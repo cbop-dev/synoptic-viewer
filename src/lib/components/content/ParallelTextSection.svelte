@@ -23,12 +23,13 @@
 
 <div 
 class="grid  
+{numCols >=2 ? "sm:grid-cols-2" : ''}
 {numCols == 2 ? "md:grid-cols-2 gap-1" :
     numCols == 3 ? "md:grid  grid-cols-3 gap-1" : 
     numCols ==4 ? "lg:grid-cols-4 gap-1" :
     numCols ==5 ? "lg:grid-cols-5 gap-1" :
     ""
-} sm:grid-cols-2">
+} grid-cols-1">
     {#each colData as col}
     {#if col.textRefs.length}
     <div >
