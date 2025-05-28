@@ -1,13 +1,14 @@
 
 //import { mylog } from '../env/env';
 import { mylog,tfserverurl } from '$lib/env/env.js';
-import gospelSynopsis from '@cbop-dev/aland-gospel-synopsis';
+
 import ntChaps from './tfN1904chaps.json';
+import { tfNtBooksDict } from './ntbooks.js';
+import * as bibleUtils from './bibleRefUtils.js';
 
 
 
-
-class TfServer{
+export class TfServer{
     ready = false;
     NT = null;
     server=tfserverurl;
@@ -48,6 +49,25 @@ class TfServer{
         return theResp ? theResp : ''
     }
 
+    async fetchVerseTextByRef(book,chap='1',v='1'){
+        mylog("fetchVerseTextByRef("+[book,chap,v].join(',')+")");
+        if (book && parseInt(chap) && parseInt(v)){
+            v = v.replaceAll(/[a-zA-z]/g, '')
+            chap = chap.replaceAll(/[a-zA-Z]/g, '')
+            let url = tfServer.server + "/verse?book=";
+            let bookname = TfServer.getBookNameBySyn(book);
+            if (!bookname){
+                mylog("fetchVerseTextByRef Bookname not found for " + book);
+                bookname = TfServer.getBookName(TfServer.getBookID(book));
+            }
+                
+            url +=bookname +"&chapter="+chap+"&verse="+v;
+            const resp = await TfServer.jsonFetch(url);
+            return resp && resp.text ? resp.text.trim() : '';
+        }
+        return ''
+        
+    }
     async fetchTextAlone(node){
         const resp = await this.fetchText(node);
         return resp && resp.text ? resp.text.trim() : '';
@@ -59,14 +79,14 @@ class TfServer{
      */
     async getVerseNodesFromRefRange(theRefRange){
         const logPref = 'getVerseNodesFromRefRange('+theRefRange+'): ';
-        const bookChapVObj= gospelSynopsis.getBookChapVerseFromRef(theRefRange);
+        const bookChapVObj= bibleUtils.getBookChapVerseFromRef(theRefRange);
         /**
          * @type {number[]} vv
          */
         const vv = [];
         if(bookChapVObj.v){
             if(bookChapVObj.v.includes('-')){
-                vv.push(...gospelSynopsis.createNumArrayFromStringListRange(bookChapVObj.v));
+                vv.push(...bibleUtils.createNumArrayFromStringListRange(bookChapVObj.v));
             }
             else if(parseInt(bookChapVObj.v)){
                 vv.push(parseInt(bookChapVObj.v));
@@ -77,7 +97,7 @@ class TfServer{
         const nodes = [];
 
         for (const v of vv){
-            const theNewNode = await this.tfGetNodeFromSection(gospelSynopsis.getBookNameBySyn(bookChapVObj.book),bookChapVObj.chap, v);
+            const theNewNode = await this.tfGetNodeFromSection(TfServer.getBookNameBySyn(bookChapVObj.book),bookChapVObj.chap, v);
             if (theNewNode)
                 nodes.push(theNewNode);
 
@@ -106,17 +126,14 @@ class TfServer{
      */
     async getNodeFromRef(theRef){
         const logPref = 'getNodeFromRef('+theRef+'): ';
-        const bookChapVObj= gospelSynopsis.getBookChapVerseFromRef(theRef);
+        const bookChapVObj= bibleUtils.getBookChapVerseFromRef(theRef);
         
         let bookName = '';
         let theNode = 0;
-        //let searchString = '';
-        //let bookID = 0;
+        
         if (bookChapVObj.book){
-            bookName = gospelSynopsis.getBookNameBySyn(bookChapVObj.book)
-            //bookID = gospelSynopsis.getBookID(bookChapVObj.book);
-            //bookName = gospelSynopsis.getBookName(bookID);
-        //    searchString = bookName ? bookName : '';
+            bookName = TfServer.getBookNameBySyn(bookChapVObj.book)
+            
             
         }
         
@@ -151,6 +168,65 @@ class TfServer{
         }
         
         return nodeid;
+    }
+
+
+
+    /**
+     * 
+     * @param {string} refString -- a NT book name of some sort
+     * @returns {number|null} - the TF node id of the book, if a matching one is found! 0 otherwise.
+     */
+    static getBookID(refString) {
+    refString = refString.replaceAll(/\s+/g,' ').trim();
+    
+    const found = Object.keys(tfNtBooksDict).find((k)=>(tfNtBooksDict[k].name.toLowerCase() == refString.toLowerCase()) || tfNtBooksDict[k].syn.map((s)=>s.toLowerCase().replaceAll("_", " ")).includes(refString.toLowerCase().replaceAll("_"," ")));
+    if (found)
+        return parseInt(found);
+    else 
+        return 0;
+}
+
+    /**
+     * 
+     * @param {string} refString  -- a NT book name
+     * @returns {string} the abbreviation of the book we're using, standardize searches and grouping, etc. If none, returns empty string.
+     */
+    static getBookAbbrev(refString){
+        const bookID = TfServer.getBookID(refString);
+        if(bookID)
+            return tfNtBooksDict[bookID].abbrev;
+        else
+            return '';
+    }
+
+
+
+
+    static getBookNameBySyn(syn){
+    
+        const id = TfServer.getBookID(syn)
+        const name = TfServer.getBookName(id);
+        mylog("getBookNameBySyn("+syn+")->id:"+id+", name:" +name)
+        return name;
+    }
+
+        
+    /**
+     * 
+     * @param {number} node 
+     * @returns {string}
+     */
+        static getBookName(node){
+        //console.log("=========================================================");
+        //mylog("HERE WE ARE!!========")
+    // mylog("=========================================================");
+        if (!tfNtBooksDict[String(node)]){
+        //   mylog("did not find " + node + " in tfNtBooksDict");
+        }
+        const name =  tfNtBooksDict[node] ? tfNtBooksDict[node].name : ''
+        //mylog("getBookName("+node+")-->'" + name+"'");
+        return name;
     }
 
 }

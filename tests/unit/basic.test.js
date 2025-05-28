@@ -1,5 +1,5 @@
 import { describe, it, expect,test} from 'vitest';
-import { tfServer } from '$lib/n1904/tfN1904';
+import { tfServer, TfServer } from '$lib/n1904/tfN1904';
 import { mylog } from '$lib/env/env';
 
 test('dummy', async () => {
@@ -29,7 +29,25 @@ test('tfGetTextFromRange', async () => {
 	//await expect(page.locator('h1')).toBeVisible();
 });
 
+test('fetchVerseTextByRef', async () => {
+	const test = [ 
+        {book: "Matthew", c: 1, v:1, text: "Βίβλος γενέσεως Ἰησοῦ Χριστοῦ υἱοῦ Δαυεὶδ υἱοῦ Ἀβραάμ." }
+
+    ]
+
+    for (const t of test){
+        const text = await tfServer.fetchVerseTextByRef(t.book,String(t.c),String(t.v))
+        expect(text).toEqual(t.text);
+    }
+
+    
+	expect(true).toBe(true);
+	//await expect(page.locator('h1')).toBeVisible();
+});
+
 /*
 start=382714
     end=382716
 	*/
+
+    //getBookNameBySyn
