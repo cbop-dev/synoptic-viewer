@@ -249,7 +249,7 @@ Enter NT reference to view parallel texts and click "Look up!", or select a sect
         {#each perGroups as group, index}
         <div class='text-center' id="section-{group.id}">
             <h2 class="inline-block"><b><u>{group.title}</u></b></h2>
-        <div class="float-right mr-2">
+        <div class="float-right mr-2 break-after-all">
             {#if index > 0}<a href="#section-{perGroups[index-1].id}">[Prev]</a>{/if}
             <a href="#">[Top]</a>
             {#if index < perGroups.length-1}<a href="#section-{perGroups[index+1].id}" class="break-after-all">[Next]</a>{/if}
@@ -257,6 +257,7 @@ Enter NT reference to view parallel texts and click "Look up!", or select a sect
         
         
         </div>
+        <br/>
         
             <ParallelTextSection parGroup={group}/>
     <hr class="mb-2"/>
