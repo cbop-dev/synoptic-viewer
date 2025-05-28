@@ -28,12 +28,8 @@
         alandPericopeNums = theNums.sort((a,b)=>a-b);   
     }
 
-    
-
-
     function buildPericopeRefs(){
         
-
         /**
          * 
          * @param {string} bookAbbrev
@@ -84,15 +80,24 @@
         for (const col of filteredGoupArray){
 
             for (const tRef of col.textRefs){
-                if(tRef.reference.includes('-')){//gotta range!, but in same chapter
-                    const nodes = await tfServer.getVerseNodesFromRefRange(tRef.reference);
+                const bookCv=gospelParallels.getBookChapVerseFromRef(tRef.reference);
+                const bookName = gospelParallels.getBookNameBySyn(bookCv.book);
+                if(bookCv.v && bookCv.v.includes('-')){//gotta range!, but in same chapter
+
+                    const [start, end] = bookCv.v.split("-");
+                    tfServer.tfGetTextFromRange(bookName,bookCv.chap,start,end).then((response)=>{
+                        tRef.text = response.text ? response.text : '';
+                        numReady+=1;
+                    });
+
+                    /*const nodes = await tfServer.getVerseNodesFromRefRange(tRef.reference);
                     //const nodeTexts
                     for (const node of nodes){
                         if (tRef.text)
                             tRef.text += " ";
                         tRef.text += await tfServer.fetchTextAlone(node);
                         
-                    }
+                    }*/
                     numReady+=1;
                 }
                 else{//not a range!
@@ -162,7 +167,8 @@
 </style>
 <div class="self-center text-center">
 <h1 class="block text-center">NT Gospel Synopsis Viewer</h1>
-Select or enter texts to view in parallel:<br/>
+Based on Kurt Aland's <i>Synopsis Quattuor Evangeliorum</i><br/>
+Enter NT reference to view parallel texts:<br/>
 <textarea id="refarea" rows="1" bind:value={refAreaText}></textarea><br/>
 <button onclick={lookupShowNtParallels} class="btn btn-primary">Show me!</button>
 </div>

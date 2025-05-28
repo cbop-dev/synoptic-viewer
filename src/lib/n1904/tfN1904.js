@@ -1,6 +1,6 @@
 
 //import { mylog } from '../env/env';
-import { mylog } from '$lib/env/env.js';
+import { mylog,tfserverurl } from '$lib/env/env.js';
 import gospelSynopsis from '@cbop-dev/aland-gospel-synopsis';
 import ntChaps from './tfN1904chaps.json';
 
@@ -10,10 +10,8 @@ import ntChaps from './tfN1904chaps.json';
 class TfServer{
     ready = false;
     NT = null;
-    //server="http://localhost:5000/nt";
-    server="https://tf.cbop.faith/nt";
-
-    
+    server=tfserverurl;
+   
     /**
      * 
      * @param {string} url 
@@ -89,7 +87,18 @@ class TfServer{
 
     }
 
-    
+    /**
+     * 
+     * @param {string} book 
+     * @param {string} chap 
+     * @param {string} start 
+     * @param {string} end 
+     */
+    async tfGetTextFromRange(book,chap,start,end){
+        const url = this.server + "/verses?book="+book.trim()+"&chapter="+chap.trim()+"&start="+start.trim()+"&end="+end
+       // mylog("tfGetNodeFromRange fetching: "+url)
+        return await TfServer.jsonFetch(url);
+    }
 
     /**
      * 

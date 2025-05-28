@@ -22,20 +22,22 @@
 </script>
 
 <div 
-class="
-{numCols == 2 ? "grid  grid-cols-2 gap-1" :
-    numCols == 3 ? "grid  grid-cols-3 gap-1" : 
-    numCols ==4 ? "grid  grid-cols-4 gap-1" :
-    numCols ==5 ? "grid  grid-cols-5 gap-1" :
+class="grid  
+{numCols == 2 ? "md:grid-cols-2 gap-1" :
+    numCols == 3 ? "md:grid  grid-cols-3 gap-1" : 
+    numCols ==4 ? "lg:grid-cols-4 gap-1" :
+    numCols ==5 ? "lg:grid-cols-5 gap-1" :
     ""
-}">
+} sm:grid-cols-2">
     {#each colData as col}
     {#if col.textRefs.length}
-    <div>
+    <div >
         
         {#each col.textRefs as textRef, index}
             {#if index > 0}<br/>{/if}
-            [{textRef.reference}]: {textRef.text}
+            <div class="rounded-box bg-base-200">
+            <b>[{textRef.reference}]</b>: {textRef.text}</div>
+             <!--<hr class='border-accent-content'/> -->
         {/each}
         
     </div>
