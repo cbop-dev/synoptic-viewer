@@ -1,3 +1,39 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
+
+@plugin "daisyui" {
+
+  themes: all, emerald --default;
+}
+
+
+h1 {
+    font-size: 150% !important;
+    text-decoration: underline;
+    
+ 
+}
+
+h1,h2{
+    font-weight: bold !important;
+    padding-bottom: 0.3em !important;
+}
+
+html {
+    font-family: 'SBL BibLit';
+}
+
+@font-face {
+    font-family: 'SBL BibLit';
+    font-style: normal;
+    font-weight: 500;
+    src: url('/fonts/SBL_BibLit_Regular.ttf'); /* IE9 Compat Modes */
+    src: local('SBL-BibLit'), local('SBL BibLit'), url('/fonts/SBL_BibLit_Regular.ttf?#iefix') format('truetype'),
+        /* Modern Browsers */ url('/fonts/SBL_BibLit_Regular.ttf') format('truetype');
+    
+}
+
+.greek {
+    font-family: "SBL BibLit", "Gentium";
+}
