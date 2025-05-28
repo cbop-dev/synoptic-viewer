@@ -24,25 +24,28 @@
 <div 
 class="grid  
 {numCols >=2 ? "sm:grid-cols-2" : ''}
-{numCols == 2 ? "md:grid-cols-2 gap-1" :
-    numCols == 3 ? "md:grid  grid-cols-3 gap-1" : 
-    numCols ==4 ? "lg:grid-cols-4 gap-1" :
+{
+    numCols == 3 ? "md:!grid-cols-3 gap-1" : 
+    numCols ==4 ? "lg:!grid-cols-4 gap-1" :
     numCols ==5 ? "lg:grid-cols-5 gap-1" :
     ""
 } grid-cols-1">
+ 
     {#each colData as col}
+    <div class="rounded-box bg-base-200">
     {#if col.textRefs.length}
-    <div >
+    
         
         {#each col.textRefs as textRef, index}
             {#if index > 0}<br/>{/if}
-            <div class="rounded-box bg-base-200">
+            <div >
             <b>[{textRef.reference}]</b>: {textRef.text}</div>
              <!--<hr class='border-accent-content'/> -->
         {/each}
         
-    </div>
+    
     {/if}
+    </div>
     {/each}
 
 
