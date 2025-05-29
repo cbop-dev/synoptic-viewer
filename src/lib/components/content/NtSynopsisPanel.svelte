@@ -13,12 +13,13 @@
     let ready = $derived(numReady >= expecting);
 
     function parsePericopeNums(){
-        const refAreaRefs = refAreaText.trim().replaceAll(/\n+/g,";").replaceAll(/;+/g,";").split(";");
+        const refAreaRefs = refAreaText.trim().replaceAll(/\n+/g,";").replaceAll(/;+/g,";");
+
         /**
          * @type {number[]} theNums
          */
         const theNums = [];
-        refAreaRefs.forEach((ref)=>{
+        bibleUtils.expandRefs(refAreaRefs).forEach((ref)=>{
             const pNum = gospelParallels.getAlandPericopeNumbers(ref.trim());
             for (const num of pNum){
                 if(!theNums.includes(num))

@@ -18,7 +18,7 @@ export const tfNtBooksDict={
 137796: {"name": "Titus", "abbrev": "Titus" , "syn": ["Titus", "Tit", "Ti"] , "words": 658 , "lemmas": 299 , "chapters": 3 },
 137797: {"name": "Philemon", "abbrev": "Phlm" , "syn": ["Philemon", "Phlmn", "Phlm","Phln","Phmn"] , "words": 335 , "lemmas": 140 , "chapters": 1 },
 137798: {"name": "Hebrews", "abbrev": "Heb" , "syn": ["Hebrews", "Heb", "He", "Hebr"] , "words": 4955 , "lemmas": 1025 , "chapters": 13 },
-137799: {"name": "James", "abbrev": "Jas" , "syn": ["James", "Ja", "Jam", "Jame"] , "words": 1739 , "lemmas": 553 , "chapters": 5 },
+137799: {"name": "James", "abbrev": "Jas" , "syn": ["James", "Ja", "Jam", "Jame", "Jas"] , "words": 1739 , "lemmas": 553 , "chapters": 5 },
 137800: {"name": "I_Peter", "abbrev": "1 Pet" , "syn": ["1 Peter", "I Pet","1 Pet","I Pe","1 Pe","I_Pet","1_Pet","I_Pet","1_Pet","I_Pe","1_Pe", "I Peter", "I_Peter"] , "words": 1676 , "lemmas": 542 , "chapters": 5 },
 137801: {"name": "II_Peter", "abbrev": "2 Pet" , "syn": ["2 Peter","II Pet","2 Pet","II Pe","2 Pe","II_Pet","2_Pet","II_Pet","2_Pet", "II_Pe","2_Pe" , "II_Peter", "II Peter"] , "words": 1098 , "lemmas": 396 , "chapters": 3 },
 137802: {"name": "I_John", "abbrev": "1 John" , "syn": ["1 John", "1 Jn", "I Jn", "I John"] , "words": 2136 , "lemmas": 233 , "chapters": 5 },
