@@ -114,8 +114,9 @@ export class TfServer{
      * @param {string} start 
      * @param {string} end 
      */
-    async tfGetTextFromRange(book,chap,start,end){
-        const url = this.server + "/verses?book="+book.trim()+"&chapter="+chap.trim()+"&start="+start.trim()+"&end="+end
+    async tfGetTextFromRange(book,chap,start,end,showVerses=true){
+        const url = this.server + "/verses?book="+book.trim()+"&chapter="+chap.trim()
+        +"&start="+start.trim()+"&end="+end+"&showVerses="+ (showVerses ? '1':'0');
        // mylog("tfGetNodeFromRange fetching: "+url)
         return await TfServer.jsonFetch(url);
     }

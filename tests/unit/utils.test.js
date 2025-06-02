@@ -48,7 +48,7 @@ test('expandRefs', async () => {
 });
 
 
-test('sortChapVerseRefsmmy', async () => {
+test('sortChapVerseRefs', async () => {
 	const tests=[
         {input: ["12:3", "12", "3:4"], output: ["3:4","12", "12:3"]},
         {input: ["12:3-4", "12", "1:3-11", "3:4", "1:2", "1", "1:4-5"], output: ["1", "1:2", "1:3-11", "1:4-5", "3:4","12", "12:3-4"]}

@@ -442,7 +442,7 @@ export function joinInRanges(numArray, separator=",", spreader="-"){
 export function sortChapVerseRefs(cv1, cv2){
     const a = cv1.split(":");
     const b = cv2.split(":");
-    mylog("sortChapVerse!")
+    //mylog("sortChapVerse!")
     let retVal = 0;
     if (a[0]==b[0])
         if (a[1] && b[1]) {

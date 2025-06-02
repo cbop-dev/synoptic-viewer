@@ -1,11 +1,13 @@
 <script>
-    import { gospelParallels } from "@cbop-dev/aland-gospel-synopsis";
+    import gospelParallels from '@cbop-dev/aland-gospel-synopsis'
     import { ParallelText, GospelPericopeGroup } from "./parallelTexts.svelte";
     import { tfServer, TfServer } from "$lib/n1904/tfN1904";
 	import ParallelTextSection from "./ParallelTextSection.svelte";
 	import { mylog } from "$lib/env/env";
     import * as bibleUtils from '$lib/n1904/bibleRefUtils.js'
     import * as mathUtils from '$lib/utils/math-utils.js';
+	//import Button from '../ui/Button.svelte';
+    import ButtonSelect from '../ui/ButtonSelect.svelte';
 
     let fetching = $state(false);
     let expecting = $state(0);
@@ -20,7 +22,7 @@
          */
         const theNums = [];
         bibleUtils.expandRefs(refAreaRefs).forEach((ref)=>{
-            const pNum = gospelParallels.getAlandPericopeNumbers(ref.trim());
+            const pNum = gospelParallels.getAlandPericopeNumbers(ref.trim(),sortOptions[sortOptionIndex].value, true);
             for (const num of pNum){
                 if(!theNums.includes(num))
                     theNums.push(num);
@@ -32,6 +34,11 @@
     }
 
     function buildPericopeRefs(){
+        mylog("sorting pericopes. Initial state = " + alandPericopeNums.join(","));
+        gospelParallels.sortAlandPericopes(alandPericopeNums,sortOptions[sortOptionIndex].value);
+        filteredPericopes = alandPericopeNums.filter((p)=>!hideNonPrimary || 
+            (gospelParallels.alandSynopsis.isPrimaryPericope(p,sortOptions[sortOptionIndex].value)));
+        mylog("sorting pericopes. Sorted state = " + alandPericopeNums.join(","));
         
         /**
          * 
@@ -69,7 +76,7 @@
              }
              return textRefArray;
         }
-        perGroups = alandPericopeNums.map((pericope)=>{
+        perGroups = filteredPericopes.map((pericope)=>{
             const row = gospelParallels.alandSynopsis.lookupPericope(pericope);
             const perGroup = new GospelPericopeGroup();
             perGroup.id = row.pericope;
@@ -159,11 +166,14 @@
     
     }
 
-    function lookupShowNtParallels(){
-        parsePericopeNums();
+    function buildAndFetchPericopes(){
         buildPericopeRefs();
         fetching = true;
         fetchTexts();
+    }
+    function lookupShowNtParallels(){
+        parsePericopeNums();
+        buildAndFetchPericopes();
         //fetching = false;
         //ready = true;
         
@@ -172,9 +182,16 @@
     }
     let refAreaText = $state('Matt 6:10');
     /**
-     * @type {number[]}
+     * @type {number[]} alandPericopes
      */
-    let alandPericopeNums = $state([])
+    let alandPericopeNums = $state([]);
+
+    /**
+     * @type {number[]} filteredPericopes
+     */
+    let filteredPericopes = $state([]);
+    //$derived(alandPericopeNums.filter((p)=>!hideNonPrimary || 
+      //      (gospelParallels.alandSynopsis.isPrimaryPericope(p,sortOptions[sortOptionIndex].value))))
 
     /**
      * @type {{pericope: number, title: string, 
@@ -189,9 +206,7 @@
     let selectedSection = $state();
    function selectSection(){
         alandPericopeNums=[...selectedSection];
-        buildPericopeRefs();
-        fetching = true;
-        fetchTexts();
+        buildAndFetchPericopes();
    } 
 
     /**
@@ -200,7 +215,31 @@
     let perGroups = $state([]);
         
     $inspect(perGroups, expecting);
-   
+   let sortOptionIndex =$state(0);
+   const sortOptions =[
+    {value: gospelParallels.gospels.NONE, name: "None"},
+    {value: gospelParallels.gospels.MATTHEW, name: "Matthew"},
+    {value: gospelParallels.gospels.MARK, name:  "Mark"},
+    {value: gospelParallels.gospels.LUKE, name:  "Luke"},
+    {value: gospelParallels.gospels.JOHN, name: "John"}
+
+   ];
+
+   let hideNonPrimary = $state(true);
+   //what is this for?
+   let hideOthers = $state(false);
+   let focus=$state(gospelParallels.gospels.NONE);
+
+    function sortFilterClick(){
+        focus=gospelParallels.gospels.NONE;
+        buildAndFetchPericopes();
+    }
+    function focusClick(){
+        buildAndFetchPericopes();
+        focus=sortOptions[sortOptionIndex].value;
+   }
+   let showSectionLinks=$state(false);
+   let showViewOptions=$state(false);
 </script>
 <style>
     a:link:hover {
@@ -214,6 +253,7 @@ Enter NT reference to view parallel texts and click "Look up!", or select a sect
 <div class="inline-block mb-1"><textarea id="refarea" class="inline-block align-middle" rows="1" bind:value={refAreaText}></textarea>
     <button onclick={lookupShowNtParallels} class="btn btn-primary inline-block align-middle">Look up!</button></div>
 <br/>
+
 <div class='mb-2'>
 <select bind:value={selectedSection} >
     
@@ -233,18 +273,43 @@ Enter NT reference to view parallel texts and click "Look up!", or select a sect
 </div>
 </div>
 <hr/>
-<div >
+<div class="text-center">
+    
     {#if alandPericopeNums.length}
+         <h1 class="text-center">Results:</h1>
+          <ButtonSelect buttonText="☰ View Options" bind:selected={showViewOptions}/>
+    {#if showViewOptions}
+    <div id="sort-options" class="text-center inline-block">Sort/Focus:
+        <select bind:value={sortOptionIndex}>
+            {#each sortOptions as option, index}
+            <option value={index}>{option.name}</option>
+            {/each}
+        </select>
+        <button class="btn btn-primary inline-block align-middle" onclick={sortFilterClick}>Sort and Filter!</button>
+        <button class="btn btn-primary inline-block align-middle" onclick={focusClick}>Focus!</button>
 
-    <div class="text-center" id="results">
-    <h2 class="inline-block">Sections:</h2>
+        <!--<label>
+	    <input type="checkbox" bind:checked={hideNonPrimary} />
+        Hide non-primary sections.
+</label>-->
+    </div>
+    {/if}
+        <div class="text-center inline-block" >
+    {#key sortOptionIndex && alandPericopeNums && perGroups}
+    <ButtonSelect buttonText="☰ Sections" bind:selected={showSectionLinks}/>
+{#if showSectionLinks}
     <div class="inline-block">
-        {#each alandPericopeNums as section, index}
+        {#each filteredPericopes as section, index}
         {index > 0 ? ', ': ''}<a href="#section-{section}">{section}</a>
         {/each}
 
-
     </div>
+    {/if}
+    {/key}
+    </div>
+    <div id="results">
+   
+
     </div>
     <div>
         {#each perGroups as group, index}
@@ -260,7 +325,7 @@ Enter NT reference to view parallel texts and click "Look up!", or select a sect
         </div>
         <br/>
         
-            <ParallelTextSection parGroup={group}/>
+            <ParallelTextSection parGroup={group} {focus}/>
     <hr class="mb-2"/>
         {/each}
 
