@@ -1,6 +1,6 @@
 
 //import { mylog } from '../env/env';
-import { mylog,tfserverurl } from '$lib/env/env.js';
+import { mylog,apiURI } from '$lib/env/env.js';
 
 import ntChaps from './tfN1904chaps.json';
 import { tfNtBooksDict } from './ntbooks.js';
@@ -11,7 +11,7 @@ import * as bibleUtils from './bibleRefUtils.js';
 export class TfServer{
     ready = false;
     NT = null;
-    server=tfserverurl;
+    server=apiURI;
    
     /**
      * 
@@ -25,10 +25,10 @@ export class TfServer{
    
     async load() {
         if (!this.ready){
-            console.log("checking for tf ...")
+            console.log("bypassing checking for tf ...")
            
             
-            await TfServer.jsonFetch(this.server+"/text/1");
+          //  await TfServer.jsonFetch(this.server+"/text/1");
             this.ready=true;
             
         }

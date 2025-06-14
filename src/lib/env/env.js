@@ -1,6 +1,6 @@
 import { writable, get } from 'svelte/store';
+export const apiURI = '/api/tf/';
 export const tfserverurl = "http://localhost:5000/nt"
-//export const tfserverurl = "https://tf.cbop.faith/nt"
 
 export const debug = writable(false);
 //debug.set(true);
