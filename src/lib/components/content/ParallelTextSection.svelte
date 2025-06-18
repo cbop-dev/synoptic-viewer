@@ -95,7 +95,7 @@
                         <span class={'m-0 ' + cssClassDict[word.id]} onclick={()=>{console.log("word clicked!"); wordClick(word.id)}}>{word.word}{'  '}</span>
                     {/each}
                     {:else}
-                    WHAT!!!?
+                    
                     {textRef.text}
                 {/if}
                  </div>
@@ -117,7 +117,15 @@
         {#each otherData.textRefs as textRef, index}
                 
                 <div class="rounded-box bg-base-200 inline-block m-1 text-left">
-                <b>[{textRef.reference}]</b>: {textRef.text}</div>
+                <b>[{textRef.reference}]</b>: 
+            {#if textRef.words && textRef.words.length}
+                    {#each textRef.words as word}
+                        <span class={'m-0 ' + cssClassDict[word.id]} onclick={()=>{console.log("word clicked!"); wordClick(word.id)}}>{word.word}{'  '}</span>
+                    {/each}
+                    {:else}
+                    
+                    {textRef.text}
+                {/if}</div>
             {/each}
     </div>
     {/if}
@@ -126,7 +134,15 @@
      <div class="rounded-box bg-blue-300  text-3xl">
         {#each colData.focused.textRefs as textRef, index}
         <div class="rounded-box  inline-block m-1 bg-blue-100 text-left">
-        <b>[{textRef.reference}]</b>: {textRef.text}
+        <b>[{textRef.reference}]</b>: 
+        {#if textRef.words && textRef.words.length}
+                    {#each textRef.words as word}
+                        <span class={'m-0 ' + cssClassDict[word.id]} onclick={()=>{console.log("word clicked!"); wordClick(word.id)}}>{word.word}{'  '}</span>
+                    {/each}
+                    {:else}
+                    
+                    {textRef.text}
+                {/if}
         </div>
         {/each}
      </div>
@@ -139,7 +155,16 @@
             {#each col.textRefs as textRef, index}
                 {#if index > 0}<br/>{/if}
                 <div >
-                <b>[{textRef.reference}]</b>: {textRef.text}</div>
+                <b>[{textRef.reference}]</b>: 
+                    {#if textRef.words && textRef.words.length}
+                    {#each textRef.words as word}
+                        <span class={'m-0 ' + cssClassDict[word.id]} onclick={()=>{console.log("word clicked!"); wordClick(word.id)}}>{word.word}{'  '}</span>
+                    {/each}
+                    {:else}
+                    
+                    {textRef.text}
+                {/if}
+            </div>
                 <!--<hr class='border-accent-content'/> -->
             {/each}
             

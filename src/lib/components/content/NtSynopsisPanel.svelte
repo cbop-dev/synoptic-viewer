@@ -141,7 +141,7 @@
         //fetchTexts();
         await fetchPostTextsBatch();
         populateGroupsText(true);
-       dataReady= true;
+        dataReady= true;
     }
 
     function populateGroupsText(words=false){
@@ -584,7 +584,7 @@ Enter NT reference to view parallel texts and click "Look up!", or select a sect
             <hr/>
             {#each selectedLexes as lex}
                <Button onclick={()=>toggleLex(lex)} buttonText={Object.entries(fetchedTextsResponse.lexemes).find(
-                ([lemma,obj])=>obj.id==lex)[0]} buttonColors={lexClasses[lex]}/> | 
+                ([lemma,obj])=>obj.id==lex)[0]} buttonColors={lexClasses[lex]}/> 
             {/each}
             <hr/>
             <h2>Other Lexemes</h2>
