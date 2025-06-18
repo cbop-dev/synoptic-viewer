@@ -80,7 +80,7 @@
     } grid-cols-1 text-2xl">
     
         {#each colData.cols as col}
-        <div class="rounded-box bg-base-200 p-1">
+        <div class="rounded-box bg-base-200 m-1 p-1">
         {#if col.textRefs.length}
         
             

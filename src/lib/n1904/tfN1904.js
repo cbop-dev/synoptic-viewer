@@ -25,7 +25,7 @@ export class TfServer{
    
     async load() {
         if (!this.ready){
-            console.log("bypassing checking for tf ...")
+            mylog("bypassing checking for tf ...")
            
             
           //  await TfServer.jsonFetch(this.server+"/text/1");
@@ -33,7 +33,7 @@ export class TfServer{
             
         }
         else{
-            console.log("already ready!")
+            mylog("already ready!")
         }
     }
     constructor(){
@@ -147,6 +147,16 @@ export class TfServer{
 
     }
     
+    //TODO: implement and test:
+    /**
+     * 
+     * @param {string[]} refs 
+     * @param {Object|null} options 
+     */
+    async tfFetchPostTexts(refs=[],options=null){
+        //TODO: this!
+    }
+
 
     async tfGetNodeFromSection(book,chap,v){
         if (typeof v === 'string'){
@@ -219,7 +229,7 @@ export class TfServer{
      * @returns {string}
      */
         static getBookName(node){
-        //console.log("=========================================================");
+        //mylog("=========================================================");
         //mylog("HERE WE ARE!!========")
     // mylog("=========================================================");
         if (!tfNtBooksDict[String(node)]){
@@ -230,6 +240,7 @@ export class TfServer{
         return name;
     }
 
+
 }
 //const NT = use("CenterBLC/SBLGNT", version="2022")
 
@@ -237,5 +248,5 @@ export class TfServer{
 
 const tfServer = new TfServer();
 
-console.log("in tf.js...")
+mylog("in tf.js...")
 export {tfServer}

@@ -1,13 +1,22 @@
+export class TextAndRef{
+    reference='';
+    text=''
+    
+    constructor(reference='', text=''){
+        this.reference=reference;
+        this.text=text;
+    }
+}
 export class ParallelText {
     /**
-     * @type {{reference:string, text:string}[]} textRefs
+     * @type {TextAndRef[]} textRefs
      */
     textRefs = $state([]);
 
 
     /**
      * 
-     * @param {{reference:string, text:string}[]} textRefs
+     * @param {TextAndRef[]}     textRefs
      */
     constructor(textRefs=[]){
         this.textRefs = textRefs

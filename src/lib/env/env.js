@@ -1,6 +1,10 @@
 import { writable, get } from 'svelte/store';
-export const apiURI = '/api/tf/';
+
 export const tfserverurl = "http://localhost:5000/nt"
+const testing = true;
+
+export const apiURI= testing ? 'http://localhost:5000/nt' :'/api/tf';
+
 
 export const debug = writable(false);
 //debug.set(true);
@@ -24,7 +28,7 @@ let defaultLevel = 0;
 //debugLevel.set(levels.DEBUG);
 
 export function mylog(msg, debugOn=get(debug),thelevel=defaultLevel) {
-    //console.log("mylog with debug val = " + get(debug))
+    //mylog("mylog with debug val = " + get(debug))
     if (debugOn && thelevel >= defaultLevel ) {
      //   mylog("mylog level at " + defaultLevel)
         console.log(msg);

@@ -14,6 +14,25 @@
     let numReady=$state(0);
     let ready = $derived(numReady >= expecting);
 
+    /**
+     * @type {GospelPericopeGroup[]} perGroups
+     */
+    let perGroups = $state([]);
+
+    /**
+    * @type string[] groupsRefsArray
+    */
+    let groupsRefsArray = $state([]);
+    
+    /**
+    * @type string[] fetchedTextsArray
+    */
+    let fetchedTextsArray = $state([]);
+    /**
+     * @type {{matt:number[], mark:number[], luke:number[], john:number[], other:number[]}[]} perGroupsIndices
+     */
+    let perGroupsIndices = $state([]); //indices of groupsRefsArray
+
     function parsePericopeNums(){
         const refAreaRefs = refAreaText.trim().replaceAll(/\n+/g,";").replaceAll(/;+/g,";");
 
@@ -95,8 +114,30 @@
             return perGroup;
 
         });
-        
 
+        
+        let refIndex = 0;
+        perGroupsIndices=[];
+        groupsRefsArray=[];
+        //TODO: test this. Does it work?
+        for (let [gi, group] of perGroups.entries()){
+            const groupIndices={matt: [], mark: [], luke: [], john: [], other: []}
+           
+            for (const book of ['matt','mark','luke','john','other']){
+                for (const ref of group[book].textRefs){
+                    groupsRefsArray.push(ref.reference);
+                    groupIndices[book].push(refIndex);
+                    refIndex++;  
+                }
+
+            }
+            
+            
+            
+            perGroupsIndices.push(groupIndices)
+        }
+        mylog('buildPericopeRefs finishing. perGroupsIndices=');
+        mylog(perGroupsIndices)
     }
 
     /**
@@ -166,12 +207,23 @@
     
     }
 
+    function batchFetchTexts(){
+        for (const [index, ref] of groupsRefsArray.entries()){
+            
+        }
+    }
     function buildAndFetchPericopes(){
         buildPericopeRefs();
         fetching = true;
         fetchTexts();
     }
+
+    function resetViewOptions(){
+        sortOptionIndex =0;
+        focus=sortOptions[sortOptionIndex].value;
+    }
     function lookupShowNtParallels(){
+        resetViewOptions();
         parsePericopeNums();
         buildAndFetchPericopes();
         //fetching = false;
@@ -193,28 +245,16 @@
     //$derived(alandPericopeNums.filter((p)=>!hideNonPrimary || 
       //      (gospelParallels.alandSynopsis.isPrimaryPericope(p,sortOptions[sortOptionIndex].value))))
 
-    /**
-     * @type {{pericope: number, title: string, 
-     *  Matt: { ref: string,  primary: boolean }, 
-     *  Mark: { ref: string , primary: boolean },
-     *  Luke: { ref:  string , primary: boolean }, 
-     *  John: { ref:string , primary: boolean }, 
-     *  other: { ref:string }}[]} perTextData
-     */
-    let perTextData =$state([]);
 
-    let selectedSection = $state();
+  let selectedSection = $state();
    function selectSection(){
         alandPericopeNums=[...selectedSection];
         buildAndFetchPericopes();
    } 
 
-    /**
-     * @type {GospelPericopeGroup[]} parTexts
-     */
-    let perGroups = $state([]);
-        
-    $inspect(perGroups, expecting);
+
+
+   
    let sortOptionIndex =$state(0);
    const sortOptions =[
     {value: gospelParallels.gospels.NONE, name: "None"},
@@ -240,6 +280,9 @@
    }
    let showSectionLinks=$state(false);
    let showViewOptions=$state(false);
+    //$inspect("perGroups", perGroups, "expecting" expecting, perGroupsIndices,"groupsRefsArray:", groupsRefsArray);
+    $inspect("perGroups", perGroups, "perGroupsIndics", perGroupsIndices,"groupsRefsArray:", groupsRefsArray);
+   // $inspect("Twelve");
 </script>
 <style>
     a:link:hover {
