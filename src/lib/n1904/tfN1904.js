@@ -1,12 +1,13 @@
 
 //import { mylog } from '../env/env';
 import { mylog,apiURI } from '$lib/env/env.js';
-
+import ntlexemes from './n1904-lexemes.json';
 import ntChaps from './tfN1904chaps.json';
 import { tfNtBooksDict } from './ntbooks.js';
 import * as bibleUtils from './bibleRefUtils.js';
+import TfUtils from '$lib/components/content/TfUtils';
 
-
+export const lexemes = ntlexemes;
 
 export class TfServer{
     ready = false;
@@ -22,7 +23,39 @@ export class TfServer{
         const resp = await fetch(url);
         return resp.json();
     }
+    
+    static async jsonPOSTFetch(url,data){
+        const jsonData = JSON.stringify(data);
+        const response = await fetch(url, {method: "POST",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: jsonData
+        });
+        mylog("jsonPOSTFetch("+url+", jsonData = '" + jsonData+"'");
+		const jsonResp = await response.json();
+        return jsonResp;
+    }
+    
+     /**
+     * 
+     * @param {{book:string,chapter:number|null,verses:number[]}[]} bcvArray
+     * @returns {Promise.<Object>}
+     */
+    async getTexts(bcvArray,showVerses=true,lexemes=true) {
+        mylog("getTexts!...");
+        const reqObject = {refs:bcvArray,options:{showVerses:showVerses, lexemes:lexemes}}
+
+        //const bodyData = JSON.stringify(reqObject)
+		const response = await TfServer.jsonPOSTFetch(apiURI+"/texts",reqObject)
+        mylog("getTexts(fetchURL: '"+apiURI+"') body data = " + reqObject, true);
+        return response;
+	} 
    
+    static getLexeme(id){
+        return Object.entries(lexemes).find(([lemma,obj])=>obj.id==id);
+    }
     async load() {
         if (!this.ready){
             mylog("bypassing checking for tf ...")

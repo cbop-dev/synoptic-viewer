@@ -19,7 +19,10 @@ test('dummy', async () => {
 test('createNumArrayFromStringListRange', async () => {
 	
     const tests=[
-        {ref: "2-12", array:[2,3,4,5,6,7,8,9,10,11,12]}
+        {ref: "2-12", array:[2,3,4,5,6,7,8,9,10,11,12]},
+        {ref:"3",array:[3]},
+        {ref:"",array:[]},
+        
     ]
 
     for (const t of tests){

@@ -1,10 +1,11 @@
 export class TextAndRef{
     reference='';
-    text=''
-    
-    constructor(reference='', text=''){
+    text='';
+    words=[];
+    constructor(reference='', text='',words=[]){
         this.reference=reference;
         this.text=text;
+        this.words=words;
     }
 }
 export class ParallelText {
@@ -36,5 +37,5 @@ export class GospelPericopeGroup{
     other = new ParallelText();
 }
 export default {
-    ParallelText, GospelPericopeGroup
+    ParallelText, GospelPericopeGroup,TextAndRef
 }

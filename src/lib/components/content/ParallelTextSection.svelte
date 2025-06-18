@@ -11,7 +11,9 @@
      */
     let {
         parGroup = new GospelPericopeGroup(),
-        focus = gospels.NONE
+        focus = gospels.NONE,
+        wordClick=(id)=>{},
+        cssClassDict={},
     } = $props();
 
     /**
@@ -87,7 +89,16 @@
             {#each col.textRefs as textRef, index}
                 {#if index > 0}<br/>{/if}
                 <div class="text-left">
-                <b>[{textRef.reference}]</b>: {textRef.text}</div>
+                <b>[{textRef.reference}]</b>: 
+                {#if textRef.words && textRef.words.length}
+                    {#each textRef.words as word}
+                        <span class={'m-0 ' + cssClassDict[word.id]} onclick={()=>{console.log("word clicked!"); wordClick(word.id)}}>{word.word}{'  '}</span>
+                    {/each}
+                    {:else}
+                    WHAT!!!?
+                    {textRef.text}
+                {/if}
+                 </div>
                 <!--<hr class='border-accent-content'/> -->
             {/each}
             

@@ -34,7 +34,9 @@ export function createNumArrayFromStringListRange(numString){
         return cleanString(numString);
     }
     const nums=[];
-    const sepGroups = cleanNumString(numString).split(',');
+    numString = cleanNumString(numString);
+    if (numString.length) {
+        const sepGroups = numString.split(',');
     for (const group of sepGroups){
         const ranges = group.split("-");
         const min = parseInt(ranges[0]);
@@ -60,6 +62,8 @@ export function createNumArrayFromStringListRange(numString){
             //bad input?; don't add anything.
         }
     }
+    }
+    
     return nums.sort((a,b)=>a-b);
 }
 

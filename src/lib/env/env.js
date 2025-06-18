@@ -1,7 +1,10 @@
 import { writable, get } from 'svelte/store';
+const testing = false ;//? true : true;
+const useLocalTF=true;
+export const tfserverurl = useLocalTF ? "http://localhost:5000/nt" : "";//add alternate tf-fast server
 
-export const tfserverurl = "http://localhost:5000/nt"
-const testing = true;
+
+//const testing = true;
 
 export const apiURI= testing ? 'http://localhost:5000/nt' :'/api/tf';
 
