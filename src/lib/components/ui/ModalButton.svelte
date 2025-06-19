@@ -26,7 +26,7 @@
 	bind:this={dialog} bind:clientHeight={modalHeight}
 	onclose={() => (showModal = false)}
 	onclick={(e) => { if (e.target === dialog) dialog.close(); }}
-	
+	class="self-center m-auto"
 	>
 	
 	<div bind:this={box} bind:clientHeight={scrollHeight} >

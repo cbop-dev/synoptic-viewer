@@ -3,6 +3,7 @@
    * @typedef {Object} Props
    * @property {string} [buttonText]
    * @property {string} [buttonStyle]
+   * @property {string} [buttonType]
    * @property {any} [style]
    * @property {string} [textSize]
    * @property {boolean} [ready]
@@ -14,11 +15,12 @@
   /** @type {Props} */
   let {
     buttonText = "Reusable Button",
-    buttonStyle = "btn bg-black base hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 ",
+    buttonType="btn-neutral",
+    buttonStyle = "btn base focus:outline-none focus:ring-4 m-1",
     style='',
     textSize = "normalSize",
     ready = true,
-    buttonColors='',
+    buttonColors=' focus:ring-blue-300 hover:bg-blue-700 ',
     tooltip='',
     onclick=()=>{}
   } = $props();
@@ -27,7 +29,7 @@
   <style>
     @reference "tailwindcss";
     .base {
-      @apply text-white font-bold py-2 px-4 rounded cursor-pointer;
+      @apply  font-bold py-2 px-4 rounded cursor-pointer;
       
     }
   
@@ -45,6 +47,6 @@
   </style>
   
   <button  data-tip={tooltip} disabled={!ready} {onclick} 
-  class="{tooltip ? 'tooltip' : ''} {textSize} {buttonStyle} {buttonColors} rounded-xl shadow-xl {style}">
+  class="{tooltip ? 'tooltip' : ''} {textSize} {buttonStyle} {buttonType} {buttonColors} rounded-xl shadow-xl {style}">
     {buttonText}
   </button>

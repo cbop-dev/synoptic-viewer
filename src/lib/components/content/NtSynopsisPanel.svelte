@@ -12,6 +12,7 @@
    import Modal2 from '../ui/Modal2.svelte';
    import ModalButton from '../ui/ModalButton.svelte';
 	import Button from '../ui/Button.svelte';
+    import { untrack } from 'svelte';
     let fetching = $state(false);
     let expecting = $state(0);
     let numReady=$state(0);
@@ -27,8 +28,7 @@
     */
     let groupsRefsArray = $state([]);
     
-    /**
-    * @type {Object|null} fetchedTextsResponse
+    /**buildPericopeRefsect|null} fetchedTextsResponse
     */
     let fetchedTextsResponse = $state(null);
     /**
@@ -140,17 +140,44 @@
         fetching = true;
         //fetchTexts();
         await fetchPostTextsBatch();
+        //buildLexArrays();
         populateGroupsText(true);
         dataReady= true;
     }
+    //let lemmasByID={}
+    let lemmasByID=$derived.by(()=>{
+        let dict={}
+        if (fetchedTextsResponse && fetchedTextsResponse.lexemes) {
+            for (const [lemma,lex] of Object.entries(fetchedTextsResponse.lexemes)){
+                dict[lex.id]=lemma;
+            }
+        }
+        return dict;
+    })
 
+    function buildLexArrays(){
+        mylog("building LexArrays...", true)
+        lemmasByID ={};
+        if (fetchedTextsResponse) {
+            for (const [lemma,lex] of Object.entries(fetchedTextsResponse.lexemes)){
+                lemmasByID[lex.id]=lemma;
+            }
+        }
+        else{
+            mylog("Cannot build LexArrays!", true)
+        }
+        //unselectedLexes=Object.keys(lemmasByID).sort();
+        //todo finish.
+        
+        
+    }
     function populateGroupsText(words=false){
-        mylog("populateGroupTexts()...", true)
+        mylog("populateGroupTexts()...")
         for (const [index,group] of perGroups.entries()){
-            mylog("checking group # " + group.id +" , title: '"+ group.title + ", index: " + index, true);
+            mylog("checking group # " + group.id +" , title: '"+ group.title + ", index: " + index);
             for (const book of ['matt', 'mark', 'luke', 'john','other']){
                 for (const [i,textRef] of group[book].textRefs.entries()){
-                    mylog("checking ref: " + textRef.reference, true);
+                    mylog("checking ref: " + textRef.reference);
                     const queryIndex= perGroupsIndices[index][book][i];
                     if (fetchedTextsResponse && fetchedTextsResponse['texts'] && fetchedTextsResponse['texts'][queryIndex]){
                         textRef.text= fetchedTextsResponse['texts'][queryIndex].text;
@@ -233,161 +260,163 @@
     let selectedLexes=$state([]);
    // let lexemes=$state(null);
 
-    function getColorClasses(lexid){
-        let colorString = '';
+
+
+  function getColorClasses(lexid){
+        let colorClassString = '';
         const redGradient =[
-    " bg-red-600 text-white",
-    " bg-red-700 text-white",
-    "  bg-red-500 text-white",
-    " bg-red-600 text-white",
+    " bg-red-600 text-black",
+    " bg-red-200 text-black",
     " bg-red-800 text-white",
     " bg-red-400 text-black",
+    " bg-red-100 text-black",
+    " bg-red-700 text-white",
     " bg-red-650 text-white",
-    " bg-red-750 text-white",
+    " bg-red-150 text-white",
     " bg-red-550 text-white",
-    " bg-red-650 text-white",
+    " bg-red-350 text-black",
     " bg-red-850 text-white",
-    " bg-red-450 text-black"
+    " bg-red-350 text-black"
     ];
     const orangeGradient =[
-        " bg-orange-600 text-white",
-    " bg-orange-700 text-white",
-    "  bg-orange-500 text-white",
-    " bg-orange-600 text-white",
+    " bg-orange-600 text-black",
+    " bg-orange-200 text-black",
     " bg-orange-800 text-white",
     " bg-orange-400 text-black",
+    " bg-orange-100 text-black",
+    " bg-orange-700 text-white",
     " bg-orange-650 text-white",
-    " bg-orange-750 text-white",
+    " bg-orange-150 text-white",
     " bg-orange-550 text-white",
-    " bg-orange-650 text-white",
+    " bg-orange-350 text-black",
     " bg-orange-850 text-white",
-    " bg-orange-450 text-black"
+    " bg-orange-350 text-black"
     ];
     const amberGradient =[
-        " bg-amber-600 text-white",
-    " bg-amber-700 text-white",
-    "  bg-amber-500 text-white",
-    " bg-amber-600 text-white",
+    " bg-amber-600 text-black",
+    " bg-amber-200 text-black",
     " bg-amber-800 text-white",
     " bg-amber-400 text-black",
+    " bg-amber-100 text-black",
+    " bg-amber-700 text-white",
     " bg-amber-650 text-white",
-    " bg-amber-750 text-white",
+    " bg-amber-150 text-white",
     " bg-amber-550 text-white",
-    " bg-amber-650 text-white",
+    " bg-amber-350 text-black",
     " bg-amber-850 text-white",
-    " bg-amber-450 text-black"
+    " bg-amber-350 text-black"
     ];
     const yellowGradient =[
-        " bg-yellow-600 text-white",
-    " bg-yellow-700 text-white",
-    "  bg-yellow-500 text-white",
-    " bg-yellow-600 text-white",
+   " bg-yellow-600 text-black",
+    " bg-yellow-200 text-black",
     " bg-yellow-800 text-white",
     " bg-yellow-400 text-black",
+    " bg-yellow-100 text-black",
+    " bg-yellow-700 text-white",
     " bg-yellow-650 text-white",
-    " bg-yellow-750 text-white",
+    " bg-yellow-150 text-white",
     " bg-yellow-550 text-white",
-    " bg-yellow-650 text-white",
+    " bg-yellow-350 text-black",
     " bg-yellow-850 text-white",
-    " bg-yellow-450 text-black"
+    " bg-yellow-350 text-black"
     ];
     const limeGradient =[
-        " bg-lime-600 text-white",
-    " bg-lime-700 text-white",
-    "  bg-lime-500 text-white",
-    " bg-lime-600 text-white",
+   " bg-lime-600 text-white ",
+    " bg-lime-200 text-black",
     " bg-lime-800 text-white",
     " bg-lime-400 text-black",
+    " bg-lime-100 text-black",
+    " bg-lime-700 text-white",
     " bg-lime-650 text-white",
-    " bg-lime-750 text-white",
+    " bg-lime-150 text-white",
     " bg-lime-550 text-white",
-    " bg-lime-650 text-white",
+    " bg-lime-350 text-black",
     " bg-lime-850 text-white",
-    " bg-lime-450 text-black"
+    " bg-lime-350 text-black"
     ];
     const greenGradient =[
-        " bg-green-600 text-white",
-    " bg-green-700 text-white",
-    "  bg-green-500 text-white",
-    " bg-green-600 text-white",
+       " bg-green-600 text-white",
+    " bg-green-200 text-black",
     " bg-green-800 text-white",
     " bg-green-400 text-black",
+    " bg-green-100 text-black",
+    " bg-green-700 text-white",
     " bg-green-650 text-white",
-    " bg-green-750 text-white",
+    " bg-green-150 text-white",
     " bg-green-550 text-white",
-    " bg-green-650 text-white",
+    " bg-green-350 text-black",
     " bg-green-850 text-white",
-    " bg-green-450 text-black"
+    " bg-green-350 text-black"
     ];
     const emeraldGradient =[
-        " bg-emerald-600 text-white",
-    " bg-emerald-700 text-white",
-    "  bg-emerald-500 text-white",
-    " bg-emerald-600 text-white",
+   " bg-emerald-600 text-white",
+    " bg-emerald-200 text-black",
     " bg-emerald-800 text-white",
     " bg-emerald-400 text-black",
+    " bg-emerald-100 text-black",
+    " bg-emerald-700 text-white",
     " bg-emerald-650 text-white",
-    " bg-emerald-750 text-white",
+    " bg-emerald-150 text-white",
     " bg-emerald-550 text-white",
-    " bg-emerald-650 text-white",
+    " bg-emerald-350 text-black",
     " bg-emerald-850 text-white",
-    " bg-emerald-450 text-black"
+    " bg-emerald-350 text-black"
     ];
     const tealGradient =[
-        " bg-teal-600 text-white",
-    " bg-teal-700 text-white",
-    "  bg-teal-500 text-white",
     " bg-teal-600 text-white",
+    " bg-teal-200 text-black",
     " bg-teal-800 text-white",
     " bg-teal-400 text-black",
+    " bg-teal-100 text-black",
+    " bg-teal-700 text-white",
     " bg-teal-650 text-white",
-    " bg-teal-750 text-white",
+    " bg-teal-150 text-white",
     " bg-teal-550 text-white",
-    " bg-teal-650 text-white",
+    " bg-teal-350 text-black",
     " bg-teal-850 text-white",
-    " bg-teal-450 text-black"
+    " bg-teal-350 text-black"
     ];
     const cyanGradient =[
-        " bg-cyan-600 text-white",
-    " bg-cyan-700 text-white",
-    "  bg-cyan-500 text-white",
-    " bg-cyan-600 text-white",
+     " bg-cyan-600 text-white",
+    " bg-cyan-200 text-black",
     " bg-cyan-800 text-white",
     " bg-cyan-400 text-black",
+    " bg-cyan-100 text-black",
+    " bg-cyan-700 text-white",
     " bg-cyan-650 text-white",
-    " bg-cyan-750 text-white",
+    " bg-cyan-150 text-white",
     " bg-cyan-550 text-white",
-    " bg-cyan-650 text-white",
+    " bg-cyan-350 text-black",
     " bg-cyan-850 text-white",
-    " bg-cyan-450 text-black"
+    " bg-cyan-350 text-black"
     ];
     const skyGradient =[
-        " bg-sky-600 text-white",
-    " bg-sky-700 text-white",
-    "  bg-sky-500 text-white",
-    " bg-sky-600 text-white",
+     " bg-sky-600 text-white",
+    " bg-sky-200 text-black",
     " bg-sky-800 text-white",
     " bg-sky-400 text-black",
+    " bg-sky-100 text-black",
+    " bg-sky-700 text-white",
     " bg-sky-650 text-white",
-    " bg-sky-750 text-white",
+    " bg-sky-150 text-white",
     " bg-sky-550 text-white",
-    " bg-sky-650 text-white",
+    " bg-sky-350 text-black",
     " bg-sky-850 text-white",
-    " bg-sky-450 text-black"
+    " bg-sky-350 text-black"
     ];
     const blueGradient =[
-        " bg-blue-600 text-white",
-    " bg-blue-700 text-white",
-    "  bg-blue-500 text-white",
-    " bg-blue-600 text-white",
+     " bg-blue-600 text-white",
+    " bg-blue-200 text-black",
     " bg-blue-800 text-white",
     " bg-blue-400 text-black",
+    " bg-blue-100 text-black",
+    " bg-blue-700 text-white",
     " bg-blue-650 text-white",
-    " bg-blue-750 text-white",
+    " bg-blue-150 text-white",
     " bg-blue-550 text-white",
-    " bg-blue-650 text-white",
+    " bg-blue-350 text-black",
     " bg-blue-850 text-white",
-    " bg-blue-450 text-black"
+    " bg-blue-350 text-black"
     ];
     const indigoGradient =[
         " bg-indigo-600 text-white",
@@ -410,7 +439,7 @@
     " bg-violet-600 text-white",
     " bg-violet-800 text-white",
     " bg-violet-400 text-black",
-    " bg-violet-650 text-white",
+    " bg-violet-200 text-black",
     " bg-violet-750 text-white",
     " bg-violet-550 text-white",
     " bg-violet-650 text-white",
@@ -418,32 +447,32 @@
     " bg-violet-450 text-black"
     ];
     const purpleGradient =[
-        " bg-purple-600 text-white",
-    " bg-purple-700 text-white",
-    "  bg-purple-500 text-white",
-    " bg-purple-600 text-white",
+     " bg-purple-600 text-black",
+    " bg-purple-200 text-black",
     " bg-purple-800 text-white",
     " bg-purple-400 text-black",
+    " bg-purple-100 text-black",
+    " bg-purple-700 text-white",
     " bg-purple-650 text-white",
-    " bg-purple-750 text-white",
+    " bg-purple-150 text-white",
     " bg-purple-550 text-white",
-    " bg-purple-650 text-white",
+    " bg-purple-750 text-black",
     " bg-purple-850 text-white",
-    " bg-purple-450 text-black"
+    " bg-purple-350 text-black"
     ];
     const fuchsiaGradient =[
-        " bg-fuchsia-600 text-white",
-    " bg-fuchsia-700 text-white",
-    "  bg-fuchsia-500 text-white",
-    " bg-fuchsia-600 text-white",
+      " bg-fuchsia-600 text-black",
+    " bg-fuchsia-200 text-black",
     " bg-fuchsia-800 text-white",
     " bg-fuchsia-400 text-black",
-    " bg-fuchsia-650 text-white",
-    " bg-fuchsia-750 text-white",
+    " bg-fuchsia-100 text-black",
+    " bg-fuchsia-700 text-white",
+    " bg-fuchsia-500 text-white",
+    " bg-fuchsia-150 text-white",
     " bg-fuchsia-550 text-white",
-    " bg-fuchsia-650 text-white",
+    " bg-fuchsia-750 text-black",
     " bg-fuchsia-850 text-white",
-    " bg-fuchsia-450 text-black"
+    " bg-fuchsia-350 text-black"
     ];
     const pinkGradient =[
         " bg-pink-600 text-white",
@@ -473,20 +502,48 @@
     " bg-rose-850 text-white",
     " bg-rose-450 text-black"
     ];
-        const colorArrays=[redGradient, purpleGradient, emeraldGradient, 
-        orangeGradient, blueGradient, limeGradient, amberGradient, cyanGradient, yellowGradient, greenGradient, indigoGradient, tealGradient, skyGradient, violetGradient, roseGradient, fuchsiaGradient, pinkGradient ]
+   const slateGradient=[
+    " bg-slate-600 text-white",
+    " bg-slate-200 text-black",
+    " bg-slate-800 text-white",
+    " bg-slate-400 text-white",
+    " bg-slate-100 text-black",
+    " bg-slate-700 text-white",
+    " bg-slate-650 text-white",
+    " bg-slate-150 text-white",
+    " bg-slate-550 text-white",
+    " bg-slate-350 text-black",
+    " bg-slate-850 text-white",
+    " bg-slate-350 text-black"
+    ];
+    const stoneGradient=[
+    " bg-stone-600 text-white",
+    " bg-stone-200 text-black",
+    " bg-stone-800 text-white",
+    " bg-stone-400 text-white",
+    " bg-stone-100 text-black",
+    " bg-stone-700 text-white",
+    " bg-stone-650 text-white",
+    " bg-stone-150 text-white",
+    " bg-stone-550 text-white",
+    " bg-stone-350 text-black",
+    " bg-stone-850 text-white",
+    " bg-stone-350 text-black"
+    ]
+        const colorArrays=[redGradient, purpleGradient, emeraldGradient, stoneGradient,blueGradient,yellowGradient,
+         limeGradient, cyanGradient,indigoGradient,amberGradient,  greenGradient,  orangeGradient, roseGradient, tealGradient, slateGradient, violetGradient, skyGradient, fuchsiaGradient, pinkGradient ]
 
         
         if (selectedLexes.includes(lexid)){
             const selectedIndex = selectedLexes.indexOf(lexid)
             const gradientIndex = ( selectedIndex % colorArrays.length);
             const colorIndex = Math.floor(selectedIndex / colorArrays.length)%colorArrays[0].length;
-            colorString += ' ' + colorArrays[gradientIndex][colorIndex];
-            mylog(`getColorClasses(${lexid}): selectedIndex = ${selectedIndex}, gradIndex=${gradientIndex}, colorIndex=${colorIndex} colorString='${colorString}'`,true )
+            colorClassString += ' ' + colorArrays[gradientIndex][colorIndex];
+            mylog(`getColorClasses(${lexid}): selectedIndex = ${selectedIndex}, gradIndex=${gradientIndex}, colorIndex=${colorIndex} colorClassString='${colorClassString}'`,true )
             
         }
         
-        return colorString;
+        return colorClassString;
 
         
     }
@@ -494,6 +551,7 @@
     /**
      * @type {Object<number,string>} lexClasses
      */
+    
     let lexClasses=$derived.by(()=>{// id->css color (e.g., "#eee")
         const ret = {}
         if(dataReady && fetchedTextsResponse.lexemes) {
@@ -510,19 +568,30 @@
         }
         return ret;
     });
+    
 
     function getLexClasses(id){
-        let classString="lex-"+id;
+        /*let classString="lex-"+id;
         let highlight=highlightLexeme(id)
         return classString + (highlight ? " " + highlight : '');
+        */
+        //mylog("getting Lex class for " + id, true);
+        return lexClasses[id];
+
     }
 
     function toggleLex(id){
         mylog("toggleLex("+id+")",true);
-        if(selectedLexes.includes(id))
+        if(selectedLexes.includes(id)) {
             selectedLexes.splice(selectedLexes.indexOf(id),1);
-        else
+           // unselectedLexes.push(id);
+           // unselectedLexes.sort((a,b)=>a-b);
+        }
+        else {
+           // unselectedLexes.splice(unselectedLexes.indexOf(id),1);
             selectedLexes.push(id);
+            //selectedLexes.sort((a,b)=>a-b);
+        }
     }
 
     function highlightLexeme(id=0,color=null){
@@ -531,18 +600,52 @@
         return ret;
     }
 
-
+    /**
+     * @type {number[]} unselectedLexes
+     */
+    let unselectedLexes =$derived.by(()=>{
+        if (fetchedTextsResponse && fetchedTextsResponse.lexemes){
+            return Object.values(fetchedTextsResponse.lexemes).filter(
+                (lex)=>!selectedLexes.includes(lex.id)).map((l)=>l.id).sort((a,b)=>a-b)}
+        else
+            return [];
+    });
+    //doesn't work. creates race condition with cssclasses derived.by above!
+    /*
+    let unselectedLexes = $derived.by(()=>{
+        let retObj = [];
+        if (dataReady && selectedLexes){
+           retObj = untrack(()=>{
+                if(fetchedTextsResponse && fetchedTextsResponse.lexemes){
+                    return Object.values(fetchedTextsResponse.lexemes).filter(
+                    (lex)=>!selectedLexes.includes(lex.id)).map((lex)=>lex.id)
+                }
+                else
+                    return []
+            });
+                
+            
+        }
+        return retObj;
+    });
+    */
    let showSectionLinks=$state(false);
    let showViewOptions=$state(false);
     //$inspect("perGroups", perGroups, "expecting" expecting, perGroupsIndices,"groupsRefsArray:", groupsRefsArray);
-    $inspect("fetchedTextsResponse:", fetchedTextsResponse, "perGroups", perGroups, "perGroupsIndics", perGroupsIndices,"groupsRefsArray:", groupsRefsArray);
+   // $inspect("unselectedLexmes:", unselectedLexes, "selectedLexes", selectedLexes, "fetchedTextsResponse:", fetchedTextsResponse, "perGroups", perGroups, "perGroupsIndics", perGroupsIndices,"groupsRefsArray:", groupsRefsArray);
    // $inspect("Twelve");
-    
+   // $inspect("lexClasses:", lexClasses)
 </script>
 <style>
+    @reference "tailwindcss";
+
+    
+
     a:link:hover {
         text-decoration: underline;
     }
+
+
 </style>
 <div class="self-center text-center">
 <h1 class="block text-center">NT Gospel Synopsis Viewer</h1>
@@ -576,27 +679,7 @@ Enter NT reference to view parallel texts and click "Look up!", or select a sect
     {#if alandPericopeNums.length}
          <h1 class="text-center">Results:</h1>
           <ButtonSelect buttonText="☰ View Options" bind:selected={showViewOptions}/>
-          {#if dataReady}
-          <ModalButton buttonText="Lexemes Highlights" title="Lexemes Highlights">
-            <Button onclick={()=>{selectedLexes.length=0;}}  buttonText="Clear All"/>
-            <h2>Selected Lexmes:</h2>
-            <i>Click on lexeme to remove.</i>
-            <hr/>
-            {#each selectedLexes as lex}
-               <Button onclick={()=>toggleLex(lex)} buttonText={Object.entries(fetchedTextsResponse.lexemes).find(
-                ([lemma,obj])=>obj.id==lex)[0]} buttonColors={lexClasses[lex]}/> 
-            {/each}
-            <hr/>
-            <h2>Other Lexemes</h2>
-            <i>Click to add/highlight.</i>
-            <br>
-              {#each Object.entries(fetchedTextsResponse.lexemes).filter(
-                ([lem,lex])=>!selectedLexes.includes(lex.id)) as [lem,lex]}
-                <Button onclick={()=>toggleLex(lex.id)} buttonText={lem} buttonColors={lexClasses[lex.id]}/> 
-            {/each}
-            
-         </ModalButton>
-         {/if}
+         
          
     {#if showViewOptions}
     <div id="sort-options" class="text-center inline-block">Sort/Focus:
@@ -627,6 +710,36 @@ Enter NT reference to view parallel texts and click "Look up!", or select a sect
     {/if}
     {/key}
     </div>
+    <div id="lexeme-highlights-options text-center inline-block">
+         {#if dataReady}
+          <ModalButton buttonText="☰ Lexemes" title="Lexeme Highlights ">
+            
+            
+            {#if selectedLexes.length}
+            <h2>Selected Lexmes:</h2>
+            <i>Click on a lexeme to remove it.</i>
+            <br/>
+            {#each selectedLexes as lex}
+               <Button onclick={()=>toggleLex(lex)} buttonText={lemmasByID[lex]} buttonColors={getColorClasses(lex)} buttonType=''/> 
+            {/each}<br/>
+            <Button onclick={()=>{selectedLexes.length=0;}}  buttonText="Clear All"/>
+            {:else}<br/>
+            <i>None selected. Click on a word in the text, or select a lexeme below.</i>
+            {/if}
+            <hr/>
+            <h2>Other Lexemes</h2>
+            <i>Click to add/highlight.</i>
+            <br>
+              {#each unselectedLexes as id}
+                <Button onclick={()=>toggleLex(id)} 
+                    buttonText={lemmasByID[id]} 
+                    buttonType="btn-accent" style="hover:text-white"/> 
+            {/each}
+            
+         </ModalButton>
+         {/if}
+
+    </div>
     <div id="results">
    
 
@@ -643,15 +756,16 @@ Enter NT reference to view parallel texts and click "Look up!", or select a sect
                 {#if index < perGroups.length-1}<a href="#section-{perGroups[index+1].id}" class="break-after-all">[Next]</a>{/if}
                 </div>
                 
-                
+    
                 </div>
             <br/>
             
-                <ParallelTextSection parGroup={group} {focus} wordClick={toggleLex} cssClassDict={lexClasses}/>
+                <ParallelTextSection parGroup={group} {focus} wordClick={toggleLex} classFunc={getLexClasses}/>
             <hr class="mb-2"/>
             {/each}
         {:else}
-        Not ready!
+        <h3><i>Loading...</i></h3>
+        <span class="loading loading-spinner loading-xl"></span>
         {/if}
 
     </div>

@@ -7,13 +7,18 @@
     
     /**
      * @type {{parGroup: GospelPericopeGroup,
-     * focus:number}}
+     * focus:number,
+     * wordClick:function(number):void,
+     * cssClassDict:Object,
+     * classFunc:function(number):string
+     * }}
      */
     let {
         parGroup = new GospelPericopeGroup(),
         focus = gospels.NONE,
         wordClick=(id)=>{},
         cssClassDict={},
+        classFunc=(id)=>'',
     } = $props();
 
     /**
@@ -92,7 +97,7 @@
                 <b>[{textRef.reference}]</b>: 
                 {#if textRef.words && textRef.words.length}
                     {#each textRef.words as word}
-                        <span class={'m-0 ' + cssClassDict[word.id]} onclick={()=>{console.log("word clicked!"); wordClick(word.id)}}>{word.word}{'  '}</span>
+                        <span class="m-0 {classFunc(word.id)} " onclick={()=>{console.log("word clicked!"); wordClick(word.id)}}>{word.word}{'  '}</span>
                     {/each}
                     {:else}
                     
@@ -120,7 +125,7 @@
                 <b>[{textRef.reference}]</b>: 
             {#if textRef.words && textRef.words.length}
                     {#each textRef.words as word}
-                        <span class={'m-0 ' + cssClassDict[word.id]} onclick={()=>{console.log("word clicked!"); wordClick(word.id)}}>{word.word}{'  '}</span>
+                        <span class={'m-0 ' + classFunc(word.id)} onclick={()=>{console.log("word clicked!"); wordClick(word.id)}}>{word.word}{'  '}</span>
                     {/each}
                     {:else}
                     
@@ -137,7 +142,7 @@
         <b>[{textRef.reference}]</b>: 
         {#if textRef.words && textRef.words.length}
                     {#each textRef.words as word}
-                        <span class={'m-0 ' + cssClassDict[word.id]} onclick={()=>{console.log("word clicked!"); wordClick(word.id)}}>{word.word}{'  '}</span>
+                        <span class={'m-0 ' + classFunc(word.id)} onclick={()=>{console.log("word clicked!"); wordClick(word.id)}}>{word.word}{'  '}</span>
                     {/each}
                     {:else}
                     
@@ -158,7 +163,7 @@
                 <b>[{textRef.reference}]</b>: 
                     {#if textRef.words && textRef.words.length}
                     {#each textRef.words as word}
-                        <span class={'m-0 ' + cssClassDict[word.id]} onclick={()=>{console.log("word clicked!"); wordClick(word.id)}}>{word.word}{'  '}</span>
+                        <span class={'m-0 ' + classFunc(word.id)} onclick={()=>{console.log("word clicked!"); wordClick(word.id)}}>{word.word}{'  '}</span>
                     {/each}
                     {:else}
                     

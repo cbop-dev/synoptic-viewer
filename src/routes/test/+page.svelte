@@ -58,18 +58,18 @@
 function getColorClasses(lexid){
     let colorString = '';
     const redGradient =[
-" bg-red-600 text-white",
-" bg-red-700 text-white",
-"  bg-red-500 text-white",
-" bg-red-600 text-white",
+" bg-red-600 text-black",
+" bg-red-200 text-black",
 " bg-red-800 text-white",
- " bg-red-400 text-black",
+" bg-red-400 text-black",
+" bg-red-100 text-black",
+" bg-red-700 text-white",
 " bg-red-650 text-white",
-" bg-red-750 text-white",
+" bg-red-150 text-white",
 " bg-red-550 text-white",
-" bg-red-650 text-white",
+" bg-red-350 text-black",
 " bg-red-850 text-white",
-" bg-red-450 text-black"
+" bg-red-350 text-black"
 ];
 const orangeGradient =[
 	" bg-orange-600 text-white",
