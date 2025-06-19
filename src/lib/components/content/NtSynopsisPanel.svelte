@@ -13,28 +13,85 @@
    import ModalButton from '../ui/ModalButton.svelte';
 	import Button from '../ui/Button.svelte';
     import { untrack } from 'svelte';
+	
     let fetching = $state(false);
     let expecting = $state(0);
     let numReady=$state(0);
     let ready = $derived(numReady >= expecting);
     let dataReady = $state(false);
+    
+    
+    /**
+    * @type {number[]} selectedLexes
+    */
+    let selectedLexes=$state([]);
+   
+   let sortOptionIndex =$state(0);
+   const sortOptions =[
+    {value: gospelParallels.gospels.NONE, name: "None", abbrev:""},
+    {value: gospelParallels.gospels.MATTHEW, name: "Matthew", abbrev:"matt"},
+    {value: gospelParallels.gospels.MARK, name:  "Mark", abbrev:"mark"},
+    {value: gospelParallels.gospels.LUKE, name:  "Luke", abbrev:"luke"},
+    {value: gospelParallels.gospels.JOHN, name: "John", abbrev: "john"}
+
+   ];
+
+   let hideNonPrimary = $state(true);
+   //what is this for?
+   let hideOthers = $state(false);
+   let focusOn=$state(false);
+   let focused=$derived.by(()=>{
+        let retVal = gospelParallels.gospels.NONE;
+        if (focusOn){
+            retVal = sortOptions[sortOptionIndex].value;
+        }
+        return retVal;
+   });
+   let sortFilter=$state(false);
+    function sortFilterClick(){
+      //  focus=gospelParallels.gospels.NONE;
+        //sortOptionIndex=
+        //buildAndFetchPericopes();
+    }
+    function focusClick(){
+        //buildAndFetchPericopes();
+        //focus=sortOptions[sortOptionIndex].value;
+   }
     /**
      * @type {GospelPericopeGroup[]} perGroups
      */
-    let perGroups = $state([]);
 
+    let perGroups = $state([]);
+    let filteredPerGroups=$derived(perGroups.filter((g)=>filteredPericopes.includes(g.id)).toSorted(
+        (a,b)=>filteredPericopes.indexOf(a.id)-filteredPericopes.indexOf(b.id)
+    ));
+    /**
+     * @type {{matt:number[], mark:number[], luke:number[], john:number[], other:number[]}[]} perGroupsIndices
+     */
+   // let perGroupsIndices = $state([]); //indices of groupsRefsArray
+    let perGroupsIndices=$derived.by(()=>{
+        let retVal = [];
+        if (perGroups && perGroups.length){
+            retVal = TfUtils.getRefsArrays(perGroups).groupsIndices;
+        }
+        return retVal;
+    });
     /**
     * @type string[] groupsRefsArray
     */
-    let groupsRefsArray = $state([]);
+    let groupsRefsArray=$derived.by(()=>{
+        let retVal = [];
+        if (perGroups && perGroups.length){
+            retVal = TfUtils.getRefsArrays(perGroups).refsArray;
+        }
+        return retVal;
+    });
+ 
+    //let groupsRefsArray = $state([]);
     
     /**buildPericopeRefsect|null} fetchedTextsResponse
     */
     let fetchedTextsResponse = $state(null);
-    /**
-     * @type {{matt:number[], mark:number[], luke:number[], john:number[], other:number[]}[]} perGroupsIndices
-     */
-    let perGroupsIndices = $state([]); //indices of groupsRefsArray
 
     function parsePericopeNums(){
         const refAreaRefs = refAreaText.trim().replaceAll(/\n+/g,";").replaceAll(/;+/g,";");
@@ -55,77 +112,44 @@
         alandPericopeNums = theNums.sort((a,b)=>a-b);   
     }
 
+    function sortAndFilterPericopes(){
+      //  alandPericopesNums=
+    }
     function buildPericopeRefs(){
         mylog("sorting pericopes. Initial state = " + alandPericopeNums.join(","));
-        gospelParallels.sortAlandPericopes(alandPericopeNums,sortOptions[sortOptionIndex].value);
-        filteredPericopes = alandPericopeNums.filter((p)=>!hideNonPrimary || 
-            (gospelParallels.alandSynopsis.isPrimaryPericope(p,sortOptions[sortOptionIndex].value)));
+        //gospelParallels.sortAlandPericopes(alandPericopeNums,sortOptions[sortOptionIndex].value);
+        //filteredPericopes = alandPericopeNums.filter((p)=>!hideNonPrimary || 
+        //    (gospelParallels.alandSynopsis.isPrimaryPericope(p,sortOptions[sortOptionIndex].value)));
         mylog("sorting pericopes. Sorted state = " + alandPericopeNums.join(","));
         
-
         perGroups = TfUtils.getGroupsArray(filteredPericopes);
-        const theArrays = TfUtils.getRefsArrays(perGroups);
-        perGroupsIndices = theArrays.groupsIndices;
-        groupsRefsArray =theArrays.refsArray;
+       // const theArrays = TfUtils.getRefsArrays(perGroups);
+       // perGroupsIndices = theArrays.groupsIndices;
+       // groupsRefsArray =theArrays.refsArray;
         mylog("ran geRefsArrays!")
  
     }
 
-
-    /**
-     * 
-     * @param {GospelPericopeGroup} group
+       /**
+     * @type {number[]} alandPericopes
      */
-    async function fetchGroupText(group) {
-        mylog("gonna fetch group...")
-        const filteredGoupArray = [group.matt, group.mark,group.luke,group.john, group.other].filter((o)=>o.textRefs.length);
-        mylog("filteredGroupArray.length: " + filteredGoupArray.length)
-        expecting += filteredGoupArray.length;
-
-        for (const col of filteredGoupArray){
-
-            for (const tRef of col.textRefs){
-                const bookCv=bibleUtils.getBookChapVerseFromRef(tRef.reference);
-                bookCv.chap = bookCv.chap ? bookCv.chap.replaceAll(/[a-zA-Z]/g,'') : ''
-                bookCv.v = bookCv.v ? bookCv.v.replaceAll(/[a-zA-Z]/g,'') : ''
-                const bookName = TfServer.getBookNameBySyn(bookCv.book);
-                mylog('fetchGroupText got bookname ' + bookName + " for: " + bookCv.book);
-                if(bookCv.v && bookCv.v.includes('-')){//gotta range!, but in same chapter
-
-                    const [start, end] = bookCv.v.split("-");
-                    tfServer.tfGetTextFromRange(bookName,bookCv.chap,start,end).then((response)=>{
-                        tRef.text = response.text ? response.text : '';
-                        numReady+=1;
-                    });
-
-                    
-                    numReady+=1;
-                }
-                
-                else{//not a range!
-
-                    tfServer.fetchVerseTextByRef(bookName,bookCv.chap,bookCv.v).then((verseText)=>{
-                        tRef.text=verseText;
-                        numReady+=1;
-                    })
-
-                }
-                
-            }
-
-            
-        }
-    }
-    function fetchTexts(){
-        for (const group of perGroups){
-            fetchGroupText(group);
+    let alandPericopeNums = $state([]);
+ 
+    let filteredPericopes=$derived.by(()=>{
+        let sortedAland=alandPericopeNums ? alandPericopeNums : [];
+        if (sortFilter) {
+            sortedAland = gospelParallels.filterSortAlandPericopes(sortedAland,sortOptions[sortOptionIndex].value)
         }
     
-    }
+        return sortedAland;
+    })
+    
+   
 
    async function fetchPostTextsBatch(){
     //todo: refactor in another .svelte.js file, then test
         fetchedTextsResponse = null;
+
         /**
          * @type {{book:string,chapter:number|null,verses:number[]}[]} bcvFetchArray
          */
@@ -136,9 +160,12 @@
     }
     async function buildAndFetchPericopes(){
         dataReady=false;
+        mylog("disabling sortFilter and focus...", true);
+        resetViewOptions();
         buildPericopeRefs();
         fetching = true;
         //fetchTexts();
+        emptySelectedLexemes();
         await fetchPostTextsBatch();
         //buildLexArrays();
         populateGroupsText(true);
@@ -189,13 +216,18 @@
                     }
                     
                 }
-            }
+            }   /**
+     * @type {number[]} alandPericopes
+     */
+    let alandPericopeNums = $state([]);
             
         }
     }
     function resetViewOptions(){
         sortOptionIndex =0;
-        focus=sortOptions[sortOptionIndex].value;
+        sortFilter=false;
+        focusOn=false;
+      //  focus=sortOptions[sortOptionIndex].value;
     }
     function lookupShowNtParallels(){
         resetViewOptions();
@@ -208,56 +240,26 @@
         
     }
     let refAreaText = $state('Matt 6:10');
-    /**
-     * @type {number[]} alandPericopes
-     */
-    let alandPericopeNums = $state([]);
+ 
 
     /**
      * @type {number[]} filteredPericopes
      */
-    let filteredPericopes = $state([]);
+ //   let filteredPericopes = $state([]);
     //$derived(alandPericopeNums.filter((p)=>!hideNonPrimary || 
       //      (gospelParallels.alandSynopsis.isPrimaryPericope(p,sortOptions[sortOptionIndex].value))))
 
 
   let selectedSection = $state();
    function selectSection(){
+        resetViewOptions();
         alandPericopeNums=[...selectedSection];
         buildAndFetchPericopes();
    } 
 
 
 
-   
-   let sortOptionIndex =$state(0);
-   const sortOptions =[
-    {value: gospelParallels.gospels.NONE, name: "None"},
-    {value: gospelParallels.gospels.MATTHEW, name: "Matthew"},
-    {value: gospelParallels.gospels.MARK, name:  "Mark"},
-    {value: gospelParallels.gospels.LUKE, name:  "Luke"},
-    {value: gospelParallels.gospels.JOHN, name: "John"}
 
-   ];
-
-   let hideNonPrimary = $state(true);
-   //what is this for?
-   let hideOthers = $state(false);
-   let focus=$state(gospelParallels.gospels.NONE);
-
-    function sortFilterClick(){
-        focus=gospelParallels.gospels.NONE;
-        buildAndFetchPericopes();
-    }
-    function focusClick(){
-        buildAndFetchPericopes();
-        focus=sortOptions[sortOptionIndex].value;
-   }
-
-    /**
-    * @type {number[]} selectedLexes
-    */
-    let selectedLexes=$state([]);
    // let lexemes=$state(null);
 
 
@@ -539,7 +541,7 @@
             const gradientIndex = ( selectedIndex % colorArrays.length);
             const colorIndex = Math.floor(selectedIndex / colorArrays.length)%colorArrays[0].length;
             colorClassString += ' ' + colorArrays[gradientIndex][colorIndex];
-            mylog(`getColorClasses(${lexid}): selectedIndex = ${selectedIndex}, gradIndex=${gradientIndex}, colorIndex=${colorIndex} colorClassString='${colorClassString}'`,true )
+          //  mylog(`getColorClasses(${lexid}): selectedIndex = ${selectedIndex}, gradIndex=${gradientIndex}, colorIndex=${colorIndex} colorClassString='${colorClassString}'`,true )
             
         }
         
@@ -579,9 +581,11 @@
         return lexClasses[id];
 
     }
-
+    function emptySelectedLexemes(){
+        selectedLexes.length = 0;
+    }
     function toggleLex(id){
-        mylog("toggleLex("+id+")",true);
+       // mylog("toggleLex("+id+")",true);
         if(selectedLexes.includes(id)) {
             selectedLexes.splice(selectedLexes.indexOf(id),1);
            // unselectedLexes.push(id);
@@ -610,31 +614,14 @@
         else
             return [];
     });
-    //doesn't work. creates race condition with cssclasses derived.by above!
-    /*
-    let unselectedLexes = $derived.by(()=>{
-        let retObj = [];
-        if (dataReady && selectedLexes){
-           retObj = untrack(()=>{
-                if(fetchedTextsResponse && fetchedTextsResponse.lexemes){
-                    return Object.values(fetchedTextsResponse.lexemes).filter(
-                    (lex)=>!selectedLexes.includes(lex.id)).map((lex)=>lex.id)
-                }
-                else
-                    return []
-            });
-                
-            
-        }
-        return retObj;
-    });
-    */
+
    let showSectionLinks=$state(false);
    let showViewOptions=$state(false);
     //$inspect("perGroups", perGroups, "expecting" expecting, perGroupsIndices,"groupsRefsArray:", groupsRefsArray);
    // $inspect("unselectedLexmes:", unselectedLexes, "selectedLexes", selectedLexes, "fetchedTextsResponse:", fetchedTextsResponse, "perGroups", perGroups, "perGroupsIndics", perGroupsIndices,"groupsRefsArray:", groupsRefsArray);
    // $inspect("Twelve");
    // $inspect("lexClasses:", lexClasses)
+   $inspect("filteredPericopes:", filteredPericopes, "[sortFilter, focusOn]:",[sortFilter,focusOn])
 </script>
 <style>
     @reference "tailwindcss";
@@ -688,8 +675,8 @@ Enter NT reference to view parallel texts and click "Look up!", or select a sect
             <option value={index}>{option.name}</option>
             {/each}
         </select>
-        <button class="btn btn-primary inline-block align-middle" onclick={sortFilterClick}>Sort and Filter!</button>
-        <button class="btn btn-primary inline-block align-middle" onclick={focusClick}>Focus!</button>
+        <ButtonSelect bind:selected={sortFilter} buttonText="Sort/Filter"/>
+        <ButtonSelect bind:selected={focusOn} buttonText="Focus!"/>
 
         <!--<label>
 	    <input type="checkbox" bind:checked={hideNonPrimary} />
@@ -697,7 +684,7 @@ Enter NT reference to view parallel texts and click "Look up!", or select a sect
 </label>-->
     </div>
     {/if}
-        <div class="text-center inline-block" >
+        <div class="text-center inline-block p-1" >
     {#key sortOptionIndex && alandPericopeNums && perGroups}
     <ButtonSelect buttonText="☰ Sections" bind:selected={showSectionLinks}/>
 {#if showSectionLinks}
@@ -722,7 +709,7 @@ Enter NT reference to view parallel texts and click "Look up!", or select a sect
             {#each selectedLexes as lex}
                <Button onclick={()=>toggleLex(lex)} buttonText={lemmasByID[lex]} buttonColors={getColorClasses(lex)} buttonType=''/> 
             {/each}<br/>
-            <Button onclick={()=>{selectedLexes.length=0;}}  buttonText="Clear All"/>
+            <Button onclick={emptySelectedLexemes}  buttonText="Clear All"/>
             {:else}<br/>
             <i>None selected. Click on a word in the text, or select a lexeme below.</i>
             {/if}
@@ -741,26 +728,25 @@ Enter NT reference to view parallel texts and click "Look up!", or select a sect
 
     </div>
     <div id="results">
-   
 
-    </div>
-    <div>
+
         {#if dataReady && fetchedTextsResponse}
 
-            {#each perGroups as group, index}
+            {#each filteredPerGroups as group, index}
             <div class='text-center' id="section-{group.id}">
                 <h2 class="inline-block"><b><u>{group.title}</u></b></h2>
             <div class="float-right mr-2 break-after-all">
-                {#if index > 0}<a href="#section-{perGroups[index-1].id}">[Prev]</a>{/if}
+                {#if index > 0}<a href="#section-{filteredPerGroups[index-1].id}">[Prev]</a>{/if}
                 <a href="#">[Top]</a>
-                {#if index < perGroups.length-1}<a href="#section-{perGroups[index+1].id}" class="break-after-all">[Next]</a>{/if}
+                {#if index < filteredPerGroups.length-1}<a href="#section-{filteredPerGroups[index+1].id}" class="break-after-all">[Next]</a>{/if}
                 </div>
                 
     
                 </div>
             <br/>
             
-                <ParallelTextSection parGroup={group} {focus} wordClick={toggleLex} classFunc={getLexClasses}/>
+                <ParallelTextSection parGroup={group} focus={focused}
+                 wordClick={toggleLex} classFunc={getLexClasses}/>
             <hr class="mb-2"/>
             {/each}
         {:else}

@@ -193,5 +193,5 @@
      </div>
 </div>
 {:else}
-What?   
+<!--Nothing!-->  
 {/if}

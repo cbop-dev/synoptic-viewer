@@ -18,19 +18,23 @@
     
 
     let theButton = $state();
+    function selectStyle(){
+      if (selected)
+        return " btn-secondary btn-active";
+      else
+        return " btn-primary btn-outline ";
+    }
     function toggle() {
       
       if (selected) {
         selected = false;
         
-        theButton.classList.replace("btn-neutral", "btn-primary");
-        theButton.classList.replace("btn-active", "btn-outline"); 
+       
       }
       else {
         selected = true;
         mylog("selected = 'true'");
-        theButton.classList.replace( "btn-primary", "btn-neutral");
-        theButton.classList.replace("btn-outline", "btn-active"); 
+        
         
 
       }
@@ -40,6 +44,7 @@
   </script>
   
   <style>
+    @reference "tailwindcss";
     .base {
       @apply text-white font-bold py-2 px-4 rounded cursor-pointer;
       
@@ -58,6 +63,6 @@
     }
   </style>
   
-  <option  onclick={toggle} bind:this={theButton} class="btn btn-outline btn-primary">
+  <option  onclick={toggle} bind:this={theButton} class="btn btn-outline btn-primary {selectStyle()}">
     {buttonText}
   </option>
