@@ -1,6 +1,6 @@
 # synoptic-viewer
 
-The front-end of a Gospel Synopsis Viewer wweb application (https://synopsis.cbop.faith), providing a visual synoptic (side-by-side) comparision of parallel texts of the Greek NT Gospels, based on the passage selection and outline of Kurt Aland's *Synopsis Quattuor Evangeliorum*. This application depends upon a running instance of the [tf-fast](https://github.com/cbop-dev/tf-fast) python application which serves (via REST/JSON calls over http) a [text-fabric](https://github.com/annotation/text-fabric) version of the Greek NT (currently [Nestle's 1904 Greek New Testament](https://github.com/CenterBLC/N1904).)
+The front-end of a Gospel Synopsis Viewer web application (https://synopsis.cbop.faith), providing a visual synoptic (side-by-side) comparision of parallel texts of the Greek NT Gospels, based on the passage selection and outline of Kurt Aland's *Synopsis Quattuor Evangeliorum*. This application depends upon a running instance of the [tf-fast](https://github.com/cbop-dev/tf-fast) python application which serves (via REST/JSON calls over http) a [text-fabric](https://github.com/annotation/text-fabric) version of the Greek NT (currently [Nestle's 1904 Greek New Testament](https://github.com/CenterBLC/N1904).)
 
 It allows for both entering passages to lookup parallels, and user-selection of Aland's sections and groupings. 
 
