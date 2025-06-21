@@ -92,9 +92,5 @@ test('getLex text', async () => {
 	
 	//await expect(page.locator('h1')).toBeVisible();
 });
-/*
-start=382714
-    end=382716
-	*/
 
-    //getBookNameBySyn
+

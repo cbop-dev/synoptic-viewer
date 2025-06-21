@@ -304,7 +304,7 @@ const roseGradient =[
         const gradientIndex = ( selectedIndex % colorArrays.length);
         const colorIndex = Math.floor(selectedIndex / colorArrays.length)%colorArrays[0].length;
         colorString += ' ' + colorArrays[gradientIndex][colorIndex];
-        mylog(`getColorClasses(${lexid}): selectedIndex = ${selectedIndex}, gradIndex=${gradientIndex}, colorIndex=${colorIndex} colorString='${colorString}'`,true )
+        //mylog(`getColorClasses(${lexid}): selectedIndex = ${selectedIndex}, gradIndex=${gradientIndex}, colorIndex=${colorIndex} colorString='${colorString}'`,true )
         
     }
     
@@ -356,7 +356,7 @@ const roseGradient =[
     }
 
     function toggleLex(id){
-        mylog("toggleLex("+id+")",true);
+        //mylog("toggleLex("+id+")",true);
         if(selectedLexes.includes(id))
             selectedLexes.splice(selectedLexes.indexOf(id),1);
         else
@@ -380,7 +380,7 @@ const roseGradient =[
         <div>  <b>{text.reference}</b>:      
         {#if text.words && text.words.length}
             {#each text.words as word}
-            <span class={'m-0 ' + lexClasses[word.id]} onclick={()=>{console.log("word clicked!"); toggleLex(word.id)}}>{word.word}{'  '}</span>
+            <span class={'m-0 ' + lexClasses[word.id]} onclick={()=>{toggleLex(word.id)}}>{word.word}{'  '}</span>
             {/each}
         {:else}
 

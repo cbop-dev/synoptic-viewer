@@ -1,4 +1,6 @@
 import ParTexts from "./parallelTexts.svelte.js";
+import {ParallelText, GospelPericopeGroup,TextAndRef,VerseWords,Word,GospelPericopeGroupIndices} from "./parallelTexts.svelte.js";
+ 
 import gospelParallels from '@cbop-dev/aland-gospel-synopsis'
 import { tfServer, TfServer } from "$lib/n1904/tfN1904";
 import { mylog } from "$lib/env/env";
@@ -16,30 +18,34 @@ import * as mathUtils from '$lib/utils/math-utils.js';
 export function getTextRefsArray(bookAbbrev, ref){
     let textRefArray = [];
         for (const r of ref.split(";")){
-        
-        const [c,vv] = r.split(":");
+            const textRef = new ParTexts.TextAndRef()
+            const [c,vv] = r.split(":");
+            let theRef = '';
+            if(c && vv) {
+                if (vv.includes(',')){ //got indivdual verses/ranges
+                    
+                    for (const v of vv.split(',')){
+                        theRef = bookAbbrev? bookAbbrev + " ": '';
+                        theRef += c+":"+v;
+                      //  textRef.reference=theRef;
+                       // textRef.text=''
+                      //  textRefArray.push(textRef);
+                    }
 
-        if(c && vv) {
-            if (vv.includes(',')){ //got indivdual verses/ranges
-                
-                for (const v of vv.split(',')){
-                    let theRef = bookAbbrev? bookAbbrev + " ": '';
-                    theRef += c+":"+v;
-                    textRefArray.push({reference: theRef, text: ''});
+                }   
+                else{
+                    theRef =  bookAbbrev? bookAbbrev + " " + r : r;
+                   // textRef.reference=theRef
+                   // textRefArray.push({reference: theRef, text: ''});
                 }
-
-            }   
-            else{
-                const theRef =  bookAbbrev? bookAbbrev + " " + r : r;
-                textRefArray.push({reference: theRef, text: ''});
             }
-        }
-        else{
-            const theRef =  bookAbbrev? bookAbbrev + " " + ref : ref;
-            textRefArray.push({reference: theRef, text: ''});
-        }
-            
-        
+            else{
+                theRef =  bookAbbrev? bookAbbrev + " " + ref : ref;
+               // textRefArray.push({reference: theRef, text: ''});
+            }
+                
+            textRef.reference=theRef;
+            textRefArray.push(textRef);
         }
         return textRefArray;
 }
@@ -48,12 +54,12 @@ export function getTextRefsArray(bookAbbrev, ref){
 /**
  * @name buildGroupsArray
  * @param {number[]} pericopeNums
- * @returns  {ParTexts.GospelPericopeGroup[]}
+ * @returns  {GospelPericopeGroup[]}
  */
 export function getGroupsArray(pericopeNums){
     return pericopeNums.map((pericope)=>{
         const row = gospelParallels.alandSynopsis.lookupPericope(pericope);
-        const perGroup = new ParTexts.GospelPericopeGroup();
+        const perGroup = new GospelPericopeGroup();
         perGroup.id = row.pericope;
         perGroup.title = row.pericope + ": " + row.title;
         if (row.Matt.ref)
@@ -75,12 +81,12 @@ export function getGroupsArray(pericopeNums){
 /**
  * 
  * @param  {GospelPericopeGroup[]} groupsArray
- * @returns {{groupsIndices: {matt:number[], mark:number[], luke:number[], john:number[], other:number[]}[], refsArray:string[]}}
- */
+ * @returns {{groupsIndices: GospelPericopeGroupIndices[], refsArray: string[]}} 
+ **/
 export function getRefsArrays(groupsArray){
     let refIndex = 0;
     /**
-     * @type {{matt:number[], mark:number[], luke:number[], john:number[], other:number[]}[]} groupsIndices
+     * @type {GospelPericopeGroupIndices[]} groupsIndices
      */
     const groupsIndices=[];
     /**
@@ -89,7 +95,7 @@ export function getRefsArrays(groupsArray){
     const refsArray=[];
     //TODO: test this. Does it work?
     for (let [gi, group] of groupsArray.entries()){
-        const groupIndices={matt: [], mark: [], luke: [], john: [], other: []}
+        const groupIndices=new GospelPericopeGroupIndices();
         
         for (const book of ['matt','mark','luke','john','other']){
             for (const ref of group[book].textRefs){
@@ -112,6 +118,12 @@ export function getRefsArrays(groupsArray){
     mylog(groupsIndices)
     return {groupsIndices,refsArray}
 }
+
+/**
+ * 
+ * @param {GospelPericopeGroup} group 
+
+ */
 
 
 /**

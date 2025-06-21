@@ -3,11 +3,13 @@
 
 
 	let { buttonText='button', title='', description='', 
-			header=null, children=null, buttonStyle='', onclick=()=>{}
+			header=null, children=null, buttonStyle='', onclick=()=>{},
+			showModal = $bindable(false)
+
 		} = $props();
 
 	let dialog = $state(); // HTMLDialogElement
-	let showModal = $state(false);
+	
 
 	$effect(() => {
 		if (showModal) dialog.showModal();

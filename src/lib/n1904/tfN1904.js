@@ -6,7 +6,9 @@ import ntChaps from './tfN1904chaps.json';
 import { tfNtBooksDict } from './ntbooks.js';
 import * as bibleUtils from './bibleRefUtils.js';
 import TfUtils from '$lib/components/content/TfUtils';
+import { ParallelText, GospelPericopeGroup,TextAndRef,VerseWords,Word,GospelPericopeGroupIndices } from '$lib/components/content/parallelTexts.svelte';
 
+const debugOn=true;
 export const lexemes = ntlexemes;
 
 export class TfServer{
@@ -44,12 +46,14 @@ export class TfServer{
      * @returns {Promise.<Object>}
      */
     async getTexts(bcvArray,showVerses=true,lexemes=true) {
-        mylog("getTexts!...");
+        //mylog("getTexts!...",true);
         const reqObject = {refs:bcvArray,options:{showVerses:showVerses, lexemes:lexemes}}
 
         //const bodyData = JSON.stringify(reqObject)
 		const response = await TfServer.jsonPOSTFetch(apiURI+"/texts",reqObject)
-        mylog("getTexts(fetchURL: '"+apiURI+"') body data = " + reqObject, true);
+       // mylog("getTexts(fetchURL: '"+apiURI+"') body data = " + JSON.stringify(reqObject),true);
+       // mylog("response: ")
+       // mylog(response)
         return response;
 	} 
    
@@ -222,7 +226,7 @@ export class TfServer{
      * @returns {number|null} - the TF node id of the book, if a matching one is found! 0 otherwise.
      */
     static getBookID(refString) {
-    refString = refString.replaceAll(/\s+/g,' ').trim();
+    refString = refString.replaceAll(/\s+/g,' ').trim() 
     
     const found = Object.keys(tfNtBooksDict).find((k)=>(tfNtBooksDict[k].name.toLowerCase() == refString.toLowerCase()) || tfNtBooksDict[k].syn.map((s)=>s.toLowerCase().replaceAll("_", " ")).includes(refString.toLowerCase().replaceAll("_"," ")));
     if (found)
@@ -273,6 +277,95 @@ export class TfServer{
         return name;
     }
 
+
+    /**
+     * @description fetches the texts found in the given pericope groups, and fills in the text data in the given group object.
+     *          Takes fetch options and optionally runs "markUniqueWords" if 'lexemes' is true
+     * @param {GospelPericopeGroup[]} groups
+     * @param {boolean} lexemes 
+     * @param {boolean} showVerses 
+     * @returns {Promise<Object>} the Response object. NB: the 'group' object has also been modified by being populated with the fetched texts. 
+     */
+    async fetchGroupsPericopes(groups,showVerses=false,lexemes=false){
+        const refsArrays=TfUtils.getRefsArrays(groups);
+        const bcvFetchArray=TfUtils.getBCVarrayFromRefs(refsArrays.refsArray);
+
+        const fetchedTextsResponse = await tfServer.getTexts(bcvFetchArray,showVerses,lexemes);
+        return fetchedTextsResponse;
+
+    }
+    /**
+     * @description fetches the texts found in the given pericope groups, and fills in the text data in the given group object.
+     *          Takes fetch options and optionally runs "markUniqueWords" if 'lexemes' is true
+     * @param {GospelPericopeGroup[]} groups
+     * @param {boolean} lexemes 
+     * @param {boolean} showVerses 
+     * @param {boolean} markUnique 
+     * @returns {Promise<Object>} the Response object. NB: the 'group' object has also been modified by being populated with the fetched texts. 
+     */
+    async fetchAndPopulateGroupsPericopes(groups,showVerses=false,lexemes=false,markUnique=false){
+      //  mylog("fetchAndPopluating...", debugOn)
+      
+        const refsArrays=TfUtils.getRefsArrays(groups);
+        const bcvFetchArray=TfUtils.getBCVarrayFromRefs(refsArrays.refsArray);
+       // console.log("about to fetch...")
+        const fetchedTextsResponse = await tfServer.getTexts(bcvFetchArray,showVerses,lexemes);
+       
+       
+        /************************
+       // debug logging:
+       
+       // console.log("FETCHED!")
+      //  mylog("fetchAndPopluated...", debugOn)
+      //  console.log("WHATS UP?")
+        //populate:
+        
+        
+     //   console.log("tfServer.fetchAndPopulate: populated group=")
+      //  mylog(group,true);
+       // console.log("printed Grup; trying again with console.log...")
+       // console.log(group);
+       //end debugging
+       ***************/
+        this.populateGroupTexts(groups,refsArrays,fetchedTextsResponse,showVerses,lexemes,markUnique);
+
+        return fetchedTextsResponse;
+    }
+
+    /**
+     * @param {GospelPericopeGroup[]} groups
+     * @param {Object} fetchedResponse
+     * @param {{groupsIndices: GospelPericopeGroupIndices[], refsArray: string[]}} refsArrays
+     * @param {boolean} lexemes 
+     * @param {boolean} showVerses 
+     * @param {boolean} markUnique 
+     */
+    populateGroupTexts(groups,refsArrays,fetchedResponse, showVerses=false,lexemes=false,markUnique=false){
+        for (const group of groups){
+            for (const book of ['matt', 'mark', 'luke', 'john','other']){
+                for (const [i,textRef] of group[book].textRefs.entries()){
+                    //mylog("checking ref: " + textRef.reference);
+                    const queryIndex= refsArrays.groupsIndices[0][book][i];
+                    if (fetchedResponse && fetchedResponse['texts'] && fetchedResponse['texts'][queryIndex]){
+                        textRef.text= fetchedResponse['texts'][queryIndex].text;
+                        if (lexemes){
+                            
+                            textRef.words=fetchedResponse['texts'][queryIndex].words;
+                        }
+                        // mylog("populating fetched text for group index "+index + ", ref: '" + textRef.reference
+                        // + "', queryIndex = " + queryIndex +", text='"+textRef.text +"'", true);
+                    }
+                    
+                }
+            }   
+
+            if(markUnique){
+                group.markUniqueWords();
+                
+            }   
+
+        }
+    }
 
 }
 //const NT = use("CenterBLC/SBLGNT", version="2022")
