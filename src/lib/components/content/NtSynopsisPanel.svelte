@@ -14,7 +14,9 @@
 	import Button from '../ui/Button.svelte';
     import { untrack } from 'svelte';
     import { ColorUtils } from '$lib/utils/color-utils';
-	
+	import GreekFilterInput from '../ui/GreekFilterInput.svelte';
+    import FilterInput from '../ui/FilterInput.svelte';
+	import { GreekUtils } from '$lib/utils/greek-utils';
     let fetching = $state(false);
     let expecting = $state(0);
     let numReady=$state(0);
@@ -27,13 +29,15 @@
    let hideSolos = $state(false);
      let hideNonPrimarySolos = $state(false);
     let showLexemeHighlights = $state(false);
-    let showLookupModal = $state(false);
+    let showLookupPanel = $state(true);
     let showSortModal = $state(false);
+    let landingPage=$state(true);
+
     /**
     * @type {number[]} selectedLexes
     */
     let selectedLexes=$state([]);
-   
+    
    let sortOptionIndex =$state(0);
    const sortOptions =[
     {value: gospelParallels.gospels.NONE, name: "None", abbrev:""},
@@ -55,7 +59,9 @@
         }
         return retVal;
    });
-   let sortFilter=$state(false);
+   let sort = $state(false);
+   let filter=$state(false);
+  // let sortFilter=$state(false);
     function sortFilterClick(){
       //  focus=gospelParallels.gospels.NONE;
         //sortOptionIndex=
@@ -145,17 +151,96 @@
  
     let filteredPericopes=$derived.by(()=>{
         let sortedAland=alandPericopeNums ? alandPericopeNums : [];
-        if (sortFilter || focusOn || hideSolos||hideNonPrimarySolos) {
+        if (sort || filter || focusOn || hideSolos||hideNonPrimarySolos) {
             sortedAland = gospelParallels.filterSortAlandPericopes(sortedAland,
-            (sortFilter || focusOn ) ? 
+            (sort|| filter || focusOn ) ? 
                 sortOptions[sortOptionIndex].value 
-               : gospelParallels.gospels.NONE,sortFilter || focusOn,hideSolos,(sortFilter || focusOn) && hideNonPrimarySolos);
+               : gospelParallels.gospels.NONE,
+            filter || focusOn, //hideNonPrimary: only filter out non-primary texts if one of these is true
+            hideSolos,
+            (sort|| filter || focusOn) && hideNonPrimarySolos);//hideNonPrimarySolos parameter
         }
     
         return sortedAland;
     })
     
    
+    let lemmasByID=$derived.by(()=>{
+        let dict={}
+        if (fetchedTextsResponse && fetchedTextsResponse.lexemes) {
+            for (const [lemma,lex] of Object.entries(fetchedTextsResponse.lexemes)){
+                dict[lex.id]=lemma;
+            }
+        }
+        return dict;
+    });
+
+       let refAreaText = $state('Matt 6:10');
+ 
+
+    /**
+     * @type {number[]} filteredPericopes
+     */
+ //   let filteredPericopes = $state([]);
+    //$derived(alandPericopeNums.filter((p)=>!hideNonPrimary || 
+      //      (gospelParallels.alandSynopsis.isPrimaryPericope(p,sortOptions[sortOptionIndex].value))))
+
+
+  let selectedSection = $state([1]);
+   function selectSection(){
+    landingPage=false;
+        resetViewOptions();
+        alandPericopeNums=[...selectedSection];
+
+        buildAndFetchPericopes();
+   } 
+
+/**
+     * @type {Object<number,string>} lexClasses
+     */
+    
+    let lexClasses=$derived.by(()=>{// id->css color (e.g., "#eee")
+        const ret = {}
+        if(dataReady && fetchedTextsResponse.lexemes) {
+            //mylog("building lexClasses...",true)
+            for(const id of Object.values(fetchedTextsResponse.lexemes).map((o)=>o.id)) {
+                
+                let classes = "lex-"+id;
+                if(selectedLexes.includes(id)){
+                    classes += " " + getColorClasses(id)
+                } 
+              //  mylog("setting lex " + id + " to: " + classes,true);
+                ret[id] = classes;
+            }
+        }
+        return ret;
+    });
+    
+    /**
+     * @type {number[]} unselectedLexes
+     */
+    let unselectedLexes =$derived.by(()=>{
+        if (fetchedTextsResponse && fetchedTextsResponse.lexemes){
+            return Object.values(fetchedTextsResponse.lexemes).filter(
+                (lex)=>!selectedLexes.includes(lex.id)).map((l)=>l.id).sort((a,b)=>a-b)}
+        else
+            return [];
+    });
+
+    //let unselectedLexBetaArray = $derived(unselectedLexes.map((lexID)=>fetchedTextsResponse.lexemes[lemmasByID[lexID]].beta));
+    let unselectedLexPlainArray = $derived(unselectedLexes.map((lexID)=>GreekUtils.removeDiacritics(lemmasByID[lexID])));
+    
+    /**
+     * @type {number[]} bestMatchedLexes
+     */
+    let bestMatchedLexes=$state([]);
+
+        
+    /**
+     * @type {number[]} otherMatchedLexes
+     */
+    let otherMatchedLexes=$state([]);
+
 
    async function fetchPostTextsBatch(){
     //todo: refactor in another .svelte.js file, then test
@@ -170,6 +255,8 @@
         
     }
     async function buildAndFetchPericopes(){
+        landingPage=false;
+        showLookupPanel=false;
         dataReady=false;
        // mylog("disabling sortFilter and focus...");
         resetViewOptions();
@@ -183,15 +270,7 @@
         dataReady= true;
     }
     //let lemmasByID={}
-    let lemmasByID=$derived.by(()=>{
-        let dict={}
-        if (fetchedTextsResponse && fetchedTextsResponse.lexemes) {
-            for (const [lemma,lex] of Object.entries(fetchedTextsResponse.lexemes)){
-                dict[lex.id]=lemma;
-            }
-        }
-        return dict;
-    })
+
 
     function buildLexArrays(){
         mylog("building LexArrays...", true)
@@ -238,7 +317,8 @@
     }
     function resetViewOptions(){
         sortOptionIndex =0;
-        sortFilter=false;
+        sort = false;
+        filter=false;
         focusOn=false;
         showUnique=false;
         hideSolos=false;
@@ -256,25 +336,7 @@
 
         
     }
-    let refAreaText = $state('Matt 6:10');
  
-
-    /**
-     * @type {number[]} filteredPericopes
-     */
- //   let filteredPericopes = $state([]);
-    //$derived(alandPericopeNums.filter((p)=>!hideNonPrimary || 
-      //      (gospelParallels.alandSynopsis.isPrimaryPericope(p,sortOptions[sortOptionIndex].value))))
-
-
-  let selectedSection = $state([1]);
-   function selectSection(){
-        resetViewOptions();
-        alandPericopeNums=[...selectedSection];
-        buildAndFetchPericopes();
-   } 
-
-
 
 
    // let lexemes=$state(null);
@@ -292,28 +354,7 @@
         return colorString;
     }
 
-    /**
-     * @type {Object<number,string>} lexClasses
-     */
     
-    let lexClasses=$derived.by(()=>{// id->css color (e.g., "#eee")
-        const ret = {}
-        if(dataReady && fetchedTextsResponse.lexemes) {
-            //mylog("building lexClasses...",true)
-            for(const id of Object.values(fetchedTextsResponse.lexemes).map((o)=>o.id)) {
-                
-                let classes = "lex-"+id;
-                if(selectedLexes.includes(id)){
-                    classes += " " + getColorClasses(id)
-                } 
-              //  mylog("setting lex " + id + " to: " + classes,true);
-                ret[id] = classes;
-            }
-        }
-        return ret;
-    });
-    
-
     function getLexClasses(id){
         /*let classString="lex-"+id;
         let highlight=highlightLexeme(id)
@@ -346,18 +387,7 @@
         return ret;
     }
 
-    /**
-     * @type {number[]} unselectedLexes
-     */
-    let unselectedLexes =$derived.by(()=>{
-        if (fetchedTextsResponse && fetchedTextsResponse.lexemes){
-            return Object.values(fetchedTextsResponse.lexemes).filter(
-                (lex)=>!selectedLexes.includes(lex.id)).map((l)=>l.id).sort((a,b)=>a-b)}
-        else
-            return [];
-    });
-
-  
+    
     //$inspect("perGroups", perGroups, "expecting" expecting, perGroupsIndices,"groupsRefsArray:", groupsRefsArray);
    // $inspect("unselectedLexmes:", unselectedLexes, "selectedLexes", selectedLexes, "fetchedTextsResponse:", fetchedTextsResponse, "perGroups", perGroups, "perGroupsIndics", perGroupsIndices,"groupsRefsArray:", groupsRefsArray);
    // $inspect("Twelve");
@@ -365,7 +395,8 @@
    //$inspect("filteredPericopes:", filteredPericopes, "[sortFilter, focusOn]:",[sortFilter,focusOn])
    //$inspect("focusOn:", focusOn, "focused:", focused)
    //$inspect("hideSolos:", hideSolos,"filteredPericopes:", filteredPericopes)
-   $inspect("showLookupModal", showLookupModal)
+  // $inspect("showLookuPanel", showLookupPanel)
+  $inspect("lemmasByID", lemmasByID,"unselectedLexes:", unselectedLexes,"unselectedLexPlainArray:",unselectedLexPlainArray,"bestMatchedLexes",bestMatchedLexes)
 </script>
 <style>
     @reference "tailwindcss";
@@ -391,18 +422,21 @@
 
 <div class="self-center text-center sticky top-0 ">
 
+    {#if !landingPage}
     <div class="navbar bg-base-100 shadow-sm ">
-  <div class="navbar-start text-left">
+  <div class="navbar-start text-left max-w-full w-full m-auto">
     <div class="dropdown md:hidden text-left">
+       
       <div tabindex="0" role="button" class="btn btn-ghost lg:hidden">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16" /> </svg>
       </div>
+      
       <ul tabindex="0"
             
         class="menu  dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow text-left ">
 
       <li >
-        <ButtonSelect bind:selected={showLookupModal} buttonText="☰ Lookup" buttonStyle="btn"/>
+        <ButtonSelect bind:selected={showLookupPanel} buttonText="☰ Lookup" buttonStyle="btn"/>
       </li>
 
       {#if alandPericopeNums && alandPericopeNums.length}
@@ -417,13 +451,12 @@
          
      {/if}
       {/if}
-    
+
       </ul>
     </div>
-    <h1 class="block hidden text-center lg:block">NT Gospel Synopsis Viewer</h1>
-    <h1 class="lg:hidden">NT Synopsis</h1>
-        <ModalButton buttonText="🛈" buttonStyle="btn-ghost" >
-        <div class="text-left m-auto">
+    <div class="text-left md:hidden">
+       <h1 class="inline">NT&nbsp;Synopsis</h1>&nbsp;<ModalButton buttonText="🛈" buttonStyle="btn-ghost inline">
+        <div class="text-left m-auto inline">
     <h2 >NT Gospel Synopsis Viewer</h2> <hr/>
             Based on Kurt Aland's <i>Synopsis Quattuor Evangeliorum</i>, using Nestle's 1904 edition of the <i>Greek New Testament.</i><br/>
             Enter NT reference to view parallel texts and click "Look up!", or select a section and press "Go!"
@@ -431,14 +464,18 @@
         Web application created by Fr. Christopher Brannan, O.P. For more information about the project and its data sources, visit the <a href="https://github.com/cbop-dev/synoptic-viewer" target="_blank">github project page</a>.
     </div>
     </ModalButton>
-    
+    </div>
   </div>
   <div class="hidden md:navbar-center ">
-
-    <ul class="bg-white menu menu-horizontal">
+    <h1 class="block  text-center"> 
+        <span class="hidden lg:inline">NT Gospel Synopsis Viewer</span>
+        <span class="lg:hidden inline">NT Synopsis</span>
+    </h1>
+       <div class="inline-block"> 
+    <ul class="bg-white menu menu-horizontal ">
         
       <li >
-        <ButtonSelect bind:selected={showLookupModal} buttonText="☰ Lookup" buttonStyle="btn"/>
+        <ButtonSelect bind:selected={showLookupPanel} buttonText="☰ Lookup" buttonStyle="btn"/>
       </li>
 
       {#if alandPericopeNums && alandPericopeNums.length}
@@ -454,20 +491,64 @@
      {/if}
       {/if}
     </ul>
+    </div>
   </div>
   <div class="navbar-end">
    
 
 
   </div>
-</div>
-
+    </div>
+    {/if}
     <!--==================================================================-->
 
 
 
 </div>
 
+{#if landingPage}
+<div id="landing-panel text-center">
+   <h1 class="block text-center ">NT Gospel Synopsis Viewer</h1>
+    
+        
+        <div class="text-center m-auto">
+    
+            Based on Kurt Aland's <i>Synopsis Quattuor Evangeliorum</i>, using Nestle's 1904 edition of the <i>Greek New Testament.</i><br/>
+            Enter NT reference to view parallel texts and click "Look up!", or select a section and press "Go!"
+      </div>
+</div>
+    <hr/>
+
+{/if}
+{#if showLookupPanel}
+<div id="search-panel" class="text-center">
+     Choose One:
+            <h2 class="cursor-default">Enter References</h2><div class="inline-block mb-1"><textarea id="refarea" class="inline-block align-middle" rows="1" bind:value={refAreaText}></textarea>
+    <button onclick={lookupShowNtParallels} class="btn btn-primary inline-block ">Look up!</button></div>
+             
+                
+               <br/> OR:
+            <h2 class="cursor-default">Select a section:</h2> 
+             <select bind:value={selectedSection} >
+            
+            {#each gospelParallels.alandSynopsis.sections as section}
+            <option value={mathUtils.createNumArrayFromStringListRange(section.pericopes)}>{mathUtils.romanize(section.section)}: {section.title}</option>
+            <hr/>
+            {/each}
+            {#each gospelParallels.alandSynopsis.pericopes as per }
+            {#if per.pericope == 1 }
+            <option value={[per.pericope]} selected="selected">{per.pericope}: {per.title}</option>
+            {:else}
+             <option value={[per.pericope]} >{per.pericope}: {per.title}</option>
+            {/if}
+            {/each}
+            <hr/>
+            <option value={gospelParallels.alandSynopsis.pericopes.map((p)=>p.pericope)}>Everything!!</option>
+
+        </select>
+        <button onclick={selectSection} class="align-top btn btn-primary inline-block">Go!</button>
+</div>
+{/if}
 <div class="text-center mt-3">
     
     {#if alandPericopeNums.length}
@@ -517,34 +598,11 @@
         <div class="text-center"><i class="m-auto">Results will show up here.</i></div>
     {/if}
 </div>
-
-<Modal2 bind:showModal={showLookupModal}>
-     Choose One:
-            <h1 class="cursor-default">Enter References</h1><div class="inline-block mb-1"><textarea id="refarea" class="inline-block align-middle" rows="1" bind:value={refAreaText}></textarea>
-    <button onclick={lookupShowNtParallels} class="btn btn-primary inline-block ">Look up!</button></div>
-             
-                
-               <br/> OR:
-            <h1 class="cursor-default">Select a section:</h1> 
-             <select bind:value={selectedSection} >
-            
-            {#each gospelParallels.alandSynopsis.sections as section}
-            <option value={mathUtils.createNumArrayFromStringListRange(section.pericopes)}>{mathUtils.romanize(section.section)}: {section.title}</option>
-            <hr/>
-            {/each}
-            {#each gospelParallels.alandSynopsis.pericopes as per }
-            {#if per.pericope == 1 }
-            <option value={[per.pericope]} selected="selected">{per.pericope}: {per.title}</option>
-            {:else}
-             <option value={[per.pericope]} >{per.pericope}: {per.title}</option>
-            {/if}
-            {/each}
-            <hr/>
-            <option value={gospelParallels.alandSynopsis.pericopes.map((p)=>p.pericope)}>Everything!!</option>
-
-        </select>
-        <button onclick={selectSection} class="align-top btn btn-primary inline-block">Go!</button>
-</Modal2>
+<div id="footer-panel" class="text-center">
+      <hr/>
+      © Fr. Christopher Brannan, O.P., 2025.  For more information about the project and its data sources, visit the <a href="https://github.com/cbop-dev/synoptic-viewer" target="_blank" class="link">github project page</a>.
+    
+</div>
 
 <Modal2 bind:showModal={showSectionLinks}>
             <div id="results-navigation"  class=" text-left">
@@ -561,13 +619,13 @@
 
 <Modal2 bind:showModal={showLexemeHighlights}>
     <div class="max-w-full block text-center">
-                <h1>Unique Lexemes:</h1>
+                <h1>Unique Lexemes</h1>
             <ButtonSelect bind:selected={showUnique} buttonText="Outline"/>
             <hr/>
-            <h1>Lexemes Highlights:</h1>
+            <h1>Highlighted Lexemes</h1>
             {#if selectedLexes.length}
             
-                <h2>Selected Lexemes</h2>
+            <h2>Selected Lexemes:</h2>
             <i>Click on a lexeme to remove it.</i>
             <br/>
             {#each selectedLexes as lex}
@@ -575,38 +633,74 @@
             {/each}<br/>
             <Button onclick={emptySelectedLexemes}  buttonText="Clear All"/>
             {:else}<br/>
-            <i>None selected. Click on a word in the text, or select a lexeme below.</i>
+            <i>None selected. Click on a word in the text, or select a lexeme below. Use the search box to find a specific word (type in Latin characters, which will automatically convert to Greek)</i>
+
+            
             {/if}
-            <hr/>
-            <h2>Other Lexemes</h2>
-            <i>Click to add/highlight.</i>
+            <hr class="!border-slate-200"/>
+            <h2>Unselected Lexemes</h2>
+            <i>Click to add/highlight. Type in search box to find words.</i>
+            <GreekFilterInput itemsList={unselectedLexPlainArray}
+            labelText=""
+            bind:bestMatches={bestMatchedLexes}
+            bind:otherMatches={otherMatchedLexes} tooltip="Type latin characters to search for Greek words"/>
             <br>
-              {#each unselectedLexes as id}
-                <Button onclick={()=>toggleLex(id)} 
+              {#if bestMatchedLexes.length == 0}
+                 {#each unselectedLexes as id}
+                 <Button onclick={()=>toggleLex(id)} 
                     buttonText={lemmasByID[id]} 
                     buttonType="btn-accent" style="hover:text-white"/> 
-            {/each}
+                {/each}
+                {:else}
+                 <h1>Trying to filter!</h1>
+                 <h3>Best matches:</h3>
+                    {#each bestMatchedLexes as lexIndex}
+                    {@const lexId = unselectedLexes[Number(lexIndex)]}
+                    {@const lemma=lemmasByID[lexId]}
+                    <!--  bestMatched.lexIndex = {lexIndex}, LexID={lexId}, Lemma='{lemma}'-->
+                
+                    <Button onclick={()=>toggleLex(lexId)} 
+                    buttonText={lemma} 
+                    buttonType="btn-accent" style="hover:text-white"/> 
+                    {/each}
+                    {#if otherMatchedLexes.length}
+                        <h3>Other Matches:</h3>
+                            {#each otherMatchedLexes as lexIndex}
+                        {@const lexId = unselectedLexes[Number(lexIndex)]}
+                        {@const lemma=lemmasByID[lexId]}
+                        <!--  bestMatched.lexIndex = {lexIndex}, LexID={lexId}, Lemma='{lemma}'-->
+                    
+                        <Button onclick={()=>toggleLex(lexId)} 
+                        buttonText={lemma} 
+                        buttonType="btn-accent" style="hover:text-white"/> 
+                        {/each}
+                    {/if}
+                {/if}
             </div>
 </Modal2>
 
 <Modal2 bind:showModal={showSortModal}>
     <div class="text-center">
-     <h2>Sort/Focus:</h2>
+     <h2>Select Primary Gospel for Viewing:</h2>
                 <select bind:value={sortOptionIndex}>
                 {#each sortOptions as option, index}
                 <option value={index}>{option.name}</option>
                 {/each}
                 </select>
-           
-            <ButtonSelect bind:selected={sortFilter} buttonText="Sort/Filter"/>
-             <ButtonSelect bind:selected={focusOn} buttonText="Focus!"/>
+           <hr/>
+           <h2>Sort, Filter, or Focus:</h2>
+           <i>(Based on selected primary Gospel.)</i><br/>
+            <ButtonSelect bind:selected={sort} disable={sortOptionIndex==0||filter||focusOn} buttonText="Sort"/>
+            <ButtonSelect bind:selected={filter} disable={sortOptionIndex==0||focusOn} buttonText="Filter"/>
+            <ButtonSelect bind:selected={focusOn} disable={sortOptionIndex==0} buttonText="Focus!"/>
           
     
         <hr class="mt-1 mb-1"/>
             
            <h2>Non-parallels:</h2>
            <ButtonSelect bind:selected={hideSolos} buttonText="Hide All Solos" tooltip="Hide sections with only one gospel column."/>
-           <ButtonSelect disable={!focusOn && ! sortFilter} bind:selected={hideNonPrimarySolos} 
+           <ButtonSelect disable={!focusOn && !sort && !filter} bind:selected={hideNonPrimarySolos} 
            buttonText="Hide Non-Primary Solos" tooltip="Hide sections with only one gospel column."/>
 </div>
         </Modal2>
+
