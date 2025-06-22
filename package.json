@@ -1,6 +1,6 @@
 {
 	"name": "@cbop-dev/synoptic-viewer",
-	"version": "0.2.5",
+	"version": "0.2.6",
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
@@ -43,6 +43,6 @@
 		"vitest": "^3.0.0"
 	},
 	"dependencies": {
-		"@cbop-dev/aland-gospel-synopsis": "^0.0.9"
+		"@cbop-dev/aland-gospel-synopsis": "^0.0.14"
 	}
 }

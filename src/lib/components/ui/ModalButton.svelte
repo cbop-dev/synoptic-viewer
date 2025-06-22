@@ -22,13 +22,13 @@
 </script>
 
 <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
-<Button {buttonText} buttonStyle={buttonStyle ? buttonStyle : 'btn  btn-primary font-normal'} onclick={()=>{onclick(); showModal = true;}} />
+<Button {buttonText} buttonStyle={buttonStyle ? buttonStyle : 'btn  btn-primary font-normal m-1'} onclick={()=>{onclick(); showModal = true;}} />
 
 <dialog
 	bind:this={dialog} bind:clientHeight={modalHeight}
 	onclose={() => (showModal = false)}
 	onclick={(e) => { if (e.target === dialog) dialog.close(); }}
-	class="self-center m-auto"
+	class="self-center m-auto max-w-full "
 	>
 	
 	<div bind:this={box} bind:clientHeight={scrollHeight} >
@@ -63,7 +63,7 @@
 
 <style>
 	dialog {
-		max-width: 32em;
+		/*max-width: 32em;*/
 		border-radius: 0.2em;
 		border: none;
 		padding: 0;

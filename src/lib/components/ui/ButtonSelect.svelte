@@ -5,15 +5,21 @@
    * @property {string} [buttonText]
    * @property {string} [buttonStyle]
    * @property {string} [textSize]
+   * @property {string} [tooltip]
    * @property {boolean} [selected]
+   * @property {boolean} [disable]
+   * @property  [children]
    */
 
   /** @type {Props} */
   let {
-    buttonText = "Reusable Button",
+    buttonText = "",
     buttonStyle = "bg-black hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 ",
     textSize = "base",
-    selected = $bindable(false)
+    tooltip='',
+    selected = $bindable(false),
+    children=null,
+    disable=false
   } = $props();
     
 
@@ -63,6 +69,11 @@
     }
   </style>
   
-  <option  onclick={toggle} bind:this={theButton} class="btn btn-outline btn-primary {selectStyle()}">
+  <option  data-tip={tooltip} onclick={()=>{if(!disable){toggle()}}} bind:this={theButton} 
+  class=" {tooltip ? 'tooltip' : ''} btn btn-outline btn-primary {selectStyle()} m-1 {disable ? 'btn-disabled' : ''}">
     {buttonText}
+    {#if children}
+		{@render children?.()}
+		<hr />
+		{/if}
   </option>

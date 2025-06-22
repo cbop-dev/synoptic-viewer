@@ -16,7 +16,7 @@
   let {
     buttonText = "Reusable Button",
     buttonType="btn-neutral",
-    buttonStyle = "btn base focus:outline-none focus:ring-4 m-1",
+    buttonStyle = "btn base focus:outline-none focus:ring-4 m-1 p-1",
     style='',
     textSize = "normalSize",
     ready = true,

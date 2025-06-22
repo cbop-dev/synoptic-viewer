@@ -29,7 +29,7 @@ test('Groups: unique words', async () => {
         await tfServer.fetchAndPopulateGroupsPericopes([group],true,true,true)
 
         //group.markUniqueWords();
-        console.log("marked uniq words!")
+        //console.log("marked uniq words!")
         for (const book of ['matt', 'mark', 'luke','john']){
             mylog('checking ' + book + ':')
             expect(group[book].unique).toEqual(t.uniques[book]);
