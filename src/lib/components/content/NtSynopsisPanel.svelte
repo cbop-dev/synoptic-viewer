@@ -455,7 +455,7 @@
       </ul>
     </div>
     <div class="text-left md:hidden">
-       <h1 class="inline">NT&nbsp;Synopsis</h1>&nbsp;<ModalButton buttonText="🛈" buttonStyle="btn-ghost inline">
+       <h1 class="inline">NT&nbsp;Synopsis</h1>&nbsp;<ModalButton buttonText="ⓘ" buttonStyle="btn-ghost inline">
         <div class="text-left m-auto inline">
     <h2 >NT Gospel Synopsis Viewer</h2> <hr/>
             Based on Kurt Aland's <i>Synopsis Quattuor Evangeliorum</i>, using Nestle's 1904 edition of the <i>Greek New Testament.</i><br/>
