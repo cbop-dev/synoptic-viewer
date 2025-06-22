@@ -14,7 +14,7 @@
   /** @type {Props} */
   let {
     buttonText = "",
-    buttonStyle = "bg-black hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 ",
+    buttonStyle = " btn btn-outline btn-primary  font-bold hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 ",
     textSize = "base",
     tooltip='',
     selected = $bindable(false),
@@ -52,7 +52,7 @@
   <style>
     @reference "tailwindcss";
     .base {
-      @apply text-white font-bold py-2 px-4 rounded cursor-pointer;
+      @apply  py-2 px-4 rounded cursor-pointer;
       
     }
   
@@ -69,11 +69,11 @@
     }
   </style>
   
-  <option  data-tip={tooltip} onclick={()=>{if(!disable){toggle()}}} bind:this={theButton} 
-  class=" {tooltip ? 'tooltip' : ''} btn btn-outline btn-primary {selectStyle()} m-1 {disable ? 'btn-disabled' : ''}">
+  <button  data-tip={tooltip} onclick={()=>{if(!disable){toggle()}}} bind:this={theButton} 
+  class=" {tooltip ? 'tooltip' : ''}   {selectStyle()} m-1 {disable ? 'btn-disabled' : ''} {buttonStyle}">
     {buttonText}
     {#if children}
 		{@render children?.()}
 		<hr />
 		{/if}
-  </option>
+  </button>

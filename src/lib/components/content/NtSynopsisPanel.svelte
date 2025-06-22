@@ -17,6 +17,12 @@
 	import GreekFilterInput from '../ui/GreekFilterInput.svelte';
     import FilterInput from '../ui/FilterInput.svelte';
 	import { GreekUtils } from '$lib/utils/greek-utils';
+    import BackToTopButton from '../ui/ScrollButtons/BackToTopButton.svelte';
+    import ArrowUp from '../ui/icons/arrow-up.svelte';
+    import ArrowDown from '../ui/icons/arrow-down.svelte';
+    import ArrowTop from '../ui/icons/arrow-top-icon.svelte';
+    import BulletsIcons from '../ui/icons/bullets-outline.svelte';
+  
     let fetching = $state(false);
     let expecting = $state(0);
     let numReady=$state(0);
@@ -435,10 +441,6 @@
             
         class="menu  dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow text-left ">
 
-      <li >
-        <ButtonSelect bind:selected={showLookupPanel} buttonText="☰ Lookup" buttonStyle="btn"/>
-      </li>
-
       {#if alandPericopeNums && alandPericopeNums.length}
       <li><ButtonSelect bind:selected={showSortModal} buttonText="☰ View Options"/></li>
 
@@ -455,7 +457,10 @@
       </ul>
     </div>
     <div class="text-left md:hidden">
-       <h1 class="inline">NT&nbsp;Synopsis</h1>&nbsp;<ModalButton buttonText="ⓘ" buttonStyle="btn-ghost inline">
+       <h1 class="inline">
+        <span class="hidden sm:inline">NT&nbsp;Synopsis</span>
+        <span class="sm:hidden inline">Synopsis</span>
+       </h1>&nbsp;<ModalButton buttonText="ⓘ" buttonStyle="btn-ghost inline">
         <div class="text-left m-auto inline">
     <h2 >NT Gospel Synopsis Viewer</h2> <hr/>
             Based on Kurt Aland's <i>Synopsis Quattuor Evangeliorum</i>, using Nestle's 1904 edition of the <i>Greek New Testament.</i><br/>
@@ -463,13 +468,24 @@
         <hr/>
         Web application created by Fr. Christopher Brannan, O.P. For more information about the project and its data sources, visit the <a href="https://github.com/cbop-dev/synoptic-viewer" target="_blank">github project page</a>.
     </div>
+    <div class="btn-sm"></div>
     </ModalButton>
+     <ul class="bg-white menu menu-horizontal ">
+        
+      <li >
+        <ButtonSelect bind:selected={showLookupPanel} buttonText="" buttonStyle="btn btn-xs p-1 m-1" >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3">
+  <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+</svg>
+        </ButtonSelect>
+      </li>
     </div>
   </div>
   <div class="hidden md:navbar-center ">
     <h1 class="block  text-center"> 
         <span class="hidden lg:inline">NT Gospel Synopsis Viewer</span>
         <span class="lg:hidden inline">NT Synopsis</span>
+        
     </h1>
        <div class="inline-block"> 
     <ul class="bg-white menu menu-horizontal ">
@@ -517,10 +533,11 @@
             Enter NT reference to view parallel texts and click "Look up!", or select a section and press "Go!"
       </div>
 </div>
-    <hr/>
+    
 
 {/if}
 {#if showLookupPanel}
+<hr/>
 <div id="search-panel" class="text-center">
      Choose One:
             <h2 class="cursor-default">Enter References</h2><div class="inline-block mb-1"><textarea id="refarea" class="inline-block align-middle" rows="1" bind:value={refAreaText}></textarea>
@@ -546,11 +563,12 @@
             <option value={gospelParallels.alandSynopsis.pericopes.map((p)=>p.pericope)}>Everything!!</option>
 
         </select>
-        <button onclick={selectSection} class="align-top btn btn-primary inline-block">Go!</button>
+        <button onclick={selectSection} class="align-top btn btn-primary inline-block m-1">Go!</button>
 </div>
+<hr class="!border-slate-300 m-6"/>
 {/if}
 <div class="text-center mt-3">
-    
+   
     {#if alandPericopeNums.length}
          <h1 class="text-center">Results:</h1>
           
@@ -572,20 +590,25 @@
                 <h2 class="inline-block"><b><u>{group.title}</u></b></h2>
                   </div>
             <div class="float-right mr-2 break-after-all">
-                   <a href="" class="" onclick={()=>{showSectionLinks=true}}>[Jump...]</a>
+                   <a href="" class="" title="Jump to section"
+                   onclick={()=>{showSectionLinks=true}}><BulletsIcons height={20} width={20}/></a>
                 {#if index > 0}
-                <a href="#section-{filteredPerGroups[index-1].id}">[Prev]</a>{/if}
-                <a href="#">[Top]</a>
-                {#if index < filteredPerGroups.length-1}<a href="#section-{filteredPerGroups[index+1].id}" class="break-after-all">[Next]</a>{/if}
+                <a href="#section-{filteredPerGroups[index-1].id}"
+                title="Previous"><ArrowUp height={20} width={20}/></a>{/if}
+                {#if index < filteredPerGroups.length-1}
+                <a href="#section-{filteredPerGroups[index+1].id}" 
+                class="break-after-all" title="Next"><ArrowDown height={20} width={20}/></a>{/if}
+                <a href="#"  class="inline" title="Top"><ArrowTop height={20} width={20}/></a>
             </div>
                 
     
           
-            <br/>
-            
+            <br class="break-all"/>
+            <div>
                 <ParallelTextSection parGroup={group} focus={focused}
                  wordClick={toggleLex} {showUnique} uniqueStyle={showUnique ? uniqueStyle : ''} classFunc={getLexClasses}/>
-            <hr class="mb-2"/>
+            </div>
+                 <hr class="mb-2"/>
             {/each}
         {:else}
         <h3><i>Loading...</i></h3>
