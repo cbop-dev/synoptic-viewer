@@ -17,7 +17,6 @@
 	import GreekFilterInput from '../ui/GreekFilterInput.svelte';
     import FilterInput from '../ui/FilterInput.svelte';
 	import { GreekUtils } from '$lib/utils/greek-utils';
-    import BackToTopButton from '../ui/ScrollButtons/BackToTopButton.svelte';
     import ArrowUp from '../ui/icons/arrow-up.svelte';
     import ArrowDown from '../ui/icons/arrow-down.svelte';
     import ArrowTop from '../ui/icons/arrow-top-icon.svelte';
