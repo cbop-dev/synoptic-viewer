@@ -422,6 +422,16 @@
     }
 
 
+    select{
+        @apply max-w-5/6  wrap-normal overflow-clip ;
+       /* overflow: hidden  !important;*/
+    }
+
+    option{
+        @apply max-w-11/12 wrap-normal overflow-clip;
+        /*overflow: hidden  !important;*/
+      
+    }
 
 </style>
 
