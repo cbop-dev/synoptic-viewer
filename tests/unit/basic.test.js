@@ -64,11 +64,11 @@ test('sortAland ', async () => {
         //{ref: "Mt 28:17", alands: [359,364]},
        // {sec: 16, primary: gPar.gospels.LUKE, alands: [294, 287, 288, 289, 290, 291, 292, 293, 295]},
         {input:[287, 288, 289, 290, 291, 294, 292, 293, 295], output: [291, 294, 287, 288, 289, 290, 292, 293, 295],
-            primary: gospelParallels.gospels.LUKE},
+            primary: gospelParallels.gospels.names.LUKE},
         {input:[20,65,51], output: [20,51,65],
-            primary: gospelParallels.gospels.MATTHEW},    
-        {input: [13, 14, 15, 16, 17, 18, 19, 20], output: [13, 14, 15, 16, 18, 20,17,19],
-            primary: gospelParallels.gospels.MARK}
+            primary: gospelParallels.gospels.names.MATTHEW},    
+        {input: [13, 14, 15, 16, 17, 18, 19, 20], output: [13, 14, 15, 16, 18,19, 20,17,],
+            primary: gospelParallels.gospels.names.MARK}
 
     ]
 	

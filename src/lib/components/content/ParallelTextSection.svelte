@@ -9,7 +9,7 @@
     
     /**
      * @type {{parGroup: GospelPericopeGroup,
-     * focus:number,
+     * focus:string,
      * wordClick:function(number):void,
      * cssClassDict:Object,
      * showUnique:boolean
@@ -19,7 +19,7 @@
      */
     let {
         parGroup = new GospelPericopeGroup(),
-        focus = gospels.NONE,
+        focus = '',
         uniqueStyle='',
         showUnique=false,
         wordClick=(id)=>{},
@@ -40,7 +40,7 @@
          * @type {ParallelText[]} cols
          */
         let cols = [];
-        if (focus==gospels.MATTHEW){
+        if (focus==gospels.names.MATTHEW){
             if (parGroup.matt.textRefs.length){
                 focused = parGroup.matt;
                 cols = [parGroup.mark,parGroup.luke,parGroup.john];
@@ -48,19 +48,19 @@
             }
             
         }
-        else if (focus==gospels.MARK){
+        else if (focus==gospels.names.MARK){
               if (parGroup.mark.textRefs.length){
                 focused = parGroup.mark;
                 cols = [parGroup.matt,parGroup.luke,parGroup.john];
             }
         }
-        else if (focus==gospels.LUKE){
+        else if (focus==gospels.names.LUKE){
               if (parGroup.luke.textRefs.length){
                 focused = parGroup.luke;
                 cols = [parGroup.matt,parGroup.mark,parGroup.john]
             }
         }
-        else if (focus==gospels.JOHN){
+        else if (focus==gospels.names.JOHN){
               if (parGroup.john.textRefs.length){
                 focused = parGroup.john;
                 cols = [parGroup.matt,parGroup.mark,parGroup.luke]
@@ -132,12 +132,14 @@ $inspect("ParTexts, focus:", focus)
                         onclick={()=>{wordClick(word.id)}}>{word.word}{'  '}</span>
                         {/each}
                     {/each}
-                {:else}
+                {:else if textRef.text}
                     
                     {textRef.text}
+                {:else}
+                    <i class="text-sm">(Not found in Nestle 1904)</i>
                 {/if}
 {/snippet}
-{#if focus==gospels.NONE}
+{#if focus==''}
     <div 
     class="grid  
     {numCols >=2 ? "sm:grid-cols-2" : ''}

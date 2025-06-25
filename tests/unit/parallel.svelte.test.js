@@ -25,13 +25,13 @@ test('Groups: unique words', async () => {
     for (const t of tests){
         const group = TfUtils.getGroupsArray([t.aland])[0];
         const groupsArrays=TfUtils.getRefsArrays([group]);
-        mylog("gonna call fetchAndPopulate...", true);
+      //  mylog("gonna call fetchAndPopulate...");
         await tfServer.fetchAndPopulateGroupsPericopes([group],true,true,true)
 
         //group.markUniqueWords();
         //console.log("marked uniq words!")
         for (const book of ['matt', 'mark', 'luke','john']){
-            mylog('checking ' + book + ':')
+           // mylog('checking ' + book + ':')
             expect(group[book].unique).toEqual(t.uniques[book]);
             expect(group.commonLexes).toEqual(t.common);
         }

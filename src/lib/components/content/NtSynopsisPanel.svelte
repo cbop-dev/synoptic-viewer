@@ -1,5 +1,5 @@
 <script>
-    import gospelParallels from '@cbop-dev/aland-gospel-synopsis'
+    import {gospelParallels} from '@cbop-dev/aland-gospel-synopsis'
     import { ParallelText, GospelPericopeGroup,Word, TextAndRef,VerseWords } from "./parallelTexts.svelte";
     import { tfServer, TfServer, lexemes} from "$lib/n1904/tfN1904";
 	import ParallelTextSection from "./ParallelTextSection.svelte";
@@ -35,52 +35,53 @@
      let hideNonPrimarySolos = $state(false);
     let showLexemeHighlights = $state(false);
     let showLookupPanel = $state(true);
-    let showSortModal = $state(false);
+   // let showViewOptions = $state(false);
     let landingPage=$state(true);
+    let showInfoModal=$state(false);
 
     /**
     * @type {number[]} selectedLexes
     */
     let selectedLexes=$state([]);
     
-   let sortOptionIndex =$state(0);
-   const sortOptions =[
-    {value: gospelParallels.gospels.NONE, name: "None", abbrev:""},
-    {value: gospelParallels.gospels.MATTHEW, name: "Matthew", abbrev:"matt"},
-    {value: gospelParallels.gospels.MARK, name:  "Mark", abbrev:"mark"},
-    {value: gospelParallels.gospels.LUKE, name:  "Luke", abbrev:"luke"},
-    {value: gospelParallels.gospels.JOHN, name: "John", abbrev: "john"}
+
+   let selectedGospelIndex =$state(0);
+   const gospelOptions =[
+    {value: '', name: "None", abbrev:""},
+    {value: gospelParallels.gospels.names.MATTHEW, name: "Matthew", abbrev:"matt"},
+    {value: gospelParallels.gospels.names.MARK, name:  "Mark", abbrev:"mark"},
+    {value: gospelParallels.gospels.names.LUKE, name:  "Luke", abbrev:"luke"},
+    {value: gospelParallels.gospels.names.JOHN, name: "John", abbrev: "john"}
 
    ];
-
+    /**
+     * @type {string} selectedGospel
+     */
+   let selectedGospel=$derived(gospelOptions[selectedGospelIndex].value);
    let hideNonPrimary = $state(true);
    //what is this for?
    let hideOthers = $state(false);
    let focusOn=$state(false);
    let focused=$derived.by(()=>{
-        let retVal = gospelParallels.gospels.NONE;
+        let retVal = '';
         if (focusOn){
-            retVal = sortOptions[sortOptionIndex].value;
+            retVal = selectedGospel;
         }
         return retVal;
    });
    let sort = $state(false);
-   let filter=$state(false);
-  // let sortFilter=$state(false);
-    function sortFilterClick(){
-      //  focus=gospelParallels.gospels.NONE;
-        //sortOptionIndex=
-        //buildAndFetchPericopes();
-    }
-    function focusClick(){
-        //buildAndFetchPericopes();
-        //focus=sortOptions[sortOptionIndex].value;
-   }
+  
+   let callSortFilter=$derived(hideSolos || (gospelParallels.gospels.isValid(selectedGospel)   &&
+   ( sort ||hideNonPrimary || focusOn|| hideNonPrimarySolos)));
+
     /**
+     * @description Array of pericopes groups, with refs for each gospel (matt,mark,luke,john,other),
+     *  derived from 'filteredPericopes' and (maybe?? see next variable comment) retaining the same order.
      * @type {GospelPericopeGroup[]} perGroups
      */
-
     let perGroups = $state([]);
+
+    //is the sorting here necessary???
     let filteredPerGroups=$derived(perGroups.filter((g)=>filteredPericopes.includes(g.id)).toSorted(
         (a,b)=>filteredPericopes.indexOf(a.id)-filteredPericopes.indexOf(b.id)
     ));
@@ -120,7 +121,7 @@
          */
         const theNums = [];
         bibleUtils.expandRefs(refAreaRefs).forEach((ref)=>{
-            const pNum = gospelParallels.getAlandPericopeNumbers(ref.trim(),sortOptions[sortOptionIndex].value, true);
+            const pNum = gospelParallels.getAlandPericopeNumbers(ref.trim(),selectedGospel, true);
             for (const num of pNum){
                 if(!theNums.includes(num))
                     theNums.push(num);
@@ -131,21 +132,15 @@
         alandPericopeNums = theNums.sort((a,b)=>a-b);   
     }
 
-    function sortAndFilterPericopes(){
-      //  alandPericopesNums=
-    }
+
     function buildPericopeRefs(){
-        mylog("sorting pericopes. Initial state = " + alandPericopeNums.join(","));
-        //gospelParallels.sortAlandPericopes(alandPericopeNums,sortOptions[sortOptionIndex].value);
-        //filteredPericopes = alandPericopeNums.filter((p)=>!hideNonPrimary || 
-        //    (gospelParallels.alandSynopsis.isPrimaryPericope(p,sortOptions[sortOptionIndex].value)));
-        mylog("sorting pericopes. Sorted state = " + alandPericopeNums.join(","));
+       // mylog("sorting pericopes. Initial state = " + alandPericopeNums.join(","));
+ 
+      //  mylog("sorting pericopes. Sorted state = " + alandPericopeNums.join(","));
         
         perGroups = TfUtils.getGroupsArray(filteredPericopes);
-       // const theArrays = TfUtils.getRefsArrays(perGroups);
-       // perGroupsIndices = theArrays.groupsIndices;
-       // groupsRefsArray =theArrays.refsArray;
-        mylog("ran geRefsArrays!")
+ 
+       // mylog("ran geRefsArrays!")
  
     }
 
@@ -155,18 +150,23 @@
     let alandPericopeNums = $state([]);
  
     let filteredPericopes=$derived.by(()=>{
-        let sortedAland=alandPericopeNums ? alandPericopeNums : [];
-        if (sort || filter || focusOn || hideSolos||hideNonPrimarySolos) {
-            sortedAland = gospelParallels.filterSortAlandPericopes(sortedAland,
-            (sort|| filter || focusOn ) ? 
-                sortOptions[sortOptionIndex].value 
-               : gospelParallels.gospels.NONE,
-            filter || focusOn, //hideNonPrimary: only filter out non-primary texts if one of these is true
-            hideSolos,
-            (sort|| filter || focusOn) && hideNonPrimarySolos);//hideNonPrimarySolos parameter
+        let alands= (alandPericopeNums ? [...alandPericopeNums] : []); //copy of alands for sorting/filtering...
+        if (callSortFilter) {
+            if (sort && gospelParallels.gospels.isValid(selectedGospel)) {//sort!
+                mylog("before sorting Alands for "+ selectedGospel +": ["+alands.join(',')+"]",true);
+                gospelParallels.sortAlandPericopes(alands,selectedGospel);
+               mylog("after sorting Alands: ["+alands.join(',')+"]",true);
+            }
+            if (hideSolos || hideNonPrimary || hideNonPrimarySolos||focusOn) {
+                //we need to filter:
+                alands = gospelParallels.filterAlandPericopes(alands,selectedGospel,focusOn || hideNonPrimary,hideSolos,
+                focusOn||hideNonPrimarySolos);
+
+            }
+           
         }
-    
-        return sortedAland;
+        mylog("after filtering alands: ["+ alands.join(",")+"]",true)
+        return alands;
     })
     
    
@@ -188,7 +188,7 @@
      */
  //   let filteredPericopes = $state([]);
     //$derived(alandPericopeNums.filter((p)=>!hideNonPrimary || 
-      //      (gospelParallels.alandSynopsis.isPrimaryPericope(p,sortOptions[sortOptionIndex].value))))
+      //      (gospelParallels.alandSynopsis.isPrimaryPericope(p,selectedGospel[selectedGospelIndex].value))))
 
 
   let selectedSection = $state([1]);
@@ -278,7 +278,7 @@
 
 
     function buildLexArrays(){
-        mylog("building LexArrays...", true)
+        //mylog("building LexArrays...", true)
         lemmasByID ={};
         if (fetchedTextsResponse) {
             for (const [lemma,lex] of Object.entries(fetchedTextsResponse.lexemes)){
@@ -288,14 +288,12 @@
         else{
             mylog("Cannot build LexArrays!", true)
         }
-        //unselectedLexes=Object.keys(lemmasByID).sort();
-        //todo finish.
-        
+
         
     }
     function populateGroupsText(words=false){
-        mylog("v==================================v", true)
-        mylog("populateGroupTexts()...",true)
+       // mylog("v==================================v", true);
+        //mylog("populateGroupTexts()...",true);
         
         for (const [index,group] of perGroups.entries()){
             mylog("checking group # " + group.id +" , title: '"+ group.title + ", index: " + index);
@@ -321,15 +319,15 @@
         mylog("^==================================^")
     }
     function resetViewOptions(){
-        sortOptionIndex =0;
+        selectedGospelIndex =0;
         sort = false;
-        filter=false;
+        hideNonPrimary=false;
         focusOn=false;
         showUnique=false;
         hideSolos=false;
         hideNonPrimarySolos=false;
         
-      //  focus=sortOptions[sortOptionIndex].value;
+      //  focus=selectedGospel[selectedGospelIndex].value;
     }
     function lookupShowNtParallels(){
         resetViewOptions();
@@ -342,7 +340,19 @@
         
     }
  
+    
+    /**
+     * 
+     * @param {boolean} flag
+     */
+    function toggleViewOptionsModal(){
+        if (showViewOptions)
+            showViewOptions=false;
+        else
+            showViewOptions=true;
 
+      
+    }
 
    // let lexemes=$state(null);
 
@@ -376,13 +386,12 @@
        // mylog("toggleLex("+id+")",true);
         if(selectedLexes.includes(id)) {
             selectedLexes.splice(selectedLexes.indexOf(id),1);
-           // unselectedLexes.push(id);
-           // unselectedLexes.sort((a,b)=>a-b);
+
         }
         else {
-           // unselectedLexes.splice(unselectedLexes.indexOf(id),1);
+           
             selectedLexes.push(id);
-            //selectedLexes.sort((a,b)=>a-b);
+
         }
     }
 
@@ -393,15 +402,8 @@
     }
 
     
-    //$inspect("perGroups", perGroups, "expecting" expecting, perGroupsIndices,"groupsRefsArray:", groupsRefsArray);
-   // $inspect("unselectedLexmes:", unselectedLexes, "selectedLexes", selectedLexes, "fetchedTextsResponse:", fetchedTextsResponse, "perGroups", perGroups, "perGroupsIndics", perGroupsIndices,"groupsRefsArray:", groupsRefsArray);
-   // $inspect("Twelve");
-   // $inspect("lexClasses:", lexClasses)
-   //$inspect("filteredPericopes:", filteredPericopes, "[sortFilter, focusOn]:",[sortFilter,focusOn])
-   //$inspect("focusOn:", focusOn, "focused:", focused)
-   //$inspect("hideSolos:", hideSolos,"filteredPericopes:", filteredPericopes)
-  // $inspect("showLookuPanel", showLookupPanel)
-  $inspect("lemmasByID", lemmasByID,"unselectedLexes:", unselectedLexes,"unselectedLexPlainArray:",unselectedLexPlainArray,"bestMatchedLexes",bestMatchedLexes)
+$inspect("filteredPericopes", filteredPericopes, "\nfilteredPerGroups", filteredPerGroups, "perGroups:", perGroups);
+  //$inspect("lemmasByID", lemmasByID,"unselectedLexes:", unselectedLexes,"unselectedLexPlainArray:",unselectedLexPlainArray,"bestMatchedLexes",bestMatchedLexes)
 </script>
 <style>
     @reference "tailwindcss";
@@ -435,12 +437,13 @@
 
 </style>
 
-<div class="self-center text-center sticky top-0 ">
+<div class="self-center text-center sticky top-0 bg-white z-40">
 
     {#if !landingPage}
-    <div class="navbar bg-base-100 shadow-sm ">
-  <div class="navbar-start text-left max-w-full w-full m-auto">
-    <div class="dropdown md:hidden text-left">
+
+    <div class="navbar bg-base-100 text-center  shadow-sm ">
+  <div class="navbar-start text-left max-w-full w-full m-auto md:hidden">
+    <div class="dropdown  text-left">
        
       <div tabindex="0" role="button" class="btn btn-ghost lg:hidden">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16" /> </svg>
@@ -451,7 +454,7 @@
         class="menu  dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow text-left ">
 
       {#if alandPericopeNums && alandPericopeNums.length}
-      <li><ButtonSelect bind:selected={showSortModal} buttonText="☰ View Options"/></li>
+      <li><ButtonSelect bind:selected={showViewOptions} buttonText="☰ View Options"/></li>
 
      {#if dataReady}
      
@@ -465,22 +468,16 @@
 
       </ul>
     </div>
-    <div class="text-left md:hidden">
+    <div class="text-left ">
        <h1 class="inline">
-        <span class="hidden sm:inline">NT&nbsp;Synopsis</span>
-        <span class="sm:hidden inline">Synopsis</span>
-       </h1>&nbsp;<ModalButton buttonText="ⓘ" buttonStyle="btn-ghost inline">
-        <div class="text-left m-auto inline">
-    <h2 >NT Gospel Synopsis Viewer</h2> <hr/>
-            Based on Kurt Aland's <i>Synopsis Quattuor Evangeliorum</i>, using Nestle's 1904 edition of the <i>Greek New Testament.</i><br/>
-            Enter NT reference to view parallel texts and click "Look up!", or select a section and press "Go!"
-        <hr/>
-        Web application created by Fr. Christopher Brannan, O.P. For more information about the project and its data sources, visit the <a href="https://github.com/cbop-dev/synoptic-viewer" target="_blank">github project page</a>.
-    </div>
-    <div class="btn-sm"></div>
-    </ModalButton>
+        <a href="" data-sveltekit-reload><span class="hidden sm:inline">NT&nbsp;Synopsis</span>
+        <span class="sm:hidden inline">Synopsis</span></a>
+       </h1>    
      <ul class="bg-white menu menu-horizontal ">
-        
+        <li>
+            <ButtonSelect buttonText="ⓘ" 
+       buttonStyle="btn btn-xs btn-ghost" bind:selected={showInfoModal}/>
+        </li>
       <li >
         <ButtonSelect bind:selected={showLookupPanel} buttonText="" buttonStyle="btn btn-xs p-1 m-1" >
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3">
@@ -490,13 +487,17 @@
       </li>
     </div>
   </div>
-  <div class="hidden md:navbar-center ">
-    <h1 class="block  text-center"> 
-        <span class="hidden lg:inline">NT Gospel Synopsis Viewer</span>
-        <span class="lg:hidden inline">NT Synopsis</span>
-        
-    </h1>
-       <div class="inline-block"> 
+  <div class="hidden md:navbar-center self-center m-auto">
+
+
+    <div class="text-center self-center border-0"> 
+        <div id="title-panel">
+        <h1 class="text-center inline"> 
+        <a href="/" data-sveltekit-reload><span class="hidden lg:inline">NT Gospel Synopsis Viewer</span>
+        <span class="lg:hidden inline">NT Synopsis</span></a>
+    </h1>&nbsp;<ButtonSelect buttonText="ⓘ" 
+       buttonStyle="btn btn-sm btn-ghost outline-0 border-0" bind:selected={showInfoModal}/>
+    </div> 
     <ul class="bg-white menu menu-horizontal ">
         
       <li >
@@ -504,7 +505,7 @@
       </li>
 
       {#if alandPericopeNums && alandPericopeNums.length}
-      <li><ButtonSelect bind:selected={showSortModal} buttonText="☰ View Options"/></li>
+      <li><ButtonSelect bind:selected={showViewOptions} buttonText="☰ View Options"/></li>
 
      {#if dataReady}
      
@@ -518,7 +519,7 @@
     </ul>
     </div>
   </div>
-  <div class="navbar-end">
+  <div class="navbar-end hidden">
    
 
 
@@ -529,11 +530,14 @@
 
 
 
-</div>
+
 
 {#if landingPage}
 <div id="landing-panel text-center">
-   <h1 class="block text-center ">NT Gospel Synopsis Viewer</h1>
+   <h1 class="block text-center "><span class="hidden lg:inline">Greek NT Gospel Synopsis Viewer</span>
+    <span class="hidden md:inline lg:hidden">NT Gospel Synopsis</span>
+    <span class="md:hidden">NT Synopsis</span>
+</h1>
     
         
         <div class="text-center m-auto">
@@ -541,13 +545,14 @@
             Based on Kurt Aland's <i>Synopsis Quattuor Evangeliorum</i>, using Nestle's 1904 edition of the <i>Greek New Testament.</i><br/>
             Enter NT reference to view parallel texts and click "Look up!", or select a section and press "Go!"
       </div>
+      <hr/>
 </div>
     
 
 {/if}
 {#if showLookupPanel}
-<hr/>
-<div id="search-panel" class="text-center">
+
+<div id="search-panel" class="text-center ">
      Choose One:
             <h2 class="cursor-default">Enter References</h2><div class="inline-block mb-1"><textarea id="refarea" class="inline-block align-middle" rows="1" bind:value={refAreaText}></textarea>
     <button onclick={lookupShowNtParallels} class="btn btn-primary inline-block ">Look up!</button></div>
@@ -576,49 +581,47 @@
 </div>
 <hr class="!border-slate-300 m-6"/>
 {/if}
+</div>
 <div class="text-center mt-3">
    
     {#if alandPericopeNums.length}
          <h1 class="text-center">Results:</h1>
-          
-     
-   
-  
-      
-   
-
-    
+        
 
     <div id="results">
 
 
         {#if dataReady && fetchedTextsResponse}
-
-            {#each filteredPerGroups as group, index}
-            <div class='anchor text-center' id="section-{group.id}">
-                <h2 class="inline-block"><b><u>{group.title}</u></b></h2>
-                  </div>
-            <div class="float-right mr-2 break-after-all">
-                   <a href="" class="" title="Jump to section"
-                   onclick={()=>{showSectionLinks=true}}><BulletsIcons height={20} width={20}/></a>
-                {#if index > 0}
-                <a href="#section-{filteredPerGroups[index-1].id}"
-                title="Previous"><ArrowUp height={20} width={20}/></a>{/if}
-                {#if index < filteredPerGroups.length-1}
-                <a href="#section-{filteredPerGroups[index+1].id}" 
-                class="break-after-all" title="Next"><ArrowDown height={20} width={20}/></a>{/if}
-                <a href="#"  class="inline" title="Top"><ArrowTop height={20} width={20}/></a>
-            </div>
-                
-    
-          
-            <br class="break-all"/>
-            <div>
-                <ParallelTextSection parGroup={group} focus={focused}
-                 wordClick={toggleLex} {showUnique} uniqueStyle={showUnique ? uniqueStyle : ''} classFunc={getLexClasses}/>
-            </div>
-                 <hr class="mb-2"/>
-            {/each}
+            {#if filteredPerGroups.length}
+                {#each filteredPerGroups as group, index }
+                <div class='anchor text-center' id="section-{group.id}">
+                    <h2 class="inline-block"><b><u>{group.title}</u></b></h2>
+                    </div>
+                <div class="float-right mr-2 break-after-all">
+                    <a href="" class="" title="Jump to section"
+                    onclick={()=>{showSectionLinks=true}}><BulletsIcons height={20} width={20}/></a>
+                    {#if index > 0}
+                    <a href="#section-{filteredPerGroups[index-1].id}"
+                    title="Previous"><ArrowUp height={20} width={20}/></a>{/if}
+                    {#if index < filteredPerGroups.length-1}
+                    <a href="#section-{filteredPerGroups[index+1].id}" 
+                    class="break-after-all" title="Next"><ArrowDown height={20} width={20}/></a>{/if}
+                    <a href="#"  class="inline" title="Top"><ArrowTop height={20} width={20}/></a>
+                </div>
+                    
+        
+            
+                <br class="break-all"/>
+                <div>
+                    <ParallelTextSection parGroup={group} focus={focused}
+                    wordClick={toggleLex} {showUnique} uniqueStyle={showUnique ? uniqueStyle : ''} classFunc={getLexClasses}/>
+                </div>
+                    <hr class="mb-2"/>
+                {/each}
+            {:else}
+                (No results. Try <a href="" data-sveltekit-reload>another search</a>{#if hideNonPrimary || focusOn || hideSolos }, 
+                or change the <a href="" onclick={toggleViewOptionsModal}>View Options</a>{/if}.)
+            {/if}
         {:else}
         <h3><i>Loading...</i></h3>
         <span class="loading loading-spinner loading-xl"></span>
@@ -627,7 +630,13 @@
     </div>
     
     {:else}
-        <div class="text-center"><i class="m-auto">Results will show up here.</i></div>
+        <div class="text-center"><i class="m-auto">Results will show up here. 
+            {#if showLookupPanel ==false}<a class="link hover:text-blue-700" 
+            href="#" onclick={()=>{showLookupPanel=true}}>Search for a text or select a section.</a>
+            {:else}
+                Search for a text or select a section above.
+            {/if}
+        </i></div>
     {/if}
 </div>
 <div id="footer-panel" class="text-center">
@@ -642,7 +651,7 @@
                     <ul>
             {#each filteredPericopes as section, index}
             {@const pericope=gospelParallels.alandSynopsis.lookupPericope(section)}
-            <li class="m-1 p-1 "><h3><a href="#section-{section}"><b>{section}. {pericope.title}</b> 
+            <li class="m-1 p-1 "><h3><a href="#section-{section}" onclick={()=>{showSectionLinks=false}}><b>{section}. {pericope.title}</b> 
                 <i>({gospelParallels.getAlandPericopeRefs(section).join("; ")})</i></a></h3></li>
             {/each}
                 </ul>           
@@ -711,28 +720,46 @@
             </div>
 </Modal2>
 
-<Modal2 bind:showModal={showSortModal}>
+<Modal2 bind:showModal={showViewOptions}>
     <div class="text-center">
      <h2>Select Primary Gospel for Viewing:</h2>
-                <select bind:value={sortOptionIndex}>
-                {#each sortOptions as option, index}
+                <select bind:value={selectedGospelIndex}>
+                {#each gospelOptions as option, index}
                 <option value={index}>{option.name}</option>
                 {/each}
                 </select>
            <hr/>
-           <h2>Sort, Filter, or Focus:</h2>
+           <h2>Sort, Filter, and/or Focus:</h2>
            <i>(Based on selected primary Gospel.)</i><br/>
-            <ButtonSelect bind:selected={sort} disable={sortOptionIndex==0||filter||focusOn} buttonText="Sort"/>
-            <ButtonSelect bind:selected={filter} disable={sortOptionIndex==0||focusOn} buttonText="Filter"/>
-            <ButtonSelect bind:selected={focusOn} disable={sortOptionIndex==0} buttonText="Focus!"/>
-          
-    
+            <ButtonSelect bind:selected={sort} disable={!gospelParallels.gospels.isValid(selectedGospel)} 
+            buttonText="Sort" tooltip="Sort according to the selected gospel's order."/> 
+            <ButtonSelect bind:selected={hideNonPrimary} 
+            disable={focusOn || !gospelParallels.gospels.isValid(selectedGospel)} 
+            buttonText="Isolate" tooltip="Hide all Aland's sections which do not include the selected gospel or which contain seconary duplicates of it."/>
+            <ButtonSelect bind:selected={focusOn} disable={!gospelParallels.gospels.isValid(selectedGospel)} 
+            buttonText="Focus!" tooltip="Focus on the selected gospel, making it more visibled, and removing any sections which do not contain it or contain secondary duplicates."/>
+            <ButtonSelect 
+            disable={!gospelParallels.gospels.isValid(selectedGospel) || (focusOn||hideNonPrimary)} 
+            bind:selected={hideNonPrimarySolos} 
+           buttonText="Hide Non-Primary Solos" 
+           tooltip="Hide all sections that have only one column but which is not the selected gospel."/>
+    <br/>
+            <ButtonSelect bind:selected={hideSolos} buttonText="Hide All Solos" 
+            tooltip="Hide ALL sections that have only one gospel column."/>
+           
+
         <hr class="mt-1 mb-1"/>
-            
-           <h2>Non-parallels:</h2>
-           <ButtonSelect bind:selected={hideSolos} buttonText="Hide All Solos" tooltip="Hide sections with only one gospel column."/>
-           <ButtonSelect disable={!focusOn && !sort && !filter} bind:selected={hideNonPrimarySolos} 
-           buttonText="Hide Non-Primary Solos" tooltip="Hide sections with only one gospel column."/>
+        <Button onclick={resetViewOptions} buttonText="Reset All"/>
 </div>
         </Modal2>
 
+<Modal2 bind:showModal={showInfoModal}>
+    <div class="text-left m-auto inline">
+    <h2 >NT Gospel Synopsis Viewer</h2> <hr/>
+            Based on Kurt Aland's <i>Synopsis Quattuor Evangeliorum</i>, using Nestle's 1904 edition of the <i>Greek New Testament.</i><br/>
+            Enter NT reference to view parallel texts and click "Look up!", or select a section and press "Go!"
+        <hr/>
+        Web application created by Fr. Christopher Brannan, O.P. For more information about the project and its data sources, visit the <a href="https://github.com/cbop-dev/synoptic-viewer" target="_blank">github project page</a>.
+    </div>
+    <div class="btn-sm"></div>
+</Modal2>
