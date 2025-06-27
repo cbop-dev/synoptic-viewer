@@ -21,13 +21,14 @@
     import ArrowDown from '../ui/icons/arrow-down.svelte';
     import ArrowTop from '../ui/icons/arrow-top-icon.svelte';
     import BulletsIcons from '../ui/icons/bullets-outline.svelte';
+	
   
     let fetching = $state(false);
     let expecting = $state(0);
     let numReady=$state(0);
     let ready = $derived(numReady >= expecting);
     let dataReady = $state(false);
-     let showSectionLinks=$state(false);
+    let showSectionLinks=$state(false);
    let showViewOptions=$state(false);
    let showUnique = $state(false);
    let uniqueStyle = "lex-uniques";
@@ -153,9 +154,9 @@
         let alands= (alandPericopeNums ? [...alandPericopeNums] : []); //copy of alands for sorting/filtering...
         if (callSortFilter) {
             if (sort && gospelParallels.gospels.isValid(selectedGospel)) {//sort!
-                mylog("before sorting Alands for "+ selectedGospel +": ["+alands.join(',')+"]",true);
+               // mylog("before sorting Alands for "+ selectedGospel +": ["+alands.join(',')+"]",true);
                 gospelParallels.sortAlandPericopes(alands,selectedGospel);
-               mylog("after sorting Alands: ["+alands.join(',')+"]",true);
+              // mylog("after sorting Alands: ["+alands.join(',')+"]",true);
             }
             if (hideSolos || hideNonPrimary || hideNonPrimarySolos||focusOn) {
                 //we need to filter:
@@ -165,7 +166,7 @@
             }
            
         }
-        mylog("after filtering alands: ["+ alands.join(",")+"]",true)
+        //mylog("after filtering alands: ["+ alands.join(",")+"]",true)
         return alands;
     })
     
@@ -193,8 +194,8 @@
 
   let selectedSection = $state([1]);
    function selectSection(){
-    landingPage=false;
-        resetViewOptions();
+        landingPage=false;
+        resetViewOptions(false);
         alandPericopeNums=[...selectedSection];
 
         buildAndFetchPericopes();
@@ -261,7 +262,7 @@
     }
     async function buildAndFetchPericopes(){
         landingPage=false;
-        showLookupPanel=false;
+        viewStates.views.lookup.state=false;
         dataReady=false;
        // mylog("disabling sortFilter and focus...");
         resetViewOptions();
@@ -318,9 +319,10 @@
         mylog("DONE! Populated the GroupTexts()!")
         mylog("^==================================^")
     }
-    function resetViewOptions(){
+    function resetViewOptions(lookup=false){
         selectedGospelIndex =0;
         sort = false;
+        viewStates.reset(lookup);
         hideNonPrimary=false;
         focusOn=false;
         showUnique=false;
@@ -401,8 +403,104 @@
         return ret;
     }
 
-    
-$inspect("filteredPericopes", filteredPericopes, "\nfilteredPerGroups", filteredPerGroups, "perGroups:", perGroups);
+    const viewStates=$state({
+        views:{
+            view: { description:  "View Options", hotkeys:['v'], state:false},
+            lookup: { description:  "Lookup passage(s) or select section", hotkeys:['l', 's'], state:true},
+            words: {description:  "Lexeme/Word Options", hotkeys:['w'], state:false},
+            info: { description:  "Website and project information.", hotkeys:['i'], state:false},
+            unique: { description:  "Toggle Unique Lexeme color outlining", hotkeys:['u'], state:false},
+            help: { description:  "Show help menu", hotkeys:['h', '?'], state:false},
+            sections: { description:  "Jump to a section", hotkeys:['j'], state:false},  
+        },
+
+        
+        /**
+         * @param {string} modalName
+         */
+        toggle(modalName){
+            if (this.views[modalName].state) {
+                this.views[modalName].state=false
+            }
+            else{
+                this.views[modalName].state = true;
+            }
+        },
+
+        /**
+         * 
+         * @param {string} key
+         * @returns {string}
+         */
+        getViewNameFromKey(key){
+            let retVal = '';
+            const matchingViews = Object.entries(this.views)
+                .filter(([name,obj])=>obj.hotkeys.includes(key))
+                .map(([k,v])=>k);this
+            if (matchingViews.length > 0){
+                retVal = matchingViews[0]
+            }
+            
+            return retVal;
+        },
+        reset(lookup=true){
+            for (const view of Object.keys(this.views)){
+                this.views[view].state = false;
+            }
+            if (lookup){
+                this.views.lookup.state=lookup
+            }
+        },
+
+        /**
+         * 
+         * @param {string} viewName
+         * @returns {boolean}
+         */
+        isVisible(viewName){
+            let retVal = false;
+            const view = this.views[viewName];
+            if(view){
+                retVal = view.state;
+            }
+            return retVal;
+        },
+        /**
+         * @returns {string[]}
+        */
+        getVisible(){
+            return Object.entries(this.views).filter(([viewName,obj])=>obj.state).map(([k,v])=>k);
+        }
+
+    });
+
+    function onkeydown(event){
+        if(!textAreaFocused){
+            const matchedView=viewStates.getViewNameFromKey(event.key);
+            if (matchedView) {
+                const visibles=viewStates.getVisible().filter((name)=>name!=matchedView && name !='lookup');     
+                if (!visibles.length){
+                    
+                    if (matchedView){
+                        viewStates.toggle(matchedView);
+                    }
+                }  
+            }
+             
+        }
+    }
+
+
+    let textAreaFocused=$state(false);
+
+    function textAreaFocus(event){
+        textAreaFocused=true;
+    }
+    function textAreaBlur(event){
+        textAreaFocused=false;
+    }
+  $inspect("viewSTates:", viewStates, "viewStates.views.words.state", viewStates.views.words.state)  
+//$inspect("filteredPericopes", filteredPericopes, "\nfilteredPerGroups", filteredPerGroups, "perGroups:", perGroups);
   //$inspect("lemmasByID", lemmasByID,"unselectedLexes:", unselectedLexes,"unselectedLexPlainArray:",unselectedLexPlainArray,"bestMatchedLexes",bestMatchedLexes)
 </script>
 <style>
@@ -436,7 +534,7 @@ $inspect("filteredPericopes", filteredPericopes, "\nfilteredPerGroups", filtered
     }
 
 </style>
-
+<svelte:window {onkeydown}/>
 <div class="self-center text-center sticky top-0 bg-white z-40">
 
     {#if !landingPage}
@@ -454,12 +552,13 @@ $inspect("filteredPericopes", filteredPericopes, "\nfilteredPerGroups", filtered
         class="menu  dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow text-left ">
 
       {#if alandPericopeNums && alandPericopeNums.length}
-      <li><ButtonSelect bind:selected={showViewOptions} buttonText="☰ View Options"/></li>
+      <li><ButtonSelect bind:selected={viewStates.views.view.state} buttonText="☰ View Options"/></li>
 
      {#if dataReady}
      
-       <li> <ButtonSelect buttonText="☰ Jump to    ↓" bind:selected={showSectionLinks}/></li>       
-        <li><ButtonSelect bind:selected={showLexemeHighlights} buttonText="☰ Words" /></li>
+       <li> <ButtonSelect buttonText="☰ Jump to    ↓" bind:selected={viewStates.views.sections.state}/></li>       
+        <li><ButtonSelect bind:selected={viewStates.views.words.state} buttonText="☰ Words" /></li>
+        
             
         
          
@@ -474,12 +573,13 @@ $inspect("filteredPericopes", filteredPericopes, "\nfilteredPerGroups", filtered
         <span class="sm:hidden inline">Synopsis</span></a>
        </h1>    
      <ul class="bg-white menu menu-horizontal ">
-        <li>
-            <ButtonSelect buttonText="ⓘ" 
-       buttonStyle="btn btn-xs btn-ghost" bind:selected={showInfoModal}/>
+        <li><ButtonSelect buttonText="i" 
+       buttonStyle="btn btn-xs  btn-circle btn-ghost  p-0" bind:selected={viewStates.views.info.state}/></li>
+       <li><ButtonSelect buttonText="?" buttonStyle="btn btn-xs btn-circle btn-ghost p-0" bind:selected={viewStates.views.help.state}/>
         </li>
       <li >
-        <ButtonSelect bind:selected={showLookupPanel} buttonText="" buttonStyle="btn btn-xs p-1 m-1" >
+        <ButtonSelect bind:selected={viewStates.views.lookup.state} buttonText="" 
+        buttonStyle="btn btn-xs btn-circle btn-ghost p-0" >
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3">
   <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
 </svg>
@@ -495,22 +595,23 @@ $inspect("filteredPericopes", filteredPericopes, "\nfilteredPerGroups", filtered
         <h1 class="text-center inline"> 
         <a href="/" data-sveltekit-reload><span class="hidden lg:inline">NT Gospel Synopsis Viewer</span>
         <span class="lg:hidden inline">NT Synopsis</span></a>
-    </h1>&nbsp;<ButtonSelect buttonText="ⓘ" 
-       buttonStyle="btn btn-sm btn-ghost outline-0 border-0" bind:selected={showInfoModal}/>
+    </h1>&nbsp;<ButtonSelect buttonText="i" 
+       buttonStyle="btn btn-xs  btn-circle btn-ghost  p-0" bind:selected={viewStates.views.info.state}/>
+       <ButtonSelect buttonText="?" buttonStyle="btn btn-xs btn-circle btn-ghost p-0" bind:selected={viewStates.views.help.state}/>
     </div> 
     <ul class="bg-white menu menu-horizontal ">
         
       <li >
-        <ButtonSelect bind:selected={showLookupPanel} buttonText="☰ Lookup" buttonStyle="btn"/>
+        <ButtonSelect bind:selected={viewStates.views.lookup.state} buttonText="☰ Lookup" buttonStyle="btn"/>
       </li>
 
       {#if alandPericopeNums && alandPericopeNums.length}
-      <li><ButtonSelect bind:selected={showViewOptions} buttonText="☰ View Options"/></li>
+      <li><ButtonSelect bind:selected={viewStates.views.view.state} buttonText="☰ View Options"/></li>
 
      {#if dataReady}
      
-       <li> <ButtonSelect buttonText="☰ Jump to    ↓" bind:selected={showSectionLinks}/></li>       
-        <li><ButtonSelect bind:selected={showLexemeHighlights} buttonText="☰ Words" /></li>
+       <li> <ButtonSelect buttonText="☰ Jump to section ↓" bind:selected={viewStates.views.sections.state}/></li>       
+        <li><ButtonSelect bind:selected={viewStates.views.words.state} buttonText="☰ Words" /></li>
             
         
          
@@ -550,11 +651,15 @@ $inspect("filteredPericopes", filteredPericopes, "\nfilteredPerGroups", filtered
     
 
 {/if}
-{#if showLookupPanel}
+{#if viewStates.views.lookup.state}
 
 <div id="search-panel" class="text-center ">
      Choose One:
-            <h2 class="cursor-default">Enter References</h2><div class="inline-block mb-1"><textarea id="refarea" class="inline-block align-middle" rows="1" bind:value={refAreaText}></textarea>
+            <h2 class="cursor-default">Enter References</h2><div class="inline-block mb-1">
+                <textarea id="refarea" class="inline-block align-middle" 
+                rows="1" bind:value={refAreaText}
+                onfocus={textAreaFocus} onblur={textAreaBlur}
+                ></textarea>
     <button onclick={lookupShowNtParallels} class="btn btn-primary inline-block ">Look up!</button></div>
              
                 
@@ -599,7 +704,7 @@ $inspect("filteredPericopes", filteredPericopes, "\nfilteredPerGroups", filtered
                     </div>
                 <div class="float-right mr-2 break-after-all">
                     <a href="" class="" title="Jump to section"
-                    onclick={()=>{showSectionLinks=true}}><BulletsIcons height={20} width={20}/></a>
+                    onclick={()=>{viewStates.views.sections.state=true}}><BulletsIcons height={20} width={20}/></a>
                     {#if index > 0}
                     <a href="#section-{filteredPerGroups[index-1].id}"
                     title="Previous"><ArrowUp height={20} width={20}/></a>{/if}
@@ -614,7 +719,8 @@ $inspect("filteredPericopes", filteredPericopes, "\nfilteredPerGroups", filtered
                 <br class="break-all"/>
                 <div>
                     <ParallelTextSection parGroup={group} focus={focused}
-                    wordClick={toggleLex} {showUnique} uniqueStyle={showUnique ? uniqueStyle : ''} classFunc={getLexClasses}/>
+                    wordClick={toggleLex} showUnique={viewStates.views.unique.state} 
+                    uniqueStyle={viewStates.views.unique.state ? uniqueStyle : ''} classFunc={getLexClasses}/>
                 </div>
                     <hr class="mb-2"/>
                 {/each}
@@ -631,8 +737,8 @@ $inspect("filteredPericopes", filteredPericopes, "\nfilteredPerGroups", filtered
     
     {:else}
         <div class="text-center"><i class="m-auto">Results will show up here. 
-            {#if showLookupPanel ==false}<a class="link hover:text-blue-700" 
-            href="#" onclick={()=>{showLookupPanel=true}}>Search for a text or select a section.</a>
+            {#if viewStates.views.lookup.state ==false}<a class="link hover:text-blue-700" 
+            href="#" onclick={()=>{viewStates.views.lookup.state=true}}>Search for a text or select a section.</a>
             {:else}
                 Search for a text or select a section above.
             {/if}
@@ -644,24 +750,25 @@ $inspect("filteredPericopes", filteredPericopes, "\nfilteredPerGroups", filtered
       © Fr. Christopher Brannan, O.P., 2025.  For more information about the project and its data sources, visit the <a href="https://github.com/cbop-dev/synoptic-viewer" target="_blank" class="link">github project page</a>.
     
 </div>
-
-<Modal2 bind:showModal={showSectionLinks}>
+{#if dataReady}
+<Modal2 bind:showModal={viewStates.views.sections.state}>
             <div id="results-navigation"  class=" text-left">
             <h1>Search Results Navigation</h1>
                     <ul>
             {#each filteredPericopes as section, index}
             {@const pericope=gospelParallels.alandSynopsis.lookupPericope(section)}
-            <li class="m-1 p-1 "><h3><a href="#section-{section}" onclick={()=>{showSectionLinks=false}}><b>{section}. {pericope.title}</b> 
+            <li class="m-1 p-1 "><h3><a href="#section-{section}" 
+                onclick={()=>{viewStates.views.sections.state=false}}><b>{section}. {pericope.title}</b> 
                 <i>({gospelParallels.getAlandPericopeRefs(section).join("; ")})</i></a></h3></li>
             {/each}
                 </ul>           
             </div>
 </Modal2>
-
-<Modal2 bind:showModal={showLexemeHighlights}>
+{/if}
+<Modal2 bind:showModal={viewStates.views.words.state}>
     <div class="max-w-full block text-center">
                 <h1>Unique Lexemes</h1>
-            <ButtonSelect bind:selected={showUnique} buttonText="Outline"/>
+            <ButtonSelect bind:selected={viewStates.views.unique.state} buttonText="Outline"/>
             <hr/>
             <h1>Highlighted Lexemes</h1>
             {#if selectedLexes.length}
@@ -720,7 +827,7 @@ $inspect("filteredPericopes", filteredPericopes, "\nfilteredPerGroups", filtered
             </div>
 </Modal2>
 
-<Modal2 bind:showModal={showViewOptions}>
+<Modal2 bind:showModal={viewStates.views.view.state}>
     <div class="text-center">
      <h2>Select Primary Gospel for Viewing:</h2>
                 <select bind:value={selectedGospelIndex}>
@@ -753,7 +860,7 @@ $inspect("filteredPericopes", filteredPericopes, "\nfilteredPerGroups", filtered
 </div>
         </Modal2>
 
-<Modal2 bind:showModal={showInfoModal}>
+<Modal2 bind:showModal={viewStates.views.info.state}>
     <div class="text-left m-auto inline">
     <h2 >NT Gospel Synopsis Viewer</h2> <hr/>
             Based on Kurt Aland's <i>Synopsis Quattuor Evangeliorum</i>, using Nestle's 1904 edition of the <i>Greek New Testament.</i><br/>
@@ -762,4 +869,21 @@ $inspect("filteredPericopes", filteredPericopes, "\nfilteredPerGroups", filtered
         Web application created by Fr. Christopher Brannan, O.P. For more information about the project and its data sources, visit the <a href="https://github.com/cbop-dev/synoptic-viewer" target="_blank">github project page</a>.
     </div>
     <div class="btn-sm"></div>
+</Modal2>
+<Modal2 bind:showModal={viewStates.views.help.state} title="Help">
+    <div class="m-auto  items-center text-center ">
+    <h2 class="inline text-center ">Hotkeys</h2>
+    <table class="table-auto self-center m-auto text-left "><tbody>
+        <tr class="border-0  border-b border-collapse border-gray-200" ><th>Key</th><th>Function</th></tr>
+{#each Object.entries(viewStates.views) as [theViewName,theViewObj]}
+    
+    <tr>
+        <td class="p-2">{theViewObj.hotkeys.map((k)=>"["+k+"]").join(",")} </td>
+        <td class="p-2">{theViewObj.description}</td>
+    </tr>
+{/each}
+</tbody>
+    </table>
+    </div>
+
 </Modal2>

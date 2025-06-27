@@ -27,56 +27,68 @@
         classFunc=(id)=>'',
     } = $props();
 
+  
     /**
-     * @type {{focused: ParallelText|null, cols: ParallelText[]}} colData
+     * @type {{focused: boolean, cols: ParallelText[], focusIndex: number}} colData
      */
     let colData = $derived.by(()=>{
 
         /**
-         * @type {ParallelText|null} focused
+         * @type {boolean} focused
          */
-        let focused  = null;
+        let focused  = false;
+
+        let focusIndex=0;
+        /**
+         * @type {string[]} bgClasses
+         */
+       // let bgClasses=[];
         /**
          * @type {ParallelText[]} cols
          */
-        let cols = [];
+        let cols = [parGroup.matt, parGroup.mark,parGroup.luke,parGroup.john];
         if (focus==gospels.names.MATTHEW){
             if (parGroup.matt.textRefs.length){
-                focused = parGroup.matt;
-                cols = [parGroup.mark,parGroup.luke,parGroup.john];
-
+                focusIndex = 0;
+                focused=true;            
             }
             
         }
         else if (focus==gospels.names.MARK){
               if (parGroup.mark.textRefs.length){
-                focused = parGroup.mark;
-                cols = [parGroup.matt,parGroup.luke,parGroup.john];
+                 focusIndex = 1;
+                    focused=true; 
+               // bgClasses=['mark','matt','luke','john'];
             }
         }
         else if (focus==gospels.names.LUKE){
               if (parGroup.luke.textRefs.length){
-                focused = parGroup.luke;
-                cols = [parGroup.matt,parGroup.mark,parGroup.john]
+                focusIndex = 2;
+                focused=true; 
             }
         }
         else if (focus==gospels.names.JOHN){
               if (parGroup.john.textRefs.length){
-                focused = parGroup.john;
-                cols = [parGroup.matt,parGroup.mark,parGroup.luke]
+                focusIndex = 3;
+                focused=true; 
             }
         }
-        else{
-            cols = [parGroup.matt,parGroup.mark,parGroup.luke,parGroup.john]
-        }
-        return {focused: focused, cols: cols.filter((o)=>o.textRefs.length)};
+       
+
+        //const colsBooks=getNonEmptyGospelColsAndBgClasses(cols)
+        return {focused: focused, cols: cols, focusIndex:focusIndex};
 
     });
 
+
+
+    
+
     //let colData =$derived.by([parGroup.matt, parGroup.mark, parGroup.luke, parGroup.john].filter((o)=>o.textRefs.length));
     let otherData= $derived(parGroup.other?.textRefs?.length ? parGroup.other : null);
-    let columnStyle = $derived(colData.cols.length ? "!grid-cols-"+colData.cols.length : 'grid-cols-3');
-    let numCols=$derived(colData.cols.length ? colData.cols.length : 1)
+    let numCols=$derived(colData.cols.filter((col)=>col.textRefs && col.textRefs.length).length)
+    let columnStyle = $derived(numCols ? "!grid-cols-"+numCols : 'grid-cols-3');
+    
   //  let columnStyle = $derived("columns-5");
     //let columns=$derived(texts.length && texts.length < 4 ? texts.length : 3);
 
@@ -94,10 +106,30 @@ function isUnique(wordid, uniqueSet){
     return retVal;
 }
 
-$inspect("ParTexts, focus:", focus)
+//$inspect("ParTexts, focus:", focus)
+//$inspect("numCols", numCols, "colData:", colData)
 </script>
 <style>
     @reference "tailwindcss";
+    .Matt {
+        @apply bg-red-50 border-red-900 border-4;
+    }
+
+    .Mark {
+        @apply bg-lime-50 border-lime-900 border-4;
+    }
+
+    .Luke{
+        @apply bg-sky-50 border-sky-900 border-4;
+    }
+
+    .John{
+        @apply bg-violet-50 border-violet-900 border-4;
+    }
+    
+    .other{
+        /*@apply bg-base-200;*/
+    }
     .lex-unique{
         @apply outline-4 pl-0.5 mr-0.5 ;
     }
@@ -120,7 +152,7 @@ $inspect("ParTexts, focus:", focus)
         
     }
 </style>
-{#snippet showText(textRef,unique)}
+{#snippet showText(textRef,unique,numCols)}
     <b>[{textRef.reference}]</b>: 
                 {#if textRef.words && textRef.words.length}
                     {#each textRef.words as verseWords}
@@ -139,7 +171,7 @@ $inspect("ParTexts, focus:", focus)
                     <i class="text-sm">(Not found in Nestle 1904)</i>
                 {/if}
 {/snippet}
-{#if focus==''}
+{#if !focus}
     <div 
     class="grid  
     {numCols >=2 ? "sm:grid-cols-2" : ''}
@@ -151,32 +183,34 @@ $inspect("ParTexts, focus:", focus)
     } grid-cols-1 text-2xl">
     
         {#each colData.cols as col, index}
-        <div class="rounded-box bg-base-200 m-1 p-1 gospel-column-{index}">
-        {#if col.textRefs.length}
-        
+
+        {#if col.textRefs && col.textRefs.length}
+            <div class="rounded-box  {Object.values(gospels.abbreviations)[index]} m-1 p-2 gospel-column-{index}">
+            {#if col.textRefs.length}
             
-            {#each col.textRefs as textRef, index2}
-            {@const unique = (showUnique && colData.cols.length > 1)? col.unique : null}
-                {#if index2 > 0}<br/>{/if}
-                <div class="text-left">
-                    
-                {@render showText(textRef,unique )}
-                 </div>
-                <!--<hr class='border-accent-content'/> -->
-            {/each}
+                
+                {#each col.textRefs as textRef, index2}
+                {@const unique = (showUnique && colData.cols.length > 1)? col.unique : null}
+                    {#if index2 > 0}<br/>{/if}
+                    <div class="text-left">
+                        
+                    {@render showText(textRef,unique )}
+                    </div>
+                    <!--<hr class='border-accent-content'/> -->
+                {/each}
+                
             
+            {/if}
+            </div>
         
+                
         {/if}
-        </div>
-    
-            
-        
         {/each}
 
 
     </div>
     {#if otherData}
-    <div class="mt-2 p-1">
+    <div class="mt-2 p-2">
         {#each otherData.textRefs as textRef, index}
                 
                 <div class="rounded-box bg-base-200 inline-block m-1 text-left">
@@ -185,35 +219,37 @@ $inspect("ParTexts, focus:", focus)
     </div>
     {/if}
 {:else if colData.focused}<!--focusing on one gospel:-->
-<div class="grid sm:!grid-cols-2 gap-1 grid-cols-1">
-     <div class="rounded-box bg-blue-300  text-3xl gospel-column-0">
-        {#each colData.focused.textRefs as textRef, index}
+<div class="grid {numCols > 1 ? 'sm:!grid-cols-2' :''} gap-1 grid-cols-1">
+     <div class="rounded-box   text-3xl gospel-column-0">
+        {#each colData.cols[colData.focusIndex].textRefs as textRef, index}
         {@const unique = (showUnique && colData.cols.length > 0)? colData.focused.unique : null}
-        <div class="rounded-box  inline-block m-1 bg-blue-100 text-left">
+        <div class="rounded-box  inline-block p-2 m-1 {Object.values(gospels.abbreviations)[colData.focusIndex]} text-left">
         {@render showText(textRef,unique)}
         </div>
         {/each}
      </div>
+     {#if numCols >1}
      <div class="text-2xl gospel-column-unfocused">
         {#each colData.cols as col,index}
-        <div class="rounded-box bg-base-200 m-1 text-left gospel-column-{index+1}">
+        {#if index!=colData.focusIndex}
         {#if col.textRefs.length}
         
-            
+             <div class="rounded-box {Object.values(gospels.abbreviations)[index]} m-1 text-left gospel-column-{index+1} p-2">
+       
             {#each col.textRefs as textRef, index}
                 {#if index > 0}<br/>{/if}
                 <div >
                 {@render showText(textRef,col.unique)}
-            </div>
+                </div>
                 <!--<hr class='border-accent-content'/> -->
             {/each}
             
-        
+            </div>
         {/if}
-        </div>
+        
     
             
-        
+        {/if}
         {/each}
         {#if otherData}
         <hr/>
@@ -221,11 +257,13 @@ $inspect("ParTexts, focus:", focus)
         {#each otherData.textRefs as textRef, index}
                 
                 <div class="rounded-box bg-base-200 inline-block m-1 text-left">
-                <b>[{textRef.reference}]</b>: {textRef.text}</div>
+                {@render showText(textRef)}
+                </div>
             {/each}
     </div>
     {/if}
      </div>
+     {/if}
 </div>
 {:else}
 <!--Nothing!-->  

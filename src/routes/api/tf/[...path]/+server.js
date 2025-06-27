@@ -7,26 +7,27 @@ export async function GET({ url, params }) {
 	const uri = params.path;
 	const theParams=url.searchParams.toString();
 	//mylog("api/tf uri = " + uri)
-	
+	//mylog("api route received request from " + url.origin +"; hostname = " + url.hostname,true);
 	const fetchUrl=tfserverurl+"/"+uri+ (theParams ? '?' +theParams : '');
-	mylog('api server, fetch('+fetchUrl+")")
+	//mylog('api server, fetch('+fetchUrl+")")
 	const res = await fetch(fetchUrl);
 
 	return res;
 	//return json({params: params, url: fetchUrl});
 }
 //TODO: test this!
-export async function POST({ request, params, cookies }) {
+export async function POST({ url, request, params, cookies }) {
 	//const { refs, sections,options } = await request.json();
-	mylog("/api/tf/ POST request: ");
-	mylog(request);
-	//mylog("/api/tf/ POST request.body: ");
+	//mylog("/api/tf/ POST request: ");
+	//mylog(request);
+	//mylog("api route received request from " + url.origin +"; hostname = " + url.hostname,true);
+	//mylog("/api/xxxxtf/ POST request.body: ");
 	//mylog(request.body);
 	//const theBody = await request.json();
-	const url =  tfserverurl+"/" + params.path;
+	const fetchurl =  tfserverurl+"/" + params.path;
 	const theBody = await request.json();
-	mylog(" POST request body to forward: " + JSON.stringify(theBody));
-	const response = await fetch(url, {
+	//mylog(" POST request body to forward: " + JSON.stringify(theBody));
+	const response = await fetch(fetchurl, {
 		method: "post",
 		headers: {
 			'Accept': 'application/json',
