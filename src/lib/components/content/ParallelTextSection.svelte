@@ -190,7 +190,7 @@ function isUnique(wordid, uniqueSet){
             
                 
                 {#each col.textRefs as textRef, index2}
-                {@const unique = (showUnique && colData.cols.length > 1)? col.unique : null}
+                {@const unique = (showUnique && numCols > 1)? col.unique : null}
                     {#if index2 > 0}<br/>{/if}
                     <div class="text-left">
                         
@@ -222,7 +222,7 @@ function isUnique(wordid, uniqueSet){
 <div class="grid {numCols > 1 ? 'sm:!grid-cols-2' :''} gap-1 grid-cols-1">
      <div class="rounded-box   text-3xl gospel-column-0">
         {#each colData.cols[colData.focusIndex].textRefs as textRef, index}
-        {@const unique = (showUnique && colData.cols.length > 0)? colData.focused.unique : null}
+        {@const unique = (showUnique && numCols > 0)? colData.focused.unique : null}
         <div class="rounded-box  inline-block p-2 m-1 {Object.values(gospels.abbreviations)[colData.focusIndex]} text-left">
         {@render showText(textRef,unique)}
         </div>

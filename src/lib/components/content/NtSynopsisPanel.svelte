@@ -726,7 +726,7 @@
                 {/each}
             {:else}
                 (No results. Try <a href="" data-sveltekit-reload>another search</a>{#if hideNonPrimary || focusOn || hideSolos }, 
-                or change the <a href="" onclick={toggleViewOptionsModal}>View Options</a>{/if}.)
+                or change the <a href="" onclick={()=>{viewStates.toggle('view')}}>View Options</a>{/if}.)
             {/if}
         {:else}
         <h3><i>Loading...</i></h3>
