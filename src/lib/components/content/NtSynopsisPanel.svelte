@@ -405,13 +405,13 @@
 
     const viewStates=$state({
         views:{
-            view: { description:  "View Options", hotkeys:['v'], state:false},
-            lookup: { description:  "Lookup passage(s) or select section", hotkeys:['l', 's'], state:true},
-            words: {description:  "Lexeme/Word Options", hotkeys:['w'], state:false},
-            info: { description:  "Website and project information.", hotkeys:['i'], state:false},
-            unique: { description:  "Toggle Unique Lexeme color outlining", hotkeys:['u'], state:false},
-            help: { description:  "Show help menu", hotkeys:['h', '?'], state:false},
-            sections: { description:  "Jump to a section", hotkeys:['j'], state:false},  
+            view: { description:  "View Options", hotkeys:['v'], state:false,modal:true},
+            lookup: { description:  "Lookup passage(s) or select section", hotkeys:['l', 's'], state:true,modal:false},
+            words: {description:  "Lexeme/Word Options", hotkeys:['w'], state:false,modal:true},
+            info: { description:  "Website and project information.", hotkeys:['i'], state:false,modal:true},
+            unique: { description:  "Toggle Unique Lexeme color outlining", hotkeys:['u'], state:false,modal:false},
+            help: { description:  "Show help menu", hotkeys:['h', '?'], state:false,modal:true},
+            sections: { description:  "Jump to a section", hotkeys:['j'], state:false,modal:true},  
         },
 
         
@@ -478,8 +478,8 @@
         if(!textAreaFocused){
             const matchedView=viewStates.getViewNameFromKey(event.key);
             if (matchedView) {
-                const visibles=viewStates.getVisible().filter((name)=>name!=matchedView && name !='lookup');     
-                if (!visibles.length){
+                const modalVisibles=viewStates.getVisible().filter((name)=>name!=matchedView && (viewStates.views[name].modal));     
+                if (!modalVisibles.length){
                     
                     if (matchedView){
                         viewStates.toggle(matchedView);
@@ -499,7 +499,7 @@
     function textAreaBlur(event){
         textAreaFocused=false;
     }
-  $inspect("viewSTates:", viewStates, "viewStates.views.words.state", viewStates.views.words.state)  
+ //$inspect("viewSTates:", viewStates, "viewStates.views.words.state", viewStates.views.words.state)  
 //$inspect("filteredPericopes", filteredPericopes, "\nfilteredPerGroups", filteredPerGroups, "perGroups:", perGroups);
   //$inspect("lemmasByID", lemmasByID,"unselectedLexes:", unselectedLexes,"unselectedLexPlainArray:",unselectedLexPlainArray,"bestMatchedLexes",bestMatchedLexes)
 </script>
