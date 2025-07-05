@@ -5,32 +5,41 @@
 			showModal = $bindable(),
 			title='',
 			onclose=()=>{}, 
-			children
+			children,
+
 	} = $props();
 	let max=$state(false);
 	let dialog = $state();
+
+	function show(){
+		dialog.showModal();
+	}
 	$effect(() => {
-		if (showModal) dialog.showModal();
-        else
+		if (showModal) show();
+        else {
 			dialog.close();
+		}
+			
 	});
+
+
 	</script>
 	<style>
 		@reference "tailwindcss";
 		hr {
 			@apply border-slate-400 m-2;
 		}
+		
 	</style>
-	
+
+
 	<div class=" bg-gray-100"></div>
 	<dialog bind:this={dialog} class="modal max-w-full" 
 	class:modal-open={showModal}
 	onclose={() => {showModal = false}} 
-	
-	
-	
 	>
-	{#key max && showModal}
+
+	{#key max && showModal}	
 		<div class="modal-box {max ? "w-full max-w-full h-full " : "md:max-w-3/4"} max-w-full" data-theme="winter">
 		
 		<div class="absolute top-2 right-1">	<form method="dialog">
@@ -53,6 +62,7 @@
 			<hr/>
 			{/if}
 		</div>
+		
 			{@render children()}
 			
 	<hr />

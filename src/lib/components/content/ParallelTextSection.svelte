@@ -3,6 +3,7 @@
     import { GospelPericopeGroup, ParallelText ,Word, TextAndRef,VerseWords} from './parallelTexts.svelte';
     import {gospelParallels} from '@cbop-dev/aland-gospel-synopsis';
     import { ColorUtils } from '$lib/utils/color-utils';
+    import CopyText     from '../ui/CopyText.svelte';
     
     const gospels = gospelParallels.gospels;
     mylog("loading ParTextSecion Compon");
@@ -13,18 +14,16 @@
      * wordClick:function(number):void,
      * cssClassDict:Object,
      * showUnique:boolean
-     * uniqueStyle: string, // cssClasses to apply to unique lexemes; default, blank, thus no styling.
-     * classFunc:function(number):string
      * }}
      */
     let {
         parGroup = new GospelPericopeGroup(),
         focus = '',
-        uniqueStyle='',
+
         showUnique=false,
         wordClick=(id)=>{},
         cssClassDict={},
-        classFunc=(id)=>'',
+        
     } = $props();
 
   
@@ -105,7 +104,9 @@ function isUnique(wordid, uniqueSet){
       //  mylog("IsUnique("+wordid+", "+Array.from(uniqueSet).join(',')+")--> "+retVal, true)
     return retVal;
 }
-
+function getText(words){
+    return words.reduce((a,b)=>a ? a +' '+b.word : b.word, '')
+}
 //$inspect("ParTexts, focus:", focus)
 //$inspect("numCols", numCols, "colData:", colData)
 </script>
@@ -152,15 +153,25 @@ function isUnique(wordid, uniqueSet){
         
     }
 </style>
-{#snippet showText(textRef,unique,numCols)}
+{#snippet showText(textRef,unique,numCols,copyButton=true)}
     <b>[{textRef.reference}]</b>: 
                 {#if textRef.words && textRef.words.length}
                     {#each textRef.words as verseWords}
-                        ({verseWords.verse})
+                        {#if copyButton}
+                            <CopyText getTextFunc={()=>getText(verseWords.words)}
+                            linkText={'(' + verseWords.verse+')'} 
+                            showButton={false}
+                            tooltip={'Copy verse '+verseWords.verse}/>
+                         {:else}
+                            ({verseWords.verse})
+                        {/if}
                         {#each verseWords.words as word}
-                        {@const  uniqueClass  = (showUnique && unique && isUnique(word.id,unique)) ? 
-                        'lex-unique ': ''}
-                        <span class="m-0 {classFunc(word.id)} {uniqueClass} " 
+                       
+                        
+                        <span 
+                        class={["m-0 word", "lex-" + word.id, 
+                            showUnique && unique && isUnique(word.id,unique) && 'lex-unique', 
+                            cssClassDict[word.id]]} 
                         onclick={()=>{wordClick(word.id)}}>{word.word}{'  '}</span>
                         {/each}
                     {/each}
@@ -170,6 +181,9 @@ function isUnique(wordid, uniqueSet){
                 {:else}
                     <i class="text-sm">(Not found in Nestle 1904)</i>
                 {/if}
+        {#if copyButton && textRef.text}
+            <CopyText copyText={textRef.text} tooltip='Copy pericope'/>
+        {/if}
 {/snippet}
 {#if !focus}
     <div 

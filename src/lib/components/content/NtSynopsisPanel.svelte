@@ -21,8 +21,11 @@
     import ArrowDown from '../ui/icons/arrow-down.svelte';
     import ArrowTop from '../ui/icons/arrow-top-icon.svelte';
     import BulletsIcons from '../ui/icons/bullets-outline.svelte';
-	
+	//import { generateHslColorGradient } from '../ui/chartUtils';
   
+    let {
+        allowEverything=false
+    }=$props();
     let fetching = $state(false);
     let expecting = $state(0);
     let numReady=$state(0);
@@ -205,7 +208,20 @@
      * @type {Object<number,string>} lexClasses
      */
     
-    let lexClasses=$derived.by(()=>{// id->css color (e.g., "#eee")
+
+   let lexClasses2={}
+   
+   /*$derived.by(()=>{
+        const colors = generateHslColorGradient(selectedLexes.length);
+        const classes={}
+        for (const [index, id] of selectedLexes.entries()){
+            classes[id]=colors[index];
+        }
+        return classes;
+        
+   });*/
+
+    let lexClasses= $derived.by(()=>{// id->css color (e.g., "#eee")
         const ret = {}
         if(dataReady && fetchedTextsResponse.lexemes) {
             //mylog("building lexClasses...",true)
@@ -475,10 +491,10 @@
     });
 
     function onkeydown(event){
-        if(!textAreaFocused){
+        if(!textAreaFocused ){
             const matchedView=viewStates.getViewNameFromKey(event.key);
             if (matchedView) {
-                const modalVisibles=viewStates.getVisible().filter((name)=>name!=matchedView && (viewStates.views[name].modal));     
+                const modalVisibles=viewStates.getVisible().filter((name)=>(viewStates.views[name].modal));     
                 if (!modalVisibles.length){
                     
                     if (matchedView){
@@ -499,10 +515,7 @@
     function textAreaBlur(event){
         textAreaFocused=false;
     }
- //$inspect("viewSTates:", viewStates, "viewStates.views.words.state", viewStates.views.words.state)  
-//$inspect("filteredPericopes", filteredPericopes, "\nfilteredPerGroups", filteredPerGroups, "perGroups:", perGroups);
-  //$inspect("lemmasByID", lemmasByID,"unselectedLexes:", unselectedLexes,"unselectedLexPlainArray:",unselectedLexPlainArray,"bestMatchedLexes",bestMatchedLexes)
-</script>
+    </script>
 <style>
     @reference "tailwindcss";
 
@@ -535,6 +548,7 @@
 
 </style>
 <svelte:window {onkeydown}/>
+
 <div class="self-center text-center sticky top-0 bg-white z-40">
 
     {#if !landingPage}
@@ -678,9 +692,11 @@
              <option value={[per.pericope]} >{per.pericope}: {per.title}</option>
             {/if}
             {/each}
+            
+            {#if allowEverything}
             <hr/>
             <option value={gospelParallels.alandSynopsis.pericopes.map((p)=>p.pericope)}>Everything!!</option>
-
+            {/if}
         </select>
         <button onclick={selectSection} class="align-top btn btn-primary inline-block m-1">Go!</button>
 </div>
@@ -720,7 +736,8 @@
                 <div>
                     <ParallelTextSection parGroup={group} focus={focused}
                     wordClick={toggleLex} showUnique={viewStates.views.unique.state} 
-                    uniqueStyle={viewStates.views.unique.state ? uniqueStyle : ''} classFunc={getLexClasses}/>
+                    cssClassDict={lexClasses}
+                    />
                 </div>
                     <hr class="mb-2"/>
                 {/each}

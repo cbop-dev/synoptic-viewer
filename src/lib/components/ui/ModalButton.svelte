@@ -53,10 +53,10 @@
 		{@render children?.()}
 		<hr />
 		{/if}
-		<!-- svelte-ignore a11y_autofocus -->
+		
 		<div class="items-center flex">
-			{#if scrollHeight > modalHeight+1} <button class="btn inline m-auto" autofocus onclick={() => box.scrollIntoView()}>Back to Top</button>{/if}
-			<button class="btn inline m-auto" autofocus onclick={() => dialog.close()}>Close</button>
+			{#if scrollHeight > modalHeight+1} <button class="btn inline m-auto"  onclick={() => box.scrollIntoView()}>Back to Top</button>{/if}
+			<button class="btn inline m-auto"  onclick={() => dialog.close()}>Close</button>
         </div>
 	</div>
 </dialog>
