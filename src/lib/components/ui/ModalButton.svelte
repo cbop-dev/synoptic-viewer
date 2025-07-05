@@ -3,7 +3,8 @@
 
 
 	let { buttonText='button', title='', description='', 
-			header=null, children=null, buttonStyle='', onclick=()=>{},
+			header=null, children=null, textSize='',
+			buttonStyle='btn  btn-primary font-normal m-1', buttonType='btn-neutral',onclick=()=>{},
 			showModal = $bindable(false)
 
 		} = $props();
@@ -22,7 +23,9 @@
 </script>
 
 <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
-<Button {buttonText} buttonStyle={buttonStyle ? buttonStyle : 'btn  btn-primary font-normal m-1'} onclick={()=>{onclick(); showModal = true;}} />
+<Button {buttonText} {buttonStyle} 
+	{buttonType} {textSize}
+onclick={()=>{onclick(); showModal = true;}} />
 
 <dialog
 	bind:this={dialog} bind:clientHeight={modalHeight}

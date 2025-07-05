@@ -12,7 +12,7 @@
    import Modal2 from '../ui/Modal2.svelte';
    import ModalButton from '../ui/ModalButton.svelte';
 	import Button from '../ui/Button.svelte';
-    import { untrack } from 'svelte';
+   // import { untrack } from 'svelte';
     import { ColorUtils } from '$lib/utils/color-utils';
 	import GreekFilterInput from '../ui/GreekFilterInput.svelte';
     import FilterInput from '../ui/FilterInput.svelte';
@@ -34,6 +34,7 @@
     let showSectionLinks=$state(false);
    let showViewOptions=$state(false);
    let showUnique = $state(false);
+   let showIdentical=$state(false);
    let uniqueStyle = "lex-uniques";
    let hideSolos = $state(false);
      let hideNonPrimarySolos = $state(false);
@@ -116,7 +117,7 @@
     /**buildPericopeRefsect|null} fetchedTextsResponse
     */
     let fetchedTextsResponse = $state(null);
-
+    let showLexOptionsInfo = $state(false);
     function parsePericopeNums(){
         const refAreaRefs = refAreaText.trim().replaceAll(/\n+/g,";").replaceAll(/;+/g,";");
 
@@ -330,7 +331,7 @@
                     
                 }
             }
-            group.markUniqueWords();        
+            group.markUniqueAndIdenticalWords();        
         }
         mylog("DONE! Populated the GroupTexts()!")
         mylog("^==================================^")
@@ -427,7 +428,9 @@
             info: { description:  "Website and project information.", hotkeys:['i'], state:false,modal:true},
             unique: { description:  "Toggle Unique Lexeme color outlining", hotkeys:['u'], state:false,modal:false},
             help: { description:  "Show help menu", hotkeys:['h', '?'], state:false,modal:true},
-            sections: { description:  "Jump to a section", hotkeys:['j'], state:false,modal:true},  
+            sections: { description:  "Jump to a section", hotkeys:['j'], state:false,modal:true},
+            identical: { description:  "Show (bold & underline) morphologically identical words shared by different gospels in a parallel group ",
+             hotkeys:['m'], state:false,modal:false},  
         },
 
         
@@ -737,6 +740,7 @@
                     <ParallelTextSection parGroup={group} focus={focused}
                     wordClick={toggleLex} showUnique={viewStates.views.unique.state} 
                     cssClassDict={lexClasses}
+                    showIdentical={viewStates.views.identical.state}
                     />
                 </div>
                     <hr class="mb-2"/>
@@ -782,10 +786,36 @@
             </div>
 </Modal2>
 {/if}
+
 <Modal2 bind:showModal={viewStates.views.words.state}>
+    
     <div class="max-w-full block text-center">
-                <h1>Unique Lexemes</h1>
-            <ButtonSelect bind:selected={viewStates.views.unique.state} buttonText="Outline"/>
+                <h1>Unique or Identical Words:</h1>
+            <ButtonSelect bind:selected={viewStates.views.unique.state} buttonText="Outline Unique Lexemes"/>
+            
+            <ButtonSelect bind:selected={viewStates.views.identical.state} tooltip="Toggle Bold/underline setting for morphologically identical words." buttonText="Identical words."/>
+
+
+  <ButtonSelect buttonStyle="btn btn-neutral btn-outline btn-circle btn-xs p-0 m-0"
+            buttonText="?"
+            bind:selected={showLexOptionsInfo}/>
+            {#if showLexOptionsInfo}
+            <div class="md:max-w-3/4  self-center m-auto">
+                <h2 class="underline">Unique and Identical Words Options:</h2>
+                                        <div class="inline-block text-left">
+                <ul class="list-disc">
+                    <li>Enabling <b>"Outline Unique Lexemes"</b> will draw <span class="outline outline-blue-400">an outline</span> (one color per gospel) around each lexeme that is unique to a specific gospel, i.e., that shows up in only one column of a single parallel group.</li>
+                    <li>Enabling <b>"Identical words"</b> will <span class="font-bold underline">bold and underline</span> all morphologically identical words shared by at least two gospels in the same parallel group </li>
+                </ul>
+                </div>
+            </div>
+            {/if}
+
+
+ 
+
+            
+           
             <hr/>
             <h1>Highlighted Lexemes</h1>
             {#if selectedLexes.length}
@@ -888,8 +918,11 @@
     <div class="btn-sm"></div>
 </Modal2>
 <Modal2 bind:showModal={viewStates.views.help.state} title="Help">
+    
     <div class="m-auto  items-center text-center ">
-    <h2 class="inline text-center ">Hotkeys</h2>
+        
+    <h2 class="inline text-center ">Hotkeys: <i>The keyboard is your friend!</i></h2>
+    
     <table class="table-auto self-center m-auto text-left "><tbody>
         <tr class="border-0  border-b border-collapse border-gray-200" ><th>Key</th><th>Function</th></tr>
 {#each Object.entries(viewStates.views) as [theViewName,theViewObj]}

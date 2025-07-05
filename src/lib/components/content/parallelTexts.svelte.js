@@ -1,4 +1,5 @@
 import { mylog } from "$lib/env/env.js";
+import { GreekUtils } from "$lib/utils/greek-utils";
 export class Word{
     id=0;
     word='';
@@ -39,7 +40,7 @@ export class ParallelText {
      * @returns boolean 
      */
     isUnique(lexID){
-        mylog("checking if " +lexID +" is in ("+Array.from(this.unique).join(",")+")", true);
+        mylog("checking if " +lexID +" is in ("+Array.from(this.unique).join(",")+")");
         return this.unique.has(lexID);
     }
     /**
@@ -92,6 +93,9 @@ export class GospelPericopeGroupIndices {
     }
 
 }
+export function  stripWord(str){
+            return GreekUtils.removeDiacritics(str.replace(/[,. ·:;]/,""));
+}
 export class GospelPericopeGroup{
     title = $state('')
     id=$state(0);
@@ -102,16 +106,40 @@ export class GospelPericopeGroup{
     other = new ParallelText();
     lexemes=new Set();
     commonLexes=new Set();
-    markUniqueWords(){
-        
+    /**
+     * @type {string[]} matchingWords
+     */
+    matchingWords=[];
+
+    markUniqueAndIdenticalWords(){
+        /**
+         * @type {Object<string,Set<number>>} wordsBooks
+         */
+        const wordsBooks = {};//word:string => <set of book indexes in which word is found>
+
+        //const bookWords=[new Set(),new Set(),new Set(),new Set()];//array of words in [matt,mark,luke,john]
+        /**
+         * 
+         * @param {string} str 
+         * @returns 
+         */
+
         //this.wordIds=new Set()
-        for (const book of [this.matt,this.mark,this.luke,this.john]){
+        for (const [index,book] of [this.matt,this.mark,this.luke,this.john].entries()){
             for (const tR of book.textRefs){
                 for (const vW of tR.words){
                     for (const word of vW.words){
-
+                        
                         book.lexemes.add(word.id);
                         this.lexemes.add(word.id);
+                                                    
+                        //track identically matching words across gospels: 
+                        const theWord=stripWord(word.word);
+                        //bookWords[index].add(theWord);
+                        if (!wordsBooks[theWord])
+                            wordsBooks[theWord]=new Set([index]);
+                        else
+                            wordsBooks[theWord].add(index);
                     }
                 }
             }
@@ -125,18 +153,28 @@ export class GospelPericopeGroup{
             const otherBookIndexes= new Set([0,1,2,3]);
             otherBookIndexes.delete(index);
             let uniques = new Set(book.lexemes);
+            
             for (const otherBookI of otherBookIndexes){
                 mylog("doing difference of ");
                 uniques = uniques.difference(books[otherBookI].lexemes);
                 
             }    
             book.unique=uniques;
+
+            
+           
+
         }
 
+
         this.commonLexes=this.lexemes.difference(this.matt.unique.union(this.mark.unique).union(
-            this.luke.unique).union(this.john.unique));      
+            this.luke.unique).union(this.john.unique));
+        
+        this.matchingWords=Object.entries(wordsBooks).filter(([word,bookIndexSet])=>bookIndexSet.size>1)
+            .map(([word,bookIndexSet])=>word);
     }
+    
 }
 export default {
-    ParallelText, GospelPericopeGroup,TextAndRef,VerseWords,Word,GospelPericopeGroupIndices
+    ParallelText, GospelPericopeGroup,TextAndRef,VerseWords,Word,GospelPericopeGroupIndices,stripWord
 }

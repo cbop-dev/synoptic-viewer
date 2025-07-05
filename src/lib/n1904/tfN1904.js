@@ -360,7 +360,7 @@ export class TfServer{
             }   
 
             if(markUnique){
-                group.markUniqueWords();
+                group.markUniqueAndIdenticalWords();
                 
             }   
 

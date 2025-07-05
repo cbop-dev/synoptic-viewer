@@ -1,5 +1,5 @@
 <script>
-    /** @type {{ data: import('./$types').PageData }} */
+    import { browser, building, dev, version } from '$app/environment';
     import { mylog } from '$lib/env/env';
     let { data } = $props();
 
@@ -371,7 +371,7 @@ const roseGradient =[
    // $inspect("lexClasses:", lexClasses, "selectedLexes:", selectedLexes);
 </script>
 <h1>Hello World! Testing!</h1>
-
+<h2>Version:{version}</h2>
 <button onclick={getTexts} class="btn">Get POST Texts!</button>
 <button onclick={getText} class="btn">Get GET Text!</button>
 {#if texts.length}

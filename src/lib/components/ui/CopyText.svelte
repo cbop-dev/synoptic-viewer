@@ -5,7 +5,8 @@
         getTextFunc=null,
         tooltip='Copy',
         linkText='',
-        showButton=true
+        showButton=true,
+        btnSizeCssClass='btn-sm'
     } = $props();
 
     function copyToClipboard(){
@@ -15,7 +16,7 @@
         navigator.clipboard.writeText(theText);
     }
 </script>
-<button title={tooltip} onclick={copyToClipboard} class="btn btn-sm btn-ghost">
+<button title={tooltip} onclick={copyToClipboard} class={["btn btn-ghost p-0.5",btnSizeCssClass]}>
     {#if linkText}
     {linkText}
     {/if}

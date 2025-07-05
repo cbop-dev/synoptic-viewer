@@ -16,7 +16,7 @@
   let {
     buttonText = "Reusable Button",
     buttonType="btn-neutral",
-    buttonStyle = "btn base focus:outline-none focus:ring-4 m-1 p-1",
+    buttonStyle = "btn base rounded  focus:outline-none focus:ring-4 m-1 p-1",
     style='',
     textSize = "normalSize",
     ready = true,
@@ -47,6 +47,6 @@
   </style>
   
   <button  data-tip={tooltip} disabled={!ready} {onclick} 
-  class="{tooltip ? 'tooltip' : ''} {textSize} {buttonStyle} {buttonType} {buttonColors} rounded-xl shadow-xl {style}">
+  class="{tooltip ? 'tooltip' : ''} {textSize} {buttonStyle} {buttonType} {buttonColors} shadow-xl {style}">
     {buttonText}
   </button>

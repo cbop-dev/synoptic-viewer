@@ -1,6 +1,6 @@
 <script>
     import { mylog } from '$lib/env/env.js';
-    import { GospelPericopeGroup, ParallelText ,Word, TextAndRef,VerseWords} from './parallelTexts.svelte';
+    import { GospelPericopeGroup, ParallelText ,Word, TextAndRef,VerseWords,stripWord} from './parallelTexts.svelte';
     import {gospelParallels} from '@cbop-dev/aland-gospel-synopsis';
     import { ColorUtils } from '$lib/utils/color-utils';
     import CopyText     from '../ui/CopyText.svelte';
@@ -12,15 +12,16 @@
      * @type {{parGroup: GospelPericopeGroup,
      * focus:string,
      * wordClick:function(number):void,
+     * showIdentical:boolean,
      * cssClassDict:Object,
-     * showUnique:boolean
+     * showUnique:boolean,
      * }}
      */
     let {
         parGroup = new GospelPericopeGroup(),
         focus = '',
-
         showUnique=false,
+        showIdentical=true,
         wordClick=(id)=>{},
         cssClassDict={},
         
@@ -87,10 +88,8 @@
     let otherData= $derived(parGroup.other?.textRefs?.length ? parGroup.other : null);
     let numCols=$derived(colData.cols.filter((col)=>col.textRefs && col.textRefs.length).length)
     let columnStyle = $derived(numCols ? "!grid-cols-"+numCols : 'grid-cols-3');
-    
-  //  let columnStyle = $derived("columns-5");
-    //let columns=$derived(texts.length && texts.length < 4 ? texts.length : 3);
 
+   
 /**
  * 
  * @param {number} wordid
@@ -167,11 +166,12 @@ function getText(words){
                         {/if}
                         {#each verseWords.words as word}
                        
-                        
+                        {@const wordCssClass=cssClassDict[word.id]}
                         <span 
                         class={["m-0 word", "lex-" + word.id, 
                             showUnique && unique && isUnique(word.id,unique) && 'lex-unique', 
-                            cssClassDict[word.id]]} 
+                            wordCssClass,
+                            showIdentical && wordCssClass && parGroup.matchingWords.includes(stripWord(word.word)) && 'underline font-bold']} 
                         onclick={()=>{wordClick(word.id)}}>{word.word}{'  '}</span>
                         {/each}
                     {/each}
