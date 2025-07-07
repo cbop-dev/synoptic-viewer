@@ -238,7 +238,7 @@ function getText(words){
      <div class="rounded-box   text-3xl gospel-column-0">
         {#each colData.cols[colData.focusIndex].textRefs as textRef, index}
         
-        {@const unique = (showUnique && numCols > 0)? colData.cols[colData.focusIndex].unique : null}
+        {@const unique = (showUnique && numCols > 1)? colData.cols[colData.focusIndex].unique : null}
         <div class="rounded-box  inline-block p-2 m-1 {Object.values(gospels.abbreviations)[colData.focusIndex]} text-left">
         {@render showText(textRef,unique)}
         </div>
