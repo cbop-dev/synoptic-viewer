@@ -152,8 +152,18 @@ function getText(words){
         
     }
 </style>
+
 {#snippet showText(textRef,unique,numCols,copyButton=true)}
-    <b>[{textRef.reference}]</b>: 
+    <span class="font-bold">[{#if copyButton}
+        <CopyText copyText={textRef.reference} 
+        linkText={textRef.reference}
+        btnSizeCssClass="text-xl m-0 p-0 hover:link"
+        tooltip="Copy reference to clipboard."
+        showButton={false}
+        />
+        {:else}
+        {textRef.reference}
+    {/if}]</span>: 
                 {#if textRef.words && textRef.words.length}
                     {#each textRef.words as verseWords}
                         {#if copyButton}
