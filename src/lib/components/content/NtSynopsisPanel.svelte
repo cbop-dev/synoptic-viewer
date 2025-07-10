@@ -21,6 +21,7 @@
     import ArrowDown from '../ui/icons/arrow-down.svelte';
     import ArrowTop from '../ui/icons/arrow-top-icon.svelte';
     import BulletsIcons from '../ui/icons/bullets-outline.svelte';
+    import { findNextAnchor,findPrevAnchor, getAnchors} from '$lib/utils/ui-utils';
 	//import { generateHslColorGradient } from '../ui/chartUtils';
   
     let {
@@ -264,7 +265,7 @@
      */
     let otherMatchedLexes=$state([]);
 
-
+    
    async function fetchPostTextsBatch(){
     //todo: refactor in another .svelte.js file, then test
         fetchedTextsResponse = null;
@@ -493,6 +494,47 @@
 
     });
 
+    
+    function jumpToPrevSection(){
+        const nextId=findPrevAnchor()
+        if (nextId){
+            document.location=document.location.toString().split('#')[0]+'#'+nextId;
+        }
+    }
+
+
+    function jumpToFirstSection(){
+        const anchors = getAnchors();
+        if (anchors && anchors.length) {
+            document.location=document.location.toString().split('#')[0]+'#'+anchors[0].id;
+
+        }     
+        
+    }
+
+    function jumpToLastSection(){
+        const anchors = getAnchors();
+        if (anchors && anchors.length) {
+            document.location=document.location.toString().split('#')[0]+'#'+anchors[anchors.length-1].id;
+
+        }     
+        
+    }
+
+
+    function jumpToNextSection(){
+        const nextId=findNextAnchor()
+        if (nextId){
+            document.location=document.location.toString().split('#')[0]+'#'+nextId;
+        }
+    }
+    const hotkeys=[
+        {key: 'n', name:'Next Section',function: jumpToNextSection},
+        {key:'p',name:'Previous Section',function: jumpToPrevSection},
+        {key:'t',name:'Top/First Section',function: jumpToFirstSection},
+        {key:'b',name:'Bottom/Last Section',function: jumpToLastSection},
+         
+    ];
     function onkeydown(event){
         if(!textAreaFocused ){
             const matchedView=viewStates.getViewNameFromKey(event.key);
@@ -504,6 +546,12 @@
                         viewStates.toggle(matchedView);
                     }
                 }  
+            }
+            else{
+                const matchedHotkey=hotkeys.filter((o)=>o.key==event.key);
+                if (matchedHotkey.length){
+                    matchedHotkey[0].function();
+                }
             }
              
         }
@@ -534,7 +582,7 @@
     }
 
     .anchor{
-        @apply -mt-24 pt-24;
+        @apply md:-mt-30 md:pt-30 -mt-20 pt-20;
     }
 
 
@@ -930,6 +978,12 @@
     <tr>
         <td class="p-2">{theViewObj.hotkeys.map((k)=>"["+k+"]").join(",")} </td>
         <td class="p-2">{theViewObj.description}</td>
+    </tr>
+{/each}
+{#each hotkeys as hk}
+    <tr>
+        <td class="p-2">[{hk.key}] </td>
+        <td class="p-2">{hk.name}</td>
     </tr>
 {/each}
 </tbody>
