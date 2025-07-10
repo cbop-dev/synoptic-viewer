@@ -538,8 +538,9 @@
     function onkeydown(event){
         if(!textAreaFocused ){
             const matchedView=viewStates.getViewNameFromKey(event.key);
+            const modalVisibles=viewStates.getVisible().filter((name)=>(viewStates.views[name].modal)); 
             if (matchedView) {
-                const modalVisibles=viewStates.getVisible().filter((name)=>(viewStates.views[name].modal));     
+                    
                 if (!modalVisibles.length){
                     
                     if (matchedView){
@@ -547,7 +548,7 @@
                     }
                 }  
             }
-            else{
+            else if (!modalVisibles.length){
                 const matchedHotkey=hotkeys.filter((o)=>o.key==event.key);
                 if (matchedHotkey.length){
                     matchedHotkey[0].function();
