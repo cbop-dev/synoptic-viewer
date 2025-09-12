@@ -18,34 +18,38 @@ import * as mathUtils from '$lib/utils/math-utils.js';
 export function getTextRefsArray(bookAbbrev, ref){
     let textRefArray = [];
         for (const r of ref.split(";")){
-            const textRef = new ParTexts.TextAndRef()
+           
             const [c,vv] = r.split(":");
-            let theRef = '';
+            
             if(c && vv) {
                 if (vv.includes(',')){ //got indivdual verses/ranges
                     
+                    
                     for (const v of vv.split(',')){
-                        theRef = bookAbbrev? bookAbbrev + " ": '';
-                        theRef += c+":"+v;
-                      //  textRef.reference=theRef;
-                       // textRef.text=''
-                      //  textRefArray.push(textRef);
+                        const textRef = new ParTexts.TextAndRef();
+                        let theRef = bookAbbrev? bookAbbrev + " " : " ";
+                        theRef += c+":";
+                        theRef += v;
+                        textRef.reference=theRef;
+                        textRefArray.push(textRef);
                     }
 
                 }   
                 else{
-                    theRef =  bookAbbrev? bookAbbrev + " " + r : r;
-                   // textRef.reference=theRef
-                   // textRefArray.push({reference: theRef, text: ''});
+                    const theRef =  bookAbbrev? bookAbbrev + " " + r : r;
+                    const textRef = new ParTexts.TextAndRef();
+                    textRef.reference=theRef;
+                    textRefArray.push(textRef);
                 }
             }
             else{
                 theRef =  bookAbbrev? bookAbbrev + " " + ref : ref;
-               // textRefArray.push({reference: theRef, text: ''});
+                const textRef = new ParTexts.TextAndRef();
+                    textRef.reference=theRef;
+                    textRefArray.push(textRef);
             }
                 
-            textRef.reference=theRef;
-            textRefArray.push(textRef);
+     
         }
         return textRefArray;
 }
