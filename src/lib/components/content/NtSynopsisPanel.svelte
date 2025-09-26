@@ -486,12 +486,14 @@
             view: { description:  "View Options", hotkeys:['v'], state:false,modal:true},
             lookup: { description:  "Lookup passage(s) or select section", hotkeys:['l', 's'], state:true,modal:false},
             words: {description:  "Lexeme/Word Options", hotkeys:['w'], state:false,modal:true},
+            highlightOnClick: { description:  "Enable/disable highlight on click.", hotkeys:['c'], state:true,modal:false},
             info: { description:  "Website and project information.", hotkeys:['i'], state:false,modal:true},
             unique: { description:  "Toggle Unique Lexeme color outlining", hotkeys:['u'], state:false,modal:false},
             help: { description:  "Show help menu", hotkeys:['h', '?'], state:false,modal:true},
             sections: { description:  "Jump to a section", hotkeys:['j'], state:false,modal:true},
             identical: { description:  "Show (bold & underline) morphologically identical words shared by different gospels in a parallel group ",
-             hotkeys:['m'], state:false,modal:false},  
+             hotkeys:['m'], state:false,modal:false},
+              
         },
 
         
@@ -632,7 +634,9 @@
     let selectedWordTabIndex=$state(0);
 
     let customGreekInputText = $state('');
-   $effect(()=>{customGreekInputText=GreekUtils.beta2Greek(customGreekInputText).toLocaleLowerCase().replaceAll(/[^α-ω]+/g,'')});
+   $effect(()=>{customGreekInputText=GreekUtils.removeDiacritics(
+        GreekUtils.beta2Greek(customGreekInputText).toLocaleLowerCase()).replaceAll(/[^α-ω]+/g,'')
+    });
    //$inspect(customGreekClasses);
     </script>
 <style>
@@ -884,6 +888,7 @@
                     cssClassDict={lexClasses}
                     cssCustomDict={customGreekClasses}
                     showIdentical={viewStates.views.identical.state}
+                    highlightOnClick={viewStates.views.highlightOnClick.state}
                     />
                 </div>
                     <hr class="mb-2"/>
@@ -935,12 +940,13 @@
     
 
     <div class="max-w-full block text-center">
-                <h1>Unique or Identical Words:</h1>
+                <h3>Highlight Features:</h3>
             <ButtonSelect bind:selected={viewStates.views.unique.state} buttonText="Outline Unique Lexemes"/>
             
-            <ButtonSelect bind:selected={viewStates.views.identical.state} tooltip="Toggle Bold/underline setting for morphologically identical words." buttonText="Identical words."/>
-
-
+            <ButtonSelect bind:selected={viewStates.views.identical.state} tooltip="Toggle Bold/underline setting for morphologically identical words." 
+            buttonText="Identical words"/>
+            <ButtonSelect bind:selected={viewStates.views.highlightOnClick.state} buttonText="Highlight Lexeme on click" tooltip="If enabled, clicking/tapping on a word will toggle highlighting of that lexeme."/>
+            
         <ButtonSelect buttonStyle="btn btn-neutral btn-outline btn-circle btn-xs p-0 m-0"
             buttonText="?"
             bind:selected={showLexOptionsInfo}/>
@@ -951,6 +957,7 @@
                 <ul class="list-disc">
                     <li>Enabling <b>"Outline Unique Lexemes"</b> will draw <span class="outline outline-blue-400">an outline</span> (one color per gospel) around each lexeme that is unique to a specific gospel, i.e., that shows up in only one column of a single parallel group.</li>
                     <li>Enabling <b>"Identical words"</b> will <span class="font-bold underline">bold and underline</span> all morphologically identical words shared by at least two gospels in the same parallel group </li>
+                    <li>Enabling <b>"Highlight Lexeme on Click"</b> will toggle <span class="bg-cyan-500 text-white">highlighting</span> of all instances of the lexeme.</li>
                 </ul>
                 </div>
             </div>

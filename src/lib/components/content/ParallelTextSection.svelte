@@ -17,6 +17,7 @@
      * cssClassDict:Object,
      * cssCustomDict:Object,
      * showUnique:boolean,
+     * highlightOnClick:boolean
      * }}
      */
     let {
@@ -26,7 +27,8 @@
         showIdentical=true,
         wordClick=(id)=>{},
         cssClassDict={},
-        cssCustomDict={}
+        cssCustomDict={},
+        highlightOnClick=true
         
     } = $props();
 
@@ -189,7 +191,7 @@ function getText(words){
                             showUnique && unique && isUnique(word.id,unique) && 'lex-unique', 
                             wordCssClass, customClass, plainGreek,
                             showIdentical && wordCssClass && parGroup.matchingWords.includes(stripWord(word.word)) && 'underline font-bold']} 
-                        onclick={()=>{wordClick(word.id)}}>{word.word}{'  '}</span>
+                        onclick={()=>{if (highlightOnClick) wordClick(word.id);}}>{word.word}{'  '}</span>
                         {/each}
                     {/each}
                 {:else if textRef.text}
