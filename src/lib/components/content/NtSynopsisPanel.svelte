@@ -1015,7 +1015,7 @@
              <div class="{selectedWordTabIndex== 1 ? 'block' : 'hidden'}">
              <h1>Custom Greek Highlights</h1>
 
-             <i>Enter some text in the text box below, then press enter. Type in Latin characters, which will automatically convert to Greek.</i>
+             <i>Enter some text in the text box below, then press enter. Type in Latin characters, which will automatically convert to Greek.</i><br/>
              <input type="text" size="15" autofocus 
                 bind:value={customGreekInputText} placeholder="Type here" 
                 class="input input-bordered w-full max-w-xs" />
