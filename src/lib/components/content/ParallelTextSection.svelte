@@ -4,6 +4,7 @@
     import {gospelParallels} from '@cbop-dev/aland-gospel-synopsis';
     import { ColorUtils } from '$lib/utils/color-utils';
     import CopyText     from '../ui/CopyText.svelte';
+    import { GreekUtils } from '$lib/utils/greek-utils';
     
     const gospels = gospelParallels.gospels;
     mylog("loading ParTextSecion Compon");
@@ -14,6 +15,7 @@
      * wordClick:function(number):void,
      * showIdentical:boolean,
      * cssClassDict:Object,
+     * cssCustomDict:Object,
      * showUnique:boolean,
      * }}
      */
@@ -24,6 +26,7 @@
         showIdentical=true,
         wordClick=(id)=>{},
         cssClassDict={},
+        cssCustomDict={}
         
     } = $props();
 
@@ -108,6 +111,7 @@ function getText(words){
 }
 //$inspect("ParTexts, focus:", focus)
 //$inspect("numCols", numCols, "colData:", colData)
+//$inspect("ParText, customClass", cssCustomDict);
 </script>
 <style>
     @reference "tailwindcss";
@@ -177,10 +181,13 @@ function getText(words){
                         {#each verseWords.words as word}
                        
                         {@const wordCssClass=cssClassDict[word.id]}
+                        {@const plainGreek=GreekUtils.plainGreek(word.word).toLocaleLowerCase().trim()}
+                        {@const customClassLookup=cssCustomDict[plainGreek]}
+                        {@const customClass= customClassLookup ? customClassLookup : ''}
                         <span 
                         class={["m-0 word", "lex-" + word.id, 
                             showUnique && unique && isUnique(word.id,unique) && 'lex-unique', 
-                            wordCssClass,
+                            wordCssClass, customClass, plainGreek,
                             showIdentical && wordCssClass && parGroup.matchingWords.includes(stripWord(word.word)) && 'underline font-bold']} 
                         onclick={()=>{wordClick(word.id)}}>{word.word}{'  '}</span>
                         {/each}

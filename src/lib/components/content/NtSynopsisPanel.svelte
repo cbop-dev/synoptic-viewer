@@ -50,6 +50,10 @@
     */
     let selectedLexes=$state([]);
     
+    /**
+    * @type {string[]} selectedGreekStrings
+    */
+    let selectedGreekStrings=$state([]);
 
    let selectedGospelIndex =$state(0);
    const gospelOptions =[
@@ -206,24 +210,39 @@
         buildAndFetchPericopes();
    } 
 
-/**
+    /**
+     * @type {Object<string,string>} lexClasses
+     */
+    let customGreekClasses= $derived.by(()=>{// id->css color (e.g., "#eee")
+        
+        /**
+         * @type {Object<string,string>}
+         */
+        const ret = {}
+        if(selectedLexes && selectedGreekStrings.length) {
+            //mylog("building lexClasses...",true)
+            for(const [relIndex,gk] of selectedGreekStrings.entries()) {
+                const color = getColorOfGreek(gk);
+                if (color) {
+                    const index = selectedLexes.length+relIndex
+                    let classes = "custom-greek-"+ relIndex;
+                    classes += " " + color;
+                    ret[gk] = classes;
+                }
+   
+            }
+        }
+        return ret;
+    });
+
+    /**
      * @type {Object<number,string>} lexClasses
      */
-    
-
-   let lexClasses2={}
-   
-   /*$derived.by(()=>{
-        const colors = generateHslColorGradient(selectedLexes.length);
-        const classes={}
-        for (const [index, id] of selectedLexes.entries()){
-            classes[id]=colors[index];
-        }
-        return classes;
-        
-   });*/
-
     let lexClasses= $derived.by(()=>{// id->css color (e.g., "#eee")
+        
+        /**
+         * @type {Object<number,string>}
+         */
         const ret = {}
         if(dataReady && fetchedTextsResponse.lexemes) {
             //mylog("building lexClasses...",true)
@@ -231,7 +250,7 @@
                 
                 let classes = "lex-"+id;
                 if(selectedLexes.includes(id)){
-                    classes += " " + getColorClasses(id)
+                    classes += " " + getColorOfLex(id)
                 } 
               //  mylog("setting lex " + id + " to: " + classes,true);
                 ret[id] = classes;
@@ -288,6 +307,7 @@
         fetching = true;
         //fetchTexts();
         emptySelectedLexemes();
+        emptySelectedCustomGreek();
         await fetchPostTextsBatch();
         //buildLexArrays();
         populateGroupsText(true);
@@ -378,7 +398,26 @@
 
 
 
-  function getColorClasses(lexid){
+   /**
+    * 
+    * @param {string} greekString
+    */
+    function getColorOfGreek(greekString){
+    
+        let colorString = ''
+        if (selectedGreekStrings.includes(greekString)){
+            const selectedIndex = selectedLexes.length + selectedGreekStrings.indexOf(greekString)
+            colorString += ' '+ ColorUtils.getCustomBgTextColorClasses(selectedIndex);
+        }
+        
+        return colorString;
+    }
+
+    /**
+     * 
+     * @param {number} lexid
+     */
+    function getColorOfLex(lexid){
     
         let colorString = ''
         if (selectedLexes.includes(lexid)){
@@ -389,7 +428,6 @@
         return colorString;
     }
 
-    
     function getLexClasses(id){
         /*let classString="lex-"+id;
         let highlight=highlightLexeme(id)
@@ -399,6 +437,11 @@
         return lexClasses[id];
 
     }
+
+    function emptySelectedCustomGreek(){
+        selectedGreekStrings.length = 0;
+    }
+
     function emptySelectedLexemes(){
         selectedLexes.length = 0;
     }
@@ -413,6 +456,23 @@
             selectedLexes.push(id);
 
         }
+    }
+
+    /**
+     * 
+     * @param {string} string
+     */
+    function toggleGreekString(string){
+        if(selectedGreekStrings.includes(string)) {
+            selectedGreekStrings.splice(selectedGreekStrings.indexOf(string),1);
+
+        }
+        else {
+           
+            selectedGreekStrings.push(string);
+
+        }
+
     }
 
     function highlightLexeme(id=0,color=null){
@@ -567,6 +627,13 @@
     function textAreaBlur(event){
         textAreaFocused=false;
     }
+
+    const wordTabs=['lexemes','custom'];
+    let selectedWordTabIndex=$state(0);
+
+    let customGreekInputText = $state('');
+   $effect(()=>{customGreekInputText=GreekUtils.beta2Greek(customGreekInputText).trim()});
+   //$inspect(customGreekClasses);
     </script>
 <style>
     @reference "tailwindcss";
@@ -789,6 +856,7 @@
                     <ParallelTextSection parGroup={group} focus={focused}
                     wordClick={toggleLex} showUnique={viewStates.views.unique.state} 
                     cssClassDict={lexClasses}
+                    cssCustomDict={customGreekClasses}
                     showIdentical={viewStates.views.identical.state}
                     />
                 </div>
@@ -837,7 +905,20 @@
 {/if}
 
 <Modal2 bind:showModal={viewStates.views.words.state}>
-    
+
+    <style>
+
+        .tabs .tab-active {
+            @apply bg-accent !important;
+            font-weight: bold;
+        }
+
+        .tab {
+            height: auto;
+            
+        }
+    </style>
+
     <div class="max-w-full block text-center">
                 <h1>Unique or Identical Words:</h1>
             <ButtonSelect bind:selected={viewStates.views.unique.state} buttonText="Outline Unique Lexemes"/>
@@ -845,7 +926,7 @@
             <ButtonSelect bind:selected={viewStates.views.identical.state} tooltip="Toggle Bold/underline setting for morphologically identical words." buttonText="Identical words."/>
 
 
-  <ButtonSelect buttonStyle="btn btn-neutral btn-outline btn-circle btn-xs p-0 m-0"
+        <ButtonSelect buttonStyle="btn btn-neutral btn-outline btn-circle btn-xs p-0 m-0"
             buttonText="?"
             bind:selected={showLexOptionsInfo}/>
             {#if showLexOptionsInfo}
@@ -866,14 +947,20 @@
             
            
             <hr/>
-            <h1>Highlighted Lexemes</h1>
+        <div role="tablist" class="tabs tabs-lifted">
+            <a role="tab" class="tab {selectedWordTabIndex==0 ? 'tab-active' : ''} " tabindex=0 onclick={()=>{selectedWordTabIndex=0}} >Lexemes</a>
+            <a role="tab" class="tab {selectedWordTabIndex==1 ? 'tab-active' : ''} " tabindex=1 onclick={()=>{selectedWordTabIndex=1}}>Custom</a>
+        </div>
+        
+            <div class="{selectedWordTabIndex== 0 ? 'block' : 'hidden'}">
+             <h1>Highlighted Lexemes</h1>
             {#if selectedLexes.length}
             
             <h2>Selected Lexemes:</h2>
             <i>Click on a lexeme to remove it.</i>
             <br/>
             {#each selectedLexes as lex}
-               <Button onclick={()=>toggleLex(lex)} buttonText={lemmasByID[lex]} buttonColors={getColorClasses(lex)} buttonType=''/> 
+               <Button onclick={()=>toggleLex(lex)} buttonText={lemmasByID[lex]} buttonColors={getColorOfLex(lex)} buttonType=''/> 
             {/each}<br/>
             <Button onclick={emptySelectedLexemes}  buttonText="Clear All"/>
             {:else}<br/>
@@ -920,7 +1007,39 @@
                         {/each}
                     {/if}
                 {/if}
+
             </div>
+                
+           
+           <!-- custom greek: -->
+             <div class="{selectedWordTabIndex== 1 ? 'block' : 'hidden'}">
+             <h1>Custom Greek Highlights</h1>
+
+             <i>Enter some text in the text box below, then press enter. Type in Latin characters, which will automatically convert to Greek.</i>
+             <input type="text" size="15" autofocus 
+                bind:value={customGreekInputText} placeholder="Type here" 
+                class="input input-bordered w-full max-w-xs" />
+                <Button onclick={()=>toggleGreekString(customGreekInputText)} buttonText='Toggle'/>
+                <Button onclick={()=>{customGreekInputText=''}} buttonText="Clear Input" buttonStyle='btn btn-ghost btn-md'/>
+            
+            {#if selectedGreekStrings.length}
+            
+                <h2>Selected Custom Greek Word Forms:</h2>
+                <i>Click on any word-form to remove it.</i>
+                <br/>
+                {#each selectedGreekStrings as gk}
+                <Button onclick={()=>toggleGreekString(gk)} buttonText={gk} buttonColors={getColorOfGreek(gk)} buttonType=''/> 
+                {/each}<br/>
+                <Button onclick={emptySelectedCustomGreek}  buttonText="Clear All"/>
+            {:else}<br/>
+                
+                <i>None selected.</i>
+ 
+            {/if}
+           
+            </div>
+
+    </div>
 </Modal2>
 
 <Modal2 bind:showModal={viewStates.views.view.state}>

@@ -16,7 +16,7 @@ class ColorUtils{
     }
 
     static getCustomBgTextColorClasses(index){
-        let colorClassString = '';
+       // let colorClassString = '';
             const redGradient =[
         " bg-red-600 text-white",
         " bg-red-200 text-black",
@@ -288,7 +288,7 @@ class ColorUtils{
   
         const gradientIndex = ( index % colorArrays.length);
         const colorIndex = Math.floor(index / colorArrays.length)%colorArrays[0].length;
-        colorClassString += ' ' + colorArrays[gradientIndex][colorIndex];
+        const colorClassString = ' ' + colorArrays[gradientIndex][colorIndex];
     //  mylog(`getColorClasses(${lexid}): selectedIndex = ${selectedIndex}, gradIndex=${gradientIndex}, colorIndex=${colorIndex} colorClassString='${colorClassString}'`,true )
         return colorClassString; 
     }
