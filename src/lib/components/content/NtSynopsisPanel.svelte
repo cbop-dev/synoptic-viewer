@@ -664,6 +664,32 @@
         /*overflow: hidden  !important;*/
       
     }
+   
+   
+                
+    
+
+        .tabs .tab-active {
+            
+            font-weight: bold;
+            @apply border-t-2 border-l-2 border-r-2;
+            background-color: white;
+            color:black;
+            text-decoration: underline;
+            
+        }
+
+        .tab {
+            height: auto;
+            @apply rounded-t-lg;
+            border-color: slategrey;
+            color: ghostwhite;
+            background-color: darkgrey;
+            text-align: center;
+            
+        }
+
+
 
 </style>
 <svelte:window {onkeydown}/>
@@ -906,18 +932,7 @@
 
 <Modal2 bind:showModal={viewStates.views.words.state}>
 
-    <style>
-
-        .tabs .tab-active {
-            @apply bg-accent !important;
-            font-weight: bold;
-        }
-
-        .tab {
-            height: auto;
-            
-        }
-    </style>
+    
 
     <div class="max-w-full block text-center">
                 <h1>Unique or Identical Words:</h1>
