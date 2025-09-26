@@ -4,7 +4,8 @@ import { GreekUtils as gu } from '$lib/utils/greek-utils';
 
 
 test('remove diacritics test',()=>{
-    const gMap = {"ᾤ":"ω",'ἰδοὺ':"ιδου"};
+    const gMap = {"ᾤ":"ω",'ἰδοὺ':"ιδου",'ὑμῶν':'υμων',
+    };
     for (const [g1,g2] of Object.entries(gMap)) {
         expect(gu.removeDiacritics(g1)).toBe(g2);
     }

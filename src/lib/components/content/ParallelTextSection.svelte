@@ -181,7 +181,7 @@ function getText(words){
                         {#each verseWords.words as word}
                        
                         {@const wordCssClass=cssClassDict[word.id]}
-                        {@const plainGreek=GreekUtils.plainGreek(word.word).toLocaleLowerCase().trim()}
+                        {@const plainGreek=GreekUtils.plainGreek(word.word).toLocaleLowerCase().replaceAll(/[^α-ω]+/g,'')}
                         {@const customClassLookup=cssCustomDict[plainGreek]}
                         {@const customClass= customClassLookup ? customClassLookup : ''}
                         <span 

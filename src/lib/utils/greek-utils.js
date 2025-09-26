@@ -144,7 +144,7 @@ class GreekUtils {
 			
 		});*/
 
-		return greek.normalize("NFD").replaceAll(/[^α-ωΑ-Ω ;.•]/g,'');
+		return greek.normalize("NFD").replaceAll(/[^α-ωΑ-Ω ;.'"[\]()•]+/g,'');
 		/*#diacReplacements = "ιεηιυιυουωαααααααεεεεεηηηηηηηηηιιιιιιιοοοοοουυυυυυυυωωωωωωωααεεηηιιοουυωωααηηηηηωωαααααηηηηιιιυρυωωωωΑΑΑΑΑΑΕΕΕΕΕΗΗΗΗΗΗΙΙΙΙΟΟΟΟΟΥΥΥΩΩΩΩΩΡ"*/
 	
 	}

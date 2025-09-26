@@ -632,7 +632,7 @@
     let selectedWordTabIndex=$state(0);
 
     let customGreekInputText = $state('');
-   $effect(()=>{customGreekInputText=GreekUtils.beta2Greek(customGreekInputText).trim()});
+   $effect(()=>{customGreekInputText=GreekUtils.beta2Greek(customGreekInputText).toLocaleLowerCase().replaceAll(/[^α-ω]+/g,'')});
    //$inspect(customGreekClasses);
     </script>
 <style>
@@ -1018,7 +1018,8 @@
              <i>Enter some text in the text box below, then press enter. Type in Latin characters, which will automatically convert to Greek.</i><br/>
              <input type="text" size="15" autofocus 
                 bind:value={customGreekInputText} placeholder="Type here" 
-                class="input input-bordered w-full max-w-xs" />
+                class="input input-bordered w-full max-w-xs" 
+                onkeydown={(e)=>{if (e.key == 'Enter') toggleGreekString(customGreekInputText);}}/>
                 <Button onclick={()=>toggleGreekString(customGreekInputText)} buttonText='Toggle'/>
                 <Button onclick={()=>{customGreekInputText=''}} buttonText="Clear Input" buttonStyle='btn btn-ghost btn-md'/>
             
