@@ -1,5 +1,6 @@
 import { mylog } from "$lib/env/env.js";
 import { GreekUtils } from "$lib/utils/greek-utils";
+import {combineRefs, formatBibRefs} from '$lib/n1904/bibleRefUtils.js'
 export class Word{
     id=0;
     word='';
@@ -50,7 +51,7 @@ export class ParallelText {
     constructor(textRefs=[]){
         this.textRefs = textRefs
         
-     //   this.references=references;
+     
     }
 }
 
@@ -173,7 +174,32 @@ export class GospelPericopeGroup{
         this.matchingWords=Object.entries(wordsBooks).filter(([word,bookIndexSet])=>bookIndexSet.size>1)
             .map(([word,bookIndexSet])=>word);
     }
+
+    getRefs(includeOther=false){
+        let refs=[];
+        if (includeOther){
+            for (const gosp of ['matt','mark','luke','john','other']){
+                if(this[gosp].textRefs.length)
+                    refs.push(combineRefs(this[gosp].textRefs.map((tr)=>tr.reference)))
+                
+            }
+        }
+        else{
+
+            for (const gosp of ['matt','mark','luke','john']){
+                if(this[gosp].textRefs.length) {
+                    const gospRefs = this[gosp].textRefs.map((tr)=>tr.reference).join("; ").trim();
+                    if (gospRefs.length) {
+                        refs.push(formatBibRefs(gospRefs));
+                    }
+                }
+                
+            }
+        }
+       
     
+        return refs.join('; ');  
+    }
 }
 export default {
     ParallelText, GospelPericopeGroup,TextAndRef,VerseWords,Word,GospelPericopeGroupIndices,stripWord

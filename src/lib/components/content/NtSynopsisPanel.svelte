@@ -21,6 +21,7 @@
     import ArrowDown from '../ui/icons/arrow-down.svelte';
     import ArrowTop from '../ui/icons/arrow-top-icon.svelte';
     import BulletsIcons from '../ui/icons/bullets-outline.svelte';
+    import CopyText from '../ui/CopyText.svelte';
     import { findNextAnchor,findPrevAnchor, getAnchors} from '$lib/utils/ui-utils';
 	//import { generateHslColorGradient } from '../ui/chartUtils';
   
@@ -721,6 +722,9 @@
      
        <li> <ButtonSelect buttonText="☰ Jump to    ↓" bind:selected={viewStates.views.sections.state}/></li>       
         <li><ButtonSelect bind:selected={viewStates.views.words.state} buttonText="☰ Words" /></li>
+        <li><ButtonSelect bind:selected={viewStates.views.highlightOnClick.state} buttonText="Auto Highlight" 
+            tooltipbottom={true}
+            tooltip="If enabled, clicking/tapping on a word will toggle highlighting of that lexeme. Press 'c' to toggle this option."/></li>
         
             
         
@@ -775,7 +779,9 @@
      
        <li> <ButtonSelect buttonText="☰ Jump to section ↓" bind:selected={viewStates.views.sections.state}/></li>       
         <li><ButtonSelect bind:selected={viewStates.views.words.state} buttonText="☰ Words" /></li>
-            
+        <li><ButtonSelect bind:selected={viewStates.views.highlightOnClick.state} buttonText="Auto Highlight" 
+            tooltipbottom={true}
+            tooltip="If enabled, clicking/tapping on a word will toggle highlighting of that lexeme. Press 'c' to toggle this option."/></li>    
         
          
      {/if}
@@ -865,7 +871,7 @@
             {#if filteredPerGroups.length}
                 {#each filteredPerGroups as group, index }
                 <div class='anchor text-center' id="section-{group.id}">
-                    <h2 class="inline-block"><b><u>{group.title}</u></b></h2>
+                    <h2 class="inline-block"><b><u>{group.title}</u></b><CopyText copyText={group.getRefs()} tooltip='Copy parallel group references'/></h2>
                     </div>
                 <div class="float-right mr-2 break-after-all">
                     <a href="" class="" title="Jump to section"

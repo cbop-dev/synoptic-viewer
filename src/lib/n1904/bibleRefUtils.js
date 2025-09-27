@@ -1,6 +1,99 @@
 import { mylog } from "$lib/env/env";
 import { tfNtBooksDict } from "./ntbooks";
 import * as mathUtils from '$lib/utils/math-utils.js';
+
+var bibleRefReverseLookupHash = {};
+
+
+var bookAbbrevMap =  
+{
+/*OT:*/
+'Gen': ['Genesis', 'Ge'],
+'Exod': ['Exodus'],
+'Lev': ['Leviticus'],
+'Num': ['Numbers'],
+'Deut': ['Deuteronomy', 'Dt', 'Deu'],
+'Josh': ['Joshua'],
+'Judg': ['Judges', 'Jdg', 'Jdgs', "Judgs"],
+'Ruth': ['Ruth'],
+'1 Sam': ['1 Samuel', 'I Samuel','1 Sa', '1 Sam','I Sa', 'I Sam'],
+'2 Sam': ['2 Samuel', 'II Samuel','2 Sa', '2 Sam','II Sa', 'II Sam'],
+'1 Kgs': ['1 Kings', 'I Kings','1 Kg', 'I Kg'],
+'2 Kgs': ['2 Kings', 'II Kings','2 Kg', 'II Kg'],
+'1 Kgdms': ['1 Kingdoms','I Kingdoms','I Kgdms'],
+'2 Kgdms': ['2 Kingdoms','II Kingdoms','II Kgdms'],
+'3 Kgdms': ['3 Kingdoms','III Kingdoms','III Kgdms'],
+'4 Kgdms': ['4 Kingdoms','IV Kingdoms','IV Kgdms'],
+'1 Chr': ['1 Chronicles', '1 Chron', '1 Ch','I Chronicales', 'I Chron', 'I Ch'],
+'2 Chr': ['2 Chronicles', '2 Chron', '2 Ch', 'II Chronicales', 'II Chron', 'II Ch'],
+'Ezra': ['Ezra'],
+'Neh': ['Nehemiah'],
+'Tob': ['Tobit'],
+'Jdt': ['Judith'],
+'Esth': ['Esther', 'Est'],
+'1 Macc': ['1 Maccabees', '1 Macc', '1 Mac', '1 Maccab', 'I Macc', 'I Mac', 'I Maccab' ],
+'2 Macc': ['2 Maccabees', '2 Macc', '2 Mac', '2 Maccab', 'II Macc', 'II Mac', 'II Maccab'],
+'3 Macc': ['3 Maccabees', '3 Macc', '3 Mac', '3 Maccab', 'III Macc', 'III Mac', 'III Maccab'],
+'4 Macc': ['4 Maccabees', '4 Macc', '4 Mac', '4 Maccab', 'IV Macc', 'IV Mac', 'IV Maccab'],
+'Job': ['Job'],
+'Ps(s)': ['Psalms'],
+'Prov': ['Proverbs'],
+'Eccl': ['Ecclesiastes', 'Qoheleth', 'Qoh'],
+'Song': ['Song of Songs', 'Song of Solomon', 'Canticles', 'Cant'],
+'Wis': ['Wisdom of Solomon', 'Wisdom', 'Wisd'],
+'Sir': ['Sirach', 'Ecclesiasticus'],
+'Isa': ['Isaiah', 'Is'],
+'Jer': ['Jeremiah'],
+'Lam': ['Lamentations'],
+'Bar': ['Baruch'],
+'Ezek': ['Ezekiel'],
+'Dan': ['Daniel'],
+'Hos': ['Hosea'],
+'Joel': ['Joel'],
+'Amos': ['Amos'],
+'Obad': ['Obadiah'],
+'Jonah': ['Jonah'],
+'Mic': ['Micah'],
+'Nah': ['Nahum'],
+'Hab': ['Habakkuk'],
+'Zeph': ['Zephaniah'],
+'Hag': ['Haggai'],
+'Zech': ['Zechariah'],
+'Mal': ['Malachi'],
+
+/*NT:*/
+'Matt':['Matt','Matthew', 'Mt'],
+'Mark':['Mark','Mk'],
+'Luke':['Luke','Lk'],
+'John':['John','Jn'],
+'Acts':['Acts','Ac', 'Act'],
+'Rom':['Rom','Romans','Rm'],
+'1 Cor':['1 Cor','1 Corinthians','First Corinthians', '1 Co'],
+'2 Cor':['2 Cor','2 Corinthians','Second Corinthians', '2 Co'],
+'Gal':['Gal','Galatians', 'Ga'],
+'Eph':['Eph','Ephesians'],
+'Phil':['Phil','Philippians', 'Phlp', 'Philip'],
+'Col':['Col','Colossians'],
+'1 Thess':['1 Thess','1 Thessalonians', 'First Thessalonians', 'I Thessalonians', 'I Thess', 'I Th', '1 Th'],
+'2 Thess':['2 Thess','2 Thessalonians', 'Second Thessalonians', 'II Thessalonians', 'II Thess', 'II Th', '2 Th'],
+'1 Tim':['1 Tim','1 Timothy', 'First Timothy', 'I Tim', 'I Timothy'],
+'2 Tim':['2 Tim','1 Timothy', 'Second Timothy', 'II Tim', 'II Timothy'],
+'Titus':['Titus','Tit', 'Ti'],
+'Phlm':['Phlm','Philemon'],
+'Heb':['Heb','Hebrews'],
+'Jas':['Jas','James', 'Ja'],
+'1 Pet':['1 Pet','1 Peter', 'I Pet', 'I Peter', 'First Peter'],
+'2 Pet':['2 Pet','2 Peter', 'II Pet', 'II Peter', 'Second Peter'],
+'1 John':['1 John','I John', '1 Jn', 'I Jn', 'First John'],
+'2 John':['2 John','II John', '2 Jn', 'II Jn', 'Second John'],
+'3 John':['3 John','III John', '3 Jn', 'III Jn', 'Third John'],
+'Jude':['Jude','Ju'],
+'Rev':['Rev','Revelation', 'Ap', 'Apoc', 'Apocalypse']
+
+};
+
+
+
 /**
  * @description - returns true if one NT reference is contained within another, e.g., refIncludes("Matt 1:1,3-10", "Matt 1:4") and  
  *                  refIncludes("Rev", "Rev 2") each return true, because the last parameter is contained in the first;
@@ -464,4 +557,228 @@ export function sortChapVerseRefs(cv1, cv2){
         retVal = 0;
    // mylog("sortChaVerseRef("+cv1+","+cv2+")=" +retVal+")");
     return retVal;
+}
+
+function cleanRepeatedSymbols(input)
+{
+	return input.replaceAll(/;+/g, ";").replace(/\:+/g, ":").replace(/[\t ]+/g," ");
+}
+
+export function formatBibRefs(inputString){
+	let books = {}
+	let lastBook = '';
+	
+	
+	cleanRepeatedSymbols(inputString).replaceAll("\t"," ").replace(/(:[0-9-,]+ +)/g,"$1\n").replaceAll(";","\n").split("\n").map(item=>item.trim()).forEach(l =>
+	{
+		if (l.trim().length > 0) {
+			
+			var vv = "";
+			var bc  = "";
+			
+			[bc, vv] = l.split(":").map(item=>item.trim());
+			bc = bc ? bc : "";
+			vv = vv ? vv : "";
+			var b = ""
+            var c = ''
+			//console.log("formatBibRefs got vv=" +vv);
+			const bc_array = bc.split(" ").map(item=>item.trim());
+			if(bc_array.length > 2) /* we have something like 1 Sam 2*/ 
+			{
+				b = bc_array[0] + " " + bc_array[1]
+				const match = getBookAbbrev(b)
+				b = match ? match : b
+				c = bc_array[2]
+			}
+			else if (bc_array.length == 2) /* we have book and chap, or chap and verse, or "1 Sam"*/
+			{
+				b = bc_array[0]
+				const match = getBookAbbrev(b)
+				b = match ? match : b
+				c = bc_array[1]
+			}
+			else if(parseInt(bc_array[0])) /* only one thing, a number: ergo, chapter (or verse) num w/o bookname */ 
+			{
+				c = parseInt(bc_array[0])
+				b = lastBook;
+			}
+			else { /* book name, no chapter!:*/
+				b = bc_array[0];
+				const match = getBookAbbrev(b)
+				b = match ? match : b
+				c = '';
+			}
+			
+			lastBook = b;
+			//console.log("formatBibRefs gonna loop over vv: " + vv)
+			vv.split(",").map(item=>item.trim()).forEach(v => 
+			{
+				//console.log("formatBibRefs looking for verse:" + v)
+				if(!books[b]) {
+					books[b] = {}
+
+				}
+
+				if (!books[b][c] || books[b][c].length == 0 )
+				{	
+					books[b][c] = [];
+				}
+					
+					
+					
+				if (!books[b][c].includes(v))
+				{ 
+					//console.log("formatBibRefs looking again for verse:" + v)
+					if (v.includes("-")){ //got a range!
+						const [start, finish] = v.split("-");
+						if (parseInt(start) < parseInt(finish)){
+							const vRange=[];
+							for (let i = parseInt(start); i <=parseInt(finish); i++){
+								vRange.push(i);
+							}
+							//adding each verse in the range
+							books[b][c].push(...vRange);
+							//console.log("formatBibRefs() loop...converted " + v + " -> [" + vRange.join(',') +"]")
+
+						}
+						else{//invalid  number range; just treat it as a string
+							//console.log("invalid range in " + v);
+							books[b][c].push(v);
+						}
+						
+
+					}
+					else {
+						//console.log("Don't got a range in " + v);
+						books[b][c].push(v);
+					}
+					
+				}
+				else
+				{/*do nothing, verse already listed*/
+					//console.log("found v " + v + " in " + b + ":" +c)
+				}
+				
+		
+				
+			});
+		}	
+	});
+		
+	var output = ""
+    var bdemarc = "";
+	Object.keys(books).sort(function(x,y)
+		{ 
+			if (getBookOrder(x) < getBookOrder(y)) 
+				return -1;
+			else if (getBookOrder(x) > getBookOrder(y)) 
+				return 1;
+				
+			else 
+				return 0;
+		}
+	).forEach(b =>
+	{
+		let bname=b;
+		let cdemarc = "";
+		output = output + bdemarc + b + " "
+		Object.keys(books[b]).sort((a, b) => parseInt(a) - parseInt(b)).forEach(c=> 
+		{
+			output = output + cdemarc + c.toString();
+			let vdemarc = ":";
+			let vv = books[b][c];
+
+			output += vdemarc + joinInRanges(vv);
+			/*vv.sort(function(a, b){return a-b}).forEach(v =>{
+				output = output + vdemarc + v;
+				vdemarc=", ";
+			});*/
+			cdemarc = "; ";
+			
+		});
+		bdemarc = "; ";
+		
+	});
+	
+		
+	
+	return cleanRepeatedSymbols(output);
+	
+}
+
+/*
+ * matchBookName: try to match input string 'lookup' with Bible book names or abbreviations, 
+ * using a "fuzzy" search: if the input is substring in any book name or abbrevation, returns
+ * the matching full book name  (lower case). This is a very generous fuzzy search: any match will do.
+ * So, searching for "s" will always return "Genesis", since this is the first book name that contains "s".
+ */
+function matchBookName(lookup) {
+	var book = ''
+	if (lookup.length > 0 && bibleRefReverseLookupHash[lookup.toLowerCase()]) 
+	{
+		book = bookAbbrevMap[bibleRefReverseLookupHash[lookup.toLowerCase()]][0];
+	}
+	else
+	{
+		for (b in bibleRefReverseLookupHash)
+		{
+			if (b.toLowerCase().startsWith(lookup.toLowerCase()))
+			{
+				book = b;
+				break;
+			}
+		}
+		for (b in bibleRefReverseLookupHash)
+		{
+			if (b.toLowerCase().includes(lookup.toLowerCase()))
+			{
+				book = b;
+				break;
+			}
+		}
+		
+	
+	}
+	return book
+}
+
+function buildbibleRefReverseLookupHash() {
+	Object.keys(bookAbbrevMap).forEach(function(abbrev,index) {
+		bookAbbrevMap[abbrev].forEach(function(bookName) {
+			bibleRefReverseLookupHash[abbrev]=abbrev;
+			if (abbrev.toLowerCase() != abbrev)
+				bibleRefReverseLookupHash[abbrev.toLowerCase()]=abbrev;
+			
+			bibleRefReverseLookupHash[bookName]=abbrev;
+			if (bookName.toLowerCase() != bookName)
+				bibleRefReverseLookupHash[bookName.toLowerCase()]=abbrev;
+		});	
+	});
+};
+
+/**
+ * 
+ * @param {string} lookup 
+ * @returns {string}
+ */
+function getBookAbbrev(lookup)
+{
+	const match = matchBookName(lookup)
+	return match ? bibleRefReverseLookupHash[match] : ''
+}
+
+function getBookOrder(bookName) 
+{
+	
+	/* bookName.length > 0 ? @@bookAbbrevMap.find_index { |k,v| k.include?(bookName) or v.map{|b| b.include?(bookName)}.include?(true)} : nil
+	*/
+	/*var book = '';*/
+	let order = -1;
+	var abbrev = getBookAbbrev(bookName)
+				
+	if (abbrev) 
+		return  Object.keys(bookAbbrevMap).indexOf(abbrev);
+	else
+		return -1;
+
 }
