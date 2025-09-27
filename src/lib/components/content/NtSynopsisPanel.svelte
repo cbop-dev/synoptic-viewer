@@ -45,6 +45,7 @@
    // let showViewOptions = $state(false);
     let landingPage=$state(true);
     let showInfoModal=$state(false);
+    let maxLexesToShow=$state(30);
 
     /**
     * @type {number[]} selectedLexes
@@ -987,9 +988,14 @@
             <h2>Selected Lexemes:</h2>
             <i>Click on a lexeme to remove it.</i>
             <br/>
-            {#each selectedLexes as lex}
-               <Button onclick={()=>toggleLex(lex)} buttonText={lemmasByID[lex]} buttonColors={getColorOfLex(lex)} buttonType=''/> 
-            {/each}<br/>
+            {#each selectedLexes as lex, index}
+                 <Button onclick={()=>toggleLex(lex)} buttonText={lemmasByID[lex]} buttonColors={getColorOfLex(lex)} buttonType=''/> 
+               
+             {/each}
+                
+              
+
+                <br/>
             <Button onclick={emptySelectedLexemes}  buttonText="Clear All"/>
             {:else}<br/>
             <i>None selected. Click on a word in the text, or select a lexeme below. Use the search box to find a specific word (type in Latin characters, which will automatically convert to Greek)</i>
@@ -1004,15 +1010,32 @@
             bind:bestMatches={bestMatchedLexes}
             bind:otherMatches={otherMatchedLexes} tooltip="Type latin characters to search for Greek words"/>
             <br>
-              {#if bestMatchedLexes.length == 0}
-                 {#each unselectedLexes as id}
-                 <Button onclick={()=>toggleLex(id)} 
-                    buttonText={lemmasByID[id]} 
-                    buttonType="btn-accent" style="hover:text-white"/> 
-                {/each}
-                {:else}
+              {#if bestMatchedLexes.length == 0 && otherMatchedLexes.length == 0}
+                <i>None found. Showing all lexemes:</i><br/>
+                        {#if unselectedLexes.length > 30 && maxLexesToShow == 0}
+                                
+                        <Button buttonText='Show less...' onclick={()=>{maxLexesToShow=30}}/>
+                            <br/>
+                        {/if}
+                    {#each unselectedLexes as id,index}
+                        
+                        {#if (maxLexesToShow == 0 || maxLexesToShow >= unselectedLexes.length)  || ((unselectedLexes.length > maxLexesToShow) && index < maxLexesToShow )}
+                            
+                        <Button onclick={()=>toggleLex(id)} 
+                            buttonText={lemmasByID[id]} 
+                            buttonType="btn-accent" style="hover:text-white"/> 
+                        
+                        {/if}
+
+                    {/each}
+                        {#if unselectedLexes.length > maxLexesToShow}
+                                <br/>
+                        <Button buttonText='Show more...' onclick={()=>{maxLexesToShow=0}}/>
+                        {/if}
+              {:else}
                  <h1>Trying to filter!</h1>
                  <h3>Best matches:</h3>
+                 {#if bestMatchedLexes.length}
                     {#each bestMatchedLexes as lexIndex}
                     {@const lexId = unselectedLexes[Number(lexIndex)]}
                     {@const lemma=lemmasByID[lexId]}
@@ -1022,6 +1045,9 @@
                     buttonText={lemma} 
                     buttonType="btn-accent" style="hover:text-white"/> 
                     {/each}
+                    {:else}
+                     <i>None found.</i>
+                    {/if}
                     {#if otherMatchedLexes.length}
                         <h3>Other Matches:</h3>
                             {#each otherMatchedLexes as lexIndex}
