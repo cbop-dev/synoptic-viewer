@@ -138,7 +138,7 @@ export function refIncludes(containingRef, includedRef) {
         else {//chapters match, but do verses?
             const allowedVerses=createNumArrayFromStringListRange(containingObj.v);
 
-            const includedV = parseInt(includedObj.v);
+            const includedV = includedObj.v ? parseInt(includedObj.v.replaceAll(/a-z/g,'')) : '';
             if (includedV && !allowedVerses.includes(includedV)) { //oops: not in range
                 passed = false;
 
@@ -475,7 +475,7 @@ export function combineRefs(refArray) {
  */
 export function joinInRanges(numArray, separator=",", spreader="-"){
 
-    let uniqueArray = [...new Set(numArray.map((x)=>Number(x)))].sort((x,y)=>x-y);
+    let uniqueArray = [...new Set(numArray.map((x)=>Number(String(x).replaceAll(/[a-z]/g,''))))].sort((x,y)=>x-y);
     //  //console.debug("uniq array: [" + uniqueArray.join("/") + "]");
     //  //console.debug("uniqArray.entries():" + [...uniqueArray]);
 
@@ -569,101 +569,103 @@ export function formatBibRefs(inputString){
 	let lastBook = '';
 	
 	
-	cleanRepeatedSymbols(inputString).replaceAll("\t"," ").replace(/(:[0-9-,]+ +)/g,"$1\n").replaceAll(";","\n").split("\n").map(item=>item.trim()).forEach(l =>
-	{
-		if (l.trim().length > 0) {
-			
-			var vv = "";
-			var bc  = "";
-			
-			[bc, vv] = l.split(":").map(item=>item.trim());
-			bc = bc ? bc : "";
-			vv = vv ? vv : "";
-			var b = ""
-            var c = ''
-			//console.log("formatBibRefs got vv=" +vv);
-			const bc_array = bc.split(" ").map(item=>item.trim());
-			if(bc_array.length > 2) /* we have something like 1 Sam 2*/ 
-			{
-				b = bc_array[0] + " " + bc_array[1]
-				const match = getBookAbbrev(b)
-				b = match ? match : b
-				c = bc_array[2]
-			}
-			else if (bc_array.length == 2) /* we have book and chap, or chap and verse, or "1 Sam"*/
-			{
-				b = bc_array[0]
-				const match = getBookAbbrev(b)
-				b = match ? match : b
-				c = bc_array[1]
-			}
-			else if(parseInt(bc_array[0])) /* only one thing, a number: ergo, chapter (or verse) num w/o bookname */ 
-			{
-				c = parseInt(bc_array[0])
-				b = lastBook;
-			}
-			else { /* book name, no chapter!:*/
-				b = bc_array[0];
-				const match = getBookAbbrev(b)
-				b = match ? match : b
-				c = '';
-			}
-			
-			lastBook = b;
-			//console.log("formatBibRefs gonna loop over vv: " + vv)
-			vv.split(",").map(item=>item.trim()).forEach(v => 
-			{
-				//console.log("formatBibRefs looking for verse:" + v)
-				if(!books[b]) {
-					books[b] = {}
+	cleanRepeatedSymbols(inputString).replaceAll("\t"," ")
+        .replace(/(:[0-9a-z-,]+ +)/g,"$1\n").replaceAll(";","\n").split("\n")
+        .map(item=>item.trim()).forEach(l =>
+        {
+            if (l.trim().length > 0) {
+                
+                var vv = "";
+                var bc  = "";
+                
+                [bc, vv] = l.split(":").map(item=>item.trim());
+                bc = bc ? bc : "";
+                vv = vv ? vv : "";
+                var b = ""
+                var c = ''
+                //console.log("formatBibRefs got vv=" +vv);
+                const bc_array = bc.split(" ").map(item=>item.trim());
+                if(bc_array.length > 2) /* we have something like 1 Sam 2*/ 
+                {
+                    b = bc_array[0] + " " + bc_array[1]
+                    const match = getBookAbbrev(b)
+                    b = match ? match : b
+                    c = bc_array[2]
+                }
+                else if (bc_array.length == 2) /* we have book and chap, or chap and verse, or "1 Sam"*/
+                {
+                    b = bc_array[0]
+                    const match = getBookAbbrev(b)
+                    b = match ? match : b
+                    c = bc_array[1]
+                }
+                else if(parseInt(bc_array[0])) /* only one thing, a number: ergo, chapter (or verse) num w/o bookname */ 
+                {
+                    c = parseInt(bc_array[0])
+                    b = lastBook;
+                }
+                else { /* book name, no chapter!:*/
+                    b = bc_array[0];
+                    const match = getBookAbbrev(b)
+                    b = match ? match : b
+                    c = '';
+                }
+                
+                lastBook = b;
+                //console.log("formatBibRefs gonna loop over vv: " + vv)
+                vv.split(",").map(item=>item.trim()).forEach(v => 
+                {
+                    //console.log("formatBibRefs looking for verse:" + v)
+                    if(!books[b]) {
+                        books[b] = {}
 
-				}
+                    }
 
-				if (!books[b][c] || books[b][c].length == 0 )
-				{	
-					books[b][c] = [];
-				}
-					
-					
-					
-				if (!books[b][c].includes(v))
-				{ 
-					//console.log("formatBibRefs looking again for verse:" + v)
-					if (v.includes("-")){ //got a range!
-						const [start, finish] = v.split("-");
-						if (parseInt(start) < parseInt(finish)){
-							const vRange=[];
-							for (let i = parseInt(start); i <=parseInt(finish); i++){
-								vRange.push(i);
-							}
-							//adding each verse in the range
-							books[b][c].push(...vRange);
-							//console.log("formatBibRefs() loop...converted " + v + " -> [" + vRange.join(',') +"]")
+                    if (!books[b][c] || books[b][c].length == 0 )
+                    {	
+                        books[b][c] = [];
+                    }
+                        
+                        
+                        
+                    if (!books[b][c].includes(v))
+                    { 
+                        //console.log("formatBibRefs looking again for verse:" + v)
+                        if (v.includes("-")){ //got a range!
+                            const [start, finish] = v.split("-");
+                            if (parseInt(start) < parseInt(finish)){
+                                const vRange=[];
+                                for (let i = parseInt(start); i <=parseInt(finish); i++){
+                                    vRange.push(i);
+                                }
+                                //adding each verse in the range
+                                books[b][c].push(...vRange);
+                                //console.log("formatBibRefs() loop...converted " + v + " -> [" + vRange.join(',') +"]")
 
-						}
-						else{//invalid  number range; just treat it as a string
-							//console.log("invalid range in " + v);
-							books[b][c].push(v);
-						}
-						
+                            }
+                            else{//invalid  number range; just treat it as a string
+                                //console.log("invalid range in " + v);
+                                books[b][c].push(v);
+                            }
+                            
 
-					}
-					else {
-						//console.log("Don't got a range in " + v);
-						books[b][c].push(v);
-					}
-					
-				}
-				else
-				{/*do nothing, verse already listed*/
-					//console.log("found v " + v + " in " + b + ":" +c)
-				}
-				
-		
-				
-			});
-		}	
-	});
+                        }
+                        else {
+                            //console.log("Don't got a range in " + v);
+                            books[b][c].push(v);
+                        }
+                        
+                    }
+                    else
+                    {/*do nothing, verse already listed*/
+                        //console.log("found v " + v + " in " + b + ":" +c)
+                    }
+                    
+            
+                    
+                });
+            }	
+        });
 		
 	var output = ""
     var bdemarc = "";
