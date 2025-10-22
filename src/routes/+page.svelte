@@ -1,6 +1,7 @@
 <script>
 	import NtSynopsisPanel from "$lib/components/content/NtSynopsisPanel.svelte";
     import ParallelTextSection from "$lib/components/content/ParallelTextSection.svelte";
+    import SynopsisHome from "$lib/components/content/SynopsisHome.svelte";
     import '../app.css';
 
     function onkeydown(event){
@@ -10,6 +11,6 @@
     }
     
 </script>
-
+<SynopsisHome/>
 <!--<ParallelTextSection/>-->
-<NtSynopsisPanel/>
+<!--<NtSynopsisPanel/>-->

@@ -6,6 +6,7 @@
    * @property {string} [buttonStyle]
    * @property {string} [textSize]
    * @property {string} [tooltip]
+   * @property {boolean} [tooltipbottom]
    * @property {boolean} [selected]
    * @property {boolean} [disable]
    * @property  [children]
@@ -17,6 +18,7 @@
     buttonStyle = " btn btn-outline btn-primary  font-bold hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 ",
     textSize = "base",
     tooltip='',
+    tooltipbottom=false,
     selected = $bindable(false),
     children=null,
     disable=false
@@ -70,7 +72,7 @@
   </style>
   
   <button  data-tip={tooltip} onclick={()=>{if(!disable){toggle()}}} bind:this={theButton} 
-  class=" {tooltip ? 'tooltip' : ''}   {selectStyle()} m-1 {disable ? 'btn-disabled' : ''} {buttonStyle}">
+  class=" {tooltip ? 'tooltip' : ''}  {tooltipbottom ? 'tooltip-bottom' : ''} {selectStyle()} m-1 {disable ? 'btn-disabled' : ''} {buttonStyle}">
     {buttonText}
     {#if children}
 		{@render children?.()}

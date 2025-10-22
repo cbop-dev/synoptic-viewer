@@ -21,6 +21,11 @@ export class TextAndRef{
     words=[];
     
 }
+
+/**
+ * @description Objects of this class represent a set of texts that belong in the same column of a group of parallel columns of text.
+ * The name may be poorly chosen. :-(
+ */
 export class ParallelText {
     /**
      * @type {TextAndRef[]} textRefs
