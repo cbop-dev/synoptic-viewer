@@ -192,7 +192,7 @@ let filteredPericopes=$derived.by(()=>{
         }
         
     }
-    mylog("after filtering alands: ["+ alands.join(",")+"]",true)
+    //mylog("after filtering alands: ["+ alands.join(",")+"]")
     return alands;
 })
 
