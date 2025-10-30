@@ -411,8 +411,28 @@ async function urlRequestShowNtParallels(){
     //resetViewOptions();
     viewStates.reset(false,['view','lookup','words','highlightOnClick']);
     //viewStates.views.highlightOnClick.state =false;
-    alandPericopeNums=request.pericopes;
-    await buildAndFetchPericopes(false);
+    let pericopes = new Set([]);
+    
+    if (request.pericopes) {
+        pericopes = new Set(request.pericopes);
+    }
+    
+    if (request.sections && request.sections.length){
+        
+        request.sections.forEach((s)=>{
+            const secs = mathUtils.createNumArrayFromStringListRange(gospelParallels.alandSynopsis.lookupSection(s).pericopes);
+            mylog("urlRequestShowNtParallels: got secs: " + secs?.join(','))
+            pericopes = pericopes.union(new Set(secs));
+
+    });
+        
+    }
+    if (pericopes.size){
+        alandPericopeNums=[...pericopes];
+        await buildAndFetchPericopes(false);
+
+    }
+
 
 }
 
@@ -685,13 +705,13 @@ $effect(()=>{customGreekInputText=GreekUtils.removeDiacritics(
 
 function loadRequestOptions(){
     mylog("loadRequestOptions...")
-    if(Object.hasOwn(request,"hideSolos,")) {mylog("hideSolos =request.hideSolos;"); hideSolos =request.hideSolos;}
-    if(Object.hasOwn(request,"sort,")) {mylog("sort =request.sort;"); sort =request.sort;}
-    if(Object.hasOwn(request,"hideNonPrimary,")) {mylog("hideNonPrimary=request.hideNonPrimary;"); hideNonPrimary=request.hideNonPrimary;}
-    if(Object.hasOwn(request,"focusOn,")) {mylog("focusOn=request.focusOn;"); focusOn=request.focusOn;}
-    if(Object.hasOwn(request,"hideNonPrimarySolos,")) {mylog("hideNonPrimarySolos=request.hideNonPrimarySolos;"); hideNonPrimarySolos=request.hideNonPrimarySolos;}
-    if(Object.hasOwn(request,"unique,")) {mylog("viewStates.views.unique.state=request.unique;"); viewStates.views.unique.state=request.unique;}
-    if(Object.hasOwn(request,"identical")) {mylog("viewStates.views.identical=request.identical;"); viewStates.views.identical=request.identical;}
+    if(Object.hasOwn(request,"hideSolos")) {mylog("hideSolos =request.hideSolos;"); hideSolos =request.hideSolos;}
+    if(Object.hasOwn(request,"sort")) {mylog("sort =request.sort;"); sort =request.sort;}
+    if(Object.hasOwn(request,"hideNonPrimary")) {mylog("hideNonPrimary=request.hideNonPrimary;"); hideNonPrimary=request.hideNonPrimary;}
+    if(Object.hasOwn(request,"focusOn")) {mylog("focusOn=request.focusOn;"); focusOn=request.focusOn;}
+    if(Object.hasOwn(request,"hideNonPrimarySolos")) {mylog("hideNonPrimarySolos=request.hideNonPrimarySolos;"); hideNonPrimarySolos=request.hideNonPrimarySolos;}
+    if(Object.hasOwn(request,"unique")) {mylog("viewStates.views.unique.state=request.unique;"); viewStates.views.unique.state=request.unique;}
+    if(Object.hasOwn(request,"identical")) {mylog("viewStates.views.identical=request.identical;"); viewStates.views.identical.state=request.identical;}
     if(Object.hasOwn(request,"selectedGospelIndex")) {mylog("selectedGospelIndex=request.selectedGospelIndex;"); selectedGospelIndex=request.selectedGospelIndex;}
     if(Object.hasOwn(request,"lexes")) {mylog("got lexes param!"); selectedLexes=request.lexes}
     if(Object.hasOwn(request,"greekStrings")) {mylog("got greekSrings!"); selectedGreekStrings=request.greekStrings}

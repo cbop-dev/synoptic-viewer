@@ -42,7 +42,7 @@ export function getRequestParamsObj(searchParamsObj){
 
   }
   if (searchParamsObj.get("sections")){
-    req.pericopes=searchParamsObj.get("sections")?.split(',').map((n)=>parseInt(n));
+    req.sections=searchParamsObj.get("sections")?.split(',').map((n)=>parseInt(n));
 
   }
   
@@ -98,14 +98,14 @@ export function generateURL(alandPericopeNums, hideSolos,selectedGospelIndex, so
     }
 
     let params={
-        hideSolos: hideSolos,
+        hideSolos: hideSolos ? 1 : 0,
         selectedGospelIndex: selectedGospelIndex,
-        sort: sort,
-        hideNonPrimary: hideNonPrimary,
-        focusOn: focusOn,
-        hideNonPrimarySolos: hideNonPrimarySolos,
-        unique: unique,
-        identical: identical,
+        sort: sort ? 1 : 0,
+        hideNonPrimary: hideNonPrimary ? 1 : 0,
+        focusOn: focusOn ? 1 : 0,
+        hideNonPrimarySolos: hideNonPrimarySolos ? 1 : 0,
+        unique: unique ? 1 : 0,
+        identical: identical ? 1 : 0,
     }
 
     if (lexes.length) {
