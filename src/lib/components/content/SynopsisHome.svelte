@@ -2,7 +2,10 @@
 	import NtSynopsisPanel from './NtSynopsisPanel.svelte';
     import CustomParallelViewer from './CustomParallelViewer.svelte';
 	
-    
+    let {
+        request
+    } = $props();
+
     
    // let { data=null } = $props();
     
@@ -39,7 +42,7 @@
   </div>
 {#each panes as pane, index}
  <div id="pane-{pane.name}" class={index==selectedPane ? 'block' : 'hidden'}>
-   <pane.comp/>
+   <pane.comp request={request}/>
  </div>
 {/each}
 <!--

@@ -376,7 +376,7 @@ function resetViewOptions(lookup=false){
          
     ];
 
-     let textAreaFocused=$state(false);
+    let textAreaFocused=$state(false);
 
     function textAreaFocus(event){
         textAreaFocused=true;

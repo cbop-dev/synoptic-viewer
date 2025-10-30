@@ -1,646 +1,721 @@
 <script>
-    import {gospelParallels} from '@cbop-dev/aland-gospel-synopsis'
-    import { ParallelText, GospelPericopeGroup,Word, TextAndRef,VerseWords } from "./parallelTexts.svelte";
-    import { tfServer, TfServer, lexemes} from "$lib/n1904/tfN1904";
-	import ParallelTextSection from "./ParallelTextSection.svelte";
-	import { mylog } from "$lib/env/env";
-    import * as bibleUtils from '$lib/n1904/bibleRefUtils.js'
-    import * as mathUtils from '$lib/utils/math-utils.js';
-	//import Button from '../ui/Button.svelte';
-    import ButtonSelect from '../ui/ButtonSelect.svelte';
-    import {default as TfUtils} from './TfUtils.js';
-   import Modal2 from '../ui/Modal2.svelte';
-   import ModalButton from '../ui/ModalButton.svelte';
-	import Button from '../ui/Button.svelte';
-   // import { untrack } from 'svelte';
-    import { ColorUtils } from '$lib/utils/color-utils';
-	import GreekFilterInput from '../ui/GreekFilterInput.svelte';
-    import FilterInput from '../ui/FilterInput.svelte';
-	import { GreekUtils } from '$lib/utils/greek-utils';
-    import ArrowUp from '../ui/icons/arrow-up.svelte';
-    import ArrowDown from '../ui/icons/arrow-down.svelte';
-    import ArrowTop from '../ui/icons/arrow-top-icon.svelte';
-    import BulletsIcons from '../ui/icons/bullets-outline.svelte';
-    import CopyText from '../ui/CopyText.svelte';
-    import { findNextAnchor,findPrevAnchor, getAnchors} from '$lib/utils/ui-utils';
-	//import { generateHslColorGradient } from '../ui/chartUtils';
-  
-    let {
-        allowEverything=false
-    }=$props();
-    let fetching = $state(false);
-    let expecting = $state(0);
-    let numReady=$state(0);
-    let ready = $derived(numReady >= expecting);
-    let dataReady = $state(false);
-    let showSectionLinks=$state(false);
-   let showViewOptions=$state(false);
-   let showUnique = $state(false);
-   let showIdentical=$state(false);
-   let uniqueStyle = "lex-uniques";
-   let hideSolos = $state(false);
-     let hideNonPrimarySolos = $state(false);
-    let showLexemeHighlights = $state(false);
-    let showLookupPanel = $state(true);
-   // let showViewOptions = $state(false);
-    let landingPage=$state(true);
-    let showInfoModal=$state(false);
-    let maxLexesToShow=$state(30);
+import { onMount } from 'svelte';
+import { generateURL } from './urlParams';
+import Icon from '../ui/icons/Icon.svelte';
+import LinkIcon from '../ui/icons/link-icon.svelte';
+import LinkSvg from  '../ui/icons/link.svg';
+import {gospelParallels} from '@cbop-dev/aland-gospel-synopsis'
+import parallelTextsSvelte, { ParallelText, GospelPericopeGroup,Word, TextAndRef,VerseWords } from "./parallelTexts.svelte";
+import { tfServer, TfServer, lexemes} from "$lib/n1904/tfN1904";
+import ParallelTextSection from "./ParallelTextSection.svelte";
+import { mylog } from "$lib/env/env";
+import * as bibleUtils from '$lib/n1904/bibleRefUtils.js'
+import * as mathUtils from '$lib/utils/math-utils.js';
+//import Button from '../ui/Button.svelte';
+import ButtonSelect from '../ui/ButtonSelect.svelte';
+import {default as TfUtils} from './TfUtils.js';
+import Modal2 from '../ui/Modal2.svelte';
+import ModalButton from '../ui/ModalButton.svelte';
+import Button from '../ui/Button.svelte';
+// import { untrack } from 'svelte';
+import { ColorUtils } from '$lib/utils/color-utils';
+import GreekFilterInput from '../ui/GreekFilterInput.svelte';
+import FilterInput from '../ui/FilterInput.svelte';
+import { GreekUtils } from '$lib/utils/greek-utils';
+import ArrowUp from '../ui/icons/arrow-up.svelte';
+import ArrowDown from '../ui/icons/arrow-down.svelte';
+import ArrowTop from '../ui/icons/arrow-top-icon.svelte';
+import BulletsIcons from '../ui/icons/bullets-outline.svelte';
+import CopyText from '../ui/CopyText.svelte';
+import { findNextAnchor,findPrevAnchor, getAnchors} from '$lib/utils/ui-utils';
+	
+//import { generateHslColorGradient } from '../ui/chartUtils';
+
+let {
+    allowEverything=false,
+    request=null
+}=$props();
+
+
+
+let fetching = $state(false);
+let expecting = $state(0);
+let numReady=$state(0);
+let ready = $derived(numReady >= expecting);
+let dataReady = $state(false);
+let showSectionLinks=$state(false);
+let showViewOptions=$state(false);
+let showUnique = $state(false);
+let showIdentical=$state(false);
+let uniqueStyle = "lex-uniques";
+let hideSolos = $state(false);
+let hideNonPrimarySolos = $state(false);
+let showLexemeHighlights = $state(false);
+let showLookupPanel = $state(true);
+// let showViewOptions = $state(false);
+//let landingPage=$state(true);
+let gotRequest = request ? (request.pericopes || request.sections ) : false;
+let landingPage = $state(!gotRequest);
+let requestProcessed = $state(false);
+
+
+let showInfoModal=$state(false);
+let maxLexesToShow=$state(30);
+
+/**
+* @type {number[]} selectedLexes
+*/
+let selectedLexes=$state([]);
+
+/**
+* @type {string[]} selectedGreekStrings
+*/
+let selectedGreekStrings=$state([]);
+
+let selectedGospelIndex =$state(0);
+const gospelOptions =[
+{value: '', name: "None", abbrev:""},
+{value: gospelParallels.gospels.names.MATTHEW, name: "Matthew", abbrev:"matt"},
+{value: gospelParallels.gospels.names.MARK, name:  "Mark", abbrev:"mark"},
+{value: gospelParallels.gospels.names.LUKE, name:  "Luke", abbrev:"luke"},
+{value: gospelParallels.gospels.names.JOHN, name: "John", abbrev: "john"}
+
+];
+/**
+ * @type {string} selectedGospel
+ */
+let selectedGospel=$derived(gospelOptions[selectedGospelIndex].value);
+let hideNonPrimary = $state(true);
+//what is this for?
+let hideOthers = $state(false);
+let focusOn=$state(false);
+let focused=$derived.by(()=>{
+    let retVal = '';
+    if (focusOn){
+        retVal = selectedGospel;
+    }
+    return retVal;
+});
+let sort = $state(false);
+
+let callSortFilter=$derived(hideSolos || (gospelParallels.gospels.isValid(selectedGospel)   &&
+( sort ||hideNonPrimary || focusOn|| hideNonPrimarySolos)));
+
+/**
+ * @description Array of pericopes groups, with refs for each gospel (matt,mark,luke,john,other),
+ *  derived from 'filteredPericopes' and (maybe?? see next variable comment) retaining the same order.
+ * @type {GospelPericopeGroup[]} perGroups
+ */
+let perGroups = $state([]);
+
+//is the sorting here necessary???
+let filteredPerGroups=$derived(perGroups.filter((g)=>filteredPericopes.includes(g.id)).toSorted(
+    (a,b)=>filteredPericopes.indexOf(a.id)-filteredPericopes.indexOf(b.id)
+));
+/**
+ * @type {{matt:number[], mark:number[], luke:number[], john:number[], other:number[]}[]} perGroupsIndices
+ */
+// let perGroupsIndices = $state([]); //indices of groupsRefsArray
+let perGroupsIndices=$derived.by(()=>{
+    let retVal = [];
+    if (perGroups && perGroups.length){
+        retVal = TfUtils.getRefsArrays(perGroups).groupsIndices;
+    }
+    return retVal;
+});
+/**
+* @type string[] groupsRefsArray
+*/
+let groupsRefsArray=$derived.by(()=>{
+    let retVal = [];
+    if (perGroups && perGroups.length){
+        retVal = TfUtils.getRefsArrays(perGroups).refsArray;
+    }
+    return retVal;
+});
+
+//let groupsRefsArray = $state([]);
+
+/**buildPericopeRefsect|null} fetchedTextsResponse
+*/
+let fetchedTextsResponse = $state(null);
+let showLexOptionsInfo = $state(false);
+function parsePericopeNums(){
+    const refAreaRefs = refAreaText.trim().replaceAll(/\n+/g,";").replaceAll(/;+/g,";");
 
     /**
-    * @type {number[]} selectedLexes
-    */
-    let selectedLexes=$state([]);
+     * @type {number[]} theNums
+     */
+    const theNums = [];
+    bibleUtils.expandRefs(refAreaRefs).forEach((ref)=>{
+        const pNum = gospelParallels.getAlandPericopeNumbers(ref.trim(),selectedGospel, true);
+        for (const num of pNum){
+            if(!theNums.includes(num))
+                theNums.push(num);
+        }
+        
+    });
+    
+    alandPericopeNums = theNums.sort((a,b)=>a-b);   
+}
+
+
+function buildPericopeRefs(){
+    // mylog("sorting pericopes. Initial state = " + alandPericopeNums.join(","));
+
+    //  mylog("sorting pericopes. Sorted state = " + alandPericopeNums.join(","));
+    
+    perGroups = TfUtils.getGroupsArray(filteredPericopes);
+
+    // mylog("ran geRefsArrays!")
+
+}
+
+    /**
+ * @type {number[]} alandPericopes
+ */
+let alandPericopeNums = $state([]);
+
+let filteredPericopes=$derived.by(()=>{
+    let alands= (alandPericopeNums ? [...alandPericopeNums] : []); //copy of alands for sorting/filtering...
+    if (callSortFilter) {
+        if (sort && gospelParallels.gospels.isValid(selectedGospel)) {//sort!
+            // mylog("before sorting Alands for "+ selectedGospel +": ["+alands.join(',')+"]",true);
+            gospelParallels.sortAlandPericopes(alands,selectedGospel);
+            // mylog("after sorting Alands: ["+alands.join(',')+"]",true);
+        }
+        if (hideSolos || hideNonPrimary || hideNonPrimarySolos||focusOn) {
+            //we need to filter:
+            alands = gospelParallels.filterAlandPericopes(alands,selectedGospel,focusOn || hideNonPrimary,hideSolos,
+            focusOn||hideNonPrimarySolos);
+
+        }
+        
+    }
+    mylog("after filtering alands: ["+ alands.join(",")+"]",true)
+    return alands;
+})
+
+
+let lemmasByID=$derived.by(()=>{
+    let dict={}
+    if (fetchedTextsResponse && fetchedTextsResponse.lexemes) {
+        for (const [lemma,lex] of Object.entries(fetchedTextsResponse.lexemes)){
+            dict[lex.id]=lemma;
+        }
+    }
+    return dict;
+});
+
+    let refAreaText = $state('Matt 6:10');
+
+
+/**
+ * @type {number[]} filteredPericopes
+ */
+//   let filteredPericopes = $state([]);
+//$derived(alandPericopeNums.filter((p)=>!hideNonPrimary || 
+    //      (gospelParallels.alandSynopsis.isPrimaryPericope(p,selectedGospel[selectedGospelIndex].value))))
+
+
+let selectedSection = $state([1]);
+function selectSection(){
+    landingPage=false;
+    resetViewOptions(false);
+    alandPericopeNums=[...selectedSection];
+
+    buildAndFetchPericopes();
+} 
+
+/**
+ * @type {Object<string,string>} lexClasses
+ */
+let customGreekClasses= $derived.by(()=>{// id->css color (e.g., "#eee")
     
     /**
-    * @type {string[]} selectedGreekStrings
-    */
-    let selectedGreekStrings=$state([]);
-
-   let selectedGospelIndex =$state(0);
-   const gospelOptions =[
-    {value: '', name: "None", abbrev:""},
-    {value: gospelParallels.gospels.names.MATTHEW, name: "Matthew", abbrev:"matt"},
-    {value: gospelParallels.gospels.names.MARK, name:  "Mark", abbrev:"mark"},
-    {value: gospelParallels.gospels.names.LUKE, name:  "Luke", abbrev:"luke"},
-    {value: gospelParallels.gospels.names.JOHN, name: "John", abbrev: "john"}
-
-   ];
-    /**
-     * @type {string} selectedGospel
+     * @type {Object<string,string>}
      */
-   let selectedGospel=$derived(gospelOptions[selectedGospelIndex].value);
-   let hideNonPrimary = $state(true);
-   //what is this for?
-   let hideOthers = $state(false);
-   let focusOn=$state(false);
-   let focused=$derived.by(()=>{
-        let retVal = '';
-        if (focusOn){
-            retVal = selectedGospel;
-        }
-        return retVal;
-   });
-   let sort = $state(false);
-  
-   let callSortFilter=$derived(hideSolos || (gospelParallels.gospels.isValid(selectedGospel)   &&
-   ( sort ||hideNonPrimary || focusOn|| hideNonPrimarySolos)));
-
-    /**
-     * @description Array of pericopes groups, with refs for each gospel (matt,mark,luke,john,other),
-     *  derived from 'filteredPericopes' and (maybe?? see next variable comment) retaining the same order.
-     * @type {GospelPericopeGroup[]} perGroups
-     */
-    let perGroups = $state([]);
-
-    //is the sorting here necessary???
-    let filteredPerGroups=$derived(perGroups.filter((g)=>filteredPericopes.includes(g.id)).toSorted(
-        (a,b)=>filteredPericopes.indexOf(a.id)-filteredPericopes.indexOf(b.id)
-    ));
-    /**
-     * @type {{matt:number[], mark:number[], luke:number[], john:number[], other:number[]}[]} perGroupsIndices
-     */
-   // let perGroupsIndices = $state([]); //indices of groupsRefsArray
-    let perGroupsIndices=$derived.by(()=>{
-        let retVal = [];
-        if (perGroups && perGroups.length){
-            retVal = TfUtils.getRefsArrays(perGroups).groupsIndices;
-        }
-        return retVal;
-    });
-    /**
-    * @type string[] groupsRefsArray
-    */
-    let groupsRefsArray=$derived.by(()=>{
-        let retVal = [];
-        if (perGroups && perGroups.length){
-            retVal = TfUtils.getRefsArrays(perGroups).refsArray;
-        }
-        return retVal;
-    });
- 
-    //let groupsRefsArray = $state([]);
-    
-    /**buildPericopeRefsect|null} fetchedTextsResponse
-    */
-    let fetchedTextsResponse = $state(null);
-    let showLexOptionsInfo = $state(false);
-    function parsePericopeNums(){
-        const refAreaRefs = refAreaText.trim().replaceAll(/\n+/g,";").replaceAll(/;+/g,";");
-
-        /**
-         * @type {number[]} theNums
-         */
-        const theNums = [];
-        bibleUtils.expandRefs(refAreaRefs).forEach((ref)=>{
-            const pNum = gospelParallels.getAlandPericopeNumbers(ref.trim(),selectedGospel, true);
-            for (const num of pNum){
-                if(!theNums.includes(num))
-                    theNums.push(num);
+    const ret = {}
+    if(selectedLexes && selectedGreekStrings.length) {
+        //mylog("building lexClasses...",true)
+        for(const [relIndex,gk] of selectedGreekStrings.entries()) {
+            const color = getColorOfGreek(gk);
+            if (color) {
+                const index = selectedLexes.length+relIndex
+                let classes = "custom-greek-"+ relIndex;
+                classes += " " + color;
+                ret[gk] = classes;
             }
+
+        }
+    }
+    return ret;
+});
+
+/**
+ * @type {Object<number,string>} lexClasses
+ */
+let lexClasses= $derived.by(()=>{// id->css color (e.g., "#eee")
+    
+    /**
+     * @type {Object<number,string>}
+     */
+    const ret = {}
+    if(dataReady && fetchedTextsResponse.lexemes) {
+        //mylog("building lexClasses...",true)
+        for(const id of Object.values(fetchedTextsResponse.lexemes).map((o)=>o.id)) {
             
-        });
-        
-        alandPericopeNums = theNums.sort((a,b)=>a-b);   
+            let classes = "lex-"+id;
+            if(selectedLexes.includes(id)){
+                classes += " " + getColorOfLex(id)
+            } 
+            //  mylog("setting lex " + id + " to: " + classes,true);
+            ret[id] = classes;
+        }
     }
+    return ret;
+});
 
+/**
+ * @type {number[]} unselectedLexes
+ */
+let unselectedLexes =$derived.by(()=>{
+    if (fetchedTextsResponse && fetchedTextsResponse.lexemes){
+        return Object.values(fetchedTextsResponse.lexemes).filter(
+            (lex)=>!selectedLexes.includes(lex.id)).map((l)=>l.id).sort((a,b)=>a-b)}
+    else
+        return [];
+});
 
-    function buildPericopeRefs(){
-       // mylog("sorting pericopes. Initial state = " + alandPericopeNums.join(","));
- 
-      //  mylog("sorting pericopes. Sorted state = " + alandPericopeNums.join(","));
-        
-        perGroups = TfUtils.getGroupsArray(filteredPericopes);
- 
-       // mylog("ran geRefsArrays!")
- 
-    }
+//let unselectedLexBetaArray = $derived(unselectedLexes.map((lexID)=>fetchedTextsResponse.lexemes[lemmasByID[lexID]].beta));
+let unselectedLexPlainArray = $derived(unselectedLexes.map((lexID)=>GreekUtils.removeDiacritics(lemmasByID[lexID])));
 
-       /**
-     * @type {number[]} alandPericopes
-     */
-    let alandPericopeNums = $state([]);
- 
-    let filteredPericopes=$derived.by(()=>{
-        let alands= (alandPericopeNums ? [...alandPericopeNums] : []); //copy of alands for sorting/filtering...
-        if (callSortFilter) {
-            if (sort && gospelParallels.gospels.isValid(selectedGospel)) {//sort!
-               // mylog("before sorting Alands for "+ selectedGospel +": ["+alands.join(',')+"]",true);
-                gospelParallels.sortAlandPericopes(alands,selectedGospel);
-              // mylog("after sorting Alands: ["+alands.join(',')+"]",true);
-            }
-            if (hideSolos || hideNonPrimary || hideNonPrimarySolos||focusOn) {
-                //we need to filter:
-                alands = gospelParallels.filterAlandPericopes(alands,selectedGospel,focusOn || hideNonPrimary,hideSolos,
-                focusOn||hideNonPrimarySolos);
-
-            }
-           
-        }
-        //mylog("after filtering alands: ["+ alands.join(",")+"]",true)
-        return alands;
-    })
-    
-   
-    let lemmasByID=$derived.by(()=>{
-        let dict={}
-        if (fetchedTextsResponse && fetchedTextsResponse.lexemes) {
-            for (const [lemma,lex] of Object.entries(fetchedTextsResponse.lexemes)){
-                dict[lex.id]=lemma;
-            }
-        }
-        return dict;
-    });
-
-       let refAreaText = $state('Matt 6:10');
- 
-
-    /**
-     * @type {number[]} filteredPericopes
-     */
- //   let filteredPericopes = $state([]);
-    //$derived(alandPericopeNums.filter((p)=>!hideNonPrimary || 
-      //      (gospelParallels.alandSynopsis.isPrimaryPericope(p,selectedGospel[selectedGospelIndex].value))))
-
-
-  let selectedSection = $state([1]);
-   function selectSection(){
-        landingPage=false;
-        resetViewOptions(false);
-        alandPericopeNums=[...selectedSection];
-
-        buildAndFetchPericopes();
-   } 
-
-    /**
-     * @type {Object<string,string>} lexClasses
-     */
-    let customGreekClasses= $derived.by(()=>{// id->css color (e.g., "#eee")
-        
-        /**
-         * @type {Object<string,string>}
-         */
-        const ret = {}
-        if(selectedLexes && selectedGreekStrings.length) {
-            //mylog("building lexClasses...",true)
-            for(const [relIndex,gk] of selectedGreekStrings.entries()) {
-                const color = getColorOfGreek(gk);
-                if (color) {
-                    const index = selectedLexes.length+relIndex
-                    let classes = "custom-greek-"+ relIndex;
-                    classes += " " + color;
-                    ret[gk] = classes;
-                }
-   
-            }
-        }
-        return ret;
-    });
-
-    /**
-     * @type {Object<number,string>} lexClasses
-     */
-    let lexClasses= $derived.by(()=>{// id->css color (e.g., "#eee")
-        
-        /**
-         * @type {Object<number,string>}
-         */
-        const ret = {}
-        if(dataReady && fetchedTextsResponse.lexemes) {
-            //mylog("building lexClasses...",true)
-            for(const id of Object.values(fetchedTextsResponse.lexemes).map((o)=>o.id)) {
-                
-                let classes = "lex-"+id;
-                if(selectedLexes.includes(id)){
-                    classes += " " + getColorOfLex(id)
-                } 
-              //  mylog("setting lex " + id + " to: " + classes,true);
-                ret[id] = classes;
-            }
-        }
-        return ret;
-    });
-    
-    /**
-     * @type {number[]} unselectedLexes
-     */
-    let unselectedLexes =$derived.by(()=>{
-        if (fetchedTextsResponse && fetchedTextsResponse.lexemes){
-            return Object.values(fetchedTextsResponse.lexemes).filter(
-                (lex)=>!selectedLexes.includes(lex.id)).map((l)=>l.id).sort((a,b)=>a-b)}
-        else
-            return [];
-    });
-
-    //let unselectedLexBetaArray = $derived(unselectedLexes.map((lexID)=>fetchedTextsResponse.lexemes[lemmasByID[lexID]].beta));
-    let unselectedLexPlainArray = $derived(unselectedLexes.map((lexID)=>GreekUtils.removeDiacritics(lemmasByID[lexID])));
-    
-    /**
-     * @type {number[]} bestMatchedLexes
-     */
-    let bestMatchedLexes=$state([]);
-
-        
-    /**
-     * @type {number[]} otherMatchedLexes
-     */
-    let otherMatchedLexes=$state([]);
+/**
+ * @type {number[]} bestMatchedLexes
+ */
+let bestMatchedLexes=$state([]);
 
     
-   async function fetchPostTextsBatch(){
-    //todo: refactor in another .svelte.js file, then test
-        fetchedTextsResponse = null;
+/**
+ * @type {number[]} otherMatchedLexes
+ */
+let otherMatchedLexes=$state([]);
 
-        /**
-         * @type {{book:string,chapter:number|null,verses:number[]}[]} bcvFetchArray
-         */
-        const bcvFetchArray=TfUtils.getBCVarrayFromRefs(groupsRefsArray);
-       
-        fetchedTextsResponse = await tfServer.getTexts(bcvFetchArray,true,true);
-        
-    }
-    async function buildAndFetchPericopes(){
-        landingPage=false;
-        viewStates.views.lookup.state=false;
-        dataReady=false;
-       // mylog("disabling sortFilter and focus...");
+
+async function fetchPostTextsBatch(){
+//todo: refactor in another .svelte.js file, then test
+    fetchedTextsResponse = null;
+
+    /**
+     * @type {{book:string,chapter:number|null,verses:number[]}[]} bcvFetchArray
+     */
+    const bcvFetchArray=TfUtils.getBCVarrayFromRefs(groupsRefsArray);
+    
+    fetchedTextsResponse = await tfServer.getTexts(bcvFetchArray,true,true);
+    
+}
+async function buildAndFetchPericopes(reset=true){
+    viewStates.views.lookup.state=false;
+    dataReady=false;
+    landingPage=false;
+    if (reset) {
+          
+    // mylog("disabling sortFilter and focus...");
         resetViewOptions();
-        buildPericopeRefs();
-        fetching = true;
-        //fetchTexts();
         emptySelectedLexemes();
         emptySelectedCustomGreek();
-        await fetchPostTextsBatch();
-        //buildLexArrays();
-        populateGroupsText(true);
-        dataReady= true;
     }
-    //let lemmasByID={}
+    
+    
+    buildPericopeRefs();
+    fetching = true;
+    //fetchTexts();
+    
+    await fetchPostTextsBatch();
+    //buildLexArrays();
+    populateGroupsText(true);
+    dataReady= true;
+}
+//let lemmasByID={}
 
 
-    function buildLexArrays(){
-        //mylog("building LexArrays...", true)
-        lemmasByID ={};
-        if (fetchedTextsResponse) {
-            for (const [lemma,lex] of Object.entries(fetchedTextsResponse.lexemes)){
-                lemmasByID[lex.id]=lemma;
+function buildLexArrays(){
+    //mylog("building LexArrays...", true)
+    lemmasByID ={};
+    if (fetchedTextsResponse) {
+        for (const [lemma,lex] of Object.entries(fetchedTextsResponse.lexemes)){
+            lemmasByID[lex.id]=lemma;
+        }
+    }
+    else{
+        mylog("Cannot build LexArrays!", true)
+    }
+
+    
+}
+function populateGroupsText(words=false){
+    // mylog("v==================================v", true);
+    //mylog("populateGroupTexts()...",true);
+    
+    for (const [index,group] of perGroups.entries()){
+        mylog("checking group # " + group.id +" , title: '"+ group.title + ", index: " + index);
+        for (const book of ['matt', 'mark', 'luke', 'john','other']){
+            for (const [i,textRef] of group[book].textRefs.entries()){
+                mylog("checking ref: " + textRef.reference);
+                const queryIndex= perGroupsIndices[index][book][i];
+                if (fetchedTextsResponse && fetchedTextsResponse['texts'] && fetchedTextsResponse['texts'][queryIndex]){
+                    textRef.text= fetchedTextsResponse['texts'][queryIndex].text;
+                    if (words){
+                        
+                        textRef.words=fetchedTextsResponse['texts'][queryIndex].words;
+                    }
+                    // mylog("populating fetched text for group index "+index + ", ref: '" + textRef.reference
+                    // + "', queryIndex = " + queryIndex +", text='"+textRef.text +"'", true);
+                }
+                
             }
+        }
+        group.markUniqueAndIdenticalWords();        
+    }
+    mylog("DONE! Populated the GroupTexts()!")
+    mylog("^==================================^")
+}
+
+
+function resetViewOptions(lookup=false){
+    selectedGospelIndex =0;
+    sort = false;
+    viewStates.reset(lookup);
+    hideNonPrimary=false;
+    focusOn=false;
+    showUnique=false;
+    hideSolos=false;
+    hideNonPrimarySolos=false;
+    
+    //  focus=selectedGospel[selectedGospelIndex].value;
+}
+function lookupShowNtParallels(){
+    resetViewOptions();
+    parsePericopeNums();
+    buildAndFetchPericopes();
+    //fetching = false;
+    //ready = true;
+    
+
+    
+}
+
+
+async function urlRequestShowNtParallels(){
+
+    //resetViewOptions();
+    viewStates.reset(false,['view','lookup','words','highlightOnClick']);
+    //viewStates.views.highlightOnClick.state =false;
+    alandPericopeNums=request.pericopes;
+    await buildAndFetchPericopes(false);
+
+}
+
+function toggleViewOptionsModal(){
+    if (showViewOptions)
+        showViewOptions=false;
+    else
+        showViewOptions=true;
+
+    
+}
+
+/**
+* 
+* @param {string} greekString
+*/
+function getColorOfGreek(greekString){
+
+    let colorString = ''
+    if (selectedGreekStrings.includes(greekString)){
+        const selectedIndex = selectedLexes.length + selectedGreekStrings.indexOf(greekString)
+        colorString += ' '+ ColorUtils.getCustomBgTextColorClasses(selectedIndex);
+    }
+    
+    return colorString;
+}
+
+/**
+ * 
+ * @param {number} lexid
+ */
+function getColorOfLex(lexid){
+
+    let colorString = ''
+    if (selectedLexes.includes(lexid)){
+        const selectedIndex = selectedLexes.indexOf(lexid)
+        colorString += ' '+ ColorUtils.getCustomBgTextColorClasses(selectedIndex);
+    }
+    
+    return colorString;
+}
+
+function getLexClasses(id){
+    /*let classString="lex-"+id;
+    let highlight=highlightLexeme(id)
+    return classString + (highlight ? " " + highlight : '');
+    */
+    //mylog("getting Lex class for " + id, true);
+    return lexClasses[id];
+
+}
+
+function emptySelectedCustomGreek(){
+    selectedGreekStrings.length = 0;
+}
+
+function emptySelectedLexemes(){
+    selectedLexes.length = 0;
+}
+function toggleLex(id){
+    // mylog("toggleLex("+id+")",true);
+    if(selectedLexes.includes(id)) {
+        selectedLexes.splice(selectedLexes.indexOf(id),1);
+
+    }
+    else {
+        
+        selectedLexes.push(id);
+
+    }
+}
+
+/**
+ * 
+ * @param {string} string
+ */
+function toggleGreekString(string){
+    if(selectedGreekStrings.includes(string)) {
+        selectedGreekStrings.splice(selectedGreekStrings.indexOf(string),1);
+
+    }
+    else {
+        
+        selectedGreekStrings.push(string);
+
+    }
+
+}
+
+function highlightLexeme(id=0,color=null){
+    let ret = ''
+    ret += "bg-red-500";
+    return ret;
+}
+
+const viewStates=$state({
+    views:{
+        view: { description:  "View Options", hotkeys:['v'], state:false,modal:true},
+        lookup: { description:  "Lookup passage(s) or select section", hotkeys:['l', 's'], state:false,modal:false},
+        words: {description:  "Lexeme/Word Options", hotkeys:['w'], state:false,modal:true},
+        highlightOnClick: { description:  "Enable/disable highlight on click.", hotkeys:['c'], state:true,modal:false},
+        info: { description:  "Website and project information.", hotkeys:['i'], state:false,modal:true},
+        unique: { description:  "Toggle Unique Lexeme color outlining", hotkeys:['u'], state:false,modal:false},
+        help: { description:  "Show help menu", hotkeys:['h', '?'], state:false,modal:true},
+        sections: { description:  "Jump to a section", hotkeys:['j'], state:false,modal:true},
+        identical: { description:  "Show (bold & underline) morphologically identical words shared by different gospels in a parallel group ",
+            hotkeys:['m'], state:false,modal:false},
+            
+    },
+
+    
+    /**
+     * @param {string} modalName
+     */
+    toggle(modalName){
+        if (this.views[modalName].state) {
+            this.views[modalName].state=false
         }
         else{
-            mylog("Cannot build LexArrays!", true)
+            this.views[modalName].state = true;
         }
-
-        
-    }
-    function populateGroupsText(words=false){
-       // mylog("v==================================v", true);
-        //mylog("populateGroupTexts()...",true);
-        
-        for (const [index,group] of perGroups.entries()){
-            mylog("checking group # " + group.id +" , title: '"+ group.title + ", index: " + index);
-            for (const book of ['matt', 'mark', 'luke', 'john','other']){
-                for (const [i,textRef] of group[book].textRefs.entries()){
-                    mylog("checking ref: " + textRef.reference);
-                    const queryIndex= perGroupsIndices[index][book][i];
-                    if (fetchedTextsResponse && fetchedTextsResponse['texts'] && fetchedTextsResponse['texts'][queryIndex]){
-                        textRef.text= fetchedTextsResponse['texts'][queryIndex].text;
-                        if (words){
-                            
-                            textRef.words=fetchedTextsResponse['texts'][queryIndex].words;
-                        }
-                       // mylog("populating fetched text for group index "+index + ", ref: '" + textRef.reference
-                       // + "', queryIndex = " + queryIndex +", text='"+textRef.text +"'", true);
-                    }
-                    
-                }
-            }
-            group.markUniqueAndIdenticalWords();        
-        }
-        mylog("DONE! Populated the GroupTexts()!")
-        mylog("^==================================^")
-    }
-    function resetViewOptions(lookup=false){
-        selectedGospelIndex =0;
-        sort = false;
-        viewStates.reset(lookup);
-        hideNonPrimary=false;
-        focusOn=false;
-        showUnique=false;
-        hideSolos=false;
-        hideNonPrimarySolos=false;
-        
-      //  focus=selectedGospel[selectedGospelIndex].value;
-    }
-    function lookupShowNtParallels(){
-        resetViewOptions();
-        parsePericopeNums();
-        buildAndFetchPericopes();
-        //fetching = false;
-        //ready = true;
-        
-
-        
-    }
- 
-    
-    /**
-     * 
-     * @param {boolean} flag
-     */
-    function toggleViewOptionsModal(){
-        if (showViewOptions)
-            showViewOptions=false;
-        else
-            showViewOptions=true;
-
-      
-    }
-
-   // let lexemes=$state(null);
-
-
-
-   /**
-    * 
-    * @param {string} greekString
-    */
-    function getColorOfGreek(greekString){
-    
-        let colorString = ''
-        if (selectedGreekStrings.includes(greekString)){
-            const selectedIndex = selectedLexes.length + selectedGreekStrings.indexOf(greekString)
-            colorString += ' '+ ColorUtils.getCustomBgTextColorClasses(selectedIndex);
-        }
-        
-        return colorString;
-    }
+    },
 
     /**
      * 
-     * @param {number} lexid
+     * @param {string} key
+     * @returns {string}
      */
-    function getColorOfLex(lexid){
-    
-        let colorString = ''
-        if (selectedLexes.includes(lexid)){
-            const selectedIndex = selectedLexes.indexOf(lexid)
-            colorString += ' '+ ColorUtils.getCustomBgTextColorClasses(selectedIndex);
+    getViewNameFromKey(key){
+        let retVal = '';
+        const matchingViews = Object.entries(this.views)
+            .filter(([name,obj])=>obj.hotkeys.includes(key))
+            .map(([k,v])=>k);this
+        if (matchingViews.length > 0){
+            retVal = matchingViews[0]
         }
         
-        return colorString;
-    }
+        return retVal;
+    },
 
-    function getLexClasses(id){
-        /*let classString="lex-"+id;
-        let highlight=highlightLexeme(id)
-        return classString + (highlight ? " " + highlight : '');
-        */
-        //mylog("getting Lex class for " + id, true);
-        return lexClasses[id];
-
-    }
-
-    function emptySelectedCustomGreek(){
-        selectedGreekStrings.length = 0;
-    }
-
-    function emptySelectedLexemes(){
-        selectedLexes.length = 0;
-    }
-    function toggleLex(id){
-       // mylog("toggleLex("+id+")",true);
-        if(selectedLexes.includes(id)) {
-            selectedLexes.splice(selectedLexes.indexOf(id),1);
-
+    /**
+     * 
+     * @param {boolean} lookup
+     * @param {string[]} views
+     */
+    reset(lookup=true,views=[]){
+        if (views.length){
+            views.forEach((view)=>{
+                this.views[view].state=false;
+            })
         }
         else {
-           
-            selectedLexes.push(id);
-
-        }
-    }
-
-    /**
-     * 
-     * @param {string} string
-     */
-    function toggleGreekString(string){
-        if(selectedGreekStrings.includes(string)) {
-            selectedGreekStrings.splice(selectedGreekStrings.indexOf(string),1);
-
-        }
-        else {
-           
-            selectedGreekStrings.push(string);
-
-        }
-
-    }
-
-    function highlightLexeme(id=0,color=null){
-        let ret = ''
-        ret += "bg-red-500";
-        return ret;
-    }
-
-    const viewStates=$state({
-        views:{
-            view: { description:  "View Options", hotkeys:['v'], state:false,modal:true},
-            lookup: { description:  "Lookup passage(s) or select section", hotkeys:['l', 's'], state:true,modal:false},
-            words: {description:  "Lexeme/Word Options", hotkeys:['w'], state:false,modal:true},
-            highlightOnClick: { description:  "Enable/disable highlight on click.", hotkeys:['c'], state:true,modal:false},
-            info: { description:  "Website and project information.", hotkeys:['i'], state:false,modal:true},
-            unique: { description:  "Toggle Unique Lexeme color outlining", hotkeys:['u'], state:false,modal:false},
-            help: { description:  "Show help menu", hotkeys:['h', '?'], state:false,modal:true},
-            sections: { description:  "Jump to a section", hotkeys:['j'], state:false,modal:true},
-            identical: { description:  "Show (bold & underline) morphologically identical words shared by different gospels in a parallel group ",
-             hotkeys:['m'], state:false,modal:false},
-              
-        },
-
-        
-        /**
-         * @param {string} modalName
-         */
-        toggle(modalName){
-            if (this.views[modalName].state) {
-                this.views[modalName].state=false
-            }
-            else{
-                this.views[modalName].state = true;
-            }
-        },
-
-        /**
-         * 
-         * @param {string} key
-         * @returns {string}
-         */
-        getViewNameFromKey(key){
-            let retVal = '';
-            const matchingViews = Object.entries(this.views)
-                .filter(([name,obj])=>obj.hotkeys.includes(key))
-                .map(([k,v])=>k);this
-            if (matchingViews.length > 0){
-                retVal = matchingViews[0]
-            }
-            
-            return retVal;
-        },
-        reset(lookup=true){
             for (const view of Object.keys(this.views)){
                 this.views[view].state = false;
             }
-            if (lookup){
-                this.views.lookup.state=lookup
-            }
-        },
 
-        /**
-         * 
-         * @param {string} viewName
-         * @returns {boolean}
-         */
-        isVisible(viewName){
-            let retVal = false;
-            const view = this.views[viewName];
-            if(view){
-                retVal = view.state;
-            }
-            return retVal;
-        },
-        /**
-         * @returns {string[]}
-        */
-        getVisible(){
-            return Object.entries(this.views).filter(([viewName,obj])=>obj.state).map(([k,v])=>k);
         }
 
-    });
+        this.views.lookup.state= lookup ? true :false;
+        
+    },
 
+    /**
+     * 
+     * @param {string} viewName
+     * @returns {boolean}
+     */
+    isVisible(viewName){
+        let retVal = false;
+        const view = this.views[viewName];
+        if(view){
+            retVal = view.state;
+        }
+        return retVal;
+    },
+    /**
+     * @returns {string[]}
+    */
+    getVisible(){
+        return Object.entries(this.views).filter(([viewName,obj])=>obj.state).map(([k,v])=>k);
+    }
+
+});
+
+
+function jumpToPrevSection(){
+    const nextId=findPrevAnchor()
+    if (nextId){
+        document.location=document.location.toString().split('#')[0]+'#'+nextId;
+    }
+}
+
+
+function jumpToFirstSection(){
+    const anchors = getAnchors();
+    if (anchors && anchors.length) {
+        document.location=document.location.toString().split('#')[0]+'#'+anchors[0].id;
+
+    }     
     
-    function jumpToPrevSection(){
-        const nextId=findPrevAnchor()
-        if (nextId){
-            document.location=document.location.toString().split('#')[0]+'#'+nextId;
-        }
+}
+
+function jumpToLastSection(){
+    const anchors = getAnchors();
+    if (anchors && anchors.length) {
+        document.location=document.location.toString().split('#')[0]+'#'+anchors[anchors.length-1].id;
+
+    }     
+    
+}
+
+
+function jumpToNextSection(){
+    const nextId=findNextAnchor()
+    if (nextId){
+        document.location=document.location.toString().split('#')[0]+'#'+nextId;
     }
+}
 
-
-    function jumpToFirstSection(){
-        const anchors = getAnchors();
-        if (anchors && anchors.length) {
-            document.location=document.location.toString().split('#')[0]+'#'+anchors[0].id;
-
-        }     
+const hotkeys=[
+    {key: 'n', name:'Next Section',function: jumpToNextSection},
+    {key:'p',name:'Previous Section',function: jumpToPrevSection},
+    {key:'t',name:'Top/First Section',function: jumpToFirstSection},
+    {key:'b',name:'Bottom/Last Section',function: jumpToLastSection},
         
-    }
-
-    function jumpToLastSection(){
-        const anchors = getAnchors();
-        if (anchors && anchors.length) {
-            document.location=document.location.toString().split('#')[0]+'#'+anchors[anchors.length-1].id;
-
-        }     
-        
-    }
-
-
-    function jumpToNextSection(){
-        const nextId=findNextAnchor()
-        if (nextId){
-            document.location=document.location.toString().split('#')[0]+'#'+nextId;
-        }
-    }
-    const hotkeys=[
-        {key: 'n', name:'Next Section',function: jumpToNextSection},
-        {key:'p',name:'Previous Section',function: jumpToPrevSection},
-        {key:'t',name:'Top/First Section',function: jumpToFirstSection},
-        {key:'b',name:'Bottom/Last Section',function: jumpToLastSection},
-         
-    ];
-    function onkeydown(event){
-        if(!textAreaFocused ){
-            const matchedView=viewStates.getViewNameFromKey(event.key);
-            const modalVisibles=viewStates.getVisible().filter((name)=>(viewStates.views[name].modal)); 
-            if (matchedView) {
-                    
-                if (!modalVisibles.length){
-                    
-                    if (matchedView){
-                        viewStates.toggle(matchedView);
-                    }
-                }  
-            }
-            else if (!modalVisibles.length){
-                const matchedHotkey=hotkeys.filter((o)=>o.key==event.key);
-                if (matchedHotkey.length){
-                    matchedHotkey[0].function();
+];
+function onkeydown(event){
+    if(!textAreaFocused ){
+        const matchedView=viewStates.getViewNameFromKey(event.key);
+        const modalVisibles=viewStates.getVisible().filter((name)=>(viewStates.views[name].modal)); 
+        if (matchedView) {
+                
+            if (!modalVisibles.length){
+                
+                if (matchedView){
+                    viewStates.toggle(matchedView);
                 }
-            }
-             
+            }  
         }
+        else if (!modalVisibles.length){
+            const matchedHotkey=hotkeys.filter((o)=>o.key==event.key);
+            if (matchedHotkey.length){
+                matchedHotkey[0].function();
+            }
+        }
+            
     }
+}
 
 
-    let textAreaFocused=$state(false);
+let textAreaFocused=$state(false);
 
-    function textAreaFocus(event){
-        textAreaFocused=true;
+function textAreaFocus(event){
+    textAreaFocused=true;
+}
+function textAreaBlur(event){
+    textAreaFocused=false;
+}
+
+const wordTabs=['lexemes','custom'];
+let selectedWordTabIndex=$state(0);
+
+let customGreekInputText = $state('');
+$effect(()=>{customGreekInputText=GreekUtils.removeDiacritics(
+    GreekUtils.beta2Greek(customGreekInputText).toLocaleLowerCase()).replaceAll(/[^α-ω]+/g,'')
+});
+//$inspect(customGreekClasses);
+
+
+
+function loadRequestOptions(){
+    mylog("loadRequestOptions...")
+    if(Object.hasOwn(request,"hideSolos,")) {mylog("hideSolos =request.hideSolos;"); hideSolos =request.hideSolos;}
+    if(Object.hasOwn(request,"sort,")) {mylog("sort =request.sort;"); sort =request.sort;}
+    if(Object.hasOwn(request,"hideNonPrimary,")) {mylog("hideNonPrimary=request.hideNonPrimary;"); hideNonPrimary=request.hideNonPrimary;}
+    if(Object.hasOwn(request,"focusOn,")) {mylog("focusOn=request.focusOn;"); focusOn=request.focusOn;}
+    if(Object.hasOwn(request,"hideNonPrimarySolos,")) {mylog("hideNonPrimarySolos=request.hideNonPrimarySolos;"); hideNonPrimarySolos=request.hideNonPrimarySolos;}
+    if(Object.hasOwn(request,"unique,")) {mylog("viewStates.views.unique.state=request.unique;"); viewStates.views.unique.state=request.unique;}
+    if(Object.hasOwn(request,"identical")) {mylog("viewStates.views.identical=request.identical;"); viewStates.views.identical=request.identical;}
+    if(Object.hasOwn(request,"selectedGospelIndex")) {mylog("selectedGospelIndex=request.selectedGospelIndex;"); selectedGospelIndex=request.selectedGospelIndex;}
+    if(Object.hasOwn(request,"lexes")) {mylog("got lexes param!"); selectedLexes=request.lexes}
+    if(Object.hasOwn(request,"greekStrings")) {mylog("got greekSrings!"); selectedGreekStrings=request.greekStrings}
+}
+let mounted=$state(false);
+onMount(() => {
+    if (gotRequest){
+        landingPage=false;
+        viewStates.views.lookup.state=false;
+        loadRequestOptions();
+        viewStates.views.lookup.state=false;
+        const promise = urlRequestShowNtParallels();
+        promise.then(()=>{requestProcessed=true});
+
     }
-    function textAreaBlur(event){
-        textAreaFocused=false;
+    else{
+        viewStates.reset()
     }
+    mounted = true;
+});
+//$inspect("filteredPericopes",filteredPericopes, "perGroups:", perGroups, "filteredPerGroups:", filteredPerGroups);
 
-    const wordTabs=['lexemes','custom'];
-    let selectedWordTabIndex=$state(0);
-
-    let customGreekInputText = $state('');
-   $effect(()=>{customGreekInputText=GreekUtils.removeDiacritics(
-        GreekUtils.beta2Greek(customGreekInputText).toLocaleLowerCase()).replaceAll(/[^α-ω]+/g,'')
-    });
-   //$inspect(customGreekClasses);
-    </script>
+$inspect("request:", request);
+</script>
 <style>
     @reference "tailwindcss";
 
@@ -703,6 +778,19 @@
 <div class="self-center text-center sticky top-0 bg-white z-40">
 
     {#if !landingPage}
+        {#if gotRequest && !requestProcessed}
+            
+            <h3><i>Processing Request...</i></h3>
+            <span class="loading loading-spinner loading-xl"></span>
+        {:else}
+
+
+
+        
+
+
+        
+
 
     <div class="navbar bg-base-100 text-center  shadow-sm ">
   <div class="navbar-start text-left max-w-full w-full m-auto md:hidden">
@@ -797,13 +885,9 @@
   </div>
     </div>
     {/if}
-    <!--==================================================================-->
-
-
-
-
-
-{#if landingPage}
+    {:else}
+    
+<!--<h1>No request!!!!</h1><hr/>-->
 <div id="landing-panel text-center">
    <h1 class="block text-center "><span class="hidden lg:inline">Greek NT Gospel Synopsis Viewer</span>
     <span class="hidden md:inline lg:hidden">NT Gospel Synopsis</span>
@@ -818,7 +902,10 @@
       </div>
       <hr/>
 </div>
+
     
+
+
 
 {/if}
 {#if viewStates.views.lookup.state}
@@ -862,7 +949,13 @@
 <div class="text-center mt-3">
    
     {#if alandPericopeNums.length}
-         <h1 class="text-center">Results:</h1>
+         <h1 class="text-center">Results:
+            <CopyText icon={LinkSvg} 
+            copyText={generateURL(alandPericopeNums,hideSolos,selectedGospelIndex,sort,
+            hideNonPrimary,focusOn,hideNonPrimarySolos,viewStates.views.unique.state,viewStates.views.identical.state,selectedLexes,selectedGreekStrings)} 
+            tooltip='Copy stuff'
+            
+            /></h1>
         
 
     <div id="results">
@@ -920,6 +1013,7 @@
             {/if}
         </i></div>
     {/if}
+
 </div>
 <div id="footer-panel" class="text-center">
       <hr/>

@@ -106,4 +106,8 @@ function findTopMostAnchorInfo() {
 export function getDivAnchorIdsArray(){
     return Array.from(document.querySelectorAll('div[id].anchor')).map((a)=>a.id);
 }
+
+export function copyToClipboard(text){
+  navigator.clipboard.writeText(theText);
+}
   //export {findTopMostAnchor, findLastAnchor,getDivAnchorIdsArray}
