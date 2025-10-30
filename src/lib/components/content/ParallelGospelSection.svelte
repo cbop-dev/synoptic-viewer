@@ -1,16 +1,17 @@
 <script>
     import { mylog } from '$lib/env/env.js';
-    import {ParallelTextGroup, ParallelText ,Word, TextAndRef,VerseWords,stripWord} from './parallelTexts.svelte.js';
-        import { ColorUtils } from '$lib/utils/color-utils';
+    import { GospelPericopeGroup, ParallelTextGroup, ParallelText ,Word, TextAndRef,VerseWords,stripWord} from './parallelTexts.svelte.js';
+    import {gospelParallels} from '@cbop-dev/aland-gospel-synopsis';
+    import { ColorUtils } from '$lib/utils/color-utils';
     import CopyText     from '../ui/CopyText.svelte';
     import { GreekUtils } from '$lib/utils/greek-utils';
     
-   
+    const gospels = gospelParallels.gospels;
     
-   
+    mylog("loading ParTextSecion Component");
     
     /**
-     * @type {{parTextGroup: ParallelTextGroup,
+     * @type {{parGroup: GospelPericopeGroup,
      * focus:string,
      * wordClick:function(number):void,
      * showIdentical:boolean,
@@ -21,7 +22,8 @@
      * }}
      */
     let {
-        parTextGroup = new ParallelTextGroup(),
+        parGroup = new GospelPericopeGroup(),
+        focus = '',
         showUnique=false,
         showIdentical=true,
         wordClick=(id)=>{},
@@ -32,11 +34,66 @@
     } = $props();
 
   
-   
-    let numCols=$derived(parTextGroup.parallelTexts.length)
- 
+    /**
+     * @type {{focused: boolean, cols: ParallelText[], focusIndex: number}} colData
+     */
+    let colData = $derived.by(()=>{
+
+        /**
+         * @type {boolean} focused
+         */
+        let focused  = false;
+
+        let focusIndex=0;
+        /**
+         * @type {string[]} bgClasses
+         */
+       // let bgClasses=[];
+        /**
+         * @type {ParallelText[]} cols
+         */
+        let cols = [parGroup.matt, parGroup.mark,parGroup.luke,parGroup.john];
+        if (focus==gospels.names.MATTHEW){
+            if (parGroup.matt.textRefs.length){
+                focusIndex = 0;
+                focused=true;            
+            }
+            
+        }
+        else if (focus==gospels.names.MARK){
+              if (parGroup.mark.textRefs.length){
+                 focusIndex = 1;
+                    focused=true; 
+               // bgClasses=['mark','matt','luke','john'];
+            }
+        }
+        else if (focus==gospels.names.LUKE){
+              if (parGroup.luke.textRefs.length){
+                focusIndex = 2;
+                focused=true; 
+            }
+        }
+        else if (focus==gospels.names.JOHN){
+              if (parGroup.john.textRefs.length){
+                focusIndex = 3;
+                focused=true; 
+            }
+        }
+       
+
+        //const colsBooks=getNonEmptyGospelColsAndBgClasses(cols)
+        return {focused: focused, cols: cols, focusIndex:focusIndex};
+
+    });
+
+
+
     
-    let columnStyle = $derived('grid-cols-'+numCols);
+
+    //let colData =$derived.by([parGroup.matt, parGroup.mark, parGroup.luke, parGroup.john].filter((o)=>o.textRefs.length));
+    let otherData= $derived(parGroup.other?.textRefs?.length ? parGroup.other : null);
+    let numCols=$derived(colData.cols.filter((col)=>col.textRefs && col.textRefs.length).length)
+    let columnStyle = $derived(numCols ? "!grid-cols-"+numCols : 'grid-cols-3');
 
    
 /**
@@ -134,7 +191,7 @@ function getText(words){
                         class={["m-0 word", "lex-" + word.id, 
                             showUnique && unique && isUnique(word.id,unique) && 'lex-unique', 
                             wordCssClass, customClass, plainGreek,
-                            showIdentical && wordCssClass && parTextGroup.matchingWords.includes(stripWord(word.word)) && 'underline font-bold']} 
+                            showIdentical && wordCssClass && parGroup.matchingWords.includes(stripWord(word.word)) && 'underline font-bold']} 
                         onclick={()=>{if (highlightOnClick) wordClick(word.id);}}>{word.word}{'  '}</span>
                         {/each}
                     {/each}
@@ -148,7 +205,7 @@ function getText(words){
             <CopyText copyText={textRef.text} tooltip='Copy pericope'/>
         {/if}
 {/snippet}
-
+{#if !focus}
     <div 
     class="grid  
     {numCols >=2 ? "sm:grid-cols-2" : ''}
@@ -159,10 +216,10 @@ function getText(words){
         ""
     } grid-cols-1 text-2xl">
     
-        {#each parTextGroup.parallelTexts as col, index}
+        {#each colData.cols as col, index}
 
         {#if col.textRefs && col.textRefs.length}
-            <div class="rounded-box  m-1 p-2 ">
+            <div class="rounded-box  {Object.values(gospels.abbreviations)[index]} m-1 p-2 gospel-column-{index}">
             {#if col.textRefs.length}
             
                 
@@ -187,4 +244,63 @@ function getText(words){
 
 
     </div>
+    {#if otherData}
+    <div class="mt-2 p-2">
+        {#each otherData.textRefs as textRef, index}
+                
+                <div class="rounded-box bg-base-200 inline-block m-1 text-left">
+                {@render showText(textRef)}</div>
+         {/each}
+    </div>
+    {/if}
+{:else if colData.focused}<!--focusing on one gospel:-->
+<div class="grid {numCols > 1 ? 'sm:!grid-cols-2' :''} gap-1 grid-cols-1">
+     <div class="rounded-box   text-3xl gospel-column-0">
+        {#each colData.cols[colData.focusIndex].textRefs as textRef, index}
+        
+        {@const unique = (showUnique && numCols > 1)? colData.cols[colData.focusIndex].unique : null}
+        <div class="rounded-box  inline-block p-2 m-1 {Object.values(gospels.abbreviations)[colData.focusIndex]} text-left">
+        {@render showText(textRef,unique)}
+        </div>
+        {/each}
+     </div>
+     {#if numCols >1}
+     <div class="text-2xl gospel-column-unfocused">
+        {#each colData.cols as col,index}
+        {#if index!=colData.focusIndex}
+        {#if col.textRefs.length}
+        
+             <div class="rounded-box {Object.values(gospels.abbreviations)[index]} m-1 text-left gospel-column-{index+1} p-2">
+       
+            {#each col.textRefs as textRef, index}
+                {#if index > 0}<br/>{/if}
+                <div >
+                {@render showText(textRef,col.unique)}
+                </div>
+                <!--<hr class='border-accent-content'/> -->
+            {/each}
+            
+            </div>
+        {/if}
+        
     
+            
+        {/if}
+        {/each}
+        {#if otherData}
+        <hr/>
+    <div class="mt-2 p-1">
+        {#each otherData.textRefs as textRef, index}
+                
+                <div class="rounded-box bg-base-200 inline-block m-1 text-left">
+                {@render showText(textRef)}
+                </div>
+            {/each}
+    </div>
+    {/if}
+     </div>
+     {/if}
+</div>
+{:else}
+<!--Nothing!-->  
+{/if}

@@ -1,7 +1,8 @@
 <script>
 	import NtSynopsisPanel from "$lib/components/content/NtSynopsisPanel.svelte";
+    import Footer from "$lib/components/content/Footer.svelte";
     import { onMount } from "svelte";
-    import ParallelTextSection from "$lib/components/content/ParallelTextSection.svelte";
+    import ParallelGospelSection from "$lib/components/content/ParallelGospelSection.svelte";
     import SynopsisHome from "$lib/components/content/SynopsisHome.svelte";
     import '../app.css';
     import { mylog } from "$lib/env/env";
@@ -28,5 +29,7 @@
    })
 </script>
 <SynopsisHome request={request}/>
-<!--<ParallelTextSection/>-->
+
+<!--<ParallelGospelSection/>-->
 <!--<NtSynopsisPanel/>-->
+<Footer/>

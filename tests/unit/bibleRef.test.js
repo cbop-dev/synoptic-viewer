@@ -112,3 +112,16 @@ test('getBookChapVerse', async () => {
     }
 	//await expect(page.locator('h1')).toBeVisible();
 });
+
+test('expandRefs', async () => {
+	const tests =[
+        {input: "Matt 3:15;", output:["Matt 3:15"]},
+     
+        
+    ]
+    for (const t of tests) {
+        expect(bibleUtils.expandRefs(t.input)).toEqual(t.output);
+    }
+	expect(true).toBe(true);
+	//await expect(page.locator('h1')).toBeVisible();
+});

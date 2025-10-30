@@ -1,5 +1,5 @@
 import ParTexts from "./parallelTexts.svelte.js";
-import {ParallelText, GospelPericopeGroup,TextAndRef,VerseWords,Word,GospelPericopeGroupIndices} from "./parallelTexts.svelte.js";
+import {ParallelText, ParallelTextGroup, GospelPericopeGroup,TextAndRef,VerseWords,Word,GospelPericopeGroupIndices} from "./parallelTexts.svelte.js";
  
 import gospelParallels from '@cbop-dev/aland-gospel-synopsis'
 import { tfServer, TfServer } from "$lib/n1904/tfN1904";
@@ -82,12 +82,97 @@ export function getGroupsArray(pericopeNums){
     });
 }
 
+
+//TODO: finish this! still in progess, broken!!!
+/**
+ * 
+ *  @param {ParallelText[]} parallelTexts 
+ *  @return {{parallelIndices: number[][], refsArray: string[]}} 
+ *  @description returns two arrays: parallelIndices, a 2-dimensional array of numbers, each of which is an index into refsArray. 
+ */
+export function getParallelRefsArrays(parallelTexts){
+     //let refIndex = 0;
+    /**
+     * @type {number[][]} groupsIndices
+     */
+    const parallelIndices=[];
+    /**
+     * @type {string[]} refsArray 
+     */
+    const refsArray=[];
+
+    
+    for (let [index, parText] of parallelTexts.entries()){
+        const thisParIndices=[];
+        
+        for (const [i,txtAndRef] of parText.textRefs.entries()){
+            
+            if (refsArray.includes(txtAndRef.reference)){ //already fetching this ref. Double-dip!
+                thisParIndices.push(refsArray.indexOf(txtAndRef.reference));
+            }
+            else{
+                const length = refsArray.push(txtAndRef.reference);
+                thisParIndices.push(length-1);
+                
+            }
+            
+        }
+
+        parallelIndices.push(thisParIndices);
+     
+
+        
+    }
+    mylog('getPericopeRefs finishing. groupsIndices=');
+    mylog(parallelIndices)
+    return {parallelIndices: parallelIndices,refsArray: refsArray}
+}
+
+
+/**
+ * @param {ParallelTextGroup} parallelTextGroup 
+ * @param {Object} response
+ * @param {{parallelIndices: number[][], refsArray: string[]}} parRefsObj 
+ * @param {boolean} [words=true] 
+ */
+export function populateTexts(parallelTextGroup, response, parRefsObj, words=true){
+
+
+    for (const [index,par] of parallelTextGroup.parallelTexts.entries()){
+        //mylog("checking group # " + group.id +" , title: '"+ group.title + ", index: " + index);
+    
+        for (const [i,textRef] of par.textRefs.entries()){
+            // mylog("checking ref: " + textRef.reference);
+            const queryIndex= parRefsObj.parallelIndices[index][i];
+            if (response && response.texts && response.texts[queryIndex]){
+                textRef.text= response.texts[queryIndex].text;
+                if (words){
+                    
+                    textRef.words=response.texts[queryIndex].words;
+                }
+                // mylog("populating fetched text for group index "+index + ", ref: '" + textRef.reference
+                // + "', queryIndex = " + queryIndex +", text='"+textRef.text +"'", true);
+            }
+            
+        }
+        
+        parallelTextGroup.markUniqueAndIdenticalWords();        
+    }
+    mylog("DONE! Populated the ParTexts()! We have " + parallelTextGroup.parallelTexts.length + " par Texts.")
+    mylog("here's what we got: " 
+        + parallelTextGroup.parallelTexts.map((p)=>p.textRefs.map((tr)=>tr.text).join(";"))
+        .join("|"));
+    mylog("^==================================^")
+
+}
+
+
 /**
  * 
  * @param  {GospelPericopeGroup[]} groupsArray
  * @returns {{groupsIndices: GospelPericopeGroupIndices[], refsArray: string[]}} 
  **/
-export function getRefsArrays(groupsArray){
+export function getGroupRefsArrays(groupsArray){
     let refIndex = 0;
     /**
      * @type {GospelPericopeGroupIndices[]} groupsIndices
@@ -159,4 +244,4 @@ function getBCVarrayFromRefs(refs){
     return bcvArray;
 }
 
-export default {getTextRefsArray,getRefsArrays,getGroupsArray,getBCVarrayFromRefs}
+export default {getTextRefsArray,getGroupRefsArrays,getGroupsArray,getBCVarrayFromRefs,getParallelRefsArrays,populateTexts}

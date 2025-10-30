@@ -1,7 +1,9 @@
 <script>
-import { ParallelText,Word, TextAndRef,VerseWords } from "./parallelTexts.svelte";
-import { tfServer, TfServer, lexemes} from "$lib/n1904/tfN1904";
+import { ParallelText,Word, TextAndRef,VerseWords,ParallelTextGroup,parseRefs } from "./parallelTexts.svelte.js";
 import ParallelTextSection from "./ParallelTextSection.svelte";
+import ScriptureTextViewer from "./ScriptureTextViewer.svelte";
+import { tfServer, TfServer, lexemes} from "$lib/n1904/tfN1904";
+import ParallelGospelSection from "./ParallelGospelSection.svelte";
 import { mylog } from "$lib/env/env";
 import * as bibleUtils from '$lib/n1904/bibleRefUtils.js'
 import * as mathUtils from '$lib/utils/math-utils.js';
@@ -22,6 +24,7 @@ import ArrowTop from '../ui/icons/arrow-top-icon.svelte';
 import BulletsIcons from '../ui/icons/bullets-outline.svelte';
 import CopyText from '../ui/CopyText.svelte';
 import { findNextAnchor,findPrevAnchor, getAnchors} from '$lib/utils/ui-utils';
+	import OptionButton from "../ui/SelectButtons/OptionButton.svelte";
 let fetching = $state(false);
 let expecting = $state(0);
 let numReady=$state(0);
@@ -36,6 +39,23 @@ let showLookupPanel = $state(true);
 let landingPage=$state(true);
 let showInfoModal=$state(false);
 let maxLexesToShow=$state(30);
+/**
+ * @type {Object|null} response
+ */
+let response=$state(null);
+
+ let numCols = $state(2);
+
+/**
+ * @type {string[]} refAreaInputs
+ */
+let refAreaInputs = $state(['Matt 1:1', "Mark 1:1"]); 
+
+
+/**
+ * @type {ParallelTextGroup} texts
+ */
+let texts= $state(new ParallelTextGroup());
 
 /**
 * @type {number[]} selectedLexes
@@ -46,16 +66,17 @@ let selectedLexes=$state([]);
 * @type {string[]} selectedGreekStrings
 */
 let selectedGreekStrings=$state([]);
-let fetchedTextsResponse = $state(null);
+
 let showLexOptionsInfo = $state(false);
     
 let lemmasByID=$derived.by(()=>{
     let dict={}
-    if (fetchedTextsResponse && fetchedTextsResponse.lexemes) {
-        for (const [lemma,lex] of Object.entries(fetchedTextsResponse.lexemes)){
+    if (response && response.lexemes && response.lexemes) {
+        for (const [lemma,lex] of Object.entries(response.lexemes)){
             dict[lex.id]=lemma;
         }
     }
+    mylog("updated lemmasByID. Keys now:[" +Object.keys(dict).join(",")+"]");
     return dict;
 });
 
@@ -94,9 +115,9 @@ let lexClasses= $derived.by(()=>{// id->css color (e.g., "#eee")
      * @type {Object<number,string>}
      */
     const ret = {}
-    if(dataReady && fetchedTextsResponse.lexemes) {
+    if(dataReady && response?.lexemes) {
         //mylog("building lexClasses...",true)
-        for(const id of Object.values(fetchedTextsResponse.lexemes).map((o)=>o.id)) {
+        for(const id of Object.values(response?.lexemes).map((o)=>o.id)) {
             
             let classes = "lex-"+id;
             if(selectedLexes.includes(id)){
@@ -113,14 +134,14 @@ let lexClasses= $derived.by(()=>{// id->css color (e.g., "#eee")
  * @type {number[]} unselectedLexes
  */
 let unselectedLexes =$derived.by(()=>{
-    if (fetchedTextsResponse && fetchedTextsResponse.lexemes){
-        return Object.values(fetchedTextsResponse.lexemes).filter(
+    if (response && response.lexemes){
+        return Object.values(response.lexemes).filter(
             (lex)=>!selectedLexes.includes(lex.id)).map((l)=>l.id).sort((a,b)=>a-b)}
     else
         return [];
 });
 
-//let unselectedLexBetaArray = $derived(unselectedLexes.map((lexID)=>fetchedTextsResponse.lexemes[lemmasByID[lexID]].beta));
+//let unselectedLexBetaArray = $derived(unselectedLexes.map((lexID)=>texts.lexemes[lemmasByID[lexID]].beta));
 let unselectedLexPlainArray = $derived(unselectedLexes.map((lexID)=>GreekUtils.removeDiacritics(lemmasByID[lexID])));
 
 /**
@@ -134,47 +155,68 @@ let bestMatchedLexes=$state([]);
  */
 let otherMatchedLexes=$state([]);
 
-    
-async function fetchPostTextsBatch(){
+
+/**
+ * 
+ * @param {string[]} refsArray
+ */
+async function fetchPostTextsBatch(refsArray){
 //todo: refactor in another .svelte.js file, then test
-    fetchedTextsResponse = null;
+    //texts = null;
 
     /**
      * @type {{book:string,chapter:number|null,verses:number[]}[]} bcvFetchArray
      */
-    const bcvFetchArray=TfUtils.getBCVarrayFromRefs(groupsRefsArray);
+    const bcvFetchArray=TfUtils.getBCVarrayFromRefs(refsArray);
     
-    fetchedTextsResponse = await tfServer.getTexts(bcvFetchArray,true,true);
+    return await tfServer.getTexts(bcvFetchArray,true,true);
+    //return texts;
+}
+
+
+
+//TODO
+async function buildAndFetchPericopes(reset=true){
+    //TODO:
+     
+    //viewStates.views.lookup.state=false;
+    dataReady=false;
+   // landingPage=false;
+    if (reset) {
+          
+    // mylog("disabling sortFilter and focus...");
+        resetViewOptions();
+        emptySelectedLexemes();
+        emptySelectedCustomGreek();
+    }
+    
+    
+    
+    fetching = true;
+    //fetchTexts();
+    texts.parallelTexts = parseRefs(refAreaInputs);
+    //mylog("after parsing input, but texts.parTexts[0].ref: " + texts.parallelTexts[0].textRefs[0].reference)
+    const parRefsObj = TfUtils.getParallelRefsArrays(texts.parallelTexts);
+    mylog("parRefsObj:");
+    mylog(parRefsObj);
+    response = await fetchPostTextsBatch(parRefsObj.refsArray);
+    
+    //buildLexArrays();
+    TfUtils.populateTexts(texts,response,parRefsObj);
+    dataReady= true;
+    //mylog("Got response with " + response.texts.length + " texts. Here's 1:" )
+    //mylog(response.texts[0].text)
+   // mylog("here texts.ptexts[0].textR[0].text: " + texts.parallelTexts[0].textRefs[0].text)
     
 }
 
-//TODO
-async function buildAndFetchPericopes(){
-    //TODO:
-    /* landingPage=false;
-    viewStates.views.lookup.state=false;
-    dataReady=false;
-    // mylog("disabling sortFilter and focus...");
-    resetViewOptions();
-    buildPericopeRefs();
-    fetching = true;
-    //fetchTexts();
-    emptySelectedLexemes();
-    emptySelectedCustomGreek();
-    await fetchPostTextsBatch();
-    //buildLexArrays();
-    populateGroupsText(true);
-    dataReady= true;
-    */
-}
-//let lemmasByID={}
 
 
 function buildLexArrays(){
     //mylog("building LexArrays...", true)
     lemmasByID ={};
-    if (fetchedTextsResponse) {
-        for (const [lemma,lex] of Object.entries(fetchedTextsResponse.lexemes)){
+    if (texts) {
+        for (const [lemma,lex] of Object.entries(response.lexemes)){
             lemmasByID[lex.id]=lemma;
         }
     }
@@ -256,7 +298,7 @@ function resetViewOptions(lookup=false){
         selectedLexes.length = 0;
     }
     function toggleLex(id){
-       // mylog("toggleLex("+id+")",true);
+        mylog("toggleLex("+id+")",true);
         if(selectedLexes.includes(id)) {
             selectedLexes.splice(selectedLexes.indexOf(id),1);
 
@@ -300,7 +342,6 @@ function resetViewOptions(lookup=false){
             info: { description:  "Website and project information.", hotkeys:['i'], state:false,modal:true},
             unique: { description:  "Toggle Unique Lexeme color outlining", hotkeys:['u'], state:false,modal:false},
             help: { description:  "Show help menu", hotkeys:['h', '?'], state:false,modal:true},
-            sections: { description:  "Jump to a section", hotkeys:['j'], state:false,modal:true},
             identical: { description:  "Show (bold & underline) morphologically identical words shared by different gospels in a parallel group ",
              hotkeys:['m'], state:false,modal:false},
               
@@ -384,7 +425,7 @@ function resetViewOptions(lookup=false){
     function textAreaBlur(event){
         textAreaFocused=false;
     }
-    function onkeydown(event){
+    function onkeydown_NOT(event){
         if(!textAreaFocused ){
             const matchedView=viewStates.getViewNameFromKey(event.key);
             const modalVisibles=viewStates.getVisible().filter((name)=>(viewStates.views[name].modal)); 
@@ -415,5 +456,210 @@ function resetViewOptions(lookup=false){
         GreekUtils.beta2Greek(customGreekInputText).toLocaleLowerCase()).replaceAll(/[^α-ω]+/g,'')
     });
     
+
+   
+
+    /**
+     *
+     */
+    function lookup(){
+        buildAndFetchPericopes();
+    }
+    //$inspect("Texts:", texts, "texts.lexemes:", [...texts.lexemes].join("; "))
+    $inspect("lemmasbyID.keys", Object.keys(lemmasByID), "selectedLexes:", selectedLexes, "response:", response, "texts:", texts);
+    
 </script>
-<h2>Coming soon...</h2>
+
+<div class="self-center text-center sticky top-0 bg-white z-40">
+
+  
+<h1>Coming soon...</h1>
+<h2 class="italic">Work in Progress</h2>
+<!--<ScriptureTextViewer/>-->
+<ButtonSelect buttonText="Lexeme clicks" bind:selected={viewStates.views.highlightOnClick.state}/>
+<ButtonSelect buttonText="Word Options" bind:selected={viewStates.views.words.state}/>
+<br/>
+{#each refAreaInputs as areaInput, index}
+    <label for="refarea{index}"class="label cursor-pointer inline">
+        <span class="label-text">Column {index}</span>
+    <textarea id="refarea{index}" class="inline-block align-middle" 
+                rows="1" bind:value={refAreaInputs[index]}
+               
+                ></textarea>
+                <!-- onfocus={textAreaFocus} onblur={textAreaBlur}-->
+    </label>     
+
+{/each}
+<Button onclick={lookup} buttonText="Lookup!"/>
+<div id="texts1">
+{#if dataReady}
+<h2> Data is Ready!</h2>
+
+
+<ParallelTextSection parTextGroup={texts} showUnique={viewStates.views.unique.state} wordClick={toggleLex} 
+                    cssClassDict={lexClasses}
+                    cssCustomDict={customGreekClasses}
+                    showIdentical={viewStates.views.identical.state}
+                    highlightOnClick={viewStates.views.highlightOnClick.state}/>
+
+{:else}
+<h2> Data is NOT Ready!</h2>
+{/if}
+</div>
+</div>
+
+<Modal2 bind:showModal={viewStates.views.words.state}>
+
+    
+
+    <div class="max-w-full block text-center">
+                <h3>Highlight Features:</h3>
+            <ButtonSelect bind:selected={viewStates.views.unique.state} buttonText="Outline Unique Lexemes"/>
+            
+            <ButtonSelect bind:selected={viewStates.views.identical.state} tooltip="Toggle Bold/underline setting for morphologically identical words." 
+            buttonText="Identical words"/>
+            <ButtonSelect bind:selected={viewStates.views.highlightOnClick.state} buttonText="Highlight Lexeme on click" tooltip="If enabled, clicking/tapping on a word will toggle highlighting of that lexeme."/>
+            
+        <ButtonSelect buttonStyle="btn btn-neutral btn-outline btn-circle btn-xs p-0 m-0"
+            buttonText="?"
+            bind:selected={showLexOptionsInfo}/>
+            {#if showLexOptionsInfo}
+            <div class="md:max-w-3/4  self-center m-auto">
+                <h2 class="underline">Unique and Identical Words Options:</h2>
+                                        <div class="inline-block text-left">
+                <ul class="list-disc">
+                    <li>Enabling <b>"Outline Unique Lexemes"</b> will draw <span class="outline outline-blue-400">an outline</span> (one color per gospel) around each lexeme that is unique to a specific gospel, i.e., that shows up in only one column of a single parallel group.</li>
+                    <li>Enabling <b>"Identical words"</b> will <span class="font-bold underline">bold and underline</span> all morphologically identical words shared by at least two gospels in the same parallel group </li>
+                    <li>Enabling <b>"Highlight Lexeme on Click"</b> will toggle <span class="bg-cyan-500 text-white">highlighting</span> of all instances of the lexeme.</li>
+                </ul>
+                </div>
+            </div>
+            {/if}
+
+
+ 
+
+            
+           
+            <hr/>
+        <div role="tablist" class="tabs tabs-lifted">
+            <a role="tab" class="tab {selectedWordTabIndex==0 ? 'tab-active' : ''} " tabindex=0 onclick={()=>{selectedWordTabIndex=0}} >Lexemes</a>
+            <a role="tab" class="tab {selectedWordTabIndex==1 ? 'tab-active' : ''} " tabindex=1 onclick={()=>{selectedWordTabIndex=1}}>Custom</a>
+        </div>
+        
+            <div class="{selectedWordTabIndex== 0 ? 'block' : 'hidden'}">
+             <h1>Highlighted Lexemes</h1>
+            {#if selectedLexes.length}
+            
+            <h2>Selected Lexemes:</h2>
+            <i>Click on a lexeme to remove it.</i>
+            <br/>
+            {#each selectedLexes as lex, index}
+                 <Button onclick={()=>toggleLex(lex)} buttonText={lemmasByID[lex]} buttonColors={getColorOfLex(lex)} buttonType=''/> 
+               
+             {/each}
+                
+              
+
+                <br/>
+            <Button onclick={emptySelectedLexemes}  buttonText="Clear All"/>
+            {:else}<br/>
+            <i>None selected. Click on a word in the text, or select a lexeme below. Use the search box to find a specific word (type in Latin characters, which will automatically convert to Greek)</i>
+
+            
+            {/if}
+            <hr class="!border-slate-200"/>
+            <h2>Unselected Lexemes</h2>
+            <i>Click to add/highlight. Type in search box to find words.</i>
+            <GreekFilterInput itemsList={unselectedLexPlainArray}
+            labelText=""
+            bind:bestMatches={bestMatchedLexes}
+            bind:otherMatches={otherMatchedLexes} tooltip="Type latin characters to search for Greek words"/>
+            <br>
+              {#if bestMatchedLexes.length == 0 && otherMatchedLexes.length == 0}
+                <i>None found. Showing all lexemes:</i><br/>
+                        {#if unselectedLexes.length > 30 && maxLexesToShow == 0}
+                                
+                        <Button buttonText='Show less...' onclick={()=>{maxLexesToShow=30}}/>
+                            <br/>
+                        {/if}
+                    {#each unselectedLexes as id,index}
+                        
+                        {#if (maxLexesToShow == 0 || maxLexesToShow >= unselectedLexes.length)  || ((unselectedLexes.length > maxLexesToShow) && index < maxLexesToShow )}
+                            
+                        <Button onclick={()=>toggleLex(id)} 
+                            buttonText={lemmasByID[id]} 
+                            buttonType="btn-accent" style="hover:text-white"/> 
+                        
+                        {/if}
+
+                    {/each}
+                        {#if unselectedLexes.length > maxLexesToShow}
+                                <br/>
+                        <Button buttonText='Show more...' onclick={()=>{maxLexesToShow=0}}/>
+                        {/if}
+              {:else}
+                 <h1>Trying to filter!</h1>
+                 <h3>Best matches:</h3>
+                 {#if bestMatchedLexes.length}
+                    {#each bestMatchedLexes as lexIndex}
+                    {@const lexId = unselectedLexes[Number(lexIndex)]}
+                    {@const lemma=lemmasByID[lexId]}
+                    <!--  bestMatched.lexIndex = {lexIndex}, LexID={lexId}, Lemma='{lemma}'-->
+                
+                    <Button onclick={()=>toggleLex(lexId)} 
+                    buttonText={lemma} 
+                    buttonType="btn-accent" style="hover:text-white"/> 
+                    {/each}
+                    {:else}
+                     <i>None found.</i>
+                    {/if}
+                    {#if otherMatchedLexes.length}
+                        <h3>Other Matches:</h3>
+                            {#each otherMatchedLexes as lexIndex}
+                        {@const lexId = unselectedLexes[Number(lexIndex)]}
+                        {@const lemma=lemmasByID[lexId]}
+                        <!--  bestMatched.lexIndex = {lexIndex}, LexID={lexId}, Lemma='{lemma}'-->
+                    
+                        <Button onclick={()=>toggleLex(lexId)} 
+                        buttonText={lemma} 
+                        buttonType="btn-accent" style="hover:text-white"/> 
+                        {/each}
+                    {/if}
+                {/if}
+
+            </div>
+                
+           
+           <!-- custom greek: -->
+             <div class="{selectedWordTabIndex== 1 ? 'block' : 'hidden'}">
+             <h1>Custom Greek Highlights</h1>
+
+             <i>Enter some text in the text box below, then press enter. Type in Latin characters, which will automatically convert to Greek.</i><br/>
+             <input type="text" size="15" 
+                bind:value={customGreekInputText} placeholder="Type here" 
+                class="input input-bordered w-full max-w-xs" 
+                onkeydown={(e)=>{if (e.key == 'Enter') toggleGreekString(customGreekInputText);}}/>
+                <Button onclick={()=>toggleGreekString(customGreekInputText)} buttonText='Toggle'/>
+                <Button onclick={()=>{customGreekInputText=''}} buttonText="Clear Input" buttonStyle='btn btn-ghost btn-md'/>
+            
+            {#if selectedGreekStrings.length}
+            
+                <h2>Selected Custom Greek Word Forms:</h2>
+                <i>Click on any word-form to remove it.</i>
+                <br/>
+                {#each selectedGreekStrings as gk}
+                <Button onclick={()=>toggleGreekString(gk)} buttonText={gk} buttonColors={getColorOfGreek(gk)} buttonType=''/> 
+                {/each}<br/>
+                <Button onclick={emptySelectedCustomGreek}  buttonText="Clear All"/>
+            {:else}<br/>
+                
+                <i>None selected.</i>
+ 
+            {/if}
+           
+            </div>
+
+    </div>
+</Modal2>
+

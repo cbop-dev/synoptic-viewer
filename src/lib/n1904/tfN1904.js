@@ -13,7 +13,7 @@ export const lexemes = ntlexemes;
 
 export class TfServer{
     ready = false;
-    NT = null;
+    //NT = null;
     server=apiURI;
    
     /**
@@ -26,6 +26,12 @@ export class TfServer{
         return resp.json();
     }
     
+    /**
+     * 
+     * @param {string} url 
+     * @param {Object} data 
+     * @returns {Promise.<Object>}
+     */
     static async jsonPOSTFetch(url,data){
         const jsonData = JSON.stringify(data);
         const response = await fetch(url, {method: "POST",
@@ -287,7 +293,7 @@ export class TfServer{
      * @returns {Promise<Object>} the Response object. NB: the 'group' object has also been modified by being populated with the fetched texts. 
      */
     async fetchGroupsPericopes(groups,showVerses=false,lexemes=false){
-        const refsArrays=TfUtils.getRefsArrays(groups);
+        const refsArrays=TfUtils.getGroupRefsArrays(groups);
         const bcvFetchArray=TfUtils.getBCVarrayFromRefs(refsArrays.refsArray);
 
         const fetchedTextsResponse = await tfServer.getTexts(bcvFetchArray,showVerses,lexemes);
@@ -306,27 +312,12 @@ export class TfServer{
     async fetchAndPopulateGroupsPericopes(groups,showVerses=false,lexemes=false,markUnique=false){
       //  mylog("fetchAndPopluating...", debugOn)
       
-        const refsArrays=TfUtils.getRefsArrays(groups);
+        const refsArrays=TfUtils.getGroupRefsArrays(groups);
         const bcvFetchArray=TfUtils.getBCVarrayFromRefs(refsArrays.refsArray);
        // console.log("about to fetch...")
         const fetchedTextsResponse = await tfServer.getTexts(bcvFetchArray,showVerses,lexemes);
        
-       
-        /************************
-       // debug logging:
-       
-       // console.log("FETCHED!")
-      //  mylog("fetchAndPopluated...", debugOn)
-      //  console.log("WHATS UP?")
-        //populate:
-        
-        
-     //   console.log("tfServer.fetchAndPopulate: populated group=")
-      //  mylog(group,true);
-       // console.log("printed Grup; trying again with console.log...")
-       // console.log(group);
-       //end debugging
-       ***************/
+
         this.populateGroupTexts(groups,refsArrays,fetchedTextsResponse,showVerses,lexemes,markUnique);
 
         return fetchedTextsResponse;

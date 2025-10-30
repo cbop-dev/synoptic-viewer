@@ -1,6 +1,8 @@
 import { mylog } from "$lib/env/env.js";
+
 import { GreekUtils } from "$lib/utils/greek-utils";
-import {combineRefs, formatBibRefs} from '$lib/n1904/bibleRefUtils.js'
+import {combineRefs, formatBibRefs,expandRefs} from '$lib/n1904/bibleRefUtils.js'
+import mathUtils from "$lib/utils/math-utils";
 export class Word{
     id=0;
     word='';
@@ -20,6 +22,18 @@ export class TextAndRef{
      */
     words=[];
     
+    /**
+     * 
+     * @param {string} ref 
+     * @param {string} txt 
+     * @param {VerseWords[]} [words=[]] 
+     */
+    constructor(ref='',txt='',words=[]){
+        this.reference = ref;
+        this.text = txt;
+        this.words=[];
+
+    }
 }
 
 /**
@@ -102,6 +116,134 @@ export class GospelPericopeGroupIndices {
 export function  stripWord(str){
             return GreekUtils.removeDiacritics(str.replace(/[,. ·:;]/,""));
 }
+
+
+/**
+ * @param {string[]} inputStrings 
+ * @returns {ParallelText[]}
+ */
+export function parseRefs(inputStrings){
+    /**
+     * @type {ParallelText[]} thePars
+     */
+    let thePars = []
+    inputStrings.entries().forEach(([i,textA])=>{
+        
+        const cleaned = textA && textA.length ? textA.trim().replaceAll(/\n+/g,";").replaceAll(/;+/g,";") : '';
+        const tAndRefs = expandRefs(cleaned).map((str)=>new TextAndRef(str));
+        thePars.push(new ParallelText(tAndRefs));
+    });
+
+     
+    return thePars;
+}
+
+
+/**
+ * @description a group of parallel texts, tracking common and unique lexemes, which can be displayed in parallel columns.
+ */
+export class ParallelTextGroup {
+
+    /**
+     * @type {ParallelText[]} parallelTexts
+     */
+    parallelTexts= $state([]);
+
+    /**
+     * 
+     * @param {ParallelText[]} parTexts 
+     */
+    constructor(parTexts=[]){
+        this.parallelTexts=parTexts;
+    }
+
+    lexemes=$state(new Set());
+    commonLexes=$state(new Set());
+    /**
+     * @type {string[]} matchingWords
+     */
+    matchingWords=$state([]);
+
+    markUniqueAndIdenticalWords(){
+        /**
+         * @type {Object<string,Set<number>>} wordsBooks
+         */
+        const wordsByPar = {};//word:string => <set of book indexes in which word is found>
+
+        //const bookWords=[new Set(),new Set(),new Set(),new Set()];//array of words in [matt,mark,luke,john]
+        /**
+         * 
+         * @param {string} str 
+         * @returns 
+         */
+
+        //this.wordIds=new Set()
+        for (const [index,par] of this.parallelTexts.entries()){
+            for (const tR of par.textRefs){
+                for (const vW of tR.words){
+                    for (const word of vW.words){
+                        
+                        par.lexemes.add(word.id);
+                        this.lexemes.add(word.id);
+                                                    
+                        //track identically matching words across gospels: 
+                        const theWord=stripWord(word.word);
+                        //bookWords[index].add(theWord);
+                        if (!wordsByPar[theWord])
+                            wordsByPar[theWord]=new Set([index]);
+                        else
+                            wordsByPar[theWord].add(index);
+                    }
+                }
+            }
+        }
+       
+         for (const [index,par] of this.parallelTexts.entries()){
+        //   this.commonLexes=this.commonLexes.intersection(book.lexemes);
+            const otherParIndexes= new Set(mathUtils.range(this.parallelTexts.length));
+            otherParIndexes.delete(index);
+            let uniques = new Set(par.lexemes);
+            
+            for (const otherParI of otherParIndexes){
+                //mylog("doing difference of ");
+                uniques = uniques.difference(this.parallelTexts[otherParI].lexemes);
+                
+            }    
+            par.unique=uniques;
+
+            
+           
+
+        }
+
+
+        this.commonLexes=this.parallelTexts.map((p)=>p.lexemes).reduce((common,thisSet)=>common.intersection(thisSet))
+        
+        this.matchingWords=Object.entries(wordsByPar).filter(([word,parIndexSet])=>parIndexSet.size>1)
+            .map(([word,parIndexSet])=>word);
+    }
+
+    /**
+     * 
+     * @param {number[]} exclude - the indexes of parallelTexts to exclude
+     * @returns {string} a single string which combines and consolidates all the references in the includes ParallelTexts
+     */
+    getRefs(exclude=[]){
+        let refs=[];
+        
+        for (const [index,par] of this.parallelTexts.entries().filter(([i,p])=>!exclude.includes(i))){
+            if(par.textRefs.length)
+                refs.push(combineRefs(par.textRefs.map((tr)=>tr.reference)))
+            
+        }
+        
+       
+    
+        return refs.join('; ');  
+    }
+
+}
+
 export class GospelPericopeGroup{
     title = $state('')
     id=$state(0);
@@ -161,7 +303,7 @@ export class GospelPericopeGroup{
             let uniques = new Set(book.lexemes);
             
             for (const otherBookI of otherBookIndexes){
-                mylog("doing difference of ");
+                //mylog("doing difference of ");
                 uniques = uniques.difference(books[otherBookI].lexemes);
                 
             }    
@@ -206,6 +348,8 @@ export class GospelPericopeGroup{
         return refs.join('; ');  
     }
 }
+
+
 export default {
-    ParallelText, GospelPericopeGroup,TextAndRef,VerseWords,Word,GospelPericopeGroupIndices,stripWord
+    ParallelText, GospelPericopeGroup,TextAndRef,VerseWords,Word,GospelPericopeGroupIndices,stripWord, parseRefs
 }

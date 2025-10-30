@@ -7,7 +7,7 @@ import LinkSvg from  '../ui/icons/link.svg';
 import {gospelParallels} from '@cbop-dev/aland-gospel-synopsis'
 import parallelTextsSvelte, { ParallelText, GospelPericopeGroup,Word, TextAndRef,VerseWords } from "./parallelTexts.svelte";
 import { tfServer, TfServer, lexemes} from "$lib/n1904/tfN1904";
-import ParallelTextSection from "./ParallelTextSection.svelte";
+import ParallelGospelSection from "./ParallelGospelSection.svelte";
 import { mylog } from "$lib/env/env";
 import * as bibleUtils from '$lib/n1904/bibleRefUtils.js'
 import * as mathUtils from '$lib/utils/math-utils.js';
@@ -119,7 +119,7 @@ let filteredPerGroups=$derived(perGroups.filter((g)=>filteredPericopes.includes(
 let perGroupsIndices=$derived.by(()=>{
     let retVal = [];
     if (perGroups && perGroups.length){
-        retVal = TfUtils.getRefsArrays(perGroups).groupsIndices;
+        retVal = TfUtils.getGroupRefsArrays(perGroups).groupsIndices;
     }
     return retVal;
 });
@@ -129,7 +129,7 @@ let perGroupsIndices=$derived.by(()=>{
 let groupsRefsArray=$derived.by(()=>{
     let retVal = [];
     if (perGroups && perGroups.length){
-        retVal = TfUtils.getRefsArrays(perGroups).refsArray;
+        retVal = TfUtils.getGroupRefsArrays(perGroups).refsArray;
     }
     return retVal;
 });
@@ -723,12 +723,11 @@ onMount(() => {
         viewStates.views.lookup.state=false;
         loadRequestOptions();
         viewStates.views.lookup.state=false;
-        const promise = urlRequestShowNtParallels();
-        promise.then(()=>{requestProcessed=true});
+        urlRequestShowNtParallels().then(()=>{requestProcessed=true});
 
     }
     else{
-        viewStates.reset()
+        viewStates.reset();
     }
     mounted = true;
 });
@@ -1003,7 +1002,7 @@ $inspect("request:", request);
             
                 <br class="break-all"/>
                 <div>
-                    <ParallelTextSection parGroup={group} focus={focused}
+                    <ParallelGospelSection parGroup={group} focus={focused}
                     wordClick={toggleLex} showUnique={viewStates.views.unique.state} 
                     cssClassDict={lexClasses}
                     cssCustomDict={customGreekClasses}
@@ -1035,11 +1034,7 @@ $inspect("request:", request);
     {/if}
 
 </div>
-<div id="footer-panel" class="text-center">
-      <hr/>
-      © Fr. Christopher Brannan, O.P., 2025.  For more information about the project and its data sources, visit the <a href="https://github.com/cbop-dev/synoptic-viewer" target="_blank" class="link">github project page</a>.
-    
-</div>
+
 {#if dataReady}
 <Modal2 bind:showModal={viewStates.views.sections.state}>
             <div id="results-navigation"  class=" text-left">

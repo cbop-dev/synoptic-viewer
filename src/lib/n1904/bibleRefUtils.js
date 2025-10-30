@@ -370,41 +370,46 @@ export function expandRefs(refString){
     refString = cleanString(refString);
     let latestBook = '';
     for (const ref of refString.split(";")){
-        let bookCv = getBookChapVerseFromRef(ref);
-        mylog("expandRefs: bookCv of '"+ref +"'= "+[bookCv.book,bookCv.chap,bookCv.v].join(','));
-        if (bookCv.book){
-            latestBook = bookCv.book;
-        }
-        else if (latestBook){
+        if(ref.length) {
+            let bookCv = getBookChapVerseFromRef(ref);
+            mylog("expandRefs: bookCv of '"+ref +"'= "+[bookCv.book,bookCv.chap,bookCv.v].join(','));
+            if (bookCv.book){
+                latestBook = bookCv.book;
+            }
+            else if (latestBook){
+                
+                bookCv = getBookChapVerseFromRef(latestBook + " " + ref);
+            }
             
-            bookCv = getBookChapVerseFromRef(latestBook + " " + ref);
-        }
-        
-        if(bookCv.book) {
-               if (bookCv.v?.includes(',')){
-                for (const vv of bookCv.v.split(',')){
-                    if (vv.includes('-')){
-                        for (const v of mathUtils.createNumArrayFromStringListRange(vv)){
-                            refArray.push(bookCv.book + " " + bookCv.chap + (v?  ":" + v : '')) ;
+            if(bookCv.book) {
+                if (bookCv.v?.includes(',')){
+                    for (const vv of bookCv.v.split(',')){
+                        if (vv.includes('-')){
+                            for (const v of mathUtils.createNumArrayFromStringListRange(vv)){
+                                refArray.push(bookCv.book + " " + bookCv.chap + (v?  ":" + v : '')) ;
+                            }
+                        }
+                        else{
+                                refArray.push(bookCv.book + " " + bookCv.chap + (vv?  ":" + vv : ''));
                         }
                     }
-                    else{
-                            refArray.push(bookCv.book + " " + bookCv.chap + (vv?  ":" + vv : ''));
+                }
+                else if (bookCv.v?.includes('-')){
+                    for (const v of mathUtils.createNumArrayFromStringListRange(bookCv.v)){
+                        refArray.push(bookCv.book + " " + bookCv.chap + (v? ":" + v: ''));
                     }
                 }
-            }
-            else if (bookCv.v?.includes('-')){
-                for (const v of mathUtils.createNumArrayFromStringListRange(bookCv.v)){
-                    refArray.push(bookCv.book + " " + bookCv.chap + (v? ":" + v: ''));
+                else{
+                    refArray.push(bookCv.book + " " + bookCv.chap + (bookCv.v ? ":" + bookCv.v : ''));
                 }
             }
             else{
-                refArray.push(bookCv.book + " " + bookCv.chap + (bookCv.v ? ":" + bookCv.v : ''));
+                //can't do anything: we don't know what book it is!
             }
+
+
         }
-        else{
-            //can't do anything: we don't know what book it is!
-        }
+        
         
     }
     return refArray;
