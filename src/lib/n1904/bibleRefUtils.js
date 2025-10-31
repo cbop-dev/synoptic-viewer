@@ -641,7 +641,7 @@ export function formatBibRefs(inputString){
 						const [start, finish] = v.split("-");
 						if (parseInt(start) < parseInt(finish)){
 							const vRange=[];
-							for (const i = parseInt(start); i <=parseInt(finish); i++){
+							for (let i = parseInt(start); i <=parseInt(finish); i++){
 								vRange.push(i);
 							}
 							//adding each verse in the range
