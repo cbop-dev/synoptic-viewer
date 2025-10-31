@@ -158,11 +158,11 @@ export function populateTexts(parallelTextGroup, response, parRefsObj, words=tru
         
         parallelTextGroup.markUniqueAndIdenticalWords();        
     }
-    mylog("DONE! Populated the ParTexts()! We have " + parallelTextGroup.parallelTexts.length + " par Texts.")
-    mylog("here's what we got: " 
-        + parallelTextGroup.parallelTexts.map((p)=>p.textRefs.map((tr)=>tr.text).join(";"))
-        .join("|"));
-    mylog("^==================================^")
+    //mylog("DONE! Populated the ParTexts()! We have " + parallelTextGroup.parallelTexts.length + " par Texts.")
+    //mylog("here's what we got: " 
+      //  + parallelTextGroup.parallelTexts.map((p)=>p.textRefs.map((tr)=>tr.text).join(";"))
+        //.join("|"));
+    //mylog("^==================================^")
 
 }
 

@@ -24,7 +24,11 @@ import ArrowTop from '../ui/icons/arrow-top-icon.svelte';
 import BulletsIcons from '../ui/icons/bullets-outline.svelte';
 import CopyText from '../ui/CopyText.svelte';
 import { findNextAnchor,findPrevAnchor, getAnchors} from '$lib/utils/ui-utils';
-	import OptionButton from "../ui/SelectButtons/OptionButton.svelte";
+import OptionButton from "../ui/SelectButtons/OptionButton.svelte";
+let {
+    live=false
+} = $props();
+
 let fetching = $state(false);
 let expecting = $state(0);
 let numReady=$state(0);
@@ -44,13 +48,15 @@ let maxLexesToShow=$state(30);
  */
 let response=$state(null);
 
- let numCols = $state(2);
+const maxCols = 4;
+
+
 
 /**
  * @type {string[]} refAreaInputs
  */
 let refAreaInputs = $state(['Matt 1:1', "Mark 1:1"]); 
-
+let numCols = $derived(refAreaInputs.length);
 
 /**
  * @type {ParallelTextGroup} texts
@@ -425,8 +431,9 @@ function resetViewOptions(lookup=false){
     function textAreaBlur(event){
         textAreaFocused=false;
     }
-    function onkeydown_NOT(event){
-        if(!textAreaFocused ){
+    function onkeydown(event){
+        mylog("CustomPanel.keydown:" + event)
+        if(live && !textAreaFocused ){
             const matchedView=viewStates.getViewNameFromKey(event.key);
             const modalVisibles=viewStates.getVisible().filter((name)=>(viewStates.views[name].modal)); 
             if (matchedView) {
@@ -466,61 +473,52 @@ function resetViewOptions(lookup=false){
         buildAndFetchPericopes();
     }
     //$inspect("Texts:", texts, "texts.lexemes:", [...texts.lexemes].join("; "))
-    $inspect("lemmasbyID.keys", Object.keys(lemmasByID), "selectedLexes:", selectedLexes, "response:", response, "texts:", texts);
-    
+    //$inspect("lemmasbyID.keys", Object.keys(lemmasByID), "selectedLexes:", selectedLexes, "response:", response, "texts:", texts);
+    function addCol(){
+        refAreaInputs.push('');
+    }
+
+    function removeCol(){
+        refAreaInputs.pop();
+
+    }
 </script>
 
-<div class="self-center text-center sticky top-0 bg-white z-40">
+<div class="self-center text-center sticky top-0 bg-white z-40" >
 
   
-<h1>Coming soon...</h1>
-<h2 class="italic">Work in Progress</h2>
+<h1>Custom NT Synopsis!</h1>
+<h3 class="italic">Choose your <span class="line-through">weapons</span> NT Bible passages:</h3>
+
 <!--<ScriptureTextViewer/>-->
-<ButtonSelect buttonText="Lexeme clicks" bind:selected={viewStates.views.highlightOnClick.state}/>
-<ButtonSelect buttonText="Word Options" bind:selected={viewStates.views.words.state}/>
-<br/>
+
 {#each refAreaInputs as areaInput, index}
-    <label for="refarea{index}"class="label cursor-pointer inline">
-        <span class="label-text">Column {index}</span>
-    <textarea id="refarea{index}" class="inline-block align-middle" 
-                rows="1" bind:value={refAreaInputs[index]}
+<div class="inline-block m-3">
+    <label for="refarea{index}"class="label cursor-pointer inline ">
+        <span class="label-text">Column {index+1}:</span></label>  
+     <textarea id="refarea{index}" class="align-middle resize" rows="1"
+                 bind:value={refAreaInputs[index]}
                
                 ></textarea>
-                <!-- onfocus={textAreaFocus} onblur={textAreaBlur}-->
-    </label>     
+</div>         
+       
 
 {/each}
+<div class="inline-block">
+{#if numCols <= maxCols}<Button buttonStyle="btn btn-sm btn-ghost" onclick={addCol} buttonText="+" tooltip="Add Column"/>{/if}
+{#if numCols >1 }<Button onclick={removeCol} buttonStyle="btn btn-sm btn-ghost"  buttonText="-" tooltip="Remove Last Column"/>{/if}
+</div>
 <Button onclick={lookup} buttonText="Lookup!"/>
-<div id="texts1">
+<div id="texts1" class="block">
 {#if dataReady}
-<h2> Data is Ready!</h2>
+<hr/>
 
-
-<ParallelTextSection parTextGroup={texts} showUnique={viewStates.views.unique.state} wordClick={toggleLex} 
-                    cssClassDict={lexClasses}
-                    cssCustomDict={customGreekClasses}
-                    showIdentical={viewStates.views.identical.state}
-                    highlightOnClick={viewStates.views.highlightOnClick.state}/>
-
-{:else}
-<h2> Data is NOT Ready!</h2>
-{/if}
-</div>
-</div>
-
-<Modal2 bind:showModal={viewStates.views.words.state}>
-
-    
-
-    <div class="max-w-full block text-center">
-                <h3>Highlight Features:</h3>
-            <ButtonSelect bind:selected={viewStates.views.unique.state} buttonText="Outline Unique Lexemes"/>
-            
-            <ButtonSelect bind:selected={viewStates.views.identical.state} tooltip="Toggle Bold/underline setting for morphologically identical words." 
-            buttonText="Identical words"/>
-            <ButtonSelect bind:selected={viewStates.views.highlightOnClick.state} buttonText="Highlight Lexeme on click" tooltip="If enabled, clicking/tapping on a word will toggle highlighting of that lexeme."/>
-            
-        <ButtonSelect buttonStyle="btn btn-neutral btn-outline btn-circle btn-xs p-0 m-0"
+<ButtonSelect bind:selected={viewStates.views.unique.state} buttonText="Outline Unique Lexemes"/>
+<ButtonSelect bind:selected={viewStates.views.identical.state} tooltip="Toggle Bold/underline setting for morphologically identical words." 
+           buttonText="Identical words"/>
+<ButtonSelect buttonText="Highlight on Click" bind:selected={viewStates.views.highlightOnClick.state}/>
+<ButtonSelect buttonText="Word Options" bind:selected={viewStates.views.words.state}/>  
+<ButtonSelect buttonStyle="btn btn-neutral btn-outline btn-circle btn-xs p-0 m-0"
             buttonText="?"
             bind:selected={showLexOptionsInfo}/>
             {#if showLexOptionsInfo}
@@ -535,13 +533,28 @@ function resetViewOptions(lookup=false){
                 </div>
             </div>
             {/if}
+<br/>
 
+<ParallelTextSection parTextGroup={texts} showUnique={viewStates.views.unique.state} wordClick={toggleLex} 
+                    cssClassDict={lexClasses}
+                    cssCustomDict={customGreekClasses}
+                    showIdentical={viewStates.views.identical.state}
+                    highlightOnClick={viewStates.views.highlightOnClick.state}/>
 
- 
+{:else}
 
-            
-           
-            <hr/>
+<span class="italic mt-3 pt-5"> Enter some valid NT references and click "Lookup!"</span>
+{/if}
+</div>
+</div>
+
+<Modal2 bind:showModal={viewStates.views.words.state}>
+
+    
+
+    <div class="max-w-full block text-center">
+                
+
         <div role="tablist" class="tabs tabs-lifted">
             <a role="tab" class="tab {selectedWordTabIndex==0 ? 'tab-active' : ''} " tabindex=0 onclick={()=>{selectedWordTabIndex=0}} >Lexemes</a>
             <a role="tab" class="tab {selectedWordTabIndex==1 ? 'tab-active' : ''} " tabindex=1 onclick={()=>{selectedWordTabIndex=1}}>Custom</a>

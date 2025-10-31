@@ -33,7 +33,8 @@ import { findNextAnchor,findPrevAnchor, getAnchors} from '$lib/utils/ui-utils';
 
 let {
     allowEverything=false,
-    request=null
+    request=null,
+    live=true,
 }=$props();
 
 
@@ -136,8 +137,7 @@ let groupsRefsArray=$derived.by(()=>{
 
 //let groupsRefsArray = $state([]);
 
-/**buildPericopeRefsect|null} fetchedTextsResponse
-*/
+
 let fetchedTextsResponse = $state(null);
 let showLexOptionsInfo = $state(false);
 function parsePericopeNums(){
@@ -660,7 +660,9 @@ const hotkeys=[
         
 ];
 function onkeydown(event){
-    if(!textAreaFocused ){
+    //mylog("NTSyPanel.onkeydown! event: ")
+    //mylog(event);
+    if(live && !textAreaFocused ){
         const matchedView=viewStates.getViewNameFromKey(event.key);
         const modalVisibles=viewStates.getVisible().filter((name)=>(viewStates.views[name].modal)); 
         if (matchedView) {
@@ -792,7 +794,7 @@ $inspect("request:", request);
 
 
 </style>
-<svelte:window {onkeydown}/>
+<svelte:window onkeydown={onkeydown}/>
 
 <div class="self-center text-center sticky top-0 bg-white z-40">
 

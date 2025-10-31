@@ -57,7 +57,7 @@ export class TfServer{
 
         //const bodyData = JSON.stringify(reqObject)
 		const response = await TfServer.jsonPOSTFetch(apiURI+"/texts",reqObject)
-       // mylog("getTexts(fetchURL: '"+apiURI+"') body data = " + JSON.stringify(reqObject),true);
+        mylog("getTexts(fetchURL: '"+apiURI+"') body data = " + JSON.stringify(reqObject),true);
        // mylog("response: ")
        // mylog(response)
         return response;
@@ -69,11 +69,9 @@ export class TfServer{
     async load() {
         if (!this.ready){
             mylog("bypassing checking for tf ...")
-           
             
           //  await TfServer.jsonFetch(this.server+"/text/1");
-            this.ready=true;
-            
+            this.ready=true;            
         }
         else{
             mylog("already ready!")
@@ -147,7 +145,6 @@ export class TfServer{
         }
 
         return nodes.sort();
-
     }
 
     /**

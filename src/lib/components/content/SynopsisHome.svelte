@@ -42,7 +42,7 @@
   </div>
 {#each panes as pane, index}
  <div id="pane-{pane.name}" class={index==selectedPane ? 'block' : 'hidden'}>
-   <pane.comp request={request}/>
+   <pane.comp request={request} live={index==selectedPane}/>
  </div>
 {/each}
 <!--

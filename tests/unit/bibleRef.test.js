@@ -116,12 +116,29 @@ test('getBookChapVerse', async () => {
 test('expandRefs', async () => {
 	const tests =[
         {input: "Matt 3:15;", output:["Matt 3:15"]},
+        {input: "Matt 3:15; 4:1", output:["Matt 3:15","Matt 4:1"]},
+        {input: "Matt 3:14-15", output:["Matt 3:14-15"]},
+        {input: "Matt 1; Mark 1", output:["Matt 1","Mark 1"]},
      
         
     ]
     for (const t of tests) {
-        expect(bibleUtils.expandRefs(t.input)).toEqual(t.output);
+        expect(bibleUtils.expandRefs(t.input, false)).toEqual(t.output);
     }
 	expect(true).toBe(true);
 	//await expect(page.locator('h1')).toBeVisible();
 });
+
+test('formatBibleRefs', async () => {
+	const tests =[
+        {input: "Matt 1", output:"Matt 1"},
+     
+        
+    ]
+    for (const t of tests) {
+        expect(bibleUtils.formatBibRefs(t.input)).toEqual(t.output);
+    }
+	expect(true).toBe(true);
+	//await expect(page.locator('h1')).toBeVisible();
+});
+

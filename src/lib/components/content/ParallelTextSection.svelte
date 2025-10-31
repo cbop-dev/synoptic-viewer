@@ -61,59 +61,58 @@ function getText(words){
 </script>
 <style>
     @reference "tailwindcss";
-    .Matt {
+    .column-1 {
         @apply bg-red-50 border-red-900 border-4;
     }
 
-    .Mark {
+    .column-2 {
         @apply bg-lime-50 border-lime-900 border-4;
     }
 
-    .Luke{
+    .column-3{
         @apply bg-sky-50 border-sky-900 border-4;
     }
 
-    .John{
+    .column-4{
         @apply bg-violet-50 border-violet-900 border-4;
     }
     
-    .other{
-        /*@apply bg-base-200;*/
-    }
+    
     .lex-unique{
         @apply outline-4 pl-0.5 mr-0.5 ;
     }
-    .gospel-column-0 span.lex-unique
+    .column-0 span.lex-unique
    {
             @apply outline-red-600   ;
         
     }
-    .gospel-column-1 span.lex-unique {
+    .column-1 span.lex-unique {
             @apply outline-green-600   ;
         
     }
-    .gospel-column-2 span.lex-unique
+    .column-2 span.lex-unique
     {
             @apply outline-blue-600   ;
         
     }
-    .gospel-column-3 span.lex-unique {
+    .column-3 span.lex-unique {
             @apply outline-fuchsia-600   ;
         
     }
 </style>
 
 {#snippet showText(textRef,unique,numCols,copyButton=true)}
-    <span class="font-bold">[{#if copyButton}
-        <CopyText copyText={textRef.reference} 
-        linkText={textRef.reference}
-        btnSizeCssClass="text-xl m-0 p-0 hover:link"
-        tooltip="Copy reference to clipboard."
-        showButton={false}
-        />
-        {:else}
-        {textRef.reference}
-    {/if}]</span>: 
+    {#if textRef.text}
+            <span class="font-bold">[{#if copyButton}
+                <CopyText copyText={textRef.reference} 
+                linkText={textRef.reference}
+                btnSizeCssClass="text-xl m-0 p-0 hover:link"
+                tooltip="Copy reference to clipboard."
+                showButton={false}
+                />
+                {:else}
+                {textRef.reference}
+            {/if}]</span>: 
                 {#if textRef.words && textRef.words.length}
                     {#each textRef.words as verseWords}
                         {#if copyButton}
@@ -141,9 +140,11 @@ function getText(words){
                 {:else if textRef.text}
                     
                     {textRef.text}
-                {:else}
-                    <i class="text-sm">(Not found in Nestle 1904)</i>
                 {/if}
+        {:else}
+            <i class="text-sm">("{textRef.reference}" not found. Did you enter it correctly?)</i>
+
+        {/if}
         {#if copyButton && textRef.text}
             <CopyText copyText={textRef.text} tooltip='Copy pericope'/>
         {/if}
@@ -162,7 +163,7 @@ function getText(words){
         {#each parTextGroup.parallelTexts as col, index}
 
         {#if col.textRefs && col.textRefs.length}
-            <div class="rounded-box  m-1 p-2 ">
+            <div class="rounded-box  m-1 p-2 column-{index+1}">
             {#if col.textRefs.length}
             
                 

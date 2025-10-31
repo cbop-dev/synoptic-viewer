@@ -1,8 +1,11 @@
 import { mylog } from "$lib/env/env.js";
 
 import { GreekUtils } from "$lib/utils/greek-utils";
-import {combineRefs, formatBibRefs,expandRefs} from '$lib/n1904/bibleRefUtils.js'
+import {combineRefs, formatBibRefs,expandRefs} from '$lib/n1904/bibleRefUtils.js';
+import * as BibleUtils from '$lib/n1904/bibleRefUtils.js'
+
 import mathUtils from "$lib/utils/math-utils";
+import { form } from "$app/server";
 export class Word{
     id=0;
     word='';
@@ -129,8 +132,12 @@ export function parseRefs(inputStrings){
     let thePars = []
     inputStrings.entries().forEach(([i,textA])=>{
         
-        const cleaned = textA && textA.length ? textA.trim().replaceAll(/\n+/g,";").replaceAll(/;+/g,";") : '';
-        const tAndRefs = expandRefs(cleaned).map((str)=>new TextAndRef(str));
+        const cleanedFormatted = formatBibRefs(textA && textA.length ? textA.trim().replaceAll(/\n+/g,";").replaceAll(/;+/g,";") : '');
+        mylog("parseRefs:cleaned refs = " + cleanedFormatted)
+        const tAndRefs = BibleUtils.expandRefs(cleanedFormatted,false).map((r)=>new TextAndRef(r));
+        mylog("parsedRefs:");
+        mylog(tAndRefs);
+        //const tAndRefs = [new TextAndRef(cleanedFormatted)]
         thePars.push(new ParallelText(tAndRefs));
     });
 
