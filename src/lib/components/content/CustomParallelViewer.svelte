@@ -1,7 +1,6 @@
 <script>
 import { ParallelText,Word, TextAndRef,VerseWords,ParallelTextGroup,parseRefs } from "./parallelTexts.svelte.js";
 import ParallelTextSection from "./ParallelTextSection.svelte";
-import ScriptureTextViewer from "./ScriptureTextViewer.svelte";
 import { tfServer, TfServer, lexemes} from "$lib/n1904/tfN1904";
 import ParallelGospelSection from "./ParallelGospelSection.svelte";
 import { mylog } from "$lib/env/env";
@@ -490,7 +489,7 @@ function resetViewOptions(lookup=false){
 <h1>Custom NT Synopsis!</h1>
 <h3 class="italic">Choose your <span class="line-through">weapons</span> NT Bible passages:</h3>
 
-<!--<ScriptureTextViewer/>-->
+
 
 {#each refAreaInputs as areaInput, index}
 <div class="inline-block m-3">
