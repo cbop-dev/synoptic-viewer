@@ -1,18 +1,6 @@
-//test
-/**
- * {{hideSolos: boolean, 
- *       selectedGospelIndex: number,
- *       sort: boolean,
- *       hideNonPrimary: boolean,
- *       focusOn: boolean,
- *       hideNonPrimarySolos: boolean,
- *       unique: boolean,
- *       identical: boolean,
- *       lexes: number[],
- *       greekStrings: string[]}}
- * 
- * 
- */
+import { mylog } from "$lib/env/env";
+import { SynopsisOptions } from "./SynopsisClasses";
+
 
 const booleanParams=[
     "hideSolos",
@@ -21,12 +9,24 @@ const booleanParams=[
     "focusOn",
     "hideNonPrimarySolos",
     "unique",
-    "identical"
+    "identical",
   ];
 
   const numericParams = [
-    "selectedGospelIndex"
+    "selectedGospelIndex",
+    "tab",
   ]
+
+  const intArrayParams=[
+    {name: "pericopes", split: ","},
+    {name: "sections", split: ","},
+  ]
+
+  const stringArrayParams=[
+    {name: "columns", split: "|"},
+    {name: "greekStrings", split: "|"},
+  ]
+
 
 
 /**
@@ -36,15 +36,28 @@ const booleanParams=[
  */
 export function getRequestParamsObj(searchParamsObj){
 
+  /**
+   * @type {Object<string,any>} req
+   */
   let req = {};
-  if (searchParamsObj.get("pericopes")){
-    req.pericopes=searchParamsObj.get("pericopes")?.split(',').map((n)=>parseInt(n));
+  for (const intParam of intArrayParams){
+      if (searchParamsObj.get(intParam.name)){
+       // mylog("checking string array param " +strParam.name +"='"+searchParamsObj.get(strParam.name)+"'")
+        req[intParam.name]=searchParamsObj.get(intParam.name)?.split(intParam.split).map((n)=>parseInt(n));
+       // mylog("Got string array param '"+strParam+"'=["+req[strParam.name].join("|")+"]");
+      }
 
   }
-  if (searchParamsObj.get("sections")){
-    req.sections=searchParamsObj.get("sections")?.split(',').map((n)=>parseInt(n));
+
+   for (const strParam of stringArrayParams){
+      if (searchParamsObj.get(strParam.name)){
+       // mylog("checking string array param " +strParam.name +"='"+searchParamsObj.get(strParam.name)+"'")
+        req[strParam.name]=searchParamsObj.get(strParam.name)?.split(strParam.split);
+       // mylog("Got string array param '"+strParam+"'=["+req[strParam.name].join("|")+"]");
+      }
 
   }
+
   
   for (const param of booleanParams){
     const p = searchParamsObj.get(param);
@@ -69,8 +82,11 @@ export function getRequestParamsObj(searchParamsObj){
 
   
   if (searchParamsObj.get('greekStrings')){
-    req.greekStrings=searchParamsObj.get("greekStrings")?.split(",");
+    req.greekStrings=searchParamsObj.get("greekStrings")?.split("|");
   }
+
+  mylog("getRequest Params returning:");
+  mylog(req);
   return req;
 }
 
@@ -113,7 +129,46 @@ export function generateURL(alandPericopeNums, hideSolos,selectedGospelIndex, so
     }
 
     if (greekStrings.length){
-        params.greekStrings=greekStrings;
+        params.greekStrings=greekStrings.join("|");
+    }
+
+    const optionsParams = Object.entries(params).filter(([k,v])=>v).map(([k,v])=>k+"="+v).join("&");
+    if (optionsParams.length) {
+        url += "&" +optionsParams
+    }
+    return url;
+}
+
+
+/**
+ * 
+ * @param {SynopsisOptions} options 
+ * @returns 
+ */
+export function generateURL2(options){
+        
+    let url = window.location.protocol  + "//" + window.location.host + "/";
+    if (options.pericopes && options.pericopes.length){
+        url += "?pericopes=" + options.pericopes.join(',');
+    }
+
+    let params={
+        hideSolos: hideSolos ? 1 : 0,
+        selectedGospelIndex: selectedGospelIndex,
+        sort: sort ? 1 : 0,
+        hideNonPrimary: hideNonPrimary ? 1 : 0,
+        focusOn: focusOn ? 1 : 0,
+        hideNonPrimarySolos: hideNonPrimarySolos ? 1 : 0,
+        unique: unique ? 1 : 0,
+        identical: identical ? 1 : 0,
+    }
+
+    if (lexes.length) {
+        params.lexes=lexes;
+    }
+
+    if (greekStrings.length){
+        params.greekStrings=greekStrings.join("|");
     }
 
     const optionsParams = Object.entries(params).filter(([k,v])=>v).map(([k,v])=>k+"="+v).join("&");

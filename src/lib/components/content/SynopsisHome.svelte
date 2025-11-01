@@ -1,11 +1,14 @@
 <script>
 	import NtSynopsisPanel from './NtSynopsisPanel.svelte';
     import CustomParallelViewer from './CustomParallelViewer.svelte';
-	
+	import { SynopsisOptions,getRequestParamsObj,generateURL } from './SynopsisClasses';
+	import { mylog } from '$lib/env/env';
     let {
-        request
+        options=null,
     } = $props();
 
+    mylog("<SynopHome> options:");
+    mylog(options);
     
    // let { data=null } = $props();
     
@@ -15,7 +18,7 @@
        {name:'Custom', 
        comp: CustomParallelViewer}
     ]
-    let selectedPane=$state(0);
+    let selectedPane=$state(options.tab && parseInt(options.tab) ? parseInt(options.tab) : 0);
 </script>
 <style>
      @reference "tailwindcss";
@@ -42,7 +45,7 @@
   </div>
 {#each panes as pane, index}
  <div id="pane-{pane.name}" class={index==selectedPane ? 'block' : 'hidden'}>
-   <pane.comp request={request} live={index==selectedPane}/>
+   <pane.comp options={options} live={index==selectedPane}/>
  </div>
 {/each}
 <!--

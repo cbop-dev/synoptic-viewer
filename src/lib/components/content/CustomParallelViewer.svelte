@@ -1,4 +1,7 @@
 <script>
+import { onMount } from "svelte";
+import LinkSvg from  '../ui/icons/link.svg';
+import { SynopsisOptions, generateURL  } from "./SynopsisClasses.js";
 import { ParallelText,Word, TextAndRef,VerseWords,ParallelTextGroup,parseRefs } from "./parallelTexts.svelte.js";
 import ParallelTextSection from "./ParallelTextSection.svelte";
 import { tfServer, TfServer, lexemes} from "$lib/n1904/tfN1904";
@@ -25,7 +28,11 @@ import CopyText from '../ui/CopyText.svelte';
 import { findNextAnchor,findPrevAnchor, getAnchors} from '$lib/utils/ui-utils';
 import OptionButton from "../ui/SelectButtons/OptionButton.svelte";
 let {
-    live=false
+    live=false,
+    /**
+     * @type {SynopsisOptions} options
+    */
+    options=new SynopsisOptions(),
 } = $props();
 
 let fetching = $state(false);
@@ -54,7 +61,7 @@ const maxCols = 4;
 /**
  * @type {string[]} refAreaInputs
  */
-let refAreaInputs = $state(['Matt 1:1', "Mark 1:1"]); 
+let refAreaInputs = $state(options.columns && options.columns.length ? options.columns : ['Matt 1:1', "Mark 1:1"]); 
 let numCols = $derived(refAreaInputs.length);
 
 /**
@@ -65,7 +72,8 @@ let texts= $state(new ParallelTextGroup());
 /**
 * @type {number[]} selectedLexes
 */
-let selectedLexes=$state([]);
+let selectedLexes=$state(options.lexes);
+mylog("initialized selected lexes: " + selectedLexes.join(','));
 
 /**
 * @type {string[]} selectedGreekStrings
@@ -343,12 +351,12 @@ function resetViewOptions(lookup=false){
             view: { description:  "View Options", hotkeys:['v'], state:false,modal:true},
             lookup: { description:  "Lookup passage(s) or select section", hotkeys:['l', 's'], state:true,modal:false},
             words: {description:  "Lexeme/Word Options", hotkeys:['w'], state:false,modal:true},
-            highlightOnClick: { description:  "Enable/disable highlight on click.", hotkeys:['c'], state:true,modal:false},
+            highlightOnClick: { description:  "Enable/disable highlight on click.", hotkeys:['c'], state:options.highlightOnClick,modal:false},
             info: { description:  "Website and project information.", hotkeys:['i'], state:false,modal:true},
-            unique: { description:  "Toggle Unique Lexeme color outlining", hotkeys:['u'], state:false,modal:false},
+            unique: { description:  "Toggle Unique Lexeme color outlining", hotkeys:['u'], state:options.unique,modal:false},
             help: { description:  "Show help menu", hotkeys:['h', '?'], state:false,modal:true},
             identical: { description:  "Show (bold & underline) morphologically identical words shared by different gospels in a parallel group ",
-             hotkeys:['m'], state:false,modal:false},
+             hotkeys:['m'], state:options.identical,modal:false},
               
         },
 
@@ -468,8 +476,8 @@ function resetViewOptions(lookup=false){
     /**
      *
      */
-    function lookup(){
-        buildAndFetchPericopes();
+    function lookup(reset=true){
+        buildAndFetchPericopes(reset);
     }
     //$inspect("Texts:", texts, "texts.lexemes:", [...texts.lexemes].join("; "))
     //$inspect("lemmasbyID.keys", Object.keys(lemmasByID), "selectedLexes:", selectedLexes, "response:", response, "texts:", texts);
@@ -481,6 +489,54 @@ function resetViewOptions(lookup=false){
         refAreaInputs.pop();
 
     }
+
+function makeURL(){
+    let opt = new SynopsisOptions(viewStates.views.unique.state,viewStates.views.identical.state,
+        viewStates.views.highlightOnClick.state,selectedLexes);
+    
+    opt.greekStrings=options.greekStrings;
+    opt.columns=refAreaInputs;
+    
+    
+    
+    
+    let url = generateURL(opt)+"&tab=1"
+    return url;
+}
+
+function loadRequestOptions(){
+    mylog("loadRequestOptions...")
+  /*  if(Object.hasOwn(request,"hideSolos")) {mylog("hideSolos =request.hideSolos;"); hideSolos =request.hideSolos;}
+    if(Object.hasOwn(request,"sort")) {mylog("sort =request.sort;"); sort =request.sort;}
+    if(Object.hasOwn(request,"hideNonPrimary")) {mylog("hideNonPrimary=request.hideNonPrimary;"); hideNonPrimary=request.hideNonPrimary;}
+    if(Object.hasOwn(request,"focusOn")) {mylog("focusOn=request.focusOn;"); focusOn=request.focusOn;}
+    if(Object.hasOwn(request,"hideNonPrimarySolos")) {mylog("hideNonPrimarySolos=request.hideNonPrimarySolos;"); hideNonPrimarySolos=request.hideNonPrimarySolos;}
+    if(Object.hasOwn(request,"unique")) {mylog("viewStates.views.unique.state=request.unique;"); viewStates.views.unique.state=request.unique;}
+    if(Object.hasOwn(request,"identical")) {mylog("viewStates.views.identical=request.identical;"); viewStates.views.identical.state=request.identical;}
+    if(Object.hasOwn(request,"selectedGospelIndex")) {mylog("selectedGospelIndex=request.selectedGospelIndex;"); selectedGospelIndex=request.selectedGospelIndex;}
+    if(Object.hasOwn(request,"lexes")) {mylog("got lexes param!"); selectedLexes=request.lexes}
+    if(Object.hasOwn(request,"greekStrings")) {mylog("got greekSrings!"); selectedGreekStrings=request.greekStrings}
+    */
+
+}
+
+let gotRequest = (options.columns && options.columns.length);
+let mounted=$state(false);
+
+onMount(() => {
+    if (gotRequest){
+        //landingPage=false;
+        
+        loadRequestOptions();
+        viewStates.views.lookup.state=false;
+        lookup(false);
+
+    }
+    else{
+        viewStates.reset();
+    }
+    mounted = true;
+});
 </script>
 
 <div class="self-center text-center sticky top-0 bg-white z-40" >
@@ -509,7 +565,7 @@ function resetViewOptions(lookup=false){
 </div>
 <Button onclick={lookup} buttonText="Lookup!"/>
 <div id="texts1" class="block">
-{#if dataReady}
+{#if mounted && dataReady}
 <hr/>
 
 <ButtonSelect bind:selected={viewStates.views.unique.state} buttonText="Outline Unique Lexemes"/>
@@ -533,7 +589,15 @@ function resetViewOptions(lookup=false){
             </div>
             {/if}
 <br/>
+<hr/>
+<h2>Parallel NT Texts:
+    <CopyText icon={LinkSvg} 
+            copyText={makeURL()} 
+            tooltip='Copy URL'
+            
+            />
 
+</h2>
 <ParallelTextSection parTextGroup={texts} showUnique={viewStates.views.unique.state} wordClick={toggleLex} 
                     cssClassDict={lexClasses}
                     cssCustomDict={customGreekClasses}

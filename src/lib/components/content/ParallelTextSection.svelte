@@ -11,7 +11,6 @@
     
     /**
      * @type {{parTextGroup: ParallelTextGroup,
-     * focus:string,
      * wordClick:function(number):void,
      * showIdentical:boolean,
      * cssClassDict:Object,

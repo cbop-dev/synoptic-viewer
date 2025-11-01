@@ -1,6 +1,8 @@
 <script>
 import { onMount } from 'svelte';
-import { generateURL } from './urlParams';
+//import { generateURL } from './urlParams.js';
+
+import { SynopsisOptions, generateURL } from './SynopsisClasses';
 import Icon from '../ui/icons/Icon.svelte';
 import LinkIcon from '../ui/icons/link-icon.svelte';
 import LinkSvg from  '../ui/icons/link.svg';
@@ -33,11 +35,16 @@ import { findNextAnchor,findPrevAnchor, getAnchors} from '$lib/utils/ui-utils';
 
 let {
     allowEverything=false,
-    request=null,
+ 
+    /**
+     * @type {SynopisOptions}
+    */
+    options=$bindable(new SynopsisOptions()),
+    //viewOptions=new ViewOptions(),
     live=true,
 }=$props();
 
-
+let myOptions=$state(SynopsisOptions.makeFrom(options))
 
 let fetching = $state(false);
 let expecting = $state(0);
@@ -55,7 +62,7 @@ let showLexemeHighlights = $state(false);
 let showLookupPanel = $state(true);
 // let showViewOptions = $state(false);
 //let landingPage=$state(true);
-let gotRequest = request ? (request.pericopes || request.sections ) : false;
+let gotRequest = myOptions ? (myOptions.pericopes && myOptions.pericopes.length  || myOptions.sections && myOptions.sections.length ) : false;
 let landingPage = $state(!gotRequest);
 let requestProcessed = $state(false);
 
@@ -413,13 +420,13 @@ async function urlRequestShowNtParallels(){
     //viewStates.views.highlightOnClick.state =false;
     let pericopes = new Set([]);
     
-    if (request.pericopes) {
-        pericopes = new Set(request.pericopes);
+    if (myOptions.pericopes) {
+        pericopes = new Set(myOptions.pericopes);
     }
     
-    if (request.sections && request.sections.length){
+    if (myOptions.sections && myOptions.sections.length){
         
-        request.sections.forEach((s)=>{
+        myOptions.sections.forEach((s)=>{
             const secs = mathUtils.createNumArrayFromStringListRange(gospelParallels.alandSynopsis.lookupSection(s).pericopes);
             mylog("urlRequestShowNtParallels: got secs: " + secs?.join(','))
             pericopes = pericopes.union(new Set(secs));
@@ -530,16 +537,19 @@ function highlightLexeme(id=0,color=null){
 
 const viewStates=$state({
     views:{
+        
+        highlightOnClick: { description:  "Enable/disable highlight on click.", hotkeys:['c'], state: myOptions.highlightOnClick,modal:false},
+        unique: { description:  "Toggle Unique Lexeme color outlining", hotkeys:['u'], state: myOptions.unique,modal:false},
+        identical: { description:  "Show (bold & underline) morphologically identical words shared by different gospels in a parallel group ",
+            hotkeys:['m'], state:myOptions.identical,modal:false},
+
+        sections: { description:  "Jump to a section", hotkeys:['j'], state:false,modal:true},
         view: { description:  "View Options", hotkeys:['v'], state:false,modal:true},
         lookup: { description:  "Lookup passage(s) or select section", hotkeys:['l', 's'], state:false,modal:false},
         words: {description:  "Lexeme/Word Options", hotkeys:['w'], state:false,modal:true},
-        highlightOnClick: { description:  "Enable/disable highlight on click.", hotkeys:['c'], state:true,modal:false},
         info: { description:  "Website and project information.", hotkeys:['i'], state:false,modal:true},
-        unique: { description:  "Toggle Unique Lexeme color outlining", hotkeys:['u'], state:false,modal:false},
         help: { description:  "Show help menu", hotkeys:['h', '?'], state:false,modal:true},
-        sections: { description:  "Jump to a section", hotkeys:['j'], state:false,modal:true},
-        identical: { description:  "Show (bold & underline) morphologically identical words shared by different gospels in a parallel group ",
-            hotkeys:['m'], state:false,modal:false},
+        
             
     },
 
@@ -617,6 +627,21 @@ const viewStates=$state({
 
 });
 
+
+function makeURL(){
+    let opt = new SynopsisOptions(viewStates.views.unique.state,viewStates.views.identical.state,
+        viewStates.views.highlightOnClick.state,selectedLexes);
+    opt.focusOn=focusOn;
+    opt.greekStrings=selectedGreekStrings;
+    opt.hideSolos=hideSolos;
+    opt.hideNonPrimarySolos=hideNonPrimarySolos;
+    opt.hideNonPrimary=hideNonPrimary;
+    opt.pericopes=alandPericopeNums;
+    opt.selectedGospelIndex=selectedGospelIndex;
+    opt.sort=sort;
+    let url = generateURL(opt)
+    return url;
+}
 
 function jumpToPrevSection(){
     const nextId=findPrevAnchor()
@@ -707,16 +732,16 @@ $effect(()=>{customGreekInputText=GreekUtils.removeDiacritics(
 
 function loadRequestOptions(){
     mylog("loadRequestOptions...")
-    if(Object.hasOwn(request,"hideSolos")) {mylog("hideSolos =request.hideSolos;"); hideSolos =request.hideSolos;}
-    if(Object.hasOwn(request,"sort")) {mylog("sort =request.sort;"); sort =request.sort;}
-    if(Object.hasOwn(request,"hideNonPrimary")) {mylog("hideNonPrimary=request.hideNonPrimary;"); hideNonPrimary=request.hideNonPrimary;}
-    if(Object.hasOwn(request,"focusOn")) {mylog("focusOn=request.focusOn;"); focusOn=request.focusOn;}
-    if(Object.hasOwn(request,"hideNonPrimarySolos")) {mylog("hideNonPrimarySolos=request.hideNonPrimarySolos;"); hideNonPrimarySolos=request.hideNonPrimarySolos;}
-    if(Object.hasOwn(request,"unique")) {mylog("viewStates.views.unique.state=request.unique;"); viewStates.views.unique.state=request.unique;}
-    if(Object.hasOwn(request,"identical")) {mylog("viewStates.views.identical=request.identical;"); viewStates.views.identical.state=request.identical;}
-    if(Object.hasOwn(request,"selectedGospelIndex")) {mylog("selectedGospelIndex=request.selectedGospelIndex;"); selectedGospelIndex=request.selectedGospelIndex;}
-    if(Object.hasOwn(request,"lexes")) {mylog("got lexes param!"); selectedLexes=request.lexes}
-    if(Object.hasOwn(request,"greekStrings")) {mylog("got greekSrings!"); selectedGreekStrings=request.greekStrings}
+    if(Object.hasOwn(myOptions,"hideSolos")) {mylog("hideSolos =myOptions.hideSolos;"); hideSolos =myOptions.hideSolos;}
+    if(Object.hasOwn(myOptions,"sort")) {mylog("sort =myOptions.sort;"); sort=myOptions.sort;}
+    if(Object.hasOwn(myOptions,"hideNonPrimary")) {mylog("hideNonPrimary=myOptions.hideNonPrimary;"); hideNonPrimary=myOptions.hideNonPrimary;}
+    if(Object.hasOwn(myOptions,"focusOn")) {mylog("focusOn=myOptions.focusOn;"); focusOn=myOptions.focusOn;}
+    if(Object.hasOwn(myOptions,"hideNonPrimarySolos")) {mylog("hideNonPrimarySolos=myOptions.hideNonPrimarySolos;"); hideNonPrimarySolos=myOptions.hideNonPrimarySolos;}
+    if(Object.hasOwn(myOptions,"unique")) {mylog("viewStates.views.unique.state=myOptions.unique;"); viewStates.views.unique.state=myOptions.unique;}
+    if(Object.hasOwn(myOptions,"identical")) {mylog("viewStates.views.identical=myOptions.identical;"); viewStates.views.identical.state=myOptions.identical;}
+    if(Object.hasOwn(myOptions,"selectedGospelIndex")) {mylog("selectedGospelIndex=myOptions.selectedGospelIndex;"); selectedGospelIndex=myOptions.selectedGospelIndex;}
+    if(Object.hasOwn(myOptions,"lexes")) {mylog("got lexes param!"); selectedLexes=myOptions.lexes}
+    if(Object.hasOwn(myOptions,"greekStrings")) {mylog("got greekSrings!"); selectedGreekStrings=myOptions.greekStrings}
 }
 let mounted=$state(false);
 onMount(() => {
@@ -735,7 +760,9 @@ onMount(() => {
 });
 //$inspect("filteredPericopes",filteredPericopes, "perGroups:", perGroups, "filteredPerGroups:", filteredPerGroups);
 
-$inspect("request:", request);
+$inspect("request:", myOptions);
+$inspect("gotRequest:",gotRequest);
+$inspect("Landing?:", landingPage);
 </script>
 <style>
     @reference "tailwindcss";
@@ -972,8 +999,7 @@ $inspect("request:", request);
     {#if alandPericopeNums.length}
          <h1 class="text-center">Results:
             <CopyText icon={LinkSvg} 
-            copyText={generateURL(alandPericopeNums,hideSolos,selectedGospelIndex,sort,
-            hideNonPrimary,focusOn,hideNonPrimarySolos,viewStates.views.unique.state,viewStates.views.identical.state,selectedLexes,selectedGreekStrings)} 
+            copyText={makeURL()} 
             tooltip='Copy stuff'
             
             /></h1>
