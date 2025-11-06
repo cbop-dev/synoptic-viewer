@@ -4,7 +4,10 @@ import LinkSvg from  '../ui/icons/link.svg';
 import { SynopsisOptions, generateURL  } from "./SynopsisClasses.js";
 import { ParallelText,Word, TextAndRef,VerseWords,ParallelTextGroup,parseRefs } from "./parallelTexts.svelte.js";
 import ParallelTextSection from "./ParallelTextSection.svelte";
-import { tfServer, TfServer, lexemes} from "$lib/n1904/tfN1904";
+import { N1904Server, lexemes} from "$lib/n1904/tfN1904";
+import {SblGnt} from '$lib/sblgnt/sblgnt.js';
+import {getServer} from "$lib/tf/tfServer.js";
+//import {tfServer,lexemes} from '$lib/sblgnt/sblgnt.js'
 import ParallelGospelSection from "./ParallelGospelSection.svelte";
 import { mylog } from "$lib/env/env";
 import * as bibleUtils from '$lib/n1904/bibleRefUtils.js'
@@ -12,6 +15,7 @@ import * as mathUtils from '$lib/utils/math-utils.js';
 //import Button from '../ui/Button.svelte';
 import ButtonSelect from '../ui/ButtonSelect.svelte';
 import {default as TfUtils} from './TfUtils.js';
+
 import Modal2 from '../ui/Modal2.svelte';
 import ModalButton from '../ui/ModalButton.svelte';
 import Button from '../ui/Button.svelte';
@@ -27,6 +31,7 @@ import BulletsIcons from '../ui/icons/bullets-outline.svelte';
 import CopyText from '../ui/CopyText.svelte';
 import { findNextAnchor,findPrevAnchor, getAnchors} from '$lib/utils/ui-utils';
 import OptionButton from "../ui/SelectButtons/OptionButton.svelte";
+const tfServer=getServer();
 let {
     live=false,
     /**
@@ -180,7 +185,7 @@ async function fetchPostTextsBatch(refsArray){
     /**
      * @type {{book:string,chapter:number|null,verses:number[]}[]} bcvFetchArray
      */
-    const bcvFetchArray=TfUtils.getBCVarrayFromRefs(refsArray);
+    const bcvFetchArray=tfServer.getBCVarrayFromRefs(refsArray);
     
     return await tfServer.getTexts(bcvFetchArray,true,true);
     //return texts;

@@ -1,9 +1,9 @@
 import { describe, it, expect,test} from 'vitest';
-import { tfServer, TfServer } from '$lib/n1904/tfN1904.js';
+import { tfServer,N1904Server } from '$lib/n1904/tfN1904.js';
 import { mylog } from '$lib/env/env.js';
 import { ParallelText, GospelPericopeGroup,TextAndRef,VerseWords,Word, parseRefs} from '$lib/components/content/parallelTexts.svelte.js';
 import GP from '@cbop-dev/aland-gospel-synopsis';
-import TfUtils from '$lib/components/content/TfUtils';
+import TfUtils from '$lib/components/content/TfUtils.js';
 test('dummy', async () => {
 	const tests =[
         {input:null,output:null}
@@ -15,6 +15,7 @@ test('dummy', async () => {
 	expect(true).toBe(true);
 	//await expect(page.locator('h1')).toBeVisible();
 });
+
 
 test('Groups: unique words', async () => {
 	const tests =[

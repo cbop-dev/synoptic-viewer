@@ -1,6 +1,6 @@
 <script>
 	import NtSynopsisPanel from "$lib/components/content/NtSynopsisPanel.svelte";
-    import ParallelTextSection from "$lib/components/content/ParallelTextSection.svelte";
+    import ParallelGospelSection from "$lib/components/content/ParallelGospelSection.svelte";
     import '../../app.css';
 
     function onkeydown(event){
@@ -11,5 +11,5 @@
     
 </script>
 
-<!--<ParallelTextSection/>-->
+<!--<ParallelGospelSection/>-->
 <NtSynopsisPanel allowEverything={true}/>

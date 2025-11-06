@@ -8,7 +8,10 @@ import LinkIcon from '../ui/icons/link-icon.svelte';
 import LinkSvg from  '../ui/icons/link.svg';
 import {gospelParallels} from '@cbop-dev/aland-gospel-synopsis'
 import parallelTextsSvelte, { ParallelText, GospelPericopeGroup,Word, TextAndRef,VerseWords } from "./parallelTexts.svelte";
-import { tfServer, TfServer, lexemes} from "$lib/n1904/tfN1904";
+import { N1904Server, lexemes} from "$lib/n1904/tfN1904";
+import { SblGnt } from '$lib/sblgnt/sblgnt.js';
+import { getServer } from "$lib/tf/tfServer";
+//import {tfServer,lexemes} from '$lib/sblgnt/sblgnt.js'
 import ParallelGospelSection from "./ParallelGospelSection.svelte";
 import { mylog } from "$lib/env/env";
 import * as bibleUtils from '$lib/n1904/bibleRefUtils.js'
@@ -30,7 +33,7 @@ import ArrowTop from '../ui/icons/arrow-top-icon.svelte';
 import BulletsIcons from '../ui/icons/bullets-outline.svelte';
 import CopyText from '../ui/CopyText.svelte';
 import { findNextAnchor,findPrevAnchor, getAnchors} from '$lib/utils/ui-utils';
-	
+const tfServer=getServer();
 //import { generateHslColorGradient } from '../ui/chartUtils';
 
 let {
@@ -316,7 +319,7 @@ async function fetchPostTextsBatch(){
     /**
      * @type {{book:string,chapter:number|null,verses:number[]}[]} bcvFetchArray
      */
-    const bcvFetchArray=TfUtils.getBCVarrayFromRefs(groupsRefsArray);
+    const bcvFetchArray=tfServer.getBCVarrayFromRefs(groupsRefsArray);
     
     fetchedTextsResponse = await tfServer.getTexts(bcvFetchArray,true,true);
     

@@ -1,16 +1,17 @@
 import { writable, get } from 'svelte/store';
-const testing = import.meta.env.MODE =='test' ? true : false;
+const testing =  import.meta.env.MODE =='test' ? true : false;
 const useLocalTF=true;
-export const tfserverurl = useLocalTF ? "http://localhost:5000/nt" : "";//add alternate tf-fast server
+export const tfserverurl = useLocalTF ? "http://localhost:5000" : "";//add alternate tf-fast server
 
+export const useSbl=true;
+//export const useSbl=false;
 
 //const testing = true;
 
-export const apiURI= testing ? 'http://localhost:5000/nt' :'/api/tf';
-
+export const apiURI= testing ? '' : '/api/tf';
 
 export const debug = writable(false);
-//debug.set(true);
+debug.set(true);
 
 //debug = true;
 
@@ -71,3 +72,4 @@ export default {
     repackageLemmas: repackageLemmas
 }
     */
+

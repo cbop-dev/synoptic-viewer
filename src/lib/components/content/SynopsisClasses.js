@@ -185,7 +185,7 @@ export function generateURL(options){
 
             
     for (const numParam of SynopsisOptions.propTypes.numericParams){
-        if (Object.hasOwn(options,numParam)){
+        if (options[numParam]){
             uris.push(numParam+"="+options[numParam]);
         }
     }
