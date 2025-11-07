@@ -1,5 +1,7 @@
 import { writable, get } from 'svelte/store';
-export const testing =  import.meta.env.MODE =='test' ? true : false;
+//export const testing =  import.meta.env.MODE =='test' ? true : false;
+export const testing = process.env.TEST || import.meta.env.MODE =='test' ? true: false
+
 const useLocalTF=true;
 export const tfserverurl = useLocalTF ? "http://localhost:5000" : "";//add alternate tf-fast server
 
@@ -73,3 +75,9 @@ export default {
 }
     */
 
+if(testing){
+    mylog("TESTING mode enabled!")
+}
+else{
+    mylog("NOT Testing.")
+}
