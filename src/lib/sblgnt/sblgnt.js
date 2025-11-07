@@ -18,9 +18,9 @@ export class SblGntServer extends N1904Server{
     longname="SBL Greek New Testament (2010)";
     name="SBL Greek NT"
     shortname="SBL GNT";
-    abbrev="sglgnt";
+    abbrev="sblgnt";
     server=env.tfserverurl;
-    
+    param=this.abbrev;
     lexemes = ntlexemes;
     booksDict=tfNtBooksDict;
     showNotes=true;

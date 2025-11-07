@@ -235,6 +235,7 @@ export class TfServer{
     longname='';
     shortname='';
     abbrev='';
+    param='nt';
     showNotes = false;
     /**
      * @type {Object<string,Object>} booksDict

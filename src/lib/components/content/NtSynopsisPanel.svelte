@@ -152,7 +152,7 @@ let groupsRefsArray=$derived.by(()=>{
 });
 
 //let groupsRefsArray = $state([]);
-let currentServer=tfServer;
+let currentServer=$state(tfServer);
 
 let fetchedTextsResponse = $state(null);
 let showLexOptionsInfo = $state(false);
@@ -235,6 +235,7 @@ let lemmasByID=$derived.by(()=>{
 
 function setServer(){
     currentServer=tfServer;
+    
 }
 
 let selectedSection = $state([1]);
@@ -674,6 +675,7 @@ function makeURL(){
     opt.pericopes=alandPericopeNums;
     opt.selectedGospelIndex=selectedGospelIndex;
     opt.sort=sort;
+    opt.nt=currentServer.param;
     let url = generateURL(opt)
     return url;
 }

@@ -18,8 +18,8 @@ export class N1904Server extends TfUtils.TfServer {
     longname="Nestle's 1904 Novum Testamentum Graece"
     name=this.longname;
     shortname="Nestle 1904 NT";
-    abbrev="n1904"
-
+    abbrev="n1904";
+    param=this.abbrev;
     server=env.tfserverurl;
     dbURI="/nt";
     lexemes = ntlexemes;

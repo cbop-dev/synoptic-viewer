@@ -8,7 +8,7 @@
     import { SblGntServer } from '$lib/sblgnt/sblgnt';
     import Button from '../ui/Button.svelte';
     import { TfServer } from './TfUtils';
-	import { server } from 'typescript';
+	
     let {
         options=null,
     } = $props();

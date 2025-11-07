@@ -1,7 +1,7 @@
 import { mylog } from '$lib/env/env.js';
 import { json } from '@sveltejs/kit';
 //import { getRequestParamsObj } from '$lib/components/content/urlParams.js';
-import { SynopsisOptions, getRequestParamsObj } from '$lib/components/content/SynopsisClasses.js';
+import { getRequestParamsObj } from '$lib/components/content/SynopsisClasses.js';
 
 
 export async function load({ url, params }) {

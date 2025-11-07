@@ -45,6 +45,14 @@ let {
     
 } = $props();
 
+let currentServer=$state(tfServer);
+
+function setServer(){
+    currentServer=tfServer;
+}
+
+
+
 let fetching = $state(false);
 let expecting = $state(0);
 let numReady=$state(0);
@@ -78,7 +86,7 @@ function displayNote(heading,note) {
     
     theNote.heading=heading;
     theNote.note=note;
-    theNote.footer=tfServer.getNoteFooter();
+    theNote.footer=currentServer.getNoteFooter();
     viewStates.views.notes.state = true;
 }
 
@@ -205,9 +213,9 @@ async function fetchPostTextsBatch(refsArray){
     /**
      * @type {{book:string,chapter:number|null,verses:number[]}[]} bcvFetchArray
      */
-    const bcvFetchArray=tfServer.getBCVarrayFromRefs(refsArray);
+    const bcvFetchArray=currentServer.getBCVarrayFromRefs(refsArray);
     
-    return await tfServer.getTexts(bcvFetchArray,true,true);
+    return await currentServer.getTexts(bcvFetchArray,true,true);
     //return texts;
 }
 
@@ -503,6 +511,7 @@ function resetViewOptions(lookup=false){
      *
      */
     function lookup(reset=true){
+        setServer();
         buildAndFetchPericopes(reset);
     }
     //$inspect("Texts:", texts, "texts.lexemes:", [...texts.lexemes].join("; "))
@@ -616,7 +625,7 @@ onMount(() => {
             {/if}
 <br/>
 <hr/>
-<h2>Parallel NT Texts from {tfServer.name}:
+<h2>Parallel NT Texts from {currentServer.name}:
     <CopyText icon={LinkSvg} 
             copyText={makeURL()} 
             tooltip='Copy URL'

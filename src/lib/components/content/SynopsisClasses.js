@@ -1,4 +1,4 @@
-import { mylog } from "$lib/env/env";
+import { mylog } from "$lib/env/env.js";
 
 export class SynopsisOptions{
     unique=false;
@@ -200,6 +200,12 @@ export function generateURL(options){
     for (const numParam of SynopsisOptions.propTypes.numericParams){
         if (options[numParam]){
             uris.push(numParam+"="+options[numParam]);
+        }
+    }
+
+    for (const strParam of SynopsisOptions.propTypes.stringParams){
+        if (options[strParam]){
+            uris.push(strParam+"="+options[strParam]);
         }
     }
         //
