@@ -11,7 +11,7 @@ export const useSbl=true;
 export const apiURI= testing ? '' : '/api/tf';
 
 export const debug = writable(false);
-debug.set(true);
+//debug.set(true);
 
 //debug = true;
 
