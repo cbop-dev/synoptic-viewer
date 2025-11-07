@@ -138,7 +138,6 @@ export function populateTexts(parallelTextGroup, response, parRefsObj, words=tru
 
 
     for (const [index,par] of parallelTextGroup.parallelTexts.entries()){
-        //mylog("checking group # " + group.id +" , title: '"+ group.title + ", index: " + index);
     
         for (const [i,textRef] of par.textRefs.entries()){
             // mylog("checking ref: " + textRef.reference);
@@ -163,11 +162,7 @@ export function populateTexts(parallelTextGroup, response, parRefsObj, words=tru
         
         parallelTextGroup.markUniqueAndIdenticalWords();        
     }
-    //mylog("DONE! Populated the ParTexts()! We have " + parallelTextGroup.parallelTexts.length + " par Texts.")
-    //mylog("here's what we got: " 
-      //  + parallelTextGroup.parallelTexts.map((p)=>p.textRefs.map((tr)=>tr.text).join(";"))
-        //.join("|"));
-    //mylog("^==================================^")
+ 
 
 }
 

@@ -1,7 +1,7 @@
 <script>
 import { onMount } from 'svelte';
 //import { generateURL } from './urlParams.js';
-
+import Footer from './Footer.svelte';
 import { SynopsisOptions, generateURL } from './SynopsisClasses';
 import Icon from '../ui/icons/Icon.svelte';
 import LinkIcon from '../ui/icons/link-icon.svelte';
@@ -859,6 +859,21 @@ onMount(() => {
 
 </style>
 <svelte:window onkeydown={onkeydown}/>
+
+{#snippet appTitle(headingTag="h1")}
+    <svelte:element this={headingTag}>NT Gospel Synopsis Viewer</svelte:element> 
+{/snippet}
+{#snippet appSummary(heading=true,headingTag="h1")}
+
+    {#if heading}
+        {@render appTitle(headingTag)}
+        <hr/>
+    {/if}
+    
+    Based on Kurt Aland's <i>Synopsis Quattuor Evangeliorum</i>, using <a href="https://www.sblgnt.com">The SBL Greek New Testament (2010)</a> or, optionally, Nestle's 1904 edition of the <i>Greek New Testament.</i><br/>
+    Enter NT reference to view parallel texts and click "Look up!", or select a section and press "Go!"
+    {/snippet}
+
 <div class="self-center text-center sticky top-0 bg-white z-40">
 
     {#if !landingPage}
@@ -981,7 +996,7 @@ onMount(() => {
         
         <div class="text-center m-auto">
     
-            Based on Kurt Aland's <i>Synopsis Quattuor Evangeliorum</i>, using <a href="https://www.sblgnt.com">The SBL Greek New Testament (2010)</a> or, optionally, Nestle's 1904 edition of the <i>Greek New Testament</i>).<br/>
+            Based on Kurt Aland's <i>Synopsis Quattuor Evangeliorum</i>, using <a href="https://www.sblgnt.com">The SBL Greek New Testament (2010)</a> or, optionally, Nestle's 1904 edition of the <i>Greek New Testament</i>.<br/>
             Enter NT reference to view parallel texts and click "Look up!", or select a section and press "Go!"
       </div>
       <hr/>
@@ -1047,6 +1062,7 @@ onMount(() => {
         {#if dataReady && fetchedTextsResponse}
             {#if filteredPerGroups.length}
                 {#each filteredPerGroups as group, index }
+                <hr class="mb-2 !border-slate-200"/>
                 <div class='anchor text-center' id="section-{group.id}">
                     <h2 class="inline-block"><b><u>{group.title}</u></b><CopyText copyText={group.getRefs()} tooltip='Copy parallel group references'/></h2>
                     </div>
@@ -1076,7 +1092,7 @@ onMount(() => {
                     showNotesFunction={displayNote}
                     />
                 </div>
-                    <hr class="mb-2"/>
+                    
                 {/each}
             {:else}
                 (No results. Try <a href="" data-sveltekit-reload>another search</a>{#if hideNonPrimary || focusOn || hideSolos }, 
@@ -1307,11 +1323,9 @@ onMount(() => {
 
 <Modal2 bind:showModal={viewStates.views.info.state}>
     <div class="text-left m-auto inline">
-    <h2 >NT Gospel Synopsis Viewer</h2> <hr/>
-            Based on Kurt Aland's <i>Synopsis Quattuor Evangeliorum</i>, using <a href="https://www.sblgnt.com">The SBL Greek New Testament (2010)</a> or, optionally, Nestle's 1904 edition of the <i>Greek New Testament.</i><br/>
-            Enter NT reference to view parallel texts and click "Look up!", or select a section and press "Go!"
+        {@render appSummary()}
         <hr/>
-        Web application created by Fr. Christopher Brannan, O.P. For more information about the project and its data sources, visit the <a href="https://github.com/cbop-dev/synoptic-viewer" target="_blank">github project page</a>.
+        <Footer/>
     </div>
     <div class="btn-sm"></div>
 </Modal2>

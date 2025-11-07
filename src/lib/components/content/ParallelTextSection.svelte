@@ -112,8 +112,7 @@ function notesClick(heading,note){
         
     }
 </style>
-
-{#snippet showText(textRef,unique,numCols,copyButton=true)}
+{#snippet showText(textRef,parGroup,unique,numCols,copyButton=true,)}
     {#if textRef.text}
             <span class="font-bold">[{#if copyButton}
                 <CopyText copyText={textRef.reference} 
@@ -153,7 +152,7 @@ function notesClick(heading,note){
                         class={["m-0 word", "lex-" + word.id, 
                             showUnique && unique && isUnique(word.id,unique) && 'lex-unique', 
                             wordCssClass, customClass, plainGreek,
-                            showIdentical && wordCssClass && parTextGroup.matchingWords.includes(stripWord(word.word)) && 'underline font-bold']} 
+                            showIdentical && wordCssClass && parGroup.matchingWords.includes(stripWord(word.word)) && 'underline font-bold']} 
                         onclick={()=>{if (highlightOnClick) wordClick(word.id);}}>{word.word}{'  '}</span>
                         {/each}
                     {/each}
@@ -193,7 +192,7 @@ function notesClick(heading,note){
                     {#if index2 > 0}<br/>{/if}
                     <div class="text-left">
                         
-                    {@render showText(textRef,unique )}
+                    {@render showText(textRef,parTextGroup,unique, )}
                     </div>
                     <!--<hr class='border-accent-content'/> -->
                 {/each}

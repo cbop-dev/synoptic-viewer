@@ -731,7 +731,7 @@ function matchBookName(lookup) {
 	}
 	else
 	{
-		for (b in bibleRefReverseLookupHash)
+		for (const b in bibleRefReverseLookupHash)
 		{
 			if (b.toLowerCase().startsWith(lookup.toLowerCase()))
 			{
@@ -739,7 +739,7 @@ function matchBookName(lookup) {
 				break;
 			}
 		}
-		for (b in bibleRefReverseLookupHash)
+		for (const b in bibleRefReverseLookupHash)
 		{
 			if (b.toLowerCase().includes(lookup.toLowerCase()))
 			{
@@ -766,7 +766,7 @@ function buildbibleRefReverseLookupHash() {
 		});	
 	});
 };
-
+buildbibleRefReverseLookupHash();
 /**
  * 
  * @param {string} lookup 

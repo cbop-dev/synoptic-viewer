@@ -221,7 +221,7 @@ function getText(words){
                     
                     {textRef.text}
                 {:else}
-                    <i class="text-sm">(Not found in SBLGNT/Nestle 1904)</i>
+                   <i class="text-sm">("{textRef.reference}" not found. Did you enter it correctly?)</i>
                 {/if}
         {#if copyButton && textRef.text}
             <CopyText copyText={textRef.text} tooltip='Copy pericope'/>
@@ -253,7 +253,7 @@ function getText(words){
                         
                     {@render showText(textRef,unique )}
                     </div>
-                    <!--<hr class='border-accent-content'/> -->
+                    
                 {/each}
                 
             
@@ -299,7 +299,7 @@ function getText(words){
                 <div >
                 {@render showText(textRef,col.unique)}
                 </div>
-                <!--<hr class='border-accent-content'/> -->
+                
             {/each}
             
             </div>
