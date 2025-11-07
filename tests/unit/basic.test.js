@@ -1,9 +1,9 @@
 import { describe, it, expect,test} from 'vitest';
 import { TfServer } from '$lib/components/content/TfUtils';
-import { tfServer,N1904Server } from '$lib/n1904/tfN1904';
+import { N1904Server } from '$lib/n1904/tfN1904';
 import { mylog } from '$lib/env/env';
 import gospelParallels from '@cbop-dev/aland-gospel-synopsis';
-
+const tfServer = new N1904Server();
 test('dummy', async () => {
 	
 	expect(true).toBe(true);

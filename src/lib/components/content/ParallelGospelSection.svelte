@@ -5,6 +5,7 @@
     import { ColorUtils } from '$lib/utils/color-utils';
     import CopyText     from '../ui/CopyText.svelte';
     import { GreekUtils } from '$lib/utils/greek-utils';
+	import Button from '../ui/Button.svelte';
     
     const gospels = gospelParallels.gospels;
     
@@ -18,7 +19,9 @@
      * cssClassDict:Object,
      * cssCustomDict:Object,
      * showUnique:boolean,
-     * highlightOnClick:boolean
+     * highlightOnClick:boolean,
+     * showNotes:boolean,
+     * showNotesFunction(heading:string,note:string):void
      * }}
      */
     let {
@@ -29,11 +32,21 @@
         wordClick=(id)=>{},
         cssClassDict={},
         cssCustomDict={},
-        highlightOnClick=true
+        highlightOnClick=true,
+        showNotes=false,
+        showNotesFunction=(heading,note)=>{alert(heading+"\n"+note)}
+
         
     } = $props();
 
-  
+    
+    /**
+     * * @param {string} heading 
+     * @param {string} note 
+    */
+    function notesClick(heading,note){
+        showNotesFunction(heading,note);
+    }
     /**
      * @type {{focused: boolean, cols: ParallelText[], focusIndex: number}} colData
      */
@@ -169,8 +182,17 @@ function getText(words){
         showButton={false}
         />
         {:else}
-        {textRef.reference}
-    {/if}]</span>: 
+        {textRef.reference}{/if}{#if !showNotes}
+        {:else}
+    
+        {#if textRef.note}
+        <Button buttonText={"\u{1F5C8}"} buttonStyle="btn btn-xs btn-ghost" 
+        tooltip={"See Notes"}
+        onclick={()=>{notesClick(textRef.reference, textRef.note)}} />{/if}
+        
+        {/if}]
+
+</span>: 
                 {#if textRef.words && textRef.words.length}
                     {#each textRef.words as verseWords}
                         {#if copyButton}
@@ -199,7 +221,7 @@ function getText(words){
                     
                     {textRef.text}
                 {:else}
-                    <i class="text-sm">(Not found in Nestle 1904)</i>
+                    <i class="text-sm">(Not found in SBLGNT/Nestle 1904)</i>
                 {/if}
         {#if copyButton && textRef.text}
             <CopyText copyText={textRef.text} tooltip='Copy pericope'/>

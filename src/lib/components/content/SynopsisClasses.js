@@ -34,6 +34,8 @@ export class SynopsisOptions{
     */
     lexes=[];
 
+    nt="sblgnt"
+    //other: "n1904"
     
     /**
      * 
@@ -70,6 +72,9 @@ export class SynopsisOptions{
         stringArrayParams: [
             {name: "columns", split: "|"},
             {name: "greekStrings", split: "|"},
+        ],
+        stringParams: [
+            "nt"
         ]
 
     };
@@ -146,6 +151,14 @@ export function getRequestParamsObj(searchParamsObj){
     }
 
 
+  }
+
+
+  for (const strParam of SynopsisOptions.propTypes.stringParams){
+     const p = searchParamsObj.get(strParam);
+     if (p && p.length){
+        options[strParam]=p;
+     }
   }
 
  

@@ -15,6 +15,11 @@ export const lexemes = ntlexemes;
 
 export class N1904Server extends TfUtils.TfServer {
     ready = false;
+    longname="Nestle's 1904 Novum Testamentum Graece"
+    name=this.longname;
+    shortname="Nestle 1904 NT";
+    abbrev="n1904"
+
     server=env.tfserverurl;
     dbURI="/nt";
     lexemes = ntlexemes;

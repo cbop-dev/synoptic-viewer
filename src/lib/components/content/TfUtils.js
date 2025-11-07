@@ -149,6 +149,12 @@ export function populateTexts(parallelTextGroup, response, parRefsObj, words=tru
                     
                     textRef.words=response.texts[queryIndex].words;
                 }
+                if (response.texts[queryIndex].notes){
+                    const theNotes = response.texts[queryIndex].notes.filter((n)=>n.length).join("\n");
+                    if (theNotes.length){
+                        textRef.note=theNotes;
+                    }
+                }
                 // mylog("populating fetched text for group index "+index + ", ref: '" + textRef.reference
                 // + "', queryIndex = " + queryIndex +", text='"+textRef.text +"'", true);
             }
@@ -226,6 +232,10 @@ export function getGroupRefsArrays(groupsArray){
 export class TfServer{
     ready = false;
     name = "TF Empty DB";
+    longname='';
+    shortname='';
+    abbrev='';
+    showNotes = false;
     /**
      * @type {Object<string,Object>} booksDict
      */
@@ -306,9 +316,9 @@ export class TfServer{
      * @param {{book:string,chapter:number|null,verses:number[]}[]} bcvArray
      * @returns {Promise.<Object>}
      */
-    async getTexts(bcvArray,showVerses=true,lexemes=true) {
+    async getTexts(bcvArray,showVerses=true,lexemes=true,showNotes=this.showNotes) {
         //mylog("getTexts!...",true);
-        const reqObject = {refs:bcvArray,options:{showVerses:showVerses, lexemes:lexemes}}
+        const reqObject = {refs:bcvArray,options:{showVerses:showVerses, lexemes:lexemes,showNotes:showNotes}}
 
         //const bodyData = JSON.stringify(reqObject)
         const url = this.getURL() + "/texts";
@@ -551,7 +561,9 @@ export class TfServer{
         return name;
     }
 
-
+    getNoteFooter(){
+        return "";
+    }
     
 }
 

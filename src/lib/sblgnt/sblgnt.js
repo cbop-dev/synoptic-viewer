@@ -13,20 +13,29 @@ import { ParallelText, GospelPericopeGroup,TextAndRef,VerseWords,Word,GospelPeri
 const debugOn=true;
 export const lexemes = ntlexemes;
 
-export class SblGnt extends N1904Server{
-   dbURI="/sblgnt";
-
+export class SblGntServer extends N1904Server{
+    dbURI="/sblgnt";
+    longname="SBL Greek New Testament (2010)";
+    name="SBL Greek NT"
+    shortname="SBL GNT";
+    abbrev="sglgnt";
     server=env.tfserverurl;
     
     lexemes = ntlexemes;
     booksDict=tfNtBooksDict;
+    showNotes=true;
+
+    getNoteFooter(){
+        return "Apparatus notes taken from The Greek New Testament: SBL Edition (https://www.sblgnt.com), copyright 2010, Society of Biblical Literature (https://sbl-site.org) and Logos Bible Software (https://logos.com). License information: https://www.sblgnt.com/license/.";
+    }
+    
 }
 
 //const NT = use("CenterBLC/SBLGNT", version="2022")
 
 //python.exit() 
 
-const tfServer = new SblGnt();
+//const tfServer = new SblGnt();
 
 mylog("in tf.js...")
-export {tfServer}
+//export {tfServer}

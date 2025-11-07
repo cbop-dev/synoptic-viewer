@@ -21,6 +21,10 @@ export class TextAndRef{
     reference='';
     text='';
     /**
+     * @type {string} note
+     */
+    note='';
+    /**
      * @type {VerseWords[]} words
      */
     words=[];
@@ -30,12 +34,13 @@ export class TextAndRef{
      * @param {string} ref 
      * @param {string} txt 
      * @param {VerseWords[]} [words=[]] 
+     * @param {string} [note=''] 
      */
-    constructor(ref='',txt='',words=[]){
+    constructor(ref='',txt='',words=[], note=''){
         this.reference = ref;
         this.text = txt;
         this.words=[];
-
+        this.note=note
     }
 }
 
@@ -114,12 +119,11 @@ export class GospelPericopeGroupIndices {
         this.john=john;
         this.other=other;
     }
-
 }
+
 export function  stripWord(str){
             return GreekUtils.removeDiacritics(str.replace(/[,. ·:;]/,""));
 }
-
 
 /**
  * @param {string[]} inputStrings 

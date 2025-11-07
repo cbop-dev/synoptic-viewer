@@ -5,16 +5,16 @@ import { SynopsisOptions, generateURL  } from "./SynopsisClasses.js";
 import { ParallelText,Word, TextAndRef,VerseWords,ParallelTextGroup,parseRefs } from "./parallelTexts.svelte.js";
 import ParallelTextSection from "./ParallelTextSection.svelte";
 import { N1904Server, lexemes} from "$lib/n1904/tfN1904";
-import {SblGnt} from '$lib/sblgnt/sblgnt.js';
-import {getServer} from "$lib/tf/tfServer.js";
-//import {tfServer,lexemes} from '$lib/sblgnt/sblgnt.js'
+import {SblGntServer} from '$lib/sblgnt/sblgnt.js';
+
+
 import ParallelGospelSection from "./ParallelGospelSection.svelte";
 import { mylog } from "$lib/env/env";
 import * as bibleUtils from '$lib/n1904/bibleRefUtils.js'
 import * as mathUtils from '$lib/utils/math-utils.js';
 //import Button from '../ui/Button.svelte';
 import ButtonSelect from '../ui/ButtonSelect.svelte';
-import {default as TfUtils} from './TfUtils.js';
+import {TfServer, default as TfUtils} from './TfUtils.js';
 
 import Modal2 from '../ui/Modal2.svelte';
 import ModalButton from '../ui/ModalButton.svelte';
@@ -31,13 +31,18 @@ import BulletsIcons from '../ui/icons/bullets-outline.svelte';
 import CopyText from '../ui/CopyText.svelte';
 import { findNextAnchor,findPrevAnchor, getAnchors} from '$lib/utils/ui-utils';
 import OptionButton from "../ui/SelectButtons/OptionButton.svelte";
-const tfServer=getServer();
+
 let {
     live=false,
     /**
      * @type {SynopsisOptions} options
     */
     options=new SynopsisOptions(),
+    /**
+     * @type {TfServer}
+    */
+    tfServer,
+    
 } = $props();
 
 let fetching = $state(false);
@@ -61,6 +66,21 @@ let response=$state(null);
 
 const maxCols = 4;
 
+
+let theNote = $state({heading: '', note:'',footer:''});
+
+/**
+ * 
+ * @param {heading} heading
+ * * @param {heading} note
+ */
+function displayNote(heading,note) {
+    
+    theNote.heading=heading;
+    theNote.note=note;
+    theNote.footer=tfServer.getNoteFooter();
+    viewStates.views.notes.state = true;
+}
 
 
 /**
@@ -362,6 +382,7 @@ function resetViewOptions(lookup=false){
             help: { description:  "Show help menu", hotkeys:['h', '?'], state:false,modal:true},
             identical: { description:  "Show (bold & underline) morphologically identical words shared by different gospels in a parallel group ",
              hotkeys:['m'], state:options.identical,modal:false},
+             notes:{description: "Notes on the text",state:false,modal:true}
               
         },
 
@@ -386,7 +407,7 @@ function resetViewOptions(lookup=false){
         getViewNameFromKey(key){
             let retVal = '';
             const matchingViews = Object.entries(this.views)
-                .filter(([name,obj])=>obj.hotkeys.includes(key))
+                .filter(([name,obj])=>obj.hotkeys?.includes(key))
                 .map(([k,v])=>k);this
             if (matchingViews.length > 0){
                 retVal = matchingViews[0]
@@ -457,7 +478,7 @@ function resetViewOptions(lookup=false){
                     }
                 }  
             }
-            else if (!modalVisibles.length){
+            else if (!modalVisibles.length && hotkeys){
                 const matchedHotkey=hotkeys.filter((o)=>o.key==event.key);
                 if (matchedHotkey.length){
                     matchedHotkey[0].function();
@@ -595,7 +616,7 @@ onMount(() => {
             {/if}
 <br/>
 <hr/>
-<h2>Parallel NT Texts:
+<h2>Parallel NT Texts from {tfServer.name}:
     <CopyText icon={LinkSvg} 
             copyText={makeURL()} 
             tooltip='Copy URL'
@@ -607,7 +628,10 @@ onMount(() => {
                     cssClassDict={lexClasses}
                     cssCustomDict={customGreekClasses}
                     showIdentical={viewStates.views.identical.state}
-                    highlightOnClick={viewStates.views.highlightOnClick.state}/>
+                    highlightOnClick={viewStates.views.highlightOnClick.state}
+                    showNotes={true}
+                    showNotesFunction={displayNote}
+                    />
 
 {:else}
 
@@ -744,3 +768,16 @@ onMount(() => {
     </div>
 </Modal2>
 
+<Modal2 bind:showModal={viewStates.views.notes.state} title="Notes" onclose={()=>{theNote.heading=''; theNote.note=''}}>
+    <h2>{theNote.heading}</h2>
+    <ul>
+
+    {#each theNote.note.split("\n") as line}
+    <li>{line}</li>
+    {/each}
+
+    </ul>
+
+    <hr/>
+    <span class="italic text-xs/0">{theNote.footer}</span>
+</Modal2>

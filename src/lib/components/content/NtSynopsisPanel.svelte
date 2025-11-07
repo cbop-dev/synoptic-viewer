@@ -9,8 +9,8 @@ import LinkSvg from  '../ui/icons/link.svg';
 import {gospelParallels} from '@cbop-dev/aland-gospel-synopsis'
 import parallelTextsSvelte, { ParallelText, GospelPericopeGroup,Word, TextAndRef,VerseWords } from "./parallelTexts.svelte";
 import { N1904Server, lexemes} from "$lib/n1904/tfN1904";
-import { SblGnt } from '$lib/sblgnt/sblgnt.js';
-import { getServer } from "$lib/tf/tfServer";
+import { SblGntServer } from '$lib/sblgnt/sblgnt.js';
+
 //import {tfServer,lexemes} from '$lib/sblgnt/sblgnt.js'
 import ParallelGospelSection from "./ParallelGospelSection.svelte";
 import { mylog } from "$lib/env/env";
@@ -20,6 +20,7 @@ import * as mathUtils from '$lib/utils/math-utils.js';
 import ButtonSelect from '../ui/ButtonSelect.svelte';
 import {default as TfUtils} from './TfUtils.js';
 import Modal2 from '../ui/Modal2.svelte';
+import { TfServer } from './TfUtils.js';
 import ModalButton from '../ui/ModalButton.svelte';
 import Button from '../ui/Button.svelte';
 // import { untrack } from 'svelte';
@@ -33,7 +34,8 @@ import ArrowTop from '../ui/icons/arrow-top-icon.svelte';
 import BulletsIcons from '../ui/icons/bullets-outline.svelte';
 import CopyText from '../ui/CopyText.svelte';
 import { findNextAnchor,findPrevAnchor, getAnchors} from '$lib/utils/ui-utils';
-const tfServer=getServer();
+
+
 //import { generateHslColorGradient } from '../ui/chartUtils';
 
 let {
@@ -45,6 +47,10 @@ let {
     options=$bindable(new SynopsisOptions()),
     //viewOptions=new ViewOptions(),
     live=true,
+    /**
+     * @type TfServer
+    */
+    tfServer
 }=$props();
 
 let myOptions=$state(SynopsisOptions.makeFrom(options))
@@ -146,7 +152,7 @@ let groupsRefsArray=$derived.by(()=>{
 });
 
 //let groupsRefsArray = $state([]);
-
+let currentServer=tfServer;
 
 let fetchedTextsResponse = $state(null);
 let showLexOptionsInfo = $state(false);
@@ -227,9 +233,13 @@ let lemmasByID=$derived.by(()=>{
 //$derived(alandPericopeNums.filter((p)=>!hideNonPrimary || 
     //      (gospelParallels.alandSynopsis.isPrimaryPericope(p,selectedGospel[selectedGospelIndex].value))))
 
+function setServer(){
+    currentServer=tfServer;
+}
 
 let selectedSection = $state([1]);
 function selectSection(){
+
     landingPage=false;
     resetViewOptions(false);
     alandPericopeNums=[...selectedSection];
@@ -319,9 +329,9 @@ async function fetchPostTextsBatch(){
     /**
      * @type {{book:string,chapter:number|null,verses:number[]}[]} bcvFetchArray
      */
-    const bcvFetchArray=tfServer.getBCVarrayFromRefs(groupsRefsArray);
+    const bcvFetchArray=currentServer.getBCVarrayFromRefs(groupsRefsArray);
     
-    fetchedTextsResponse = await tfServer.getTexts(bcvFetchArray,true,true);
+    fetchedTextsResponse = await currentServer.getTexts(bcvFetchArray,true,true);
     
 }
 async function buildAndFetchPericopes(reset=true){
@@ -375,6 +385,12 @@ function populateGroupsText(words=false){
                 const queryIndex= perGroupsIndices[index][book][i];
                 if (fetchedTextsResponse && fetchedTextsResponse['texts'] && fetchedTextsResponse['texts'][queryIndex]){
                     textRef.text= fetchedTextsResponse['texts'][queryIndex].text;
+                    if (fetchedTextsResponse['texts'][queryIndex].notes){
+                        const notes = fetchedTextsResponse['texts'][queryIndex].notes.filter((n)=>n.length).join("\n");
+                        if (notes.length){
+                            textRef.note=notes;
+                        }
+                    }
                     if (words){
                         
                         textRef.words=fetchedTextsResponse['texts'][queryIndex].words;
@@ -401,6 +417,7 @@ function resetViewOptions(lookup=false){
     showUnique=false;
     hideSolos=false;
     hideNonPrimarySolos=false;
+    setServer();
     
     //  focus=selectedGospel[selectedGospelIndex].value;
 }
@@ -538,6 +555,20 @@ function highlightLexeme(id=0,color=null){
     return ret;
 }
 
+let theNote = $state({heading: '', note:'',footer:''});
+
+/**
+ * 
+ * @param {heading} heading
+ * * @param {heading} note
+ */
+function displayNote(heading,note) {
+    
+    theNote.heading=heading;
+    theNote.note=note;
+    theNote.footer=currentServer.getNoteFooter();
+    viewStates.views.notes.state = true;
+}
 const viewStates=$state({
     views:{
         
@@ -552,6 +583,7 @@ const viewStates=$state({
         words: {description:  "Lexeme/Word Options", hotkeys:['w'], state:false,modal:true},
         info: { description:  "Website and project information.", hotkeys:['i'], state:false,modal:true},
         help: { description:  "Show help menu", hotkeys:['h', '?'], state:false,modal:true},
+        notes:{description: "Notes on the text",state:false,modal:true}
         
             
     },
@@ -577,7 +609,7 @@ const viewStates=$state({
     getViewNameFromKey(key){
         let retVal = '';
         const matchingViews = Object.entries(this.views)
-            .filter(([name,obj])=>obj.hotkeys.includes(key))
+            .filter(([name,obj])=>obj.hotkeys?.includes(key))
             .map(([k,v])=>k);this
         if (matchingViews.length > 0){
             retVal = matchingViews[0]
@@ -763,9 +795,9 @@ onMount(() => {
 });
 //$inspect("filteredPericopes",filteredPericopes, "perGroups:", perGroups, "filteredPerGroups:", filteredPerGroups);
 
-$inspect("request:", myOptions);
-$inspect("gotRequest:",gotRequest);
-$inspect("Landing?:", landingPage);
+//$inspect("request:", myOptions);
+//$inspect("gotRequest:",gotRequest);
+//$inspect("Landing?:", landingPage);
 </script>
 <style>
     @reference "tailwindcss";
@@ -825,7 +857,6 @@ $inspect("Landing?:", landingPage);
 
 </style>
 <svelte:window onkeydown={onkeydown}/>
-
 <div class="self-center text-center sticky top-0 bg-white z-40">
 
     {#if !landingPage}
@@ -948,7 +979,7 @@ $inspect("Landing?:", landingPage);
         
         <div class="text-center m-auto">
     
-            Based on Kurt Aland's <i>Synopsis Quattuor Evangeliorum</i>, using Nestle's 1904 edition of the <i>Greek New Testament.</i><br/>
+            Based on Kurt Aland's <i>Synopsis Quattuor Evangeliorum</i>, using <a href="https://www.sblgnt.com">The SBL Greek New Testament (2010)</a> or, optionally, Nestle's 1904 edition of the <i>Greek New Testament</i>).<br/>
             Enter NT reference to view parallel texts and click "Look up!", or select a section and press "Go!"
       </div>
       <hr/>
@@ -1000,7 +1031,7 @@ $inspect("Landing?:", landingPage);
 <div class="text-center mt-3">
    
     {#if alandPericopeNums.length}
-         <h1 class="text-center">Results:
+         <h1 class="text-center">Results from {currentServer.name}:
             <CopyText icon={LinkSvg} 
             copyText={makeURL()} 
             tooltip='Copy stuff'
@@ -1038,7 +1069,9 @@ $inspect("Landing?:", landingPage);
                     cssClassDict={lexClasses}
                     cssCustomDict={customGreekClasses}
                     showIdentical={viewStates.views.identical.state}
-                    highlightOnClick={viewStates.views.highlightOnClick.state}
+                    highlightOnClick={viewStates.views.highlightOnClick.state} 
+                    showNotes={currentServer.showNotes}
+                    showNotesFunction={displayNote}
                     />
                 </div>
                     <hr class="mb-2"/>
@@ -1273,7 +1306,7 @@ $inspect("Landing?:", landingPage);
 <Modal2 bind:showModal={viewStates.views.info.state}>
     <div class="text-left m-auto inline">
     <h2 >NT Gospel Synopsis Viewer</h2> <hr/>
-            Based on Kurt Aland's <i>Synopsis Quattuor Evangeliorum</i>, using Nestle's 1904 edition of the <i>Greek New Testament.</i><br/>
+            Based on Kurt Aland's <i>Synopsis Quattuor Evangeliorum</i>, using <a href="https://www.sblgnt.com">The SBL Greek New Testament (2010)</a> or, optionally, Nestle's 1904 edition of the <i>Greek New Testament.</i><br/>
             Enter NT reference to view parallel texts and click "Look up!", or select a section and press "Go!"
         <hr/>
         Web application created by Fr. Christopher Brannan, O.P. For more information about the project and its data sources, visit the <a href="https://github.com/cbop-dev/synoptic-viewer" target="_blank">github project page</a>.
@@ -1289,11 +1322,12 @@ $inspect("Landing?:", landingPage);
     <table class="table-auto self-center m-auto text-left "><tbody>
         <tr class="border-0  border-b border-collapse border-gray-200" ><th>Key</th><th>Function</th></tr>
 {#each Object.entries(viewStates.views) as [theViewName,theViewObj]}
-    
+    {#if theViewObj.hotkeys && theViewObj.hotkeys.length}
     <tr>
         <td class="p-2">{theViewObj.hotkeys.map((k)=>"["+k+"]").join(",")} </td>
         <td class="p-2">{theViewObj.description}</td>
     </tr>
+    {/if}
 {/each}
 {#each hotkeys as hk}
     <tr>
@@ -1305,4 +1339,18 @@ $inspect("Landing?:", landingPage);
     </table>
     </div>
 
+</Modal2>
+
+<Modal2 bind:showModal={viewStates.views.notes.state} title="Notes" onclose={()=>{theNote.heading=''; theNote.note=''}}>
+    <h2>{theNote.heading}</h2>
+    <ul>
+
+    {#each theNote.note.split("\n") as line}
+    <li>{line}</li>
+    {/each}
+
+    </ul>
+
+    <hr/>
+    <span class="italic text-xs/0">{theNote.footer}</span>
 </Modal2>

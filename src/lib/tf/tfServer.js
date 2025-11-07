@@ -5,12 +5,12 @@ import * as BibleUtils from '$lib/n1904/bibleRefUtils.js';
 import TfUtils from '$lib/components/content/TfUtils';
 import { ParallelText, TextAndRef,VerseWords,Word } from '$lib/components/content/parallelTexts.svelte';
 import { N1904Server } from '$lib/n1904/tfN1904';
-import { SblGnt } from '$lib/sblgnt/sblgnt';
+import { SblGntServer } from '$lib/sblgnt/sblgnt';
 
 
 
 const n1904 = new N1904Server()
-const sbl= new SblGnt()
+const sbl= new SblGntServer()
 
 export function getServer(){
     if (useSbl){
@@ -19,7 +19,8 @@ export function getServer(){
     else
         return n1904;
 }
- export {sbl as tfServer}
+//export {sbl as tfServer}
+export {sbl, n1904, sbl as tfServer}
 
 //export {n1904 as tfServer}
 

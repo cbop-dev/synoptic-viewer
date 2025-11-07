@@ -4,6 +4,7 @@
         import { ColorUtils } from '$lib/utils/color-utils';
     import CopyText     from '../ui/CopyText.svelte';
     import { GreekUtils } from '$lib/utils/greek-utils';
+    import Button from '../ui/Button.svelte';
     
    
     
@@ -16,7 +17,9 @@
      * cssClassDict:Object,
      * cssCustomDict:Object,
      * showUnique:boolean,
-     * highlightOnClick:boolean
+     * highlightOnClick:boolean,
+     * showNotes:boolean,
+     * showNotesFunction(heading:string,note:string):void
      * }}
      */
     let {
@@ -26,7 +29,9 @@
         wordClick=(id)=>{},
         cssClassDict={},
         cssCustomDict={},
-        highlightOnClick=true
+        highlightOnClick=true,
+        showNotes=true,
+        showNotesFunction=(heading,note)=>{alert(heading+"\n"+note)}
         
     } = $props();
 
@@ -53,6 +58,14 @@ function isUnique(wordid, uniqueSet){
 }
 function getText(words){
     return words.reduce((a,b)=>a ? a +' '+b.word : b.word, '')
+}
+
+/**
+ * * @param {string} heading 
+ * @param {string} note 
+*/
+function notesClick(heading,note){
+    showNotesFunction(heading,note);
 }
 //$inspect("ParTexts, focus:", focus)
 //$inspect("numCols", numCols, "colData:", colData)
@@ -108,10 +121,18 @@ function getText(words){
                 btnSizeCssClass="text-xl m-0 p-0 hover:link"
                 tooltip="Copy reference to clipboard."
                 showButton={false}
-                />
+                />{#if !showNotes} Not showing notes!
                 {:else}
-                {textRef.reference}
-            {/if}]</span>: 
+                    {#if textRef.note}
+                    <Button buttonText={"\u{1F5C8}"} buttonStyle="btn btn-xs btn-ghost" 
+                        tooltip={"See Notes"}
+                        onclick={()=>{notesClick(textRef.reference, textRef.note)}} />
+                    {:else}     
+                    {/if}
+                {/if}
+    {:else}
+        {textRef.reference}
+    {/if}]</span>: 
                 {#if textRef.words && textRef.words.length}
                     {#each textRef.words as verseWords}
                         {#if copyButton}

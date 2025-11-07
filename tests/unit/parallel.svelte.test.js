@@ -1,9 +1,11 @@
 import { describe, it, expect,test} from 'vitest';
-import { tfServer,N1904Server } from '$lib/n1904/tfN1904.js';
+import {N1904Server } from '$lib/n1904/tfN1904.js';
 import { mylog } from '$lib/env/env.js';
 import { ParallelText, GospelPericopeGroup,TextAndRef,VerseWords,Word, parseRefs} from '$lib/components/content/parallelTexts.svelte.js';
 import GP from '@cbop-dev/aland-gospel-synopsis';
 import TfUtils from '$lib/components/content/TfUtils.js';
+
+const tfServer = new N1904Server();
 test('dummy', async () => {
 	const tests =[
         {input:null,output:null}
