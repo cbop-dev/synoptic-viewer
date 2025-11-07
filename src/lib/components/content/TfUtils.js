@@ -249,11 +249,16 @@ export class TfServer{
     booksDict = {};
     dbURI="/nt";
     server=env.tfserverurl;
+    
 
     
 
     getURL(){
-        return this.server+this.dbURI
+        return this.server+this.dbURI;
+    }
+
+    getApiUri(){
+        return env.testing ? this.getURL() : env.apiURI+this.dbURI;
     }
    
     /**
@@ -321,7 +326,7 @@ export class TfServer{
         const reqObject = {refs:bcvArray,options:{showVerses:showVerses, lexemes:lexemes,showNotes:showNotes}}
 
         //const bodyData = JSON.stringify(reqObject)
-        const url = this.getURL() + "/texts";
+        const url = this.getApiUri() + "/texts";
 		const response = await this.jsonPOSTFetch(url,reqObject)
         mylog("getTexts(fetchURL: '"+url+"') body data = " + JSON.stringify(reqObject),true);
        // mylog("response: ")
@@ -358,7 +363,7 @@ export class TfServer{
      * @returns 
      */
     async fetchText(node){
-        const url = this.getURL()+"/text/"+node;
+        const url = this.getApiUri()+"/text/"+node;
         mylog("fetchText("+url+")");
         const theResp = await this.jsonFetch(url);
         return theResp ? theResp : ''
@@ -369,7 +374,7 @@ export class TfServer{
         if (book && parseInt(chap) && parseInt(v)){
             v = v.replaceAll(/[a-zA-z]/g, '')
             chap = chap.replaceAll(/[a-zA-Z]/g, '')
-            let url = this.getURL() + "/verse?book=";
+            let url = this.getApiUri() + "/verse?book=";
             let bookname = this.getBookNameBySyn(book);
             if (!bookname){
                 mylog("fetchVerseTextByRef Bookname not found for " + book);
@@ -436,7 +441,7 @@ export class TfServer{
      * @param {string} end 
      */
     async tfGetTextFromRange(book,chap,start,end,showVerses=true){
-        const url = this.getURL() +  "/verses?book="+book.trim()+"&chapter="+chap.trim()
+        const url = this.getApiUri() +  "/verses?book="+book.trim()+"&chapter="+chap.trim()
         +"&start="+start.trim()+"&end="+end+"&showVerses="+ (showVerses ? '1':'0');
        // mylog("tfGetNodeFromRange fetching: "+url)
         return await this.jsonFetch(url);
@@ -495,7 +500,7 @@ export class TfServer{
                 if(v)
                     uri+= "&verse="+v;
             }
-            const thenode = await this.jsonFetch(this.getURL()+uri);
+            const thenode = await this.jsonFetch(this.getApiUri()+uri);
             nodeid = Number(thenode) ? Number(thenode) : 0;
         }
         

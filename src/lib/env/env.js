@@ -1,5 +1,5 @@
 import { writable, get } from 'svelte/store';
-const testing =  import.meta.env.MODE =='test' ? true : false;
+export const testing =  import.meta.env.MODE =='test' ? true : false;
 const useLocalTF=true;
 export const tfserverurl = useLocalTF ? "http://localhost:5000" : "";//add alternate tf-fast server
 
