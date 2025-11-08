@@ -9,7 +9,7 @@
     
     import BibleTextBlock from './BibleTextBlock.svelte';
     const gospels = gospelParallels.gospels;
-    import * as Theme from './theme.js';
+    
 
     //mylog("loading ParTextSecion Component");
     

@@ -48,8 +48,8 @@
   
     import Button from '../ui/Button.svelte';
     import BibleTextBlock from './BibleTextBlock.svelte';
+    import { ParallelTextGroup } from './parallelTexts.svelte';
     
-    import * as Theme from './theme';
    
     
    
