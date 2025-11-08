@@ -11,7 +11,7 @@ export async function GET({ url, params }) {
 	//mylog("api/tf uri = " + uri)
 	//mylog("api route received request from " + url.origin +"; hostname = " + url.hostname,true);
 	const fetchUrl=tfserverurl+"/"+uri+ (theParams ? '?' +theParams : '');
-	mylog('api server, fetch('+fetchUrl+")",true)
+	mylog('api server, fetch('+fetchUrl+")")
 	const res = await fetch(fetchUrl);
 
 	return res;

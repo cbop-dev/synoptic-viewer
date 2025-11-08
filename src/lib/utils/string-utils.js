@@ -16,7 +16,7 @@ export function findMatchingPhrases(strings,searchStrings){
      */
     const ret={};
     const searchedSentence=strings.map((s)=>s.trim()).join(" ");
-    mylog(`findMatchingPhrases([${strings.join(',')}],['${searchStrings.join("','")}'])`, true);
+    mylog(`findMatchingPhrases([${strings.join(',')}],['${searchStrings.join("','")}'])`);
     //useful for finding *where* the matched words are found. Making this to "save" overhead of re-caldulating lengths. Necessary?
    // const searchedWordsLengths=strings.map((s)=>s.length);
 
@@ -52,7 +52,7 @@ export function findMatchingPhrases(strings,searchStrings){
             matchedIndexes = MathUtils.range(foundSearchWordEndIndex - foundSearchWordStartIndex.index +1,
                         foundSearchWordStartIndex.index);
             
-            mylog(`in findMatchingPhrases loop (); foundIndex=${foundSentenceIndex};  foundSearchWordEndIndex = ${foundSearchWordEndIndex} - foundSearchWordStartIndex.index=${foundSearchWordStartIndex.index}  `, true);
+            mylog(`in findMatchingPhrases loop (); foundIndex=${foundSentenceIndex};  foundSearchWordEndIndex = ${foundSearchWordEndIndex} - foundSearchWordStartIndex.index=${foundSearchWordStartIndex.index}  `);
 
         }
        //mylog("pushing into ret: [" +matchedIndexes.join(",")+"]", true);

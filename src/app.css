@@ -37,3 +37,78 @@ html {
 .greek {
     font-family: "SBL BibLit", "Gentium";
 }
+
+.column {
+    @apply border-4;
+}
+
+.column .lex-unique {
+    @apply outline-3;
+}
+
+.column-0 {
+    /*
+    --baseColor:  red;
+    --borderColor: var(--color-red-900);
+    --bgColor: var(--)
+    */
+     @apply bg-red-50 border-red-900 ;
+
+    .lex-unique{
+        @apply pl-0.5 mr-0.5  outline-red-700;
+    }
+}
+/*
+
+   .Matts {
+        @apply bg-red-50 border-red-900 border-4;
+    }
+
+    .Mark {
+        @apply bg-lime-50 border-lime-900 border-4;
+    }
+
+    .Luke{
+        @apply bg-sky-50 border-sky-900 border-4;
+    }
+
+    .John{
+        @apply bg-violet-50 border-violet-900 border-4;
+    }
+    
+    .other{
+        @apply bg-base-200;
+    }*/
+
+.column-1 {
+    @apply bg-lime-50 border-lime-900;
+    
+    .lex-unique{
+        @apply  pl-0.5 mr-0.5  outline-lime-500;
+    }
+}
+
+.column-2 {
+    @apply bg-sky-50 border-sky-900;
+        
+    .lex-unique{
+        @apply  pl-0.5 mr-0.5  outline-sky-800;
+    }
+}
+.column-3 {
+    @apply bg-violet-50 border-violet-900;
+
+    
+    .lex-unique{
+        @apply  pl-0.5 mr-0.5  outline-violet-500;
+    }
+
+}
+.column-4 {
+    @apply bg-amber-50 border-amber-900;
+        
+    .lex-unique{
+        @apply  pl-0.5 mr-0.5  outline-amber-500;
+    }
+
+}
