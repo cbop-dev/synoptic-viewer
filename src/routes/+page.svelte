@@ -42,4 +42,6 @@
 <!--<ParallelGospelSection/>-->
 <!--<NtSynopsisPanel/>-->
 <hr class="p0 mt-3"/>
+<div class="italic text-sm text-center">
 <Footer/>
+</div>

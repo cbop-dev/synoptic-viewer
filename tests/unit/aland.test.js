@@ -65,9 +65,9 @@ test('alandSection sort', () => {
         const copy = [...t.input];
        const sorted =gospelParallels.sortAlandPericopes(t.input,t.primary);
        
-        mylog("original: ["+copy.join(',')+"], sorted for "+t.primary +
+        /*mylog("original: ["+copy.join(',')+"], sorted for "+t.primary +
          " --> ["+t.input+"], sorted: [" +
-         sorted.join(',')+"];", true)
+         sorted.join(',')+"];", true)*/
         expect(t.input).toEqual(t.output);
     }
 	expect(true).toBe(true);

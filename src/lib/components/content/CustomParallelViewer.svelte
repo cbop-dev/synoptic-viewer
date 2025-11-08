@@ -130,7 +130,7 @@ let lemmasByID=$derived.by(()=>{
 /**
  * @type {Object<string,string>} lexClasses
  */
-let customGreekClasses= $derived.by(()=>{// id->css color (e.g., "#eee")
+let customGreekClasses= $derived.by(()=>{// (greek expression)->css color (e.g., "#eee")
     
     /**
      * @type {Object<string,string>}
@@ -500,8 +500,8 @@ function resetViewOptions(lookup=false){
     let selectedWordTabIndex=$state(0);
 
     let customGreekInputText = $state('');
-   $effect(()=>{customGreekInputText=GreekUtils.removeDiacritics(
-        GreekUtils.beta2Greek(customGreekInputText).toLocaleLowerCase()).replaceAll(/[^α-ω]+/g,'')
+   $effect(()=>{customGreekInputText=GreekUtils.onlyPlainGreek(
+        GreekUtils.beta2Greek(customGreekInputText),true,true).replaceAll('σ ','ς ');
     });
     
 
@@ -649,9 +649,8 @@ onMount(() => {
 </div>
 </div>
 
+<div>  <a href="#"  class="inline" title="Top"><ArrowTop height={20} width={20}/></a></div>
 <Modal2 bind:showModal={viewStates.views.words.state}>
-
-    
 
     <div class="max-w-full block text-center">
                 

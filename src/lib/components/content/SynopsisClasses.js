@@ -210,5 +210,5 @@ export function generateURL(options){
     }
         //
 
-    return url + (uris.length ? "?"+uris.join("&") :'');
+    return url + encodeURI((uris.length ? "?"+uris.join("&") :''));
 }

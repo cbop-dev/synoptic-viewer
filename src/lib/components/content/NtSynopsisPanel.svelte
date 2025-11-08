@@ -761,7 +761,7 @@ let selectedWordTabIndex=$state(0);
 
 let customGreekInputText = $state('');
 $effect(()=>{customGreekInputText=GreekUtils.removeDiacritics(
-    GreekUtils.beta2Greek(customGreekInputText).toLocaleLowerCase()).replaceAll(/[^α-ω]+/g,'')
+     GreekUtils.beta2Greek(customGreekInputText),true,true).replaceAll('σ ','ς ');
 });
 //$inspect(customGreekClasses);
 
@@ -872,9 +872,9 @@ onMount(() => {
     
     Based on Kurt Aland's <i>Synopsis Quattuor Evangeliorum</i>, using <a href="https://www.sblgnt.com">The SBL Greek New Testament (2010)</a> or, optionally, Nestle's 1904 edition of the <i>Greek New Testament.</i><br/>
     Enter NT reference to view parallel texts and click "Look up!", or select a section and press "Go!"
-    {/snippet}
+{/snippet}
 
-<div class="self-center text-center sticky top-0 bg-white z-40">
+<div class="self-center text-center sticky top-3 bg-white z-10">
 
     {#if !landingPage}
         {#if gotRequest && !requestProcessed}
@@ -928,8 +928,7 @@ onMount(() => {
         <span class="sm:hidden inline">Synopsis</span></a>
        </h1>    
      <ul class="bg-white menu menu-horizontal ">
-        <li><ButtonSelect buttonText="i" 
-       buttonStyle="btn btn-xs  btn-circle btn-ghost  p-0" bind:selected={viewStates.views.info.state}/></li>
+        
        <li><ButtonSelect buttonText="?" buttonStyle="btn btn-xs btn-circle btn-ghost p-0" bind:selected={viewStates.views.help.state}/>
         </li>
       <li >
@@ -950,8 +949,7 @@ onMount(() => {
         <h1 class="text-center inline"> 
         <a href="/" data-sveltekit-reload><span class="hidden lg:inline">NT Gospel Synopsis Viewer</span>
         <span class="lg:hidden inline">NT Synopsis</span></a>
-    </h1>&nbsp;<ButtonSelect buttonText="i" 
-       buttonStyle="btn btn-xs  btn-circle btn-ghost  p-0" bind:selected={viewStates.views.info.state}/>
+    </h1>&nbsp;
        <ButtonSelect buttonText="?" buttonStyle="btn btn-xs btn-circle btn-ghost p-0" bind:selected={viewStates.views.help.state}/>
     </div> 
     <ul class="bg-white menu menu-horizontal ">
@@ -1332,7 +1330,10 @@ onMount(() => {
 <Modal2 bind:showModal={viewStates.views.help.state} title="Help">
     
     <div class="m-auto  items-center text-center ">
-        
+    <h2>Synopsis View</h2>
+    On landing page, enter NT reference to view parallel texts and click "Look up!", or select a section and press "Go!"    
+    <hr/>
+
     <h2 class="inline text-center ">Hotkeys: <i>The keyboard is your friend!</i></h2>
     
     <table class="table-auto self-center m-auto text-left "><tbody>

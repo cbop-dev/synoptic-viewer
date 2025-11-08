@@ -69,14 +69,14 @@ class GreekUtils {
 	static fuzzySearchArray(searchString, stringArray, limit = -1) {
 		var sString = searchString.replace('ς','σ');
 		var toCheck = ['*', '?', '.', '+'];
-
+		let partialMatch;
 		if (toCheck.some(c => sString.includes(c))) /* (sString.includes("*"))*/
 		{
 			sString = sString.replace("*", ".*");
 			sString = sString.replace("?", ".?");
 			sString = sString.replace("+", ".+");
 			var regex = new RegExp("^" + sString);
-			var partialMatch = function(stringObj) {
+			partialMatch = function(stringObj) {
 				//console.debug("Limit: " + limit)
 				var sObj = stringObj.replace('ς','σ')
 				if (false) {
@@ -100,7 +100,7 @@ class GreekUtils {
 		else
 		{
 
-			var partialMatch = function(stringObj) {
+			partialMatch = function(stringObj) {
 				//console.debug("Limit: " + limit)
 				var sObj = stringObj.replace('ς','σ')
 				if (false) {
@@ -151,15 +151,36 @@ class GreekUtils {
 	}
 
 
+	static normalize(greek){
+		return greek.normalize("NFD");
+	}
+
 	/**
 	 * 
 	 * @param {string} greek 
 	 * @returns {string} input without diacritics. Easy for sorting/searching!
 	 */
-	static plainGreek(greek){
+	static plainGreek(greek,normalize=true){
 
-		return this.removeDiacritics(greek);
+		return this.normalize(this.removeDiacritics(greek));
 	}	
+
+	/**
+	 * 
+	 * @param {string} string
+	 * @param {boolean} [noFinalSigma=false] if true, makes all sigmas to be 'σ', and NONE 'ς'
+	 * @returns {string} input reduced to only lowercaseGreek characters, w/o diacritics, no other letters, no punctuation left only spaces!
+	 */
+	static onlyPlainGreek(string,normalize=true,toLower=false,noFinalSigma=false){
+		let greek=this.plainGreek(string).replaceAll(/[^α-ωΑ-Ω ]+/g,'');
+		if (toLower){
+			greek = greek.toLocaleLowerCase();
+		}
+		if (noFinalSigma){
+			greek=greek.replaceAll('σ ','ς ');
+		}
+		return greek;
+	}
 }
 
 //module.exports= GreekUtils;

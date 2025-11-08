@@ -8,7 +8,15 @@
     import { SblGntServer } from '$lib/sblgnt/sblgnt';
     import Button from '../ui/Button.svelte';
     import { TfServer } from './TfUtils';
-	
+	import ButtonSelect from '../ui/ButtonSelect.svelte';
+    import Modal2 from '../ui/Modal2.svelte';
+    import Footer from './Footer.svelte';
+    import ArrowTop from '../ui/icons/arrow-top-icon.svelte';
+    import ArrowDown from '../ui/icons/arrow-down.svelte';
+    let showInfoModal = $state(false);
+    let y = $state();
+    let windowHeight=$state();
+    let contentHeight = $state();
     let {
         options=null,
     } = $props();
@@ -16,7 +24,7 @@
     mylog("<SynopHome> options:");
     mylog(options);
     
-
+    let headerHeight = $state();
     const myServers={
         list: [
             {abbrev: 'sblgn', name: "SBL Greek NT", server: sblServer},
@@ -79,46 +87,87 @@
         
     }
 </style>
-<div class="relative">
-<div class="sticky z-50 pt-0.5"> 
-<div class="inline-block float-right">
-    <label for="ntversion" class="hidden md:inline m-0 p-0 text-sm">NT version:</label>
-    <select name="ntversion" class="m-0 ml-1 mr-1 p-0 text-sm" bind:value={currentServerName}>
-        {#each myServers.list as serverOption, index}
-        <option value={serverOption.abbrev}>{serverOption.name}</option>
-        {/each}
-    </select>
-     <!--<Button buttonText="Switch!" textSize="text-sm" buttonStyle="btn btn-ghost btn-xs" onclick={switchNT}/>-->
+{#snippet appTitle(headingTag="h1")}
+    <svelte:element this={headingTag}>NT Gospel Synopsis Viewer</svelte:element> 
+{/snippet}
+{#snippet appSummary(heading=true,headingTag="h1")}
+
+    {#if heading}
+        {@render appTitle(headingTag)}
+        <hr/>
+    {/if}
+    
+    Based on Kurt Aland's <i>Synopsis Quattuor Evangeliorum</i>, using <a href="https://www.sblgnt.com">The SBL Greek New Testament (2010)</a> or, optionally, Nestle's 1904 edition of the <i>Greek New Testament.</i>
+{/snippet}
+<svelte:window bind:scrollY={y} bind:innerHeight={windowHeight}/>
+
+<div class="relative" bind:clientHeight={contentHeight}>
+    <div class="sticky block top-0 z-100 bg-white/70 text-center" bind:clientHeight={headerHeight}>
+        <div class="inline-block float-right">
+            <label for="ntversion" class="hidden md:inline m-0 p-0 text-sm">NT version:</label>
+            <select name="ntversion" class="m-0 ml-1 mr-1 p-0 text-sm" bind:value={currentServerName}>
+                {#each myServers.list as serverOption, index}
+                <option value={serverOption.abbrev}>{serverOption.name}</option>
+                {/each}
+            </select>
+            <!--<Button buttonText="Switch!" textSize="text-sm" buttonStyle="btn btn-ghost btn-xs" onclick={switchNT}/>-->
+        </div>
+        
+        <div role="tablist" class="inline-block float-left tabs tabs-lifted">
+            {#each panes as pane, index}
+            <a role="tab" class="tab {selectedPane==index ? 'tab-active' : ''} " tabindex=index onclick={()=>{selectedPane=index}} >{pane.name}</a>
+            {/each}
+        </div>
+        <div class="inline-block text-center">
+            <ButtonSelect buttonText="i" 
+       buttonStyle="btn btn-xs  btn-circle btn-ghost  p-0" bind:selected={showInfoModal}/>
+
+        </div>
+    
     </div>
-   
-<div role="tablist" class="tabs tabs-lifted">
+    
+    <div class="clear-right block">
     {#each panes as pane, index}
-    <a role="tab" class="tab {selectedPane==index ? 'tab-active' : ''} " tabindex=index onclick={()=>{selectedPane=index}} >{pane.name}</a>
+
+    <div id="pane-{pane.name}" class={index==selectedPane ? 'block' : 'hidden'}>
+        
+            <pane.comp options={options} live={index==selectedPane} tfServer={tfServer}/>
+        
+    </div>
     {/each}
-</div>
-</div>
+    <!--
 
-<div class="clear-right block">
-{#each panes as pane, index}
+    <div class={panes[selectedPane]=='Gospels' ? 'block' : 'hidden'}>
+    <NtSynopsisPanel/>
+    </div>
 
- <div id="pane-{pane.name}" class={index==selectedPane ? 'block' : 'hidden'}>
+    <div class={panes[selectedPane]=='Custom' ? 'block' : 'hidden'}>
+    <CustomParallelViewer/>
+    </div>
+
+    -->
+    </div>
     
-        <pane.comp options={options} live={index==selectedPane} tfServer={tfServer}/>
-    
- </div>
-{/each}
-<!--
-
-<div class={panes[selectedPane]=='Gospels' ? 'block' : 'hidden'}>
-<NtSynopsisPanel/>
-</div>
-
-<div class={panes[selectedPane]=='Custom' ? 'block' : 'hidden'}>
-<CustomParallelViewer/>
-</div>
-
--->
 
 </div>
 
-</div>
+{#if (y <= contentHeight-windowHeight) && (windowHeight < contentHeight-10) }
+    <div class="fixed bottom-0 right-0 z-100">
+    <a href="#bottom-div"  class="inline bg-white/60 border-slate-400/80 border-1 p-0.5 rounded-lg" title="Bottom">
+        <ArrowDown height={20} width={20}/></a>
+    </div>
+{/if}
+
+{#if y>100}<div class="fixed bottom-5 right-0 z-100"><a href="#"  class="inline bg-white/60 border-slate-400/80 border-1 p-0.5 rounded-lg" title="Top"><ArrowTop height={20} width={20}/></a></div>{/if}
+
+<Modal2 bind:showModal={showInfoModal}>
+    <div class="text-left m-auto inline">
+        {@render appSummary()}
+        <hr/>
+        <div class="italic text-sm">
+        <Footer/>
+        </div>
+    </div>    
+</Modal2>
+
+<div id="bottom-div"></div>

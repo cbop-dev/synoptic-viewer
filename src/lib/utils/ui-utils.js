@@ -97,7 +97,7 @@ function findTopMostAnchorInfo() {
   function findLastAnchor(){
     const anchors = document.querySelectorAll('div[id].anchor');
     const last= anchors[anchors.length-1].id ? anchors[anchors.length-1].id : '';
-    console.log("findLastAnchor last:" +last);
+    
     return last;
 
   }

@@ -324,7 +324,7 @@ export class TfServer{
         //const bodyData = JSON.stringify(reqObject)
         const url = this.getApiUri() + "/texts";
 		const response = await this.jsonPOSTFetch(url,reqObject)
-        mylog("getTexts(fetchURL: '"+url+"') body data = " + JSON.stringify(reqObject),true);
+        mylog("getTexts(fetchURL: '"+url+"') body data = " + JSON.stringify(reqObject));
        // mylog("response: ")
        // mylog(response)
         return response;

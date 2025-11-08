@@ -6,6 +6,7 @@
     import CopyText     from '../ui/CopyText.svelte';
     import { GreekUtils } from '$lib/utils/greek-utils';
 	import Button from '../ui/Button.svelte';
+    import {showText,ShowTextOptions,getText} from './ParallelTextSection.svelte'
     
     const gospels = gospelParallels.gospels;
     
@@ -122,9 +123,9 @@ function isUnique(wordid, uniqueSet){
       //  mylog("IsUnique("+wordid+", "+Array.from(uniqueSet).join(',')+")--> "+retVal, true)
     return retVal;
 }
-function getText(words){
+/*function getText(words){
     return words.reduce((a,b)=>a ? a +' '+b.word : b.word, '')
-}
+}*/
 //$inspect("ParTexts, focus:", focus)
 //$inspect("numCols", numCols, "colData:", colData)
 //$inspect("ParText, customClass", cssCustomDict);
@@ -173,60 +174,6 @@ function getText(words){
     }
 </style>
 
-{#snippet showText(textRef,unique,numCols,copyButton=true)}
-    <span class="font-bold">[{#if copyButton}
-        <CopyText copyText={textRef.reference} 
-        linkText={textRef.reference}
-        btnSizeCssClass="text-xl m-0 p-0 hover:link"
-        tooltip="Copy reference to clipboard."
-        showButton={false}
-        />
-        {:else}
-        {textRef.reference}{/if}{#if !showNotes}
-        {:else}
-    
-        {#if textRef.note}
-        <Button buttonText={"\u{1F5C8}"} buttonStyle="btn btn-xs btn-ghost" 
-        tooltip={"See Notes"}
-        onclick={()=>{notesClick(textRef.reference, textRef.note)}} />{/if}
-        
-        {/if}]
-
-</span>: 
-                {#if textRef.words && textRef.words.length}
-                    {#each textRef.words as verseWords}
-                        {#if copyButton}
-                            <CopyText getTextFunc={()=>getText(verseWords.words)}
-                            linkText={'(' + verseWords.verse+')'} 
-                            showButton={false}
-                            tooltip={'Copy verse '+verseWords.verse}/>
-                         {:else}
-                            ({verseWords.verse})
-                        {/if}
-                        {#each verseWords.words as word}
-                       
-                        {@const wordCssClass=cssClassDict[word.id]}
-                        {@const plainGreek=GreekUtils.plainGreek(word.word).toLocaleLowerCase().replaceAll(/[^α-ω]+/g,'')}
-                        {@const customClassLookup=cssCustomDict[plainGreek]}
-                        {@const customClass= customClassLookup ? customClassLookup : ''}
-                        <span 
-                        class={["m-0 word", "lex-" + word.id, 
-                            showUnique && unique && isUnique(word.id,unique) && 'lex-unique', 
-                            wordCssClass, customClass, plainGreek,
-                            showIdentical && wordCssClass && parGroup.matchingWords.includes(stripWord(word.word)) && 'underline font-bold']} 
-                        onclick={()=>{if (highlightOnClick) wordClick(word.id);}}>{word.word}{'  '}</span>
-                        {/each}
-                    {/each}
-                {:else if textRef.text}
-                    
-                    {textRef.text}
-                {:else}
-                   <i class="text-sm">("{textRef.reference}" not found. Did you enter it correctly?)</i>
-                {/if}
-        {#if copyButton && textRef.text}
-            <CopyText copyText={textRef.text} tooltip='Copy pericope'/>
-        {/if}
-{/snippet}
 {#if !focus}
     <div 
     class="grid  
@@ -248,10 +195,12 @@ function getText(words){
                 {#each col.textRefs as textRef, index2}
                 
                 {@const unique = (showUnique && numCols > 1)? col.unique : null}
+                 {@const myOptions=new ShowTextOptions(textRef,parGroup,showUnique,numCols,true,cssClassDict,cssCustomDict,showNotes,
+                 showUnique,unique,highlightOnClick,wordClick,showNotesFunction)}  
                     {#if index2 > 0}<br/>{/if}
                     <div class="text-left">
                         
-                    {@render showText(textRef,unique )}
+                    {@render showText(myOptions )}
                     </div>
                     
                 {/each}
@@ -269,9 +218,10 @@ function getText(words){
     {#if otherData}
     <div class="mt-2 p-2">
         {#each otherData.textRefs as textRef, index}
-                
-                <div class="rounded-box bg-base-200 inline-block m-1 text-left">
-                {@render showText(textRef)}</div>
+                 {@const myOptions=new ShowTextOptions(textRef,parGroup,showUnique,numCols,true,cssClassDict,cssCustomDict,showNotes,
+                 showUnique,false,highlightOnClick,wordClick,showNotesFunction)}  
+                <div class="rounded-box bg-base-200 inline-block m-1 p-1 text-left">
+                {@render showText(myOptions)}</div>
          {/each}
     </div>
     {/if}
@@ -281,8 +231,10 @@ function getText(words){
         {#each colData.cols[colData.focusIndex].textRefs as textRef, index}
         
         {@const unique = (showUnique && numCols > 1)? colData.cols[colData.focusIndex].unique : null}
+         {@const myOptions=new ShowTextOptions(textRef,parGroup,showUnique,numCols,true,cssClassDict,cssCustomDict,showNotes,
+                 showUnique,unique,highlightOnClick,wordClick,showNotesFunction)}  
         <div class="rounded-box  inline-block p-2 m-1 {Object.values(gospels.abbreviations)[colData.focusIndex]} text-left">
-        {@render showText(textRef,unique)}
+        {@render showText(myOptions)}
         </div>
         {/each}
      </div>
@@ -295,9 +247,11 @@ function getText(words){
              <div class="rounded-box {Object.values(gospels.abbreviations)[index]} m-1 text-left gospel-column-{index+1} p-2">
        
             {#each col.textRefs as textRef, index}
+                {@const myOptions=new ShowTextOptions(textRef,parGroup,showUnique,numCols,true,cssClassDict,cssCustomDict,showNotes,
+                    showUnique,col.unique,highlightOnClick,wordClick,showNotesFunction)}  
                 {#if index > 0}<br/>{/if}
                 <div >
-                {@render showText(textRef,col.unique)}
+                {@render showText(myOptions)}
                 </div>
                 
             {/each}
@@ -313,9 +267,10 @@ function getText(words){
         <hr/>
     <div class="mt-2 p-1">
         {#each otherData.textRefs as textRef, index}
-                
+                 {@const myOptions=new ShowTextOptions(textRef,parGroup,showUnique,numCols,true,cssClassDict,cssCustomDict,showNotes,
+                 showUnique,false,highlightOnClick,wordClick,showNotesFunction)}  
                 <div class="rounded-box bg-base-200 inline-block m-1 text-left">
-                {@render showText(textRef)}
+                {@render showText(myOptions)}
                 </div>
             {/each}
     </div>
