@@ -38,15 +38,15 @@ html {
     font-family: "SBL BibLit", "Gentium";
 }
 
-.column {
-    @apply border-4;
+.column, .gospel {
+    @apply border-4 rounded-lg;
 }
 
 .column .lex-unique {
     @apply outline-3;
 }
 
-.column-0 {
+.column-0, .column.Matt, .Matt, .column .Matt{
     /*
     --baseColor:  red;
     --borderColor: var(--color-red-900);
@@ -75,12 +75,17 @@ html {
     .John{
         @apply bg-violet-50 border-violet-900 border-4;
     }
-    
-    .other{
-        @apply bg-base-200;
-    }*/
+    */
 
-.column-1 {
+.column.other .other{
+    @apply bg-base-200;
+}
+
+.gospel-column-unfocused {
+    @apply bg-gray-200;
+}
+
+.column-1,  .column.Mark, .Mark{
     @apply bg-lime-50 border-lime-900;
     
     .lex-unique{
@@ -88,14 +93,14 @@ html {
     }
 }
 
-.column-2 {
+.column-2,  .column.Luke, .Luke {
     @apply bg-sky-50 border-sky-900;
         
     .lex-unique{
         @apply  pl-0.5 mr-0.5  outline-sky-800;
     }
 }
-.column-3 {
+.column-3,  .column.John, .John {
     @apply bg-violet-50 border-violet-900;
 
     

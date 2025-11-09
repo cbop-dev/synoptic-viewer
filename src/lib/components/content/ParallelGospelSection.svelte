@@ -197,14 +197,14 @@ function isUnique(wordid, uniqueSet){
         {#each colData.cols as col, index}
 
         {#if col.textRefs && col.textRefs.length}
-            <div class="rounded-box  {Object.values(gospels.abbreviations)[index]} m-1 p-2 gospel-column column gospel-column-{index} column-{index}">
+            <div class="rounded-box  {Object.values(gospels.abbreviations)[index]} m-1 p-2 gospel-column gospel column gospel-column-{index} column-{index}">
             {#if col.textRefs.length}
             
                 
                 {#each col.textRefs as textRef, index2}
                 
                 {@const unique = (showUnique && numCols > 1)? col.unique : new Set()}
-                {@const cssClasses=["column-"+index]}
+               
               
                     {#if index2 > 0}<br/>{/if}
                     <div class="text-left">
@@ -212,7 +212,7 @@ function isUnique(wordid, uniqueSet){
                        <BibleTextBlock {textRef}  {parGroup} {showUnique} {numCols} copyButton={true} {showIdentical}
                     cssWordClassDict={cssClassDict} cssWordCustomDict={cssCustomDict} 
                     {showNotes} uniqueSet={unique} bind:highlightOnClick={highlightOnClick} notesClick={showNotesFunction} 
-                        {wordClick} }
+                        {wordClick} 
                     />
 
                    <!-- {@render showText(myOptions,cssClasses)}-->
@@ -239,7 +239,7 @@ function isUnique(wordid, uniqueSet){
                          <BibleTextBlock {textRef}  {parGroup} {showUnique} {numCols} copyButton={true} {showIdentical}
                     cssWordClassDict={cssClassDict} cssWordCustomDict={cssCustomDict} 
                     {showNotes} bind:highlightOnClick={highlightOnClick} notesClick={showNotesFunction} 
-                        {wordClick} }
+                        {wordClick} 
                     />
                 <!--{@render showText(myOptions)}-->
             
@@ -249,12 +249,12 @@ function isUnique(wordid, uniqueSet){
     {/if}
 {:else if colData.focused}<!--focusing on one gospel:-->
 <div class="grid {numCols > 1 ? 'sm:!grid-cols-2' :''} gap-1 grid-cols-1">
-     <div class="rounded-box   text-3xl  gospel-column  gospel-column-0">
+     <div class="rounded-box   text-3xl  column gospel gospel-column  gospel-column-0 column-{colData.focusIndex}">
         {#each colData.cols[colData.focusIndex].textRefs as textRef, index}
         
         {@const unique = (showUnique && numCols > 1)? colData.cols[colData.focusIndex].unique : new Set()}
         
-                 unique,highlightOnClick,wordClick,showNotesFunction)}  
+                 
         <div class="rounded-box  inline-block p-2 m-1 {Object.values(gospels.abbreviations)[colData.focusIndex]} text-left">
                  <BibleTextBlock {textRef}  {parGroup} {showUnique} {numCols} copyButton={true} {showIdentical}
                     cssWordClassDict={cssClassDict} cssWordCustomDict={cssCustomDict} 
@@ -266,16 +266,16 @@ function isUnique(wordid, uniqueSet){
         {/each}
      </div>
      {#if numCols >1}
-     <div class="text-2xl gospel-column-unfocused">
+     <div class="text-2xl gospel column gospel-column-unfocused">
         {#each colData.cols as col,index}
         {#if index!=colData.focusIndex}
         {#if col.textRefs.length}
         
-             <div class="rounded-box {Object.values(gospels.abbreviations)[index]} m-1 text-left gospel-column gospel-column-{index+1} column-{index+1} p-2">
+             <div class="rounded-box {Object.values(gospels.abbreviations)[index]} m-1 text-left gospel-column gospel-column-{index+1} nonfocused   p-2">
        
             {#each col.textRefs as textRef, index}
                 
-                    col.unique,highlightOnClick,wordClick,showNotesFunction)}  
+                    
                 {#if index > 0}<br/>{/if}
                 <div >
                          <BibleTextBlock {textRef}  {parGroup} {showUnique} {numCols} copyButton={true} {showIdentical}
@@ -300,7 +300,7 @@ function isUnique(wordid, uniqueSet){
     <div class="mt-2 p-1">
         {#each otherData.textRefs as textRef, index}
                  
-                 false,highlightOnClick,wordClick,showNotesFunction)}  
+                 
                 <div class="rounded-box bg-base-200 inline-block m-1 text-left">
                          <BibleTextBlock {textRef}  {parGroup} {showUnique} {numCols} copyButton={true} {showIdentical}
                     cssWordClassDict={cssClassDict} cssWordCustomDict={cssCustomDict} 
