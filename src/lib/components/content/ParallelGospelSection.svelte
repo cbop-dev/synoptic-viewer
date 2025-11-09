@@ -234,7 +234,7 @@ function isUnique(wordid, uniqueSet){
     <div class="mt-2 p-2 flex flex-wrap">
         {#each otherData.textRefs as textRef, index}
                
-                <div class="rounded-box bg-base-200 inline-block m-1 p-1 text-left flex-1">
+                <div class="rounded-box bg-base-200 other inline-block m-1 p-1 text-left m:flex-1">
 
                          <BibleTextBlock {textRef}  {parGroup} {showUnique} {numCols} copyButton={true} {showIdentical}
                     cssWordClassDict={cssClassDict} cssWordCustomDict={cssCustomDict} 
@@ -301,7 +301,7 @@ function isUnique(wordid, uniqueSet){
         {#each otherData.textRefs as textRef, index}
                  
                  
-                <div class="rounded-box bg-base-200 inline-block m-1 text-left">
+                <div class="rounded-box other bg-base-200 inline-block m-1 text-left">
                          <BibleTextBlock {textRef}  {parGroup} {showUnique} {numCols} copyButton={true} {showIdentical}
                     cssWordClassDict={cssClassDict} cssWordCustomDict={cssCustomDict} 
                     {showNotes}  bind:highlightOnClick={highlightOnClick} notesClick={showNotesFunction} 

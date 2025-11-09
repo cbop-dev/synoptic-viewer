@@ -143,9 +143,9 @@ let {
 <style>
     @reference "tailwindcss";
 
-    .bible-block {
+    /*.bible-block {
         @apply bg-white/20 border-1 border-black/30 rounded p-1;
-    }
+    }*/
 
    .lex-unique{
       /*  @apply outline-2 pl-0.5 mr-0.5 ;

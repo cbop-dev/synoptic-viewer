@@ -649,7 +649,7 @@ onMount(() => {
 </div>
 </div>
 
-<div>  <a href="#"  class="inline" title="Top"><ArrowTop height={20} width={20}/></a></div>
+
 <Modal2 bind:showModal={viewStates.views.words.state}>
 
     <div class="max-w-full block text-center">

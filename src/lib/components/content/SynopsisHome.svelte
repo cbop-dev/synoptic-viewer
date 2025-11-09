@@ -150,16 +150,23 @@
     
 
 </div>
+<div class="fixed bottom-0 right-0 z-100 mr-1 mb-1"><!--up//downarros-->
 
+
+
+{#if y>100}
+    <div class="block">
+        <a href="#"  class="inline bg-white/60 border-slate-400/80 border-1 p-0.5 rounded-lg" title="Top"><ArrowTop height={20} width={20}/></a>
+    </div>
+{/if}
 {#if (y <= contentHeight-windowHeight) && (windowHeight < contentHeight-10) }
-    <div class="fixed bottom-0 right-0 z-100">
+    <div class="block">
     <a href="#bottom-div"  class="inline bg-white/60 border-slate-400/80 border-1 p-0.5 rounded-lg" title="Bottom">
         <ArrowDown height={20} width={20}/></a>
     </div>
 {/if}
-
-{#if y>100}<div class="fixed bottom-5 right-0 z-100"><a href="#"  class="inline bg-white/60 border-slate-400/80 border-1 p-0.5 rounded-lg" title="Top"><ArrowTop height={20} width={20}/></a></div>{/if}
-
+    
+</div>
 <Modal2 bind:showModal={showInfoModal}>
     <div class="text-left m-auto inline">
         {@render appSummary()}
