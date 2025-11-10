@@ -126,10 +126,18 @@ export function  stripWord(str){
 }
 
 /**
+ * 
+ * @param {string[]} inputLines Lines of input, where each line represents multiple columns and each column is separated by a pipe ("|") character.
+ */
+export function parseMultipleGroups(inputLines)
+{
+    
+}
+/**
  * @param {string[]} inputStrings 
  * @returns {ParallelText[]}
  */
-export function parseRefs(inputStrings){
+export function parseSingleGroup(inputStrings){
     /**
      * @type {ParallelText[]} thePars
      */
@@ -137,7 +145,7 @@ export function parseRefs(inputStrings){
     inputStrings.entries().forEach(([i,textA])=>{
         
         const cleanedFormatted = formatBibRefs(textA && textA.length ? textA.trim().replaceAll(/\n+/g,";").replaceAll(/;+/g,";") : '');
-        mylog("parseRefs:cleaned refs = " + cleanedFormatted)
+        mylog("parseSingleGroup:cleaned refs = " + cleanedFormatted)
         const tAndRefs = BibleUtils.expandRefs(cleanedFormatted,false).map((r)=>new TextAndRef(r));
         mylog("parsedRefs:");
         mylog(tAndRefs);
@@ -362,5 +370,5 @@ export class GospelPericopeGroup{
 
 
 export default {
-    ParallelText, GospelPericopeGroup,TextAndRef,VerseWords,Word,GospelPericopeGroupIndices,stripWord, parseRefs
+    ParallelText, GospelPericopeGroup,TextAndRef,VerseWords,Word,GospelPericopeGroupIndices,stripWord, parseSingleGroup
 }

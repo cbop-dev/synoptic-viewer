@@ -96,7 +96,7 @@ let {
                 
                 {#each textRef.words as verseWords}
 
-                    {@const customMatchedWords=StringUtils.findMatchingPhrases(
+                    {@const customMatchedWords=StringUtils.findPhrases(
                     verseWords.words.map((w)=>GreekUtils.onlyPlainGreek(w.word,true,true,true)),
                         Object.keys(cssWordCustomDict).map((str)=>GreekUtils.onlyPlainGreek(str)))
                         // NB: first index is that of cssCustomDict; second is into textRef.words

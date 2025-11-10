@@ -2,7 +2,7 @@
 import { onMount } from "svelte";
 import LinkSvg from  '../ui/icons/link.svg';
 import { SynopsisOptions, generateURL  } from "./SynopsisClasses.js";
-import { ParallelText,Word, TextAndRef,VerseWords,ParallelTextGroup,parseRefs } from "./parallelTexts.svelte.js";
+import { ParallelText,Word, TextAndRef,VerseWords,ParallelTextGroup,parseSingleGroup } from "./parallelTexts.svelte.js";
 import ParallelTextSection from "./ParallelTextSection.svelte";
 import { N1904Server, lexemes} from "$lib/n1904/tfN1904";
 import {SblGntServer} from '$lib/sblgnt/sblgnt.js';
@@ -74,6 +74,12 @@ let response=$state(null);
 
 const maxCols = 4;
 
+const requestModes =[
+    {name:"Single Group"},
+    {name: "Batch"}
+];
+
+let selectedRequestModeIndex = $state(0);
 
 let theNote = $state({heading: '', note:'',footer:''});
 
@@ -97,10 +103,12 @@ function displayNote(heading,note) {
 let refAreaInputs = $state(options.columns && options.columns.length ? options.columns : ['Matt 1:1', "Mark 1:1"]); 
 let numCols = $derived(refAreaInputs.length);
 
+let batchInput=$state('Matt 1:1|Mark 1:1|John 1:1\nMatt 5:17|Eph 2:14-16');
+
 /**
- * @type {ParallelTextGroup} texts
+ * @type {ParallelTextGroup[]} texts
  */
-let texts= $state(new ParallelTextGroup());
+let texts= $state([]);
 
 /**
 * @type {number[]} selectedLexes
@@ -206,26 +214,41 @@ let otherMatchedLexes=$state([]);
  * 
  * @param {string[]} refsArray
  */
-async function fetchPostTextsBatch(refsArray){
+//async function fetchPostTextsBatch(refsArray){
 //todo: refactor in another .svelte.js file, then test
     //texts = null;
 
     /**
      * @type {{book:string,chapter:number|null,verses:number[]}[]} bcvFetchArray
      */
-    const bcvFetchArray=currentServer.getBCVarrayFromRefs(refsArray);
+ /*   const bcvFetchArray=currentServer.getBCVarrayFromRefs(refsArray);
     
     return await currentServer.getTexts(bcvFetchArray,true,true);
     //return texts;
+}*/
+
+/**
+ * 
+ * @param {string} theInput
+ * @returns {ParallelTextGroup[]}
+ */
+function parseGroupsBatch(theInput){
+    const lines = theInput.trim().replaceAll(/\n+/g,"\n").split("\n").filter((s)=>s.length);
+    const parGroups=[]
+
+    for (const line of lines){
+        const group = new ParallelTextGroup();
+        group.parallelTexts=parseSingleGroup(line.split("|").filter((l)=>l.trim().length));
+        parGroups.push(group);
+    }
+    return parGroups;
 }
 
-
-
-//TODO
 async function buildAndFetchPericopes(reset=true){
-    //TODO:
+
      
     //viewStates.views.lookup.state=false;
+    //const parRefsOb
     dataReady=false;
    // landingPage=false;
     if (reset) {
@@ -240,15 +263,26 @@ async function buildAndFetchPericopes(reset=true){
     
     fetching = true;
     //fetchTexts();
-    texts.parallelTexts = parseRefs(refAreaInputs);
+    if (selectedRequestModeIndex==0) {
+        texts = [new ParallelTextGroup()];
+        texts[0].parallelTexts = parseSingleGroup(refAreaInputs);
+    }
+    else { //presuming batch mode!
+        texts = parseGroupsBatch(batchInput);
+    }
+    
+  
     //mylog("after parsing input, but texts.parTexts[0].ref: " + texts.parallelTexts[0].textRefs[0].reference)
-    const parRefsObj = TfUtils.getParallelRefsArrays(texts.parallelTexts);
+    //const parRefsObj = TfUtils.getParallelRefsArrays(texts.parallelTexts);
+    const parRefsObj = TfUtils.getParallelGroupsRefsArrays(texts);
     mylog("parRefsObj:");
     mylog(parRefsObj);
-    response = await fetchPostTextsBatch(parRefsObj.refsArray);
+    response = await currentServer.fetchPostTextsBatch(parRefsObj.refsArray);
     
     //buildLexArrays();
-    TfUtils.populateTexts(texts,response,parRefsObj);
+    for (const [i,textGroup] of texts.entries()) {
+        TfUtils.populateTextGroup(textGroup,response,parRefsObj.groupsIndices[i]);
+    }
     dataReady= true;
     //mylog("Got response with " + response.texts.length + " texts. Here's 1:" )
     //mylog(response.texts[0].text)
@@ -511,6 +545,7 @@ function resetViewOptions(lookup=false){
      *
      */
     function lookup(reset=true){
+        
         setServer();
         buildAndFetchPericopes(reset);
     }
@@ -572,32 +607,46 @@ onMount(() => {
     }
     mounted = true;
 });
+$inspect(texts)
 </script>
 
 <div class="self-center text-center sticky top-0 bg-white z-40" >
 
   
-<h1>Custom NT Synopsis!</h1>
-<h3 class="italic">Choose your <span class="line-through">weapons</span> NT Bible passages:</h3>
+<h1 class="text-3xl bold underline">Custom NT Synopsis!</h1>
+<h3 class="italic">Choose your <span class="line-through">weapons</span> NT Bible passages:<ButtonSelect buttonStyle="btn btn-neutral btn-outline btn-circle btn-xs p-0 m-0"
+            buttonText="?"
+            bind:selected={viewStates.views.help.state}/></h3>
+<label for="request-mode">Mode:</label>
+<select name="request-mode" bind:value={selectedRequestModeIndex}>
+    {#each requestModes as rMode,i}
+        <option value={i}>{rMode.name}</option>
+    {/each}
 
+</select><br/>
 
+{#if selectedRequestModeIndex == 0}
+    {#each refAreaInputs as areaInput, index}
+    <div class="inline-block m-3">
+        <label for="refarea{index}"class="label cursor-pointer inline ">
+            <span class="label-text">Column {index+1}:</span></label>  
+        <textarea id="refarea{index}" class="align-middle resize" rows="1"
+                    bind:value={refAreaInputs[index]}
+                
+                    ></textarea>
+    </div>         
+        
 
-{#each refAreaInputs as areaInput, index}
-<div class="inline-block m-3">
-    <label for="refarea{index}"class="label cursor-pointer inline ">
-        <span class="label-text">Column {index+1}:</span></label>  
-     <textarea id="refarea{index}" class="align-middle resize" rows="1"
-                 bind:value={refAreaInputs[index]}
-               
-                ></textarea>
-</div>         
-       
+    {/each}
+    <div class="inline-block">
+    {#if numCols <= maxCols}<Button buttonStyle="btn btn-sm btn-ghost" onclick={addCol} buttonText="+" tooltip="Add Column"/>{/if}
+    {#if numCols >1 }<Button onclick={removeCol} buttonStyle="btn btn-sm btn-ghost"  buttonText="-" tooltip="Remove Last Column"/>{/if}
+    </div>
+{:else}
+    <br/>
+    <textarea bind:value={batchInput} cols="20" rows="10"/><br/>
+{/if}
 
-{/each}
-<div class="inline-block">
-{#if numCols <= maxCols}<Button buttonStyle="btn btn-sm btn-ghost" onclick={addCol} buttonText="+" tooltip="Add Column"/>{/if}
-{#if numCols >1 }<Button onclick={removeCol} buttonStyle="btn btn-sm btn-ghost"  buttonText="-" tooltip="Remove Last Column"/>{/if}
-</div>
 <Button onclick={lookup} buttonText="Lookup!"/>
 <div id="texts1" class="block">
 {#if mounted && dataReady}
@@ -608,21 +657,8 @@ onMount(() => {
            buttonText="Identical words"/>
 <ButtonSelect buttonText="Highlight on Click" bind:selected={viewStates.views.highlightOnClick.state}/>
 <ButtonSelect buttonText="Word Options" bind:selected={viewStates.views.words.state}/>  
-<ButtonSelect buttonStyle="btn btn-neutral btn-outline btn-circle btn-xs p-0 m-0"
-            buttonText="?"
-            bind:selected={showLexOptionsInfo}/>
-            {#if showLexOptionsInfo}
-            <div class="md:max-w-3/4  self-center m-auto">
-                <h2 class="underline">Unique and Identical Words Options:</h2>
-                                        <div class="inline-block text-left">
-                <ul class="list-disc">
-                    <li>Enabling <b>"Outline Unique Lexemes"</b> will draw <span class="outline outline-blue-400">an outline</span> (one color per gospel) around each lexeme that is unique to a specific gospel, i.e., that shows up in only one column of a single parallel group.</li>
-                    <li>Enabling <b>"Identical words"</b> will <span class="font-bold underline">bold and underline</span> all morphologically identical words shared by at least two gospels in the same parallel group </li>
-                    <li>Enabling <b>"Highlight Lexeme on Click"</b> will toggle <span class="bg-cyan-500 text-white">highlighting</span> of all instances of the lexeme.</li>
-                </ul>
-                </div>
-            </div>
-            {/if}
+
+            
 <br/>
 <hr/>
 <h2>Parallel NT Texts from {currentServer.name}:
@@ -633,7 +669,10 @@ onMount(() => {
             />
 
 </h2>
-<ParallelTextSection parTextGroup={texts} showUnique={viewStates.views.unique.state} wordClick={toggleLex} 
+{#each texts as textGroup,i}
+<hr class=" m-1 p-1"/>
+{#if texts.length > 1}<h3 class="font-bold underline">Group #{i+1}</h3>{/if}
+<ParallelTextSection parTextGroup={textGroup} showUnique={viewStates.views.unique.state} wordClick={toggleLex} 
                     cssClassDict={lexClasses}
                     cssCustomDict={customGreekClasses}
                     showIdentical={viewStates.views.identical.state}
@@ -641,7 +680,7 @@ onMount(() => {
                     showNotes={true}
                     showNotesFunction={displayNote}
                     />
-
+{/each}
 {:else}
 
 <span class="italic mt-3 pt-5"> Enter some valid NT references and click "Lookup!"</span>
@@ -788,4 +827,31 @@ onMount(() => {
 
     <hr/>
     <span class="italic text-xs/0">{theNote.footer}</span>
+</Modal2>
+
+<Modal2 bind:showModal={viewStates.views.help.state} title="Help: Custom Synopsis Viewer">
+    
+    <div class="m-auto  items-center text-center ">
+    <div class="inline-block text-left"> 
+    Enter several columns of NT references to see them in parallel columns. There are two options:
+    <ol class="list-decimal ml-9">
+        <li><span class="bold">Single group mode:</span> Enter a group of texts in each column (add/subtract columns by clicking the +/- buttons). Seperate references within a column with a colon or newline.</li>
+        <li><span class="bold">Batch mode (aka "Awesome Sauce"):</span>Enter several groups of rows, one group per row. Separate columns with a "pipe" (|) symbol. Separate references within a single column by a colon.</li>
+    </ol>
+    Press "Lookup!" when you're ready. Then hold on to your exegetical seatbelts and enjoy the NT synopsis ride...
+    </div>
+    <hr class="m-5"/>
+
+    <h2 class="underline">Results Options: Unique and Identical Words</h2>
+             <div class=" m-auto inline-block text-left">
+                <ul class="list-disc ml-9">
+                    <li>Enabling <b>"Outline Unique Lexemes"</b> will draw <span class="outline outline-blue-400">an outline</span> (one color per gospel) around each lexeme that is unique to a specific gospel, i.e., that shows up in only one column of a single parallel group.</li>
+                    <li>Enabling <b>"Identical words"</b> will <span class="font-bold underline">bold and underline</span> all morphologically identical words shared by at least two gospels in the same parallel group </li>
+                    <li>Enabling <b>"Highlight Lexeme on Click"</b> will toggle <span class="bg-cyan-500 text-white">highlighting</span> of all instances of the lexeme.</li>
+                </ul>
+    
+            </div>
+   
+    </div>
+
 </Modal2>

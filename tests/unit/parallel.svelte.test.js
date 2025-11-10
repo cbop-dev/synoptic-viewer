@@ -1,7 +1,7 @@
 import { describe, it, expect,test} from 'vitest';
 import {N1904Server } from '$lib/n1904/tfN1904.js';
 import { mylog } from '$lib/env/env.js';
-import { ParallelText, GospelPericopeGroup,TextAndRef,VerseWords,Word, parseRefs} from '$lib/components/content/parallelTexts.svelte.js';
+import { ParallelText, GospelPericopeGroup,TextAndRef,VerseWords,Word, parseSingleGroup} from '$lib/components/content/parallelTexts.svelte.js';
 import GP from '@cbop-dev/aland-gospel-synopsis';
 import TfUtils from '$lib/components/content/TfUtils.js';
 
@@ -27,7 +27,7 @@ test('Groups: unique words', async () => {
    // expect(false).toBe(true);
     for (const t of tests){
         const group = TfUtils.getGroupsArray([t.aland])[0];
-        const groupsArrays=TfUtils.getGroupRefsArrays([group]);
+        const groupsArrays=TfUtils.getGospelGroupRefsArrays([group]);
       //  mylog("gonna call fetchAndPopulate...");
         await tfServer.fetchAndPopulateGroupsPericopes([group],true,true,true)
 
@@ -44,13 +44,13 @@ test('Groups: unique words', async () => {
 });
 
 
-test('parseRefs', async () => {
+test('parseSingleGroup', async () => {
 	const tests =[
         {input:["Matt 3:12;"],output: [new ParallelText([new TextAndRef("Matt 3:12")])]}
     ]
     
     for (const t of tests){
-        const results = parseRefs(t.input)
+        const results = parseSingleGroup(t.input)
         expect(true).toBe(true);
         for (const [i,resultPt] of results.entries()) {
             for (const [j,resultRef] of resultPt.textRefs.entries()){

@@ -51,7 +51,7 @@ node build
 
 ## TO DO:
 
-- [ ] include Nestle's secondary parallels (work in progress, Nov. 2025)
+- [ ] include Aland's secondary parallels (work in progress, Nov. 2025)
 - [ ] More README documentation: requirements, installation, testing, usage.
 - [X] Lexeme type-to-search.
 - [ ] Further testing and performance improvements.

@@ -36,7 +36,7 @@ export class N1904Server extends TfUtils.TfServer {
     async fetchAndPopulateGroupsPericopes(groups,showVerses=false,lexemes=false,markUnique=false){
       //  mylog("fetchAndPopluating...", debugOn)
       
-        const refsArrays=TfUtils.getGroupRefsArrays(groups);
+        const refsArrays=TfUtils.getGospelGroupRefsArrays(groups);
         const bcvFetchArray=this.getBCVarrayFromRefs(refsArrays.refsArray);
        // console.log("about to fetch...")
         const fetchedTextsResponse = await this.getTexts(bcvFetchArray,showVerses,lexemes);

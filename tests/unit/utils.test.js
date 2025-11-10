@@ -71,6 +71,7 @@ test('string utils', async () => {
         {searched: ['short'], searchingFor: ["short"], output: {"short": [0]}},
         {searched: ['veryshort'], searchingFor: ["short"], output: {"short":[0]}},
         {searched: ['two','words'], searchingFor: ["words"], output: {"words":[1]}},
+        {searched: ['two','words'], searchingFor: ["wordss"], output: {}},
         /*
         {searched: ['two','words'], searchingFor: ["two"], output: [[0]]},
         {searched: ['two','words'], searchingFor: ["two words"], output: [[0,1]]},
@@ -93,7 +94,21 @@ test('string utils', async () => {
     ];
     for (const t of tests){
         //expect(true).toBe(true);
-        expect(StringUtils.findMatchingPhrases(t.searched,t.searchingFor)).toEqual(t.output);
+        expect(StringUtils.findPhrases(t.searched,t.searchingFor)).toEqual(t.output);
     }
 	expect(true).toBe(true);
+});
+
+
+
+test('string sequences', async () => {
+	const tests=[
+        {input: '', output: ''}
+
+    ];
+    for (const t of tests){
+
+    }
+	expect(true).toBe(true);
+
 });

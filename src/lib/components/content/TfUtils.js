@@ -81,13 +81,71 @@ export function getGroupsArray(pericopeNums){
     });
 }
 
+/**
+ * 
+ * @param {ParallelTextGroup[]} groupsArray 
+ * @returns {{groupsIndices: number[][][], refsArray: string[]}} 
+ * @description does some weird magic: returns two arrays:
+ *  - groupsIndices: 3-dimensiona array of indices. 
+ *      1. First level corresponds to indexes of groupsArray, and contains 2-dimensional arrays:
+ *      2. Second level contains one array per column of the corresponding group in groupsArray
+ *      3. Third level, is the actual indicies into the refsArray property
+ * - refsArray: list of reference strings, where each is a biblical reference (e.g., "Matt 3:16")
+ * 
+ */
+export function getParallelGroupsRefsArrays(groupsArray)
+{
+    let refIndex = 0;
+    /**
+     * @type {number[][][]} groupsIndices???? what is this?
+     */
+    const groupsIndices=[];
+    /**
+     * @type {string[]} refsArray 
+     */
+    const refsArray=[];
+    //TODO: test this. Does it work?
+    for (let [gi, group] of groupsArray.entries()){
+        /**
+         * @type {number[][]} thisGroupIndices
+         */
+        const thisGroupIndices=[];
+        
+        for (const parText of group.parallelTexts){
+            const thisColIndices=[]
+            for (const ref of parText.textRefs){
+                /**
+                 * @type {number[]}
+                 */
+               
+                if (refsArray.includes(ref.reference)){ //already fetching this ref. Double-dip!
+                    thisColIndices.push(refsArray.indexOf(ref.reference));
+                }
+                else{
+                    refsArray.push(ref.reference);
+                    thisColIndices.push(refIndex);
+                    refIndex++; 
+                }
+                
+            }
+            thisGroupIndices.push(thisColIndices);
+        }
 
-//TODO: finish this! still in progess, broken!!!
+        groupsIndices.push(thisGroupIndices)
+    }
+    mylog('getPericopeRefs finishing. groupsIndices=');
+    mylog(groupsIndices)
+    return {groupsIndices,refsArray}
+}
 /**
  * 
  *  @param {ParallelText[]} parallelTexts 
  *  @return {{parallelIndices: number[][], refsArray: string[]}} 
- *  @description returns two arrays: parallelIndices, a 2-dimensional array of numbers, each of which is an index into refsArray. 
+ *  @description returns two arrays: parallelIndices, a 2-dimensional array of numbers. 
+ *  The first indices of this corresponds with the indices of parallelTexts.  The second-level array contains indices into refsArray, 
+ *  which in turn contains the reference (e.g., "Matt 3:16") for each bible text queried. This removes duplicate queries the same text 
+ *  is wanted multiple times. Thus, the resulting `refsArray` of the return object function can be used to query the TfServer,
+ *  and the result of this can be used refsArray to populate the texts in parallelTexts. 
  */
 export function getParallelRefsArrays(parallelTexts){
      //let refIndex = 0;
@@ -128,20 +186,22 @@ export function getParallelRefsArrays(parallelTexts){
 }
 
 
+
+
 /**
  * @param {ParallelTextGroup} parallelTextGroup 
  * @param {Object} response
- * @param {{parallelIndices: number[][], refsArray: string[]}} parRefsObj 
+ * @param {number[][]} parallelIndices - first index corresponding to that of parallelTextGroup, then containing indices into response.text
  * @param {boolean} [words=true] 
  */
-export function populateTexts(parallelTextGroup, response, parRefsObj, words=true){
+export function populateTextGroup(parallelTextGroup, response, parallelIndices, words=true){
 
 
     for (const [index,par] of parallelTextGroup.parallelTexts.entries()){
     
         for (const [i,textRef] of par.textRefs.entries()){
             // mylog("checking ref: " + textRef.reference);
-            const queryIndex= parRefsObj.parallelIndices[index][i];
+            const queryIndex= parallelIndices[index][i];
             if (response && response.texts && response.texts[queryIndex]){
                 textRef.text= response.texts[queryIndex].text;
                 if (words){
@@ -172,7 +232,7 @@ export function populateTexts(parallelTextGroup, response, parRefsObj, words=tru
  * @param  {GospelPericopeGroup[]} groupsArray
  * @returns {{groupsIndices: GospelPericopeGroupIndices[], refsArray: string[]}} 
  **/
-export function getGroupRefsArrays(groupsArray){
+export function getGospelGroupRefsArrays(groupsArray){
     let refIndex = 0;
     /**
      * @type {GospelPericopeGroupIndices[]} groupsIndices
@@ -315,7 +375,7 @@ export class TfServer{
      /**
      * 
      * @param {{book:string,chapter:number|null,verses:number[]}[]} bcvArray
-     * @returns {Promise.<Object>}
+     * @returns {Promise.<Object>} respone from fetch request, converted from the HTTP JSON response into a javascript object.
      */
     async getTexts(bcvArray,showVerses=true,lexemes=true,showNotes=this.showNotes) {
         //mylog("getTexts!...",true);
@@ -469,14 +529,22 @@ export class TfServer{
 
     }
     
-    //TODO: implement and test:
+    //TODO: and test:
     /**
      * 
-     * @param {string[]} refs 
+     * @param {string[]} refsArray an array of strings, each of which is a single biblical reference to look up (like "Matt 3:16")
      * @param {Object|null} options 
+     * @returns the response object from getTexts()
      */
-    async tfFetchPostTexts(refs=[],options=null){
-        //TODO: this!
+    async fetchPostTextsBatch(refsArray=[],options=null){
+         /**
+         * @type {{book:string,chapter:number|null,verses:number[]}[]} bcvFetchArray
+         */
+        mylog(`fetchpostTextsBath(["${refsArray.join('","')}"])`, true);
+        const bcvFetchArray=this.getBCVarrayFromRefs(refsArray);
+        
+        return await this.getTexts(bcvFetchArray,true,true);
+        //return texts;
     }
 
     async tfGetNodeFromSection(book,chap,v){
@@ -568,4 +636,4 @@ export class TfServer{
     
 }
 
-export default {getTextRefsArray,getGroupRefsArrays,getGroupsArray,getParallelRefsArrays,populateTexts,TfServer}
+export default {getTextRefsArray,getGospelGroupRefsArrays,getGroupsArray,getParallelRefsArrays,populateTextGroup,TfServer,getParallelGroupsRefsArrays}

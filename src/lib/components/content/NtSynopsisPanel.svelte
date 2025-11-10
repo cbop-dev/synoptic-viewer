@@ -136,7 +136,7 @@ let filteredPerGroups=$derived(perGroups.filter((g)=>filteredPericopes.includes(
 let perGroupsIndices=$derived.by(()=>{
     let retVal = [];
     if (perGroups && perGroups.length){
-        retVal = TfUtils.getGroupRefsArrays(perGroups).groupsIndices;
+        retVal = TfUtils.getGospelGroupRefsArrays(perGroups).groupsIndices;
     }
     return retVal;
 });
@@ -146,7 +146,7 @@ let perGroupsIndices=$derived.by(()=>{
 let groupsRefsArray=$derived.by(()=>{
     let retVal = [];
     if (perGroups && perGroups.length){
-        retVal = TfUtils.getGroupRefsArrays(perGroups).refsArray;
+        retVal = TfUtils.getGospelGroupRefsArrays(perGroups).refsArray;
     }
     return retVal;
 });
@@ -322,19 +322,19 @@ let bestMatchedLexes=$state([]);
  */
 let otherMatchedLexes=$state([]);
 
-
+/*
 async function fetchPostTextsBatch(){
 //todo: refactor in another .svelte.js file, then test
     fetchedTextsResponse = null;
-
+*/
     /**
      * @type {{book:string,chapter:number|null,verses:number[]}[]} bcvFetchArray
      */
-    const bcvFetchArray=currentServer.getBCVarrayFromRefs(groupsRefsArray);
+/*    const bcvFetchArray=currentServer.getBCVarrayFromRefs(groupsRefsArray);
     
     fetchedTextsResponse = await currentServer.getTexts(bcvFetchArray,true,true);
     
-}
+}*/
 async function buildAndFetchPericopes(reset=true){
     viewStates.views.lookup.state=false;
     dataReady=false;
@@ -352,7 +352,7 @@ async function buildAndFetchPericopes(reset=true){
     fetching = true;
     //fetchTexts();
     
-    await fetchPostTextsBatch();
+    fetchedTextsResponse = await currentServer.fetchPostTextsBatch(groupsRefsArray);
     //buildLexArrays();
     populateGroupsText(true);
     dataReady= true;
