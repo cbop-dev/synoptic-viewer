@@ -28,13 +28,20 @@ export class SynopsisOptions{
      * @type {string[]} columns
      */
     columns=[];
-
+    
+    /**
+     * @type {string[]} batch
+     */
+    batch=[];
     /**
      * @type {number[]} lexes
     */
     lexes=[];
 
-    nt="sblgnt"
+    nt="sblgnt";
+
+    mode=0;
+    tab=0;
     //other: "n1904"
     
     /**
@@ -60,6 +67,7 @@ export class SynopsisOptions{
         numericParams : [
             "selectedGospelIndex",
             "tab",
+            "mode"
             
         ],
 
@@ -72,6 +80,7 @@ export class SynopsisOptions{
         stringArrayParams: [
             {name: "columns", split: "|"},
             {name: "greekStrings", split: "|"},
+            {name:"batch", split:"^"}
         ],
         stringParams: [
             "nt"

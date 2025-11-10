@@ -57,7 +57,7 @@ export function findPhrases(strings,searchStrings){
         }
        //mylog("pushing into ret: [" +matchedIndexes.join(",")+"]", true);
        if(matchedIndexes.length){
-            mylog(`found something, pushing into ret[${rawSearchPhrase}] [${matchedIndexes.join(",")}"]"`, true);
+           // mylog(`found something, pushing into ret[${rawSearchPhrase}] [${matchedIndexes.join(",")}"]"`);
             ret[rawSearchPhrase]=matchedIndexes;
        }
         
@@ -67,8 +67,6 @@ export function findPhrases(strings,searchStrings){
     //mylog(ret);
     return ret;
 }
-
-
 
 
 

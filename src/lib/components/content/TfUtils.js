@@ -540,7 +540,7 @@ export class TfServer{
          /**
          * @type {{book:string,chapter:number|null,verses:number[]}[]} bcvFetchArray
          */
-        mylog(`fetchpostTextsBath(["${refsArray.join('","')}"])`, true);
+        //mylog(`fetchpostTextsBath(["${refsArray.join('","')}"])`);
         const bcvFetchArray=this.getBCVarrayFromRefs(refsArray);
         
         return await this.getTexts(bcvFetchArray,true,true);

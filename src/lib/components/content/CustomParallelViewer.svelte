@@ -79,7 +79,7 @@ const requestModes =[
     {name: "Batch"}
 ];
 
-let selectedRequestModeIndex = $state(0);
+let selectedRequestModeIndex = $state( options.mode < requestModes.length ? options.mode : 0);
 
 let theNote = $state({heading: '', note:'',footer:''});
 
@@ -103,7 +103,7 @@ function displayNote(heading,note) {
 let refAreaInputs = $state(options.columns && options.columns.length ? options.columns : ['Matt 1:1', "Mark 1:1"]); 
 let numCols = $derived(refAreaInputs.length);
 
-let batchInput=$state('Matt 1:1|Mark 1:1|John 1:1\nMatt 5:17|Eph 2:14-16');
+let batchInput=$state(options.batch && options.batch.length ? options.batch.join("\n") : 'Matt 1:1|Mark 1:1|John 1:1\nMatt 5:17|Eph 2:14-16');
 
 /**
  * @type {ParallelTextGroup[]} texts
@@ -263,6 +263,7 @@ async function buildAndFetchPericopes(reset=true){
     
     fetching = true;
     //fetchTexts();
+    mylog(`buildAndFetchPericopes: selectedRequestModeIndex=${selectedRequestModeIndex}`)
     if (selectedRequestModeIndex==0) {
         texts = [new ParallelTextGroup()];
         texts[0].parallelTexts = parseSingleGroup(refAreaInputs);
@@ -271,19 +272,20 @@ async function buildAndFetchPericopes(reset=true){
         texts = parseGroupsBatch(batchInput);
     }
     
-  
+    
     //mylog("after parsing input, but texts.parTexts[0].ref: " + texts.parallelTexts[0].textRefs[0].reference)
     //const parRefsObj = TfUtils.getParallelRefsArrays(texts.parallelTexts);
     const parRefsObj = TfUtils.getParallelGroupsRefsArrays(texts);
-    mylog("parRefsObj:");
-    mylog(parRefsObj);
+
     response = await currentServer.fetchPostTextsBatch(parRefsObj.refsArray);
     
     //buildLexArrays();
     for (const [i,textGroup] of texts.entries()) {
         TfUtils.populateTextGroup(textGroup,response,parRefsObj.groupsIndices[i]);
     }
+    fetching=false;
     dataReady= true;
+    
     //mylog("Got response with " + response.texts.length + " texts. Here's 1:" )
     //mylog(response.texts[0].text)
    // mylog("here texts.ptexts[0].textR[0].text: " + texts.parallelTexts[0].textRefs[0].text)
@@ -301,7 +303,7 @@ function buildLexArrays(){
         }
     }
     else{
-        mylog("Cannot build LexArrays!", true)
+        mylog("Cannot build LexArrays!")
     }
 
     
@@ -378,7 +380,7 @@ function resetViewOptions(lookup=false){
         selectedLexes.length = 0;
     }
     function toggleLex(id){
-        mylog("toggleLex("+id+")",true);
+        mylog("toggleLex("+id+")");
         if(selectedLexes.includes(id)) {
             selectedLexes.splice(selectedLexes.indexOf(id),1);
 
@@ -565,12 +567,19 @@ function makeURL(){
         viewStates.views.highlightOnClick.state,selectedLexes);
     
     opt.greekStrings=options.greekStrings;
-    opt.columns=refAreaInputs;
+    if(selectedRequestModeIndex==0){
+        opt.columns=refAreaInputs;
+    }
+    else{
+        opt.batch=batchInput.split("\n");
+        opt.mode=1;
+    }
+    
+    opt.tab=1;
     
     
     
-    
-    let url = generateURL(opt)+"&tab=1"
+    let url = generateURL(opt);
     return url;
 }
 
@@ -590,7 +599,7 @@ function loadRequestOptions(){
 
 }
 
-let gotRequest = (options.columns && options.columns.length);
+let gotRequest = ((options.columns && options.columns.length) || (options.batch && options.batch.length));
 let mounted=$state(false);
 
 onMount(() => {
@@ -647,7 +656,7 @@ $inspect(texts)
     <textarea bind:value={batchInput} cols="20" rows="10"/><br/>
 {/if}
 
-<Button onclick={lookup} buttonText="Lookup!"/>
+<Button onclick={lookup} buttonText="Lookup!" ready={!fetching}/>
 <div id="texts1" class="block">
 {#if mounted && dataReady}
 <hr/>

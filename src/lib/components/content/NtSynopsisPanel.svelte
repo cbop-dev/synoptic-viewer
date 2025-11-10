@@ -369,7 +369,7 @@ function buildLexArrays(){
         }
     }
     else{
-        mylog("Cannot build LexArrays!", true)
+        //mylog("Cannot build LexArrays!")
     }
 
     
