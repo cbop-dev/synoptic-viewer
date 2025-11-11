@@ -4,7 +4,7 @@
     import { onMount } from "svelte";
     import ParallelGospelSection from "$lib/components/content/ParallelGospelSection.svelte";
     import SynopsisHome from "$lib/components/content/SynopsisHome.svelte";
-    import { SynopsisOptions } from "$lib/components/content/SynopsisClasses";
+    import { SynopsisOptions } from "$lib/components/content/SynopsisClasses.svelte";
     import '../app.css';
     import { mylog } from "$lib/env/env";
     function onkeydown(event){

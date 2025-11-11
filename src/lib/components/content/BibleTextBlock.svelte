@@ -13,7 +13,8 @@
      * @param {Word[]} words
      */
     export function getText(words){
-        return words.reduce((a,b)=>a ? a +' '+b.word : b.word, '')
+        const phrase = words.reduce((a,b)=>a ? a +' '+b.word : b.word, '');
+        return hideApp ? GreekUtils.removeApparatusMarks(phrase) : phrase;
     }
 
 
@@ -33,6 +34,7 @@
 * highlightOnClick :  boolean
 * notesClick:  function
 * wordClick:  function
+* hideApp:boolean
 * }} 
 */
 let {
@@ -50,6 +52,7 @@ let {
         highlightOnClick=$bindable(false),
         notesClick=()=>{},
         wordClick=()=>{},
+        hideApp=false,
 }=$props();
 /**
  * 
@@ -116,7 +119,7 @@ let {
                     
                         {@const wordCssClass=cssWordClassDict[word.id]}
                         {@const plainGreek=GreekUtils.onlyPlainGreek(word.word)}
-                        {@const customMatchSearchStrings=Object.entries(customMatchedWords).filter(([searchPhrase,array])=>array.includes(index)).map(([s,a])=>s)}
+                        {@const customMatchSearchStrings=Object.entries(customMatchedWords).filter(([searchPhrase,array2d])=>array2d.flat().includes(index)).map(([s,a2d])=>s)}
                         {@const customClasses = customMatchSearchStrings.map((s)=>cssWordCustomDict[s])}
                         
                         <span role="none"
@@ -124,7 +127,7 @@ let {
                             showUnique && uniqueSet && isUnique(word.id,uniqueSet) && "lex-unique", 
                             wordCssClass, customClasses?.length ? customClasses[0] : '', "test", 
                             showIdentical && wordCssClass && parGroup.matchingWords.includes(stripWord(word.word)) && 'underline font-bold'] } 
-                        onclick={()=>{if (highlightOnClick) wordClick(word.id);}}>{word.word}{'  '}</span>
+                        onclick={()=>{if (highlightOnClick) wordClick(word.id);}}>{getText([word])}{'  '}</span>
                     {/each}
                 {/each}
             {:else if textRef.text}

@@ -63,6 +63,7 @@
      * showUnique:boolean,
      * highlightOnClick:boolean,
      * showNotes:boolean,
+     * hideApp:boolean
      * showNotesFunction(heading:string,note:string):void
      * }}
      */
@@ -75,6 +76,7 @@
         cssCustomDict={},
         highlightOnClick=true,
         showNotes=true,
+        hideApp=false,
         showNotesFunction=(heading,note)=>{alert(heading+"\n"+note)}
         
     } = $props();
@@ -131,7 +133,7 @@ function notesClick(heading,note){
                     <div class="text-left">
                      
                     <BibleTextBlock {textRef}  parGroup={parTextGroup} {showUnique} {numCols} copyButton={true} {showIdentical}
-                    cssWordClassDict={cssClassDict} cssWordCustomDict={cssCustomDict} 
+                    cssWordClassDict={cssClassDict} cssWordCustomDict={cssCustomDict} hideApp={hideApp}
                     {showNotes} uniqueSet={unique} bind:highlightOnClick={highlightOnClick} notesClick={showNotesFunction} 
                         {wordClick} 
                     />

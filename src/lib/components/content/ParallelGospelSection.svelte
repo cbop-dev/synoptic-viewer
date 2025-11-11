@@ -23,6 +23,7 @@
      * showUnique:boolean,
      * highlightOnClick:boolean,
      * showNotes:boolean,
+     * hideApp:boolean,
      * showNotesFunction(heading:string,note:string):void
      * }}
      */
@@ -36,6 +37,7 @@
         cssCustomDict={},
         highlightOnClick=true,
         showNotes=false,
+        hideApp=false,
         showNotesFunction=(heading,note)=>{alert(heading+"\n"+note)}
 
         
@@ -212,7 +214,7 @@ function isUnique(wordid, uniqueSet){
                        <BibleTextBlock {textRef}  {parGroup} {showUnique} {numCols} copyButton={true} {showIdentical}
                     cssWordClassDict={cssClassDict} cssWordCustomDict={cssCustomDict} 
                     {showNotes} uniqueSet={unique} bind:highlightOnClick={highlightOnClick} notesClick={showNotesFunction} 
-                        {wordClick} 
+                        {wordClick} {hideApp}
                     />
 
                    <!-- {@render showText(myOptions,cssClasses)}-->
@@ -239,7 +241,7 @@ function isUnique(wordid, uniqueSet){
                          <BibleTextBlock {textRef}  {parGroup} {showUnique} {numCols} copyButton={true} {showIdentical}
                     cssWordClassDict={cssClassDict} cssWordCustomDict={cssCustomDict} 
                     {showNotes} bind:highlightOnClick={highlightOnClick} notesClick={showNotesFunction} 
-                        {wordClick} 
+                        {wordClick} {hideApp}
                     />
                 <!--{@render showText(myOptions)}-->
             
@@ -259,7 +261,7 @@ function isUnique(wordid, uniqueSet){
                  <BibleTextBlock {textRef}  {parGroup} {showUnique} {numCols} copyButton={true} {showIdentical}
                     cssWordClassDict={cssClassDict} cssWordCustomDict={cssCustomDict} 
                     {showNotes} uniqueSet={unique} bind:highlightOnClick={highlightOnClick} notesClick={showNotesFunction} 
-                        {wordClick} 
+                        {wordClick} {hideApp}
                     />
         <!--{@render showText(myOptions)}-->
         </div>
@@ -281,7 +283,7 @@ function isUnique(wordid, uniqueSet){
                          <BibleTextBlock {textRef}  {parGroup} {showUnique} {numCols} copyButton={true} {showIdentical}
                     cssWordClassDict={cssClassDict} cssWordCustomDict={cssCustomDict} 
                     {showNotes} uniqueSet={col.unique} bind:highlightOnClick={highlightOnClick} notesClick={showNotesFunction} 
-                        {wordClick} 
+                        {wordClick} {hideApp}
                     />
                 <!--{@render showText(myOptions)}-->
                 </div>
@@ -305,7 +307,7 @@ function isUnique(wordid, uniqueSet){
                          <BibleTextBlock {textRef}  {parGroup} {showUnique} {numCols} copyButton={true} {showIdentical}
                     cssWordClassDict={cssClassDict} cssWordCustomDict={cssCustomDict} 
                     {showNotes}  bind:highlightOnClick={highlightOnClick} notesClick={showNotesFunction} 
-                        {wordClick} 
+                        {wordClick} {hideApp}
                     />
                     <!--{@render showText(myOptions)}-->
                 </div>

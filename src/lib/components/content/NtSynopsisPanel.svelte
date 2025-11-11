@@ -2,7 +2,7 @@
 import { onMount } from 'svelte';
 //import { generateURL } from './urlParams.js';
 import Footer from './Footer.svelte';
-import { SynopsisOptions, generateURL } from './SynopsisClasses';
+import { SynopsisOptions, generateURL } from './SynopsisClasses.svelte';
 import Icon from '../ui/icons/Icon.svelte';
 import LinkIcon from '../ui/icons/link-icon.svelte';
 import LinkSvg from  '../ui/icons/link.svg';
@@ -44,7 +44,7 @@ let {
     /**
      * @type {SynopisOptions}
     */
-    options=$bindable(new SynopsisOptions()),
+    options=new SynopsisOptions(),
     //viewOptions=new ViewOptions(),
     live=true,
     /**
@@ -71,7 +71,8 @@ let showLexemeHighlights = $state(false);
 let showLookupPanel = $state(true);
 // let showViewOptions = $state(false);
 //let landingPage=$state(true);
-let gotRequest = myOptions ? (myOptions.pericopes && myOptions.pericopes.length  || myOptions.sections && myOptions.sections.length ) : false;
+let gotRequest = myOptions ? (myOptions.pericopes && myOptions.pericopes.length  
+    || myOptions.sections && myOptions.sections.length) : false;
 let landingPage = $state(!gotRequest);
 let requestProcessed = $state(false);
 
@@ -675,6 +676,9 @@ function makeURL(){
     opt.pericopes=alandPericopeNums;
     opt.selectedGospelIndex=selectedGospelIndex;
     opt.sort=sort;
+    opt.unique=viewStates.views.unique.state;
+    opt.identical=viewStates.views.identical.state;
+    opt.focusOn=focusOn;
     opt.nt=currentServer.param;
     let url = generateURL(opt)
     return url;
@@ -800,6 +804,9 @@ onMount(() => {
 //$inspect("request:", myOptions);
 //$inspect("gotRequest:",gotRequest);
 //$inspect("Landing?:", landingPage);
+$inspect(`myOptions.hideApp: ${myOptions.hideApp}`);
+$inspect(`myOptions.nt: ${myOptions.nt}`);
+$inspect(`myOptions.nt:${myOptions.nt}`)
 </script>
 <style>
     @reference "tailwindcss";
@@ -913,6 +920,9 @@ onMount(() => {
         <li><ButtonSelect bind:selected={viewStates.views.highlightOnClick.state} buttonText="Auto Highlight" 
             tooltipbottom={true}
             tooltip="If enabled, clicking/tapping on a word will toggle highlighting of that lexeme. Press 'c' to toggle this option."/></li>
+         {#if myOptions.nt==SblGntServer.abbrev}   <li><label for="hide-app-check1">Hide apparatus marks</label>
+<input id="hide-app-check1" class="toggle" type="checkbox" bind:checked={myOptions.hideApp}/>
+     </li>{/if}
         
             
         
@@ -968,7 +978,10 @@ onMount(() => {
         <li><ButtonSelect bind:selected={viewStates.views.highlightOnClick.state} buttonText="Auto Highlight" 
             tooltipbottom={true}
             tooltip="If enabled, clicking/tapping on a word will toggle highlighting of that lexeme. Press 'c' to toggle this option."/></li>    
-        
+        {#if myOptions.nt==SblGntServer.abbrev}   <li><label class="label" for="hide-app-check2">
+<input  class="toggle" id="hide-app-check2" type="checkbox" bind:checked={myOptions.hideApp}/>Hide apparatus marks</label>
+     </li>{/if}
+ 
          
      {/if}
       {/if}
@@ -1088,6 +1101,7 @@ onMount(() => {
                     highlightOnClick={viewStates.views.highlightOnClick.state} 
                     showNotes={currentServer.showNotes}
                     showNotesFunction={displayNote}
+                    hideApp={myOptions.hideApp}
                     />
                 </div>
                     

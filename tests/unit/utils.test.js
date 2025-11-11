@@ -68,10 +68,13 @@ test('sortChapVerseRefs', async () => {
 
 test('string utils', async () => {
 	const tests=[
-        {searched: ['short'], searchingFor: ["short"], output: {"short": [0]}},
-        {searched: ['veryshort'], searchingFor: ["short"], output: {"short":[0]}},
-        {searched: ['two','words'], searchingFor: ["words"], output: {"words":[1]}},
+        {searched: ['short'], searchingFor: ["short"], output: {"short": [[0]]}},
+        {searched: ['veryshort'], searchingFor: ["short"], output: {"short":[[0]]}},
+        {searched: ['two','words'], searchingFor: ["words"], output: {"words":[[1]]}},
         {searched: ['two','words'], searchingFor: ["wordss"], output: {}},
+        {searched:GreekUtils.onlyPlainGreek("Βίβλος γενέσεως Ἰησοῦ χριστοῦ υἱοῦ Δαυὶδ υἱοῦ Ἀβραάμ.").split(" "),
+            searchingFor:["ου"], 
+            output:{"ου":[[2],[3],[4],[6]]}},
         /*
         {searched: ['two','words'], searchingFor: ["two"], output: [[0]]},
         {searched: ['two','words'], searchingFor: ["two words"], output: [[0,1]]},
@@ -80,17 +83,17 @@ test('string utils', async () => {
         {searched: ['has','three','words'], searchingFor: ['has',"three"], output: [[0],[1]]},
         {searched: ['has','three','words'], searchingFor: ['has three'], output: [[0,1]]},
         */
-        {searched: ['the','list','is','short'], searchingFor: ["short", "is"], output: {"short":[3], "is":[1]}},//watch out! early match 
+        {searched: ['the','list','is','short'], searchingFor: ["short", "is"], output: {"short":[[3]], "is":[[1],[2]]}},//watch out! early match 
         /*
         {searched: ['the','list','is','short'], searchingFor: ["is short"], output: [[2,3]]},//watch out! early match
         {searched: ['the','list','is','short'], searchingFor: ["short", "is short"], output: [[3],[2,3]]},//watch out! early match
         {searched: ['the','list','is','short'], searchingFor: ["short", "list is"], output: [[3],[1,2]]},
         {searched: ['the','list','is','short'], searchingFor: ["is short", "list is"], output: [[2,3],[1,2]]},
         */
-        {searched: ['χριστου','υι'], searchingFor: ["χριστου υι"], output: {"χριστου υι":[0,1]}},/*
+        {searched: ['χριστου','υι'], searchingFor: ["χριστου υι"], output: {"χριστου υι":[[0,1]]}},/*
         {searched: ['this', 'is', 'noncontiguous', 'match'], searchingFor: ["is match"], output: [[]]},*/
-        {searched: ['a','partial', 'match!'], searchingFor: ["partial mat"], output: {"partial mat":[1,2]}},
-         {searched: GreekUtils.onlyPlainGreek("Βίβλος γενέσεως Ἰησοῦ χριστοῦ υἱοῦ Δαυὶδ υἱοῦ Ἀβραάμ.".trim(),true,true).split(" "), searchingFor: ["δ υιου"], output: {"δ υιου": [5,6]}}
+        {searched: ['a','partial', 'match!'], searchingFor: ["partial mat"], output: {"partial mat":[[1,2]]}},
+         {searched: GreekUtils.onlyPlainGreek("Βίβλος γενέσεως Ἰησοῦ χριστοῦ υἱοῦ Δαυὶδ υἱοῦ Ἀβραάμ.".trim(),true,true).split(" "), searchingFor: ["δ υιου"], output: {"δ υιου": [[5,6]]}}
     ];
     for (const t of tests){
         //expect(true).toBe(true);

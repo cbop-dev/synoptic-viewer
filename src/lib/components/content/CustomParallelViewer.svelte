@@ -1,7 +1,7 @@
 <script>
 import { onMount } from "svelte";
 import LinkSvg from  '../ui/icons/link.svg';
-import { SynopsisOptions, generateURL  } from "./SynopsisClasses.js";
+import { SynopsisOptions, generateURL  } from "./SynopsisClasses.svelte.js";
 import { ParallelText,Word, TextAndRef,VerseWords,ParallelTextGroup,parseSingleGroup } from "./parallelTexts.svelte.js";
 import ParallelTextSection from "./ParallelTextSection.svelte";
 import { N1904Server, lexemes} from "$lib/n1904/tfN1904";
@@ -46,7 +46,7 @@ let {
 } = $props();
 
 let currentServer=$state(tfServer);
-
+let myOptions=$state(SynopsisOptions.makeFrom(options))
 function setServer(){
     currentServer=tfServer;
 }
@@ -79,7 +79,7 @@ const requestModes =[
     {name: "Batch"}
 ];
 
-let selectedRequestModeIndex = $state( options.mode < requestModes.length ? options.mode : 0);
+let selectedRequestModeIndex = $state( myOptions.mode < requestModes.length ? myOptions.mode : 0);
 
 let theNote = $state({heading: '', note:'',footer:''});
 
@@ -100,10 +100,10 @@ function displayNote(heading,note) {
 /**
  * @type {string[]} refAreaInputs
  */
-let refAreaInputs = $state(options.columns && options.columns.length ? options.columns : ['Matt 1:1', "Mark 1:1"]); 
+let refAreaInputs = $state(myOptions.columns && myOptions.columns.length ? myOptions.columns : ['Matt 1:1', "Mark 1:1"]); 
 let numCols = $derived(refAreaInputs.length);
 
-let batchInput=$state(options.batch && options.batch.length ? options.batch.join("\n") : 'Matt 1:1|Mark 1:1|John 1:1\nMatt 5:17|Eph 2:14-16');
+let batchInput=$state(myOptions.batch && myOptions.batch.length ? myOptions.batch.join("\n") : 'Matt 1:1|Mark 1:1|John 1:1\nMatt 5:17|Eph 2:14-16');
 
 /**
  * @type {ParallelTextGroup[]} texts
@@ -113,7 +113,7 @@ let texts= $state([]);
 /**
 * @type {number[]} selectedLexes
 */
-let selectedLexes=$state(options.lexes);
+let selectedLexes=$state(myOptions.lexes);
 mylog("initialized selected lexes: " + selectedLexes.join(','));
 
 /**
@@ -420,12 +420,12 @@ function resetViewOptions(lookup=false){
             view: { description:  "View Options", hotkeys:['v'], state:false,modal:true},
             lookup: { description:  "Lookup passage(s) or select section", hotkeys:['l', 's'], state:true,modal:false},
             words: {description:  "Lexeme/Word Options", hotkeys:['w'], state:false,modal:true},
-            highlightOnClick: { description:  "Enable/disable highlight on click.", hotkeys:['c'], state:options.highlightOnClick,modal:false},
+            highlightOnClick: { description:  "Enable/disable highlight on click.", hotkeys:['c'], state:myOptions.highlightOnClick,modal:false},
             info: { description:  "Website and project information.", hotkeys:['i'], state:false,modal:true},
-            unique: { description:  "Toggle Unique Lexeme color outlining", hotkeys:['u'], state:options.unique,modal:false},
+            unique: { description:  "Toggle Unique Lexeme color outlining", hotkeys:['u'], state:myOptions.unique,modal:false},
             help: { description:  "Show help menu", hotkeys:['h', '?'], state:false,modal:true},
             identical: { description:  "Show (bold & underline) morphologically identical words shared by different gospels in a parallel group ",
-             hotkeys:['m'], state:options.identical,modal:false},
+             hotkeys:['m'], state:myOptions.identical,modal:false},
              notes:{description: "Notes on the text",state:false,modal:true}
               
         },
@@ -566,7 +566,7 @@ function makeURL(){
     let opt = new SynopsisOptions(viewStates.views.unique.state,viewStates.views.identical.state,
         viewStates.views.highlightOnClick.state,selectedLexes);
     
-    opt.greekStrings=options.greekStrings;
+    opt.greekStrings=myOptions.greekStrings;
     if(selectedRequestModeIndex==0){
         opt.columns=refAreaInputs;
     }
@@ -599,7 +599,7 @@ function loadRequestOptions(){
 
 }
 
-let gotRequest = ((options.columns && options.columns.length) || (options.batch && options.batch.length));
+let gotRequest = ((myOptions.columns && myOptions.columns.length) || (myOptions.batch && myOptions.batch.length));
 let mounted=$state(false);
 
 onMount(() => {
@@ -616,7 +616,7 @@ onMount(() => {
     }
     mounted = true;
 });
-$inspect(texts)
+$inspect(myOptions.hideApp)
 </script>
 
 <div class="self-center text-center sticky top-0 bg-white z-40" >
@@ -666,8 +666,9 @@ $inspect(texts)
            buttonText="Identical words"/>
 <ButtonSelect buttonText="Highlight on Click" bind:selected={viewStates.views.highlightOnClick.state}/>
 <ButtonSelect buttonText="Word Options" bind:selected={viewStates.views.words.state}/>  
-
-            
+{#if myOptions.nt==SblGntServer.abbrev}<label for="hide-app-check">Hide appart?</label>
+<input name="hide-app-check" type="checkbox" bind:checked={myOptions.hideApp}/>
+    {/if}       
 <br/>
 <hr/>
 <h2>Parallel NT Texts from {currentServer.name}:
@@ -686,7 +687,7 @@ $inspect(texts)
                     cssCustomDict={customGreekClasses}
                     showIdentical={viewStates.views.identical.state}
                     highlightOnClick={viewStates.views.highlightOnClick.state}
-                    showNotes={true}
+                    showNotes={true} hideApp={myOptions.hideApp}
                     showNotesFunction={displayNote}
                     />
 {/each}

@@ -14,11 +14,12 @@ const debugOn=true;
 export const lexemes = ntlexemes;
 
 export class SblGntServer extends N1904Server{
+    static abbrev='sblgnt';
     dbURI="/sblgnt";
     longname="SBL Greek New Testament (2010)";
     name="SBL Greek NT"
     shortname="SBL GNT";
-    abbrev="sblgnt";
+    abbrev=SblGntServer.abbrev;
     server=env.tfserverurl;
     param=this.abbrev;
     lexemes = ntlexemes;
@@ -28,6 +29,7 @@ export class SblGntServer extends N1904Server{
     getNoteFooter(){
         return "Apparatus notes taken from The Greek New Testament: SBL Edition (https://www.sblgnt.com), copyright 2010, Society of Biblical Literature (https://sbl-site.org) and Logos Bible Software (https://logos.com). License information: https://www.sblgnt.com/license/.";
     }
+    
     
 }
 

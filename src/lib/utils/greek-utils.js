@@ -1,3 +1,6 @@
+import { mylog, debug } from "$lib/env/env"
+debug.set(true);
+
 class GreekUtils {
 	static greekLetters
 	static latinBetaCodeLetters
@@ -11,7 +14,7 @@ class GreekUtils {
 		this.latinBetaCodeLetters = "abgdezhiqklmncoprsstufxywvABGDEZHIQKLMNCOPRSTUFXYWV".split("")
 		this.beta = this.latinBetaCodeLetters + this.greekBetaDiac;
 		this.latinGreekMap = new Object();
-		
+		this.apparatusMarks= "⸂⸀⸁⸄⟦\\]\\[⟧⸂⸃⸅";
 		for (var i = 0; i < this.greekLetters.length; i++){
 			this.latinGreekMap[this.latinBetaCodeLetters[i]] = this.greekLetters[i];
 		}
@@ -62,6 +65,12 @@ class GreekUtils {
 		return greekChars.join("").replaceAll('ς','σ').replace(/σ$/, 'ς');
 	}
 	
+
+	static removeApparatusMarks(greek){
+		const theREstring="[" + GreekUtils.apparatusMarks +"]+";
+		mylog(`trying re expression: '${theREstring}'`, true)
+		return greek.trim().replaceAll(new RegExp(theREstring,'g'),'').trim().replaceAll(/\s+/g,' ');
+	}
 	/** TODO 
 	 *  searches an array of strings for all strings that contain searchString
 	 * 

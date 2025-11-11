@@ -1,11 +1,12 @@
 <script>
 	import NtSynopsisPanel from './NtSynopsisPanel.svelte';
     import CustomParallelViewer from './CustomParallelViewer.svelte';
-	import { SynopsisOptions,getRequestParamsObj,generateURL } from './SynopsisClasses';
+	import { SynopsisOptions,getRequestParamsObj,generateURL } from './SynopsisClasses.svelte.js';
 	import { mylog } from '$lib/env/env';
     import {getServer, sbl as sblServer, n1904 as n1904Server} from '$lib/tf/tfServer.js'
     import { N1904Server } from '$lib/n1904/tfN1904';
     import { SblGntServer } from '$lib/sblgnt/sblgnt';
+    
     import Button from '../ui/Button.svelte';
     import { TfServer } from './TfUtils';
 	import ButtonSelect from '../ui/ButtonSelect.svelte';
@@ -18,7 +19,7 @@
     let windowHeight=$state();
     let contentHeight = $state();
     let {
-        options=null,
+        options=new SynopsisOptions(),
     } = $props();
 
     mylog("<SynopHome> options:");
@@ -27,7 +28,7 @@
     let headerHeight = $state();
     const myServers={
         list: [
-            {abbrev: 'sblgn', name: "SBL Greek NT", server: sblServer},
+            {abbrev: 'sblgnt', name: "SBL Greek NT", server: sblServer},
             {abbrev: 'n1904', name: "Nestle's 1904 GNT", server: n1904Server},
         ],
         
@@ -104,6 +105,8 @@
 <div class="relative" bind:clientHeight={contentHeight}>
     <div class="sticky block top-0 z-100 bg-white/70 text-center" bind:clientHeight={headerHeight}>
         <div class="inline-block float-right">
+            
+
             <label for="ntversion" class="hidden md:inline m-0 p-0 text-sm">NT version:</label>
             <select name="ntversion" class="m-0 ml-1 mr-1 p-0 text-sm" bind:value={currentServerName}>
                 {#each myServers.list as serverOption, index}

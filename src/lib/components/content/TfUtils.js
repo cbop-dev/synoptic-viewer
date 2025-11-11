@@ -285,6 +285,8 @@ export function getGospelGroupRefsArrays(groupsArray){
 
 
 export class TfServer{
+    static abbrev='Dummy Server!';
+
     ready = false;
     name = "TF Empty DB";
     longname='';

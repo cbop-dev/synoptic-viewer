@@ -1,15 +1,47 @@
 import { mylog } from "$lib/env/env.js";
+//import { SynopsisOptions,getRequestParamsObj,generateURL } from './SynopsisClasses.svelte.js';
+
+export class SynopsisViewOptions{
+    unique= $state(false);
+    identical= $state(false);
+    highlightOnClick= $state(false);
+    hideNonPrimary= $state(false);
+    hideSolos= $state(false);
+    focusOn= $state(false);
+    hideNonPrimarySolos= $state(false);
+    sort= $state(false);
+    selectedGospelIndex= $state(0);
+     /**
+     * @type {string[]} greekStrings
+     */
+    greekStrings= $state([]);
+    hideApp= $state(false);
+    mode= $state(0);
+    tab= $state(0);
+    nt=$state("sblgnt");
+
+}
 
 export class SynopsisOptions{
-    unique=false;
-    identical=false;
-    highlightOnClick=false;
-    hideNonPrimary=false;
-    hideSolos=false;
-    focusOn=false;
-    hideNonPrimarySolos=false;
 
-    sort=false;
+    //viewOptions=new SynopsisViewOptions();
+        unique= $state(false);
+    identical= $state(false);
+    highlightOnClick= $state(false);
+    hideNonPrimary= $state(false);
+    hideSolos= $state(false);
+    focusOn= $state(false);
+    hideNonPrimarySolos= $state(false);
+    sort= $state(false);
+    selectedGospelIndex= $state(0);
+     /**
+     * @type {string[]} greekStrings
+     */
+    greekStrings= $state([]);
+    hideApp= $state(false);
+    mode= $state(0);
+    tab= $state(0);
+    nt=$state("sblgnt");
     /**
      * @type {number[]} pericopes
      */
@@ -19,11 +51,7 @@ export class SynopsisOptions{
      */
     sections=[];
  
-    selectedGospelIndex=0;
-    /**
-     * @type {string[]} greekStrings
-     */
-    greekStrings=[];
+  
     /**
      * @type {string[]} columns
      */
@@ -38,12 +66,9 @@ export class SynopsisOptions{
     */
     lexes=[];
 
-    nt="sblgnt";
-
-    mode=0;
-    tab=0;
-    //other: "n1904"
     
+ 
+
     /**
      * 
      * @param {boolean} unique 
@@ -62,6 +87,7 @@ export class SynopsisOptions{
         "unique",
         "identical",
         "sort",
+        "hideApp"
         ],
 
         numericParams : [
@@ -89,10 +115,14 @@ export class SynopsisOptions{
     };
 
     constructor(unique=false,identical=false,highlightOnClick=false,lexes=[],){
-        this.unique=unique;
+        this.unique=unique; 
+        
         this.identical=identical;
+        
         this.highlightOnClick=highlightOnClick;
+        
         this.lexes=lexes;
+        
         
     }
 
@@ -109,9 +139,9 @@ export class SynopsisOptions{
 
         return sop;
     }
-    
-
+  
 }
+
 
 
 

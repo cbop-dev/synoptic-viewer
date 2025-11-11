@@ -11,3 +11,18 @@ test('remove diacritics test',()=>{
     }
         
 })
+
+
+test('remove apparatus test',()=>{
+    const tests = [
+        {input: "⸂εἶπεν δὲ⸃ πρὸς αὐτὸν ⸀ὁ Ἰησοῦς· Μὴ κωλύετε, ὃς γὰρ οὐκ ἔστιν καθ’ ⸂ὑμῶν ὑπὲρ ὑμῶν⸃ ἐστιν.", 
+            output: "εἶπεν δὲ πρὸς αὐτὸν ὁ Ἰησοῦς· Μὴ κωλύετε, ὃς γὰρ οὐκ ἔστιν καθ’ ὑμῶν ὑπὲρ ὑμῶν ἐστιν."}
+
+    ];
+    
+
+    for (const t of tests) {
+        expect(gu.removeApparatusMarks(t.input)).toBe(t.output);
+    }
+        
+})

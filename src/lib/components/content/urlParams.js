@@ -1,5 +1,5 @@
 import { mylog } from "$lib/env/env";
-import { SynopsisOptions } from "./SynopsisClasses";
+import { SynopsisOptions } from "./SynopsisClasses.svelte.js";
 
 
 const booleanParams=[
