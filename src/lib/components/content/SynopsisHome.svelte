@@ -66,7 +66,7 @@
     ]
 
     const hotkeys={
-        'i':()=>{showInfoModal=!showInfoModal}
+       // 'i':()=>{showInfoModal=!showInfoModal}
     }
     let selectedPane=$state(options.request.tab ? options.request.tab : 0);
     

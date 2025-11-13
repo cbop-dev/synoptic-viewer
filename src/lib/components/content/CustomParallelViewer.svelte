@@ -927,7 +927,7 @@ $inspect(`refarea.0:'${refAreaInputs[0]}`);
             
             <table class="table-auto self-center m-auto text-left "><tbody>
                 <tr class="border-0  border-b border-collapse border-gray-200" ><th>Key</th><th>Function</th></tr>
-                <tr><td class="p-2">[i]</td><td class="p-2">Website and project nfo</td></tr>
+                
         {#each Object.entries(viewStates.views) as [theViewName,theViewObj]}
             {#if theViewObj.hotkeys && theViewObj.hotkeys.length}
             <tr>
