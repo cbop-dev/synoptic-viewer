@@ -62,7 +62,7 @@ let {
 }=$props();
 //mylog("NTSynPanel: about to copy options")
 mylog(`typeof options: ${typeof options}`)
-let myOptions=$state(options.copy());
+let myOptions=options;
 
 let fetching = $state(false);
 let expecting = $state(0);

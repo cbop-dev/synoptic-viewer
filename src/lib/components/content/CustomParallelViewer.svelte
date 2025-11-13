@@ -32,11 +32,14 @@ import CopyText from '../ui/CopyText.svelte';
 import { findNextAnchor,findPrevAnchor, getAnchors} from '$lib/utils/ui-utils';
 import OptionButton from "../ui/SelectButtons/OptionButton.svelte";
 import Footer from './Footer.svelte';
+
+
 let {
     live=false,
     keyevent=null,
+    thisTabIndex=1,
     /**
-     * @type {SynopsisOptions3} options
+    * @type {SynopsisOptions3} options
     */
     options=new SynopsisOptions3(),
     /**
@@ -47,7 +50,11 @@ let {
 } = $props();
 
 let currentServer=$state(tfServer);
-let myOptions=$state(options.copy());
+
+/**
+ * @type {SynopsisOptions3} myOptions
+ */
+let myOptions=options;
 function setServer(){
     currentServer=tfServer;
 }
@@ -80,7 +87,7 @@ const requestModes =[
     {name: "Batch"}
 ];
 
-let selectedRequestModeIndex = $state( myOptions.request.mode < requestModes.length ? myOptions.request.mode : 0);
+let selectedRequestModeIndex = $state(myOptions.request.mode < requestModes.length ? myOptions.request.mode : 0);
 
 let theNote = $state({heading: '', note:'',footer:''});
 

@@ -162,7 +162,11 @@
 
     <div id="pane-{pane.name}" class={index==selectedPane ? 'block' : 'hidden'}>
         
-            <pane.comp options={options} live={index==selectedPane} tfServer={tfServer} keyevent={keyEvents[index]}/>
+            {#if options.request.tab==index}
+            <pane.comp options={options.copy()} live={index==selectedPane} tfServer={tfServer} keyevent={keyEvents[index]}/>
+            {:else}
+            <pane.comp live={index==selectedPane} tfServer={tfServer} keyevent={keyEvents[index]}/>
+            {/if}
         
     </div>
     {/each}
