@@ -665,8 +665,8 @@ onMount(() => {
 //$inspect(myOptions.hideApp)
 $inspect(`refarea.0:'${refAreaInputs[0]}`);
 </script>
-{#snippet appTitle(headingTag="h1")}
-    <svelte:element this={headingTag}>NT Gospel Synopsis Viewer</svelte:element> 
+{#snippet appTitle(headingTag="h1", short=false, classes=[])}
+    <svelte:element this={headingTag} class={classes}>{#if !short}Custom {/if} NT Synopsis</svelte:element> 
 {/snippet}
 {#snippet appSummary(heading=true,headingTag="h1")}
 
@@ -678,26 +678,85 @@ $inspect(`refarea.0:'${refAreaInputs[0]}`);
     Based on Kurt Aland's <i>Synopsis Quattuor Evangeliorum</i>, using <a href="https://www.sblgnt.com">The SBL Greek New Testament (2010)</a> or, optionally, Nestle's 1904 edition of the <i>Greek New Testament.</i><br/>
     Enter some NT references in the columns, or select "batch" mode to trying something more fancy.
 {/snippet}
+{#snippet resultsNav(short=false)}
+    {#if mounted && dataReady}
+    
+        <li><ButtonSelect bind:selected={viewStates.views.lookup.state} buttonText="Again!" tooltip="Toggle lookup panel." /></li>
+        <li><ButtonSelect bind:selected={myOptions.viewOptions.unique} buttonText="Unique Lexemes" tooltip="Outline all lexemes unique to each column."/></li>
+        <li><ButtonSelect bind:selected={myOptions.viewOptions.identical} tooltip="Toggle Bold/underline setting for morphologically identical words." 
+                buttonText="Identical words"/></li>
+        <li><ButtonSelect buttonText="Highlight on Click" bind:selected={myOptions.viewOptions.highlightOnClick} tooltip="If enabled, clicking on any word will highlight all instances of the lexem."/></li>
+        <li><ButtonSelect buttonText="Word Options" bind:selected={viewStates.views.words.state} tooltip="View Lexeme and custom Greek options."/></li>  
+        {#if currentServer.abbrev==SblGntServer.abbrev}
+        
+         <li><label class="label" for="hide-app-check{short? '-short':''}">
+<input  class="toggle" id="hide-app-check{short? '-short':''}" type="checkbox" bind:checked={myOptions.viewOptions.hideApp}/>Hide appar{#if !short}aratus marks{:else}.{/if}</label>
+     </li>
+            {/if}  
+    {/if}
+{/snippet}
 <div class="self-center text-center sticky top-0 bg-white z-40" >
 
-  
-<h1 class="text-3xl bold underline">Custom NT Synopsis!</h1>
-{#if viewStates.views.lookup.state}
-<h3 class="italic">Choose your <span class="line-through">weapons</span> NT Bible passages:<ButtonSelect buttonStyle="btn btn-neutral btn-outline btn-circle btn-xs p-0 m-0"
+  <!--<div class="block"><h1 class="text-3xl bold block underline self-center "><span class="self-center inline">Custom NT Synopsis!</span>
+<ButtonSelect buttonStyle="btn btn-neutral btn-outline btn-circle btn-xs p-0 m-0 "
             buttonText="?"
-            bind:selected={viewStates.views.help.state}/></h3>
-<label for="request-mode">Mode:</label>
-<select name="request-mode" bind:value={selectedRequestModeIndex}>
-    {#each requestModes as rMode,i}
-        <option value={i}>{rMode.name}</option>
-    {/each}
+            bind:selected={viewStates.views.help.state} /></h1>
+</div>-->
+{#if !landingPage}
+<div class="navbar bg-base-100 text-center  shadow-sm ">
+  <div class="navbar-start text-left max-w-full w-full m-auto md:hidden">
+    <div class="dropdown  text-left">
+               
+      <div tabindex="0" role="button" class="btn btn-ghost lg:hidden">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16" /> </svg>
+      </div>
 
-</select><br/>
+      <ul tabindex="0"
+       class="menu  dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow text-left ">
+        {@render resultsNav(true)} 
+      </ul>
+    </div>
+    <div class="text-left ">
+        {@render appTitle('h1',true,['inline'])}
+        <ul class="bg-white menu menu-horizontal ">
+            
+        <li><ButtonSelect buttonText="?" buttonStyle="btn btn-xs btn-circle btn-ghost p-0" bind:selected={viewStates.views.help.state}/>
+            </li>
+        <li >
+            <ButtonSelect bind:selected={viewStates.views.lookup.state} buttonText="" 
+            buttonStyle="btn btn-xs btn-circle btn-ghost p-0" >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+            </svg>
+            </ButtonSelect>
+        </li></ul>
+    </div>
+
+  </div>
+  <div class="hidden md:navbar-center self-center m-auto">
+         <div class="text-center self-center border-0"> 
+           <div id="title-panel">
+             {@render appTitle()}
+            </div>
+             <ul class="bg-white menu menu-horizontal ">
+
+                {@render resultsNav()}
+             </ul>
+             
+         </div>
+    </div>
+  <div class="navbar-end hidden">
+  </div>
+</div>
+{/if}
+{#if viewStates.views.lookup.state}
+<h3 class="italic">Choose your <span class="line-through">weapons</span> NT Bible passages:</h3>
+
 
 {#if selectedRequestModeIndex == 0}
     {#each refAreaInputs as areaInput, index}
-    <div class="inline-block m-3">
-        <label for="refarea{index}"class="label cursor-pointer inline ">
+    <div class="inline-block m-3 text-left">
+        <label for="refarea{index}" class="label cursor-pointer block  ">
             <span class="label-text">Column {index+1}:</span></label>  
         <textarea id="refarea{index}" class="align-middle resize" rows="1"
                     bind:value={refAreaInputs[index]}
@@ -707,7 +766,7 @@ $inspect(`refarea.0:'${refAreaInputs[0]}`);
         
 
     {/each}
-    <div class="inline-block">
+    <div class="block">
     {#if numCols <= maxCols}<Button buttonStyle="btn btn-sm btn-ghost" onclick={addCol} buttonText="+" tooltip="Add Column"/>{/if}
     {#if numCols >1 }<Button onclick={removeCol} buttonStyle="btn btn-sm btn-ghost"  buttonText="-" tooltip="Remove Last Column"/>{/if}
     </div>
@@ -717,26 +776,26 @@ $inspect(`refarea.0:'${refAreaInputs[0]}`);
     onfocus={textAreaFocus} onblur={textAreaBlur}
     /><br/>
 {/if}
+<div class="mb-2">
+<label for="request-mode">Mode:</label>
+<select name="request-mode" bind:value={selectedRequestModeIndex}>
+    {#each requestModes as rMode,i}
+        <option value={i}>{rMode.name}</option>
+    {/each}
 
+</select>
 <Button onclick={lookup} buttonText="Lookup!" ready={!fetching}/>
+</div>
 {/if}
+
 <div id="texts1" class="block">
 <hr/>
+
 
 {#if !(mounted && dataReady)}
     <span class="italic mt-3 pt-5"> Enter some valid NT references and click "Lookup!"</span>
 {:else}
-    <ButtonSelect bind:selected={viewStates.views.lookup.state} buttonText="Again!" tooltip="Toggle lookup panel." />
-    <ButtonSelect bind:selected={myOptions.viewOptions.unique} buttonText="Outline Unique Lexemes"/>
-    <ButtonSelect bind:selected={myOptions.viewOptions.identical} tooltip="Toggle Bold/underline setting for morphologically identical words." 
-            buttonText="Identical words"/>
-    <ButtonSelect buttonText="Highlight on Click" bind:selected={myOptions.viewOptions.highlightOnClick}/>
-    <ButtonSelect buttonText="Word Options" bind:selected={viewStates.views.words.state}/>  
-        {#if currentServer.abbrev==SblGntServer.abbrev}<label for="hide-app-check">Hide appart?</label>
-        <input name="hide-app-check" class="toggle" type="checkbox" bind:checked={myOptions.viewOptions.hideApp}/>
-        
-        {/if}       
-    <br/>
+    
     <hr/>
     <h2>Parallel NT Texts from {currentServer.name}:
         <CopyText icon={LinkSvg} 
@@ -748,6 +807,7 @@ $inspect(`refarea.0:'${refAreaInputs[0]}`);
     </h2>
     {#each texts as textGroup,i}
     <hr class=" m-1 p-1"/>
+    <div class="anchor" id="group-{i+1}">
     {#if texts.length > 1}<h3 class="font-bold underline">Group #{i+1}</h3>{/if}
     <ParallelTextSection parTextGroup={textGroup}  wordClick={toggleLex} 
                         cssClassDict={lexClasses}
@@ -756,6 +816,7 @@ $inspect(`refarea.0:'${refAreaInputs[0]}`);
                         showNotes={true} 
                         showNotesFunction={displayNote}
                         />
+    </div>
     {/each}
     
 

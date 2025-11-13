@@ -917,7 +917,34 @@ $inspect(`myOptions.nt:${myOptions.request.nt}`)
     Based on Kurt Aland's <i>Synopsis Quattuor Evangeliorum</i>, using <a href="https://www.sblgnt.com">The SBL Greek New Testament (2010)</a> or, optionally, Nestle's 1904 edition of the <i>Greek New Testament.</i><br/>
     Enter NT reference to view parallel texts and click "Look up!", or select a section and press "Go!"
 {/snippet}
+{#snippet resultsButtons(short=false)}
+    {#if !short}    
+       <li >
+        <ButtonSelect bind:selected={viewStates.views.lookup.state} buttonText="☰ Lookup" buttonStyle="btn"/>
+      </li>
+      {/if}
 
+      {#if alandPericopeNums && alandPericopeNums.length}
+      <li><ButtonSelect bind:selected={viewStates.views.view.state} buttonText="☰ View Options"/></li>
+
+     {#if dataReady}
+     
+       <li> <ButtonSelect buttonText="☰ Jump to ↓" bind:selected={viewStates.views.sections.state}/></li>       
+        <li><ButtonSelect bind:selected={viewStates.views.words.state} buttonText="☰ Words" /></li>
+        <li><ButtonSelect bind:selected={myOptions.viewOptions.highlightOnClick} buttonText="Auto Highlight" 
+            tooltipbottom={true}
+            tooltip="If enabled, clicking/tapping on a word will toggle highlighting of that lexeme. Press 'c' to toggle this option."/></li>    
+        {#if currentServer.abbrev==SblGntServer.abbrev}   
+        <li><label class="label" for="hide-app-check{short? '-short':''}">
+<input  class="toggle" id="hide-app-check{short? '-short':''}" type="checkbox" bind:checked={myOptions.viewOptions.hideApp}/>Hide appar{#if !short}aratus marks{:else}.{/if}</label>
+     </li>
+     {/if}
+ 
+         
+     {/if}
+      {/if}
+
+{/snippet}
 <div class="self-center text-center sticky top-3 bg-white z-10">
 
     {#if !landingPage}
@@ -927,112 +954,82 @@ $inspect(`myOptions.nt:${myOptions.request.nt}`)
             <span class="loading loading-spinner loading-xl"></span>
         {:else}
 
-
-
+  <div class="navbar bg-base-100 text-center  shadow-sm ">
+    <div class="navbar-start text-left max-w-full w-full m-auto md:hidden">
+        <div class="dropdown  text-left">
         
+        <div tabindex="0" role="button" class="btn btn-ghost lg:hidden">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16" /> </svg>
+        </div>
 
-
-        
-
-
-    <div class="navbar bg-base-100 text-center  shadow-sm ">
-  <div class="navbar-start text-left max-w-full w-full m-auto md:hidden">
-    <div class="dropdown  text-left">
-       
-      <div tabindex="0" role="button" class="btn btn-ghost lg:hidden">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16" /> </svg>
-      </div>
-      
-      <ul tabindex="0"
-            
+        <ul tabindex="0"
         class="menu  dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow text-left ">
+        {@render resultsButtons(true)}
+        <!-- 
 
-      {#if alandPericopeNums && alandPericopeNums.length}
-      <li><ButtonSelect bind:selected={viewStates.views.view.state} buttonText="☰ View Options"/></li>
+        {#if alandPericopeNums && alandPericopeNums.length}
+        <li><ButtonSelect bind:selected={viewStates.views.view.state} buttonText="☰ View Options"/></li>
 
-     {#if dataReady}
-     
-       <li> <ButtonSelect buttonText="☰ Jump to    ↓" bind:selected={viewStates.views.sections.state}/></li>       
-        <li><ButtonSelect bind:selected={viewStates.views.words.state} buttonText="☰ Words" /></li>
-        <li><ButtonSelect bind:selected={myOptions.viewOptions.highlightOnClick} buttonText="Auto Highlight" 
-            tooltipbottom={true}
-            tooltip="If enabled, clicking/tapping on a word will toggle highlighting of that lexeme. Press 'c' to toggle this option."/></li>
-         {#if currentServer.abbrev==SblGntServer.abbrev}   <li><label for="hide-app-check1">Hide apparatus marks</label>
-<input id="hide-app-check1" class="toggle" type="checkbox" bind:checked={myOptions.viewOptions.hideApp}/>
-     </li>{/if}
+        {#if dataReady}
         
+        <li> <ButtonSelect buttonText="☰ Jump to    ↓" bind:selected={viewStates.views.sections.state}/></li>       
+            <li><ButtonSelect bind:selected={viewStates.views.words.state} buttonText="☰ Words" /></li>
+            <li><ButtonSelect bind:selected={myOptions.viewOptions.highlightOnClick} buttonText="Auto Highlight" 
+                tooltipbottom={true}
+                tooltip="If enabled, clicking/tapping on a word will toggle highlighting of that lexeme. Press 'c' to toggle this option."/></li>
+            {#if currentServer.abbrev==SblGntServer.abbrev}   <li><label for="hide-app-check1">Hide apparatus marks</label>
+                <input id="hide-app-check1" class="toggle" type="checkbox" bind:checked={myOptions.viewOptions.hideApp}/>
+            </li>
+            {/if}
             
-        
-         
-     {/if}
-      {/if}
-
-      </ul>
+                
+            
+            
+        {/if}
+        {/if}
+    -->
+        </ul>
+        </div>
+        <div class="text-left ">
+        <h1 class="inline">
+            <a href="" data-sveltekit-reload><span class="hidden sm:inline">NT&nbsp;Synopsis</span>
+            <span class="sm:hidden inline">Synopsis</span></a>
+        </h1>    
+        <ul class="bg-white menu menu-horizontal ">
+            
+        <li><ButtonSelect buttonText="?" buttonStyle="btn btn-xs btn-circle btn-ghost p-0" bind:selected={viewStates.views.help.state}/>
+            </li>
+        <li >
+            <ButtonSelect bind:selected={viewStates.views.lookup.state} buttonText="" 
+            buttonStyle="btn btn-xs btn-circle btn-ghost p-0" >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3">
+    <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+    </svg>
+            </ButtonSelect>
+        </li></ul>
+        </div>
     </div>
-    <div class="text-left ">
-       <h1 class="inline">
-        <a href="" data-sveltekit-reload><span class="hidden sm:inline">NT&nbsp;Synopsis</span>
-        <span class="sm:hidden inline">Synopsis</span></a>
-       </h1>    
-     <ul class="bg-white menu menu-horizontal ">
-        
-       <li><ButtonSelect buttonText="?" buttonStyle="btn btn-xs btn-circle btn-ghost p-0" bind:selected={viewStates.views.help.state}/>
-        </li>
-      <li >
-        <ButtonSelect bind:selected={viewStates.views.lookup.state} buttonText="" 
-        buttonStyle="btn btn-xs btn-circle btn-ghost p-0" >
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3">
-  <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-</svg>
-        </ButtonSelect>
-      </li>
+    <div class="hidden md:navbar-center self-center m-auto">
+
+        <div class="text-center self-center border-0"> 
+            <div id="title-panel">
+                <h1 class="text-center inline"> 
+                <a href="/" data-sveltekit-reload><span class="hidden lg:inline">NT Gospel Synopsis Viewer</span>
+                <span class="lg:hidden inline">NT Synopsis</span></a>
+                </h1>&nbsp;
+                <ButtonSelect buttonText="?" buttonStyle="btn btn-xs btn-circle btn-ghost p-0" bind:selected={viewStates.views.help.state}/>
+            </div> 
+        <ul class="bg-white menu menu-horizontal ">
+            
+        {@render resultsButtons(false)}
+        </ul>
+        </div>
     </div>
-  </div>
-  <div class="hidden md:navbar-center self-center m-auto">
+    <div class="navbar-end hidden">
+    
 
 
-    <div class="text-center self-center border-0"> 
-        <div id="title-panel">
-        <h1 class="text-center inline"> 
-        <a href="/" data-sveltekit-reload><span class="hidden lg:inline">NT Gospel Synopsis Viewer</span>
-        <span class="lg:hidden inline">NT Synopsis</span></a>
-    </h1>&nbsp;
-       <ButtonSelect buttonText="?" buttonStyle="btn btn-xs btn-circle btn-ghost p-0" bind:selected={viewStates.views.help.state}/>
-    </div> 
-    <ul class="bg-white menu menu-horizontal ">
-        
-      <li >
-        <ButtonSelect bind:selected={viewStates.views.lookup.state} buttonText="☰ Lookup" buttonStyle="btn"/>
-      </li>
-
-      {#if alandPericopeNums && alandPericopeNums.length}
-      <li><ButtonSelect bind:selected={viewStates.views.view.state} buttonText="☰ View Options"/></li>
-
-     {#if dataReady}
-     
-       <li> <ButtonSelect buttonText="☰ Jump to section ↓" bind:selected={viewStates.views.sections.state}/></li>       
-        <li><ButtonSelect bind:selected={viewStates.views.words.state} buttonText="☰ Words" /></li>
-        <li><ButtonSelect bind:selected={myOptions.viewOptions.highlightOnClick} buttonText="Auto Highlight" 
-            tooltipbottom={true}
-            tooltip="If enabled, clicking/tapping on a word will toggle highlighting of that lexeme. Press 'c' to toggle this option."/></li>    
-        {#if myOptions.request.nt==SblGntServer.abbrev}   <li><label class="label" for="hide-app-check2">
-<input  class="toggle" id="hide-app-check2" type="checkbox" bind:checked={myOptions.viewOptions.hideApp}/>Hide apparatus marks</label>
-     </li>
-     {:else}
-     Not showing 'hide app' checkbox! whey? myops.request.nt={myOptions.request.nt}
-     {/if}
- 
-         
-     {/if}
-      {/if}
-    </ul>
     </div>
-  </div>
-  <div class="navbar-end hidden">
-   
-
-
-  </div>
     </div>
     {/if}
     {:else}
