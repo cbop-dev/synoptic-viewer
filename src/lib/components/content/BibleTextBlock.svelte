@@ -1,6 +1,6 @@
 <script>
     import {ParallelTextGroup, ParallelText, Word, TextAndRef,VerseWords,stripWord} from './parallelTexts.svelte.js';
-    
+    import { SynopsisOptions3 } from './SynopsisClasses.svelte.js';
     import { ColorUtils } from '$lib/utils/color-utils';
     import CopyText     from '../ui/CopyText.svelte';
     import { GreekUtils } from '$lib/utils/greek-utils';
@@ -12,7 +12,7 @@
      * 
      * @param {Word[]} words
      */
-    export function getText(words){
+    export function getText(words,hideApp=false){
         const phrase = words.reduce((a,b)=>a ? a +' '+b.word : b.word, '');
         return hideApp ? GreekUtils.removeApparatusMarks(phrase) : phrase;
     }
@@ -22,37 +22,35 @@
 * @type {{
 * textRef :  TextAndRef
 * parGroup:  ParallelTextGroup
-* showUnique:  boolean
 * numCols:  number
 * copyButton:  boolean 
 * cssWordClassDict:  Object<number,string>
 * cssWordCustomDict:  Object<string,string>
 * cssUniqueColor: string
 * showNotes:  boolean
-* showIdentical :  boolean
 * uniqueSet:  Set<number>
-* highlightOnClick :  boolean
+* options:SynopsisOptions3
 * notesClick:  function
 * wordClick:  function
-* hideApp:boolean
 * }} 
 */
 let {
         textRef,
         parGroup,
-        showUnique=false,
+        options=new SynopsisOptions3(),
+        //options.viewOptions.unique=false,
         numCols,
         copyButton=true,
-        showIdentical=false,
+        //options.viewOptions.identical=false,
         cssWordClassDict={},
         cssWordCustomDict={},
 //        cssUniqueColor="border-black",
         showNotes=true,
         uniqueSet=new Set(),
-        highlightOnClick=$bindable(false),
+        //options.viewOptions.highlightOnClick=$bindable(false),
         notesClick=()=>{},
         wordClick=()=>{},
-        hideApp=false,
+       // options.viewOptions.hideApp=false,
 }=$props();
 /**
  * 
@@ -107,7 +105,7 @@ let {
                     
                     <span class="bg-white/40 border-black/40 border-2 m-0 p-0 rounded-xl">
                     {#if copyButton}
-                        <CopyText getTextFunc={()=>getText(verseWords.words)}
+                        <CopyText getTextFunc={()=>getText(verseWords.words,options.viewOptions.hideApp)}
                         linkText={String(verseWords.verse)} 
                         showButton={false}
                         tooltip={'Copy verse '+verseWords.verse}/>
@@ -124,10 +122,10 @@ let {
                         
                         <span role="none"
                         class={["m-0", "word", "lex-"+word.id, 
-                            showUnique && uniqueSet && isUnique(word.id,uniqueSet) && "lex-unique", 
+                            options.viewOptions.unique && uniqueSet && isUnique(word.id,uniqueSet) && "lex-unique", 
                             wordCssClass, customClasses?.length ? customClasses[0] : '', "test", 
-                            showIdentical && wordCssClass && parGroup.matchingWords.includes(stripWord(word.word)) && 'underline font-bold'] } 
-                        onclick={()=>{if (highlightOnClick) wordClick(word.id);}}>{getText([word])}{'  '}</span>
+                            options.viewOptions.identical && wordCssClass && parGroup.matchingWords.includes(stripWord(word.word)) && 'underline font-bold'] } 
+                        onclick={()=>{if (options.viewOptions.highlightOnClick) wordClick(word.id)}}>{getText([word],options.viewOptions.hideApp)}{'  '}</span>
                     {/each}
                 {/each}
             {:else if textRef.text}

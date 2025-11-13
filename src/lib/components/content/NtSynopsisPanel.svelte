@@ -1,8 +1,8 @@
 <script>
-import { onMount } from 'svelte';
+import { onMount, untrack } from 'svelte';
 //import { generateURL } from './urlParams.js';
 import Footer from './Footer.svelte';
-import { SynopsisOptions, generateURL } from './SynopsisClasses.svelte';
+import { SynopsisOptions3} from './SynopsisClasses.svelte.js';
 import Icon from '../ui/icons/Icon.svelte';
 import LinkIcon from '../ui/icons/link-icon.svelte';
 import LinkSvg from  '../ui/icons/link.svg';
@@ -37,14 +37,22 @@ import { findNextAnchor,findPrevAnchor, getAnchors} from '$lib/utils/ui-utils';
 
 
 //import { generateHslColorGradient } from '../ui/chartUtils';
-
+   /**
+     * @type {{options:SynopsisOptions2,
+     * allowEverything:boolean,
+     * live:boolean,
+     * tfServer:TfServer}}
+     */
 let {
     allowEverything=false,
- 
     /**
-     * @type {SynopisOptions}
+     * keyboard event
     */
-    options=new SynopsisOptions(),
+    keyevent=null,
+    /**
+     * @type {SynopisOptions3} options
+    */
+    options=new SynopsisOptions3(),
     //viewOptions=new ViewOptions(),
     live=true,
     /**
@@ -52,8 +60,9 @@ let {
     */
     tfServer
 }=$props();
-
-let myOptions=$state(SynopsisOptions.makeFrom(options))
+//mylog("NTSynPanel: about to copy options")
+mylog(`typeof options: ${typeof options}`)
+let myOptions=$state(options.copy());
 
 let fetching = $state(false);
 let expecting = $state(0);
@@ -62,18 +71,18 @@ let ready = $derived(numReady >= expecting);
 let dataReady = $state(false);
 let showSectionLinks=$state(false);
 let showViewOptions=$state(false);
-let showUnique = $state(false);
-let showIdentical=$state(false);
+//let showUnique = $state(false);
+//let showIdentical=$state(false);
 let uniqueStyle = "lex-uniques";
-let hideSolos = $state(false);
-let hideNonPrimarySolos = $state(false);
-let showLexemeHighlights = $state(false);
+//let hideSolos = $state(false);
+//let hideNonPrimarySolos = $state(false);
+//let showLexemeHighlights = $state(false);
 let showLookupPanel = $state(true);
 // let showViewOptions = $state(false);
 //let landingPage=$state(true);
-let gotRequest = myOptions ? (myOptions.pericopes && myOptions.pericopes.length  
-    || myOptions.sections && myOptions.sections.length) : false;
-let landingPage = $state(!gotRequest);
+//let gotRequest = myOptions ? (myOptions.request.pericopes && myOptions.request.pericopes.length  
+  //  || myOptions.request.sections && myOptions.request.sections.length) : false;
+let landingPage = $state(!myOptions.request.fromURL);
 let requestProcessed = $state(false);
 
 
@@ -83,14 +92,14 @@ let maxLexesToShow=$state(30);
 /**
 * @type {number[]} selectedLexes
 */
-let selectedLexes=$state([]);
+let selectedLexes=$state(myOptions.viewOptions.lexes);
 
 /**
-* @type {string[]} selectedGreekStrings
+* @type {string[]} myOptions.viewOptions.greekStrings
 */
-let selectedGreekStrings=$state([]);
-
-let selectedGospelIndex =$state(0);
+//let myOptions.viewOptions.greekStrings=$state(myOptions);
+myOptions.viewOptions.greekStrings
+//let selectedGospelIndex =$state(0);
 const gospelOptions =[
 {value: '', name: "None", abbrev:""},
 {value: gospelParallels.gospels.names.MATTHEW, name: "Matthew", abbrev:"matt"},
@@ -102,22 +111,22 @@ const gospelOptions =[
 /**
  * @type {string} selectedGospel
  */
-let selectedGospel=$derived(gospelOptions[selectedGospelIndex].value);
-let hideNonPrimary = $state(true);
+let selectedGospel=$derived(gospelOptions[myOptions.viewOptions.selectedGospelIndex].value);
+//let hideNonPrimary = $state(true);
 //what is this for?
 let hideOthers = $state(false);
-let focusOn=$state(false);
+//let focusOn=$state(false);
 let focused=$derived.by(()=>{
     let retVal = '';
-    if (focusOn){
+    if (myOptions.viewOptions.focusOn){
         retVal = selectedGospel;
     }
     return retVal;
 });
 let sort = $state(false);
 
-let callSortFilter=$derived(hideSolos || (gospelParallels.gospels.isValid(selectedGospel)   &&
-( sort ||hideNonPrimary || focusOn|| hideNonPrimarySolos)));
+let callSortFilter=$derived(myOptions.viewOptions.hideSolos || (gospelParallels.gospels.isValid(selectedGospel)   &&
+( sort ||myOptions.viewOptions.hideNonPrimary || myOptions.viewOptions.focusOn|| myOptions.viewOptions.hideNonPrimarySolos)));
 
 /**
  * @description Array of pericopes groups, with refs for each gospel (matt,mark,luke,john,other),
@@ -188,10 +197,11 @@ function buildPericopeRefs(){
 
 }
 
+
     /**
  * @type {number[]} alandPericopes
  */
-let alandPericopeNums = $state([]);
+let alandPericopeNums = $state(myOptions.request.pericopes);
 
 let filteredPericopes=$derived.by(()=>{
     let alands= (alandPericopeNums ? [...alandPericopeNums] : []); //copy of alands for sorting/filtering...
@@ -201,10 +211,10 @@ let filteredPericopes=$derived.by(()=>{
             gospelParallels.sortAlandPericopes(alands,selectedGospel);
             // mylog("after sorting Alands: ["+alands.join(',')+"]",true);
         }
-        if (hideSolos || hideNonPrimary || hideNonPrimarySolos||focusOn) {
+        if (myOptions.viewOptions.hideSolos || myOptions.viewOptions.hideNonPrimary || myOptions.viewOptions.hideNonPrimarySolos||myOptions.viewOptions.focusOn) {
             //we need to filter:
-            alands = gospelParallels.filterAlandPericopes(alands,selectedGospel,focusOn || hideNonPrimary,hideSolos,
-            focusOn||hideNonPrimarySolos);
+            alands = gospelParallels.filterAlandPericopes(alands,selectedGospel,myOptions.viewOptions.focusOn || myOptions.viewOptions.hideNonPrimary,myOptions.viewOptions.hideSolos,
+            myOptions.viewOptions.focusOn||myOptions.viewOptions.hideNonPrimarySolos);
 
         }
         
@@ -258,9 +268,9 @@ let customGreekClasses= $derived.by(()=>{// id->css color (e.g., "#eee")
      * @type {Object<string,string>}
      */
     const ret = {}
-    if(selectedLexes && selectedGreekStrings.length) {
+    if(selectedLexes && myOptions.viewOptions.greekStrings.length) {
         //mylog("building lexClasses...",true)
-        for(const [relIndex,gk] of selectedGreekStrings.entries()) {
+        for(const [relIndex,gk] of myOptions.viewOptions.greekStrings.entries()) {
             const color = getColorOfGreek(gk);
             if (color) {
                 const index = selectedLexes.length+relIndex
@@ -411,14 +421,14 @@ function populateGroupsText(words=false){
 
 
 function resetViewOptions(lookup=false){
-    selectedGospelIndex =0;
-    sort = false;
+    myOptions.viewOptions.selectedGospelIndex =0;
+    myOptions.viewOptions.sort = false;
     viewStates.reset(lookup);
-    hideNonPrimary=false;
-    focusOn=false;
-    showUnique=false;
-    hideSolos=false;
-    hideNonPrimarySolos=false;
+    myOptions.viewOptions.hideNonPrimary=false;
+    myOptions.viewOptions.focusOn=false;
+    myOptions.viewOptions.unique=false;
+    myOptions.viewOptions.hideSolos=false;
+    myOptions.viewOptions.hideNonPrimarySolos=false;
     setServer();
     
     //  focus=selectedGospel[selectedGospelIndex].value;
@@ -438,17 +448,17 @@ function lookupShowNtParallels(){
 async function urlRequestShowNtParallels(){
 
     //resetViewOptions();
-    viewStates.reset(false,['view','lookup','words','highlightOnClick']);
+    viewStates.reset(false,['view','lookup','words']);
     //viewStates.views.highlightOnClick.state =false;
     let pericopes = new Set([]);
     
-    if (myOptions.pericopes) {
-        pericopes = new Set(myOptions.pericopes);
+    if (myOptions.request.pericopes) {
+        pericopes = new Set(myOptions.request.pericopes);
     }
     
-    if (myOptions.sections && myOptions.sections.length){
+    if (myOptions.request.sections && myOptions.request.sections.length){
         
-        myOptions.sections.forEach((s)=>{
+        myOptions.request.sections.forEach((s)=>{
             const secs = mathUtils.createNumArrayFromStringListRange(gospelParallels.alandSynopsis.lookupSection(s).pericopes);
             mylog("urlRequestShowNtParallels: got secs: " + secs?.join(','))
             pericopes = pericopes.union(new Set(secs));
@@ -481,8 +491,8 @@ function toggleViewOptionsModal(){
 function getColorOfGreek(greekString){
 
     let colorString = ''
-    if (selectedGreekStrings.includes(greekString)){
-        const selectedIndex = selectedLexes.length + selectedGreekStrings.indexOf(greekString)
+    if (myOptions.viewOptions.greekStrings.includes(greekString)){
+        const selectedIndex = selectedLexes.length + myOptions.viewOptions.greekStrings.indexOf(greekString)
         colorString += ' '+ ColorUtils.getCustomBgTextColorClasses(selectedIndex);
     }
     
@@ -515,14 +525,14 @@ function getLexClasses(id){
 }
 
 function emptySelectedCustomGreek(){
-    selectedGreekStrings.length = 0;
+    myOptions.viewOptions.greekStrings.length = 0;
 }
 
 function emptySelectedLexemes(){
     selectedLexes.length = 0;
 }
 function toggleLex(id){
-    // mylog("toggleLex("+id+")",true);
+//    mylog("toggleLex("+id+")");
     if(selectedLexes.includes(id)) {
         selectedLexes.splice(selectedLexes.indexOf(id),1);
 
@@ -539,13 +549,13 @@ function toggleLex(id){
  * @param {string} string
  */
 function toggleGreekString(string){
-    if(selectedGreekStrings.includes(string)) {
-        selectedGreekStrings.splice(selectedGreekStrings.indexOf(string),1);
+    if(myOptions.viewOptions.greekStrings.includes(string)) {
+        myOptions.viewOptions.greekStrings.splice(myOptions.viewOptions.greekStrings.indexOf(string),1);
 
     }
     else {
         
-        selectedGreekStrings.push(string);
+        myOptions.viewOptions.greekStrings.push(string);
 
     }
 
@@ -571,24 +581,36 @@ function displayNote(heading,note) {
     theNote.footer=currentServer.getNoteFooter();
     viewStates.views.notes.state = true;
 }
+
+const hotkeys=[
+    {key: 'n', name:'Next Section',function: jumpToNextSection},
+    {key:'p',name:'Previous Section',function: jumpToPrevSection},
+    {key:'t',name:'Top/First Section',function: jumpToFirstSection},
+    {key:'b',name:'Bottom/Last Section',function: jumpToLastSection},
+    {key:'c',name:'Highlight on Click',function: ()=>{myOptions.viewOptions.highlightOnClick =!myOptions.viewOptions.highlightOnClick}},
+    {key:'u',name:'Unique Lexemes',function: ()=>{myOptions.viewOptions.unique =!myOptions.viewOptions.unique}},
+    {key:'m',name:'Identical Words',function: ()=>{myOptions.viewOptions.identical =!myOptions.viewOptions.identical}},
+        
+];
+
 const viewStates=$state({
     views:{
         
-        highlightOnClick: { description:  "Enable/disable highlight on click.", hotkeys:['c'], state: myOptions.highlightOnClick,modal:false},
-        unique: { description:  "Toggle Unique Lexeme color outlining", hotkeys:['u'], state: myOptions.unique,modal:false},
-        identical: { description:  "Show (bold & underline) morphologically identical words shared by different gospels in a parallel group ",
-            hotkeys:['m'], state:myOptions.identical,modal:false},
-
+        //highlightOnClick: { description:  "Enable/disable highlight on click.", hotkeys:['c'], state: myOptions.viewOptions.highlightOnClick,modal:false},
+        //unique: { description:  "Toggle Unique Lexeme color outlining", hotkeys:['u'], state: myOptions.viewOptions.unique,modal:false},
+       // identical: { description:  "Show (bold & underline) morphologically identical words shared by different gospels in a parallel group ",
+         //   hotkeys:['m'], state:myOptions.viewOptions.identical,modal:false},
         sections: { description:  "Jump to a section", hotkeys:['j'], state:false,modal:true},
         view: { description:  "View Options", hotkeys:['v'], state:false,modal:true},
         lookup: { description:  "Lookup passage(s) or select section", hotkeys:['l', 's'], state:false,modal:false},
         words: {description:  "Lexeme/Word Options", hotkeys:['w'], state:false,modal:true},
-        info: { description:  "Website and project information.", hotkeys:['i'], state:false,modal:true},
+      //  info: { description:  "Website and project information.", hotkeys:['i'], state:false,modal:true},
         help: { description:  "Show help menu", hotkeys:['h', '?'], state:false,modal:true},
         notes:{description: "Notes on the text",state:false,modal:true}
         
             
     },
+    
 
     
     /**
@@ -612,7 +634,7 @@ const viewStates=$state({
         let retVal = '';
         const matchingViews = Object.entries(this.views)
             .filter(([name,obj])=>obj.hotkeys?.includes(key))
-            .map(([k,v])=>k);this
+            .map(([k,v])=>k);
         if (matchingViews.length > 0){
             retVal = matchingViews[0]
         }
@@ -665,11 +687,18 @@ const viewStates=$state({
 });
 
 
+/*
+$effect(()=>{
+    myOptions.viewOptions.highlightOnClick = viewStates.views.highlightOnClick.state;
+    myOptions.viewOptions.unique = viewStates.views.unique.state;
+    myOptions.viewOptions.identical = viewStates.views.identical.state;
+})*/
+
 function makeURL(){
-    let opt = new SynopsisOptions(viewStates.views.unique.state,viewStates.views.identical.state,
+    /*let opt = new SynopsisOptions(viewStates.views.unique.state,viewStates.views.identical.state,
         viewStates.views.highlightOnClick.state,selectedLexes);
     opt.focusOn=focusOn;
-    opt.greekStrings=selectedGreekStrings;
+    opt.greekStrings=myOptions.viewOptions.greekStrings;
     opt.hideSolos=hideSolos;
     opt.hideNonPrimarySolos=hideNonPrimarySolos;
     opt.hideNonPrimary=hideNonPrimary;
@@ -679,9 +708,11 @@ function makeURL(){
     opt.unique=viewStates.views.unique.state;
     opt.identical=viewStates.views.identical.state;
     opt.focusOn=focusOn;
-    opt.nt=currentServer.param;
-    let url = generateURL(opt)
-    return url;
+    opt.nt=currentServer.param;*/
+    myOptions.request.pericopes=alandPericopeNums;
+//    mylog("MakeURL: about to call generateURL()!")
+    const baseurl = window.location.protocol  + "//" + window.location.host + "/";
+    return baseurl + myOptions.generateURI();
 }
 
 function jumpToPrevSection(){
@@ -718,17 +749,13 @@ function jumpToNextSection(){
     }
 }
 
-const hotkeys=[
-    {key: 'n', name:'Next Section',function: jumpToNextSection},
-    {key:'p',name:'Previous Section',function: jumpToPrevSection},
-    {key:'t',name:'Top/First Section',function: jumpToFirstSection},
-    {key:'b',name:'Bottom/Last Section',function: jumpToLastSection},
-        
-];
+
 function onkeydown(event){
-    //mylog("NTSyPanel.onkeydown! event: ")
-    //mylog(event);
+//    mylog("NTSyPanel.onkeydown! event: ");
+    mylog(event);
     if(live && !textAreaFocused ){
+
+
         const matchedView=viewStates.getViewNameFromKey(event.key);
         const modalVisibles=viewStates.getVisible().filter((name)=>(viewStates.views[name].modal)); 
         if (matchedView) {
@@ -748,6 +775,9 @@ function onkeydown(event){
         }
             
     }
+    else{
+//        mylog("onkey: text area focused. Doing nothing!")
+    }
 }
 
 
@@ -764,6 +794,13 @@ const wordTabs=['lexemes','custom'];
 let selectedWordTabIndex=$state(0);
 
 let customGreekInputText = $state('');
+
+$effect(()=>{
+    if (keyevent){
+
+        untrack(()=> onkeydown(keyevent));
+    }
+})
 $effect(()=>{customGreekInputText=GreekUtils.removeDiacritics(
      GreekUtils.beta2Greek(customGreekInputText),true,true).replaceAll('σ ','ς ');
 });
@@ -773,6 +810,7 @@ $effect(()=>{customGreekInputText=GreekUtils.removeDiacritics(
 
 function loadRequestOptions(){
     mylog("loadRequestOptions...")
+    /*
     if(Object.hasOwn(myOptions,"hideSolos")) {mylog("hideSolos =myOptions.hideSolos;"); hideSolos =myOptions.hideSolos;}
     if(Object.hasOwn(myOptions,"sort")) {mylog("sort =myOptions.sort;"); sort=myOptions.sort;}
     if(Object.hasOwn(myOptions,"hideNonPrimary")) {mylog("hideNonPrimary=myOptions.hideNonPrimary;"); hideNonPrimary=myOptions.hideNonPrimary;}
@@ -782,11 +820,12 @@ function loadRequestOptions(){
     if(Object.hasOwn(myOptions,"identical")) {mylog("viewStates.views.identical=myOptions.identical;"); viewStates.views.identical.state=myOptions.identical;}
     if(Object.hasOwn(myOptions,"selectedGospelIndex")) {mylog("selectedGospelIndex=myOptions.selectedGospelIndex;"); selectedGospelIndex=myOptions.selectedGospelIndex;}
     if(Object.hasOwn(myOptions,"lexes")) {mylog("got lexes param!"); selectedLexes=myOptions.lexes}
-    if(Object.hasOwn(myOptions,"greekStrings")) {mylog("got greekSrings!"); selectedGreekStrings=myOptions.greekStrings}
+    if(Object.hasOwn(myOptions,"greekStrings")) {mylog("got greekSrings!"); myOptions.viewOptions.greekStrings=myOptions.greekStrings}*/
 }
 let mounted=$state(false);
 onMount(() => {
-    if (gotRequest){
+    if (myOptions.request.fromURL){
+//        mylog("NTSynPanel got url params. Let's make a request!")
         landingPage=false;
         viewStates.views.lookup.state=false;
         loadRequestOptions();
@@ -804,9 +843,9 @@ onMount(() => {
 //$inspect("request:", myOptions);
 //$inspect("gotRequest:",gotRequest);
 //$inspect("Landing?:", landingPage);
-$inspect(`myOptions.hideApp: ${myOptions.hideApp}`);
-$inspect(`myOptions.nt: ${myOptions.nt}`);
-$inspect(`myOptions.nt:${myOptions.nt}`)
+$inspect(`myOptions.hideApp: ${myOptions.viewOptions.hideApp}`);
+$inspect(`myOptions.nt: ${myOptions.request.nt}`);
+$inspect(`myOptions.nt:${myOptions.request.nt}`)
 </script>
 <style>
     @reference "tailwindcss";
@@ -865,8 +904,6 @@ $inspect(`myOptions.nt:${myOptions.nt}`)
 
 
 </style>
-<svelte:window onkeydown={onkeydown}/>
-
 {#snippet appTitle(headingTag="h1")}
     <svelte:element this={headingTag}>NT Gospel Synopsis Viewer</svelte:element> 
 {/snippet}
@@ -884,7 +921,7 @@ $inspect(`myOptions.nt:${myOptions.nt}`)
 <div class="self-center text-center sticky top-3 bg-white z-10">
 
     {#if !landingPage}
-        {#if gotRequest && !requestProcessed}
+        {#if myOptions.request.fromURL && !requestProcessed}
             
             <h3><i>Processing Request...</i></h3>
             <span class="loading loading-spinner loading-xl"></span>
@@ -917,11 +954,11 @@ $inspect(`myOptions.nt:${myOptions.nt}`)
      
        <li> <ButtonSelect buttonText="☰ Jump to    ↓" bind:selected={viewStates.views.sections.state}/></li>       
         <li><ButtonSelect bind:selected={viewStates.views.words.state} buttonText="☰ Words" /></li>
-        <li><ButtonSelect bind:selected={viewStates.views.highlightOnClick.state} buttonText="Auto Highlight" 
+        <li><ButtonSelect bind:selected={myOptions.viewOptions.highlightOnClick} buttonText="Auto Highlight" 
             tooltipbottom={true}
             tooltip="If enabled, clicking/tapping on a word will toggle highlighting of that lexeme. Press 'c' to toggle this option."/></li>
-         {#if myOptions.nt==SblGntServer.abbrev}   <li><label for="hide-app-check1">Hide apparatus marks</label>
-<input id="hide-app-check1" class="toggle" type="checkbox" bind:checked={myOptions.hideApp}/>
+         {#if currentServer.abbrev==SblGntServer.abbrev}   <li><label for="hide-app-check1">Hide apparatus marks</label>
+<input id="hide-app-check1" class="toggle" type="checkbox" bind:checked={myOptions.viewOptions.hideApp}/>
      </li>{/if}
         
             
@@ -975,12 +1012,15 @@ $inspect(`myOptions.nt:${myOptions.nt}`)
      
        <li> <ButtonSelect buttonText="☰ Jump to section ↓" bind:selected={viewStates.views.sections.state}/></li>       
         <li><ButtonSelect bind:selected={viewStates.views.words.state} buttonText="☰ Words" /></li>
-        <li><ButtonSelect bind:selected={viewStates.views.highlightOnClick.state} buttonText="Auto Highlight" 
+        <li><ButtonSelect bind:selected={myOptions.viewOptions.highlightOnClick} buttonText="Auto Highlight" 
             tooltipbottom={true}
             tooltip="If enabled, clicking/tapping on a word will toggle highlighting of that lexeme. Press 'c' to toggle this option."/></li>    
-        {#if myOptions.nt==SblGntServer.abbrev}   <li><label class="label" for="hide-app-check2">
-<input  class="toggle" id="hide-app-check2" type="checkbox" bind:checked={myOptions.hideApp}/>Hide apparatus marks</label>
-     </li>{/if}
+        {#if myOptions.request.nt==SblGntServer.abbrev}   <li><label class="label" for="hide-app-check2">
+<input  class="toggle" id="hide-app-check2" type="checkbox" bind:checked={myOptions.viewOptions.hideApp}/>Hide apparatus marks</label>
+     </li>
+     {:else}
+     Not showing 'hide app' checkbox! whey? myops.request.nt={myOptions.request.nt}
+     {/if}
  
          
      {/if}
@@ -1060,11 +1100,11 @@ $inspect(`myOptions.nt:${myOptions.nt}`)
    
     {#if alandPericopeNums.length}
          <h1 class="text-center">Results from {currentServer.name}:
-            <CopyText icon={LinkSvg} 
-            copyText={makeURL()} 
+            {#key myOptions.viewOptions}<CopyText icon={LinkSvg} 
+            getTextFunc={makeURL} 
             tooltip='Copy stuff'
             
-            /></h1>
+            />{/key}</h1>
         
 
     <div id="results">
@@ -1093,21 +1133,19 @@ $inspect(`myOptions.nt:${myOptions.nt}`)
             
                 <br class="break-all"/>
                 <div>
-                    <ParallelGospelSection parGroup={group} focus={focused}
-                    wordClick={toggleLex} showUnique={viewStates.views.unique.state} 
+                    <ParallelGospelSection parGroup={group} options={myOptions} focus={focused}
+                    wordClick={toggleLex}
                     cssClassDict={lexClasses}
                     cssCustomDict={customGreekClasses}
-                    showIdentical={viewStates.views.identical.state}
-                    highlightOnClick={viewStates.views.highlightOnClick.state} 
                     showNotes={currentServer.showNotes}
                     showNotesFunction={displayNote}
-                    hideApp={myOptions.hideApp}
+                    
                     />
                 </div>
                     
                 {/each}
             {:else}
-                (No results. Try <a href="" data-sveltekit-reload>another search</a>{#if hideNonPrimary || focusOn || hideSolos }, 
+                (No results. Try <a href="" data-sveltekit-reload>another search</a>{#if myOptions.viewOptions.hideNonPrimary || myOptions.viewOptions.focusOn || myOptions.viewOptions.hideSolos }, 
                 or change the <a href="" onclick={()=>{viewStates.toggle('view')}}>View Options</a>{/if}.)
             {/if}
         {:else}
@@ -1145,18 +1183,121 @@ $inspect(`myOptions.nt:${myOptions.nt}`)
 </Modal2>
 {/if}
 
+
+<Modal2 bind:showModal={viewStates.views.view.state}>
+    <div class="text-center">
+     <h2>Select Primary Gospel for Viewing:</h2>
+                <select bind:value={myOptions.viewOptions.selectedGospelIndex}>
+                {#each gospelOptions as option, index}
+                <option value={index}>{option.name}</option>
+                {/each}
+                </select>
+           <hr/>
+           <h2>Sort, Filter, and/or Focus:</h2>
+           <i>(Based on selected primary Gospel.)</i><br/>
+            <ButtonSelect bind:selected={myOptions.viewOptions.sort} disable={!gospelParallels.gospels.isValid(selectedGospel)} 
+            buttonText="Sort" tooltip="Sort according to the selected gospel's order."/> 
+            <ButtonSelect bind:selected={myOptions.viewOptions.hideNonPrimary} 
+            disable={myOptions.viewOptions.focusOn || !gospelParallels.gospels.isValid(selectedGospel)} 
+            buttonText="Isolate" tooltip="Hide all Aland's sections which do not include the selected gospel or which contain seconary duplicates of it."/>
+            <ButtonSelect bind:selected={myOptions.viewOptions.focusOn} disable={!gospelParallels.gospels.isValid(selectedGospel)} 
+            buttonText="Focus!" tooltip="Focus on the selected gospel, making it more visibled, and removing any sections which do not contain it or contain secondary duplicates."/>
+            <ButtonSelect 
+            disable={!gospelParallels.gospels.isValid(selectedGospel) || (myOptions.viewOptions.focusOn||myOptions.viewOptions.hideNonPrimary)} 
+            bind:selected={myOptions.viewOptions.hideNonPrimarySolos} 
+           buttonText="Hide Non-Primary Solos" 
+           tooltip="Hide all sections that have only one column but which is not the selected gospel."/>
+    <br/>
+            <ButtonSelect bind:selected={myOptions.viewOptions.hideSolos} buttonText="Hide All Solos" 
+            tooltip="Hide ALL sections that have only one gospel column."/>
+           
+
+        <hr class="mt-1 mb-1"/>
+        <Button onclick={resetViewOptions} buttonText="Reset All"/>
+</div>
+        </Modal2>
+
+<!--<Modal2 bind:showModal={viewStates.views.info.state}>
+    <div class="text-left m-auto inline">
+        {@render appSummary()}
+        <hr/>
+        <Footer/>
+    </div>
+    <div class="btn-sm"></div>
+</Modal2>-->
+<Modal2 bind:showModal={viewStates.views.help.state} title="Help">
+    
+    <div class="m-auto  items-center text-center ">
+    <h2>Synopsis View</h2>
+    On landing page, enter NT reference to view parallel texts and click "Look up!", or select a section and press "Go!"    
+   <hr class="m-5 mb-3"/>
+
+        <h2 class="underline">Results Options: Unique and Identical Words</h2>
+             <div class=" m-auto inline-block text-left">
+                <ul class="list-disc ml-9">
+                    <li>Enabling <b>"Outline Unique Lexemes"</b> will draw <span class="outline outline-blue-400">an outline</span> (one color per gospel) around each lexeme that is unique to a specific gospel, i.e., that shows up in only one column of a single parallel group.</li>
+                    <li>Enabling <b>"Identical words"</b> will <span class="font-bold underline">bold and underline</span> all morphologically identical words shared by at least two gospels in the same parallel group </li>
+                    <li>Enabling <b>"Highlight Lexeme on Click"</b> will toggle <span class="bg-cyan-500 text-white">highlighting</span> of all instances of the lexeme.</li>
+                </ul>
+    
+            </div>
+   
+ <hr class="m-5"/>
+    <h2 class="inline text-center ">Hotkeys: <i>The keyboard is your friend!</i></h2>
+    
+    <table class="table-auto self-center m-auto text-left "><tbody>
+        <tr class="border-0  border-b border-collapse border-gray-200" ><th>Key</th><th>Function</th></tr>
+            <tr><td class="p-2">[i]</td><td class="p-2">Website and project nfo</td>
+    </tr>
+{#each Object.entries(viewStates.views) as [theViewName,theViewObj]}
+    {#if theViewObj.hotkeys && theViewObj.hotkeys.length}
+    <tr>
+        <td class="p-2">{theViewObj.hotkeys.map((k)=>"["+k+"]").join(",")} </td>
+        <td class="p-2">{theViewObj.description}</td>
+    </tr>
+    {/if}
+{/each}
+{#each hotkeys as hk}
+    <tr>
+        <td class="p-2">[{hk.key}] </td>
+        <td class="p-2">{hk.name}</td>
+    </tr>
+{/each}
+</tbody>
+    </table>
+    </div>
+
+</Modal2>
+
+<Modal2 bind:showModal={viewStates.views.notes.state} title="Notes" onclose={()=>{theNote.heading=''; theNote.note=''}}>
+    <h2>{theNote.heading}</h2>
+    <ul>
+
+    {#each theNote.note.split("\n") as line}
+    <li>{line}</li>
+    {/each}
+
+    </ul>
+
+    <hr/>
+    <span class="italic text-xs/0">{theNote.footer}</span>
+</Modal2>
+
+
 <Modal2 bind:showModal={viewStates.views.words.state}>
 
     
 
     <div class="max-w-full block text-center">
                 <h3>Highlight Features:</h3>
-            <ButtonSelect bind:selected={viewStates.views.unique.state} buttonText="Outline Unique Lexemes"/>
+            <ButtonSelect bind:selected={myOptions.viewOptions.unique} buttonText="Outline Unique Lexemes"/>
             
-            <ButtonSelect bind:selected={viewStates.views.identical.state} tooltip="Toggle Bold/underline setting for morphologically identical words." 
+            <ButtonSelect bind:selected={myOptions.viewOptions.identical} tooltip="Toggle Bold/underline setting for morphologically identical words." 
             buttonText="Identical words"/>
-            <ButtonSelect bind:selected={viewStates.views.highlightOnClick.state} buttonText="Highlight Lexeme on click" tooltip="If enabled, clicking/tapping on a word will toggle highlighting of that lexeme."/>
-            
+            <ButtonSelect bind:selected={myOptions.viewOptions.highlightOnClick} 
+            buttonText="Highlight Lexeme on click" 
+            tooltip="If enabled, clicking/tapping on a word will toggle highlighting of that lexeme."/>
+    
         <ButtonSelect buttonStyle="btn btn-neutral btn-outline btn-circle btn-xs p-0 m-0"
             buttonText="?"
             bind:selected={showLexOptionsInfo}/>
@@ -1280,12 +1421,12 @@ $inspect(`myOptions.nt:${myOptions.nt}`)
                 <Button onclick={()=>toggleGreekString(customGreekInputText)} buttonText='Toggle'/>
                 <Button onclick={()=>{customGreekInputText=''}} buttonText="Clear Input" buttonStyle='btn btn-ghost btn-md'/>
             
-            {#if selectedGreekStrings.length}
+            {#if myOptions.viewOptions.greekStrings.length}
             
                 <h2>Selected Custom Greek Word Forms:</h2>
                 <i>Click on any word-form to remove it.</i>
                 <br/>
-                {#each selectedGreekStrings as gk}
+                {#each myOptions.viewOptions.greekStrings as gk}
                 <Button onclick={()=>toggleGreekString(gk)} buttonText={gk} buttonColors={getColorOfGreek(gk)} buttonType=''/> 
                 {/each}<br/>
                 <Button onclick={emptySelectedCustomGreek}  buttonText="Clear All"/>
@@ -1298,90 +1439,4 @@ $inspect(`myOptions.nt:${myOptions.nt}`)
             </div>
 
     </div>
-</Modal2>
-
-<Modal2 bind:showModal={viewStates.views.view.state}>
-    <div class="text-center">
-     <h2>Select Primary Gospel for Viewing:</h2>
-                <select bind:value={selectedGospelIndex}>
-                {#each gospelOptions as option, index}
-                <option value={index}>{option.name}</option>
-                {/each}
-                </select>
-           <hr/>
-           <h2>Sort, Filter, and/or Focus:</h2>
-           <i>(Based on selected primary Gospel.)</i><br/>
-            <ButtonSelect bind:selected={sort} disable={!gospelParallels.gospels.isValid(selectedGospel)} 
-            buttonText="Sort" tooltip="Sort according to the selected gospel's order."/> 
-            <ButtonSelect bind:selected={hideNonPrimary} 
-            disable={focusOn || !gospelParallels.gospels.isValid(selectedGospel)} 
-            buttonText="Isolate" tooltip="Hide all Aland's sections which do not include the selected gospel or which contain seconary duplicates of it."/>
-            <ButtonSelect bind:selected={focusOn} disable={!gospelParallels.gospels.isValid(selectedGospel)} 
-            buttonText="Focus!" tooltip="Focus on the selected gospel, making it more visibled, and removing any sections which do not contain it or contain secondary duplicates."/>
-            <ButtonSelect 
-            disable={!gospelParallels.gospels.isValid(selectedGospel) || (focusOn||hideNonPrimary)} 
-            bind:selected={hideNonPrimarySolos} 
-           buttonText="Hide Non-Primary Solos" 
-           tooltip="Hide all sections that have only one column but which is not the selected gospel."/>
-    <br/>
-            <ButtonSelect bind:selected={hideSolos} buttonText="Hide All Solos" 
-            tooltip="Hide ALL sections that have only one gospel column."/>
-           
-
-        <hr class="mt-1 mb-1"/>
-        <Button onclick={resetViewOptions} buttonText="Reset All"/>
-</div>
-        </Modal2>
-
-<Modal2 bind:showModal={viewStates.views.info.state}>
-    <div class="text-left m-auto inline">
-        {@render appSummary()}
-        <hr/>
-        <Footer/>
-    </div>
-    <div class="btn-sm"></div>
-</Modal2>
-<Modal2 bind:showModal={viewStates.views.help.state} title="Help">
-    
-    <div class="m-auto  items-center text-center ">
-    <h2>Synopsis View</h2>
-    On landing page, enter NT reference to view parallel texts and click "Look up!", or select a section and press "Go!"    
-    <hr/>
-
-    <h2 class="inline text-center ">Hotkeys: <i>The keyboard is your friend!</i></h2>
-    
-    <table class="table-auto self-center m-auto text-left "><tbody>
-        <tr class="border-0  border-b border-collapse border-gray-200" ><th>Key</th><th>Function</th></tr>
-{#each Object.entries(viewStates.views) as [theViewName,theViewObj]}
-    {#if theViewObj.hotkeys && theViewObj.hotkeys.length}
-    <tr>
-        <td class="p-2">{theViewObj.hotkeys.map((k)=>"["+k+"]").join(",")} </td>
-        <td class="p-2">{theViewObj.description}</td>
-    </tr>
-    {/if}
-{/each}
-{#each hotkeys as hk}
-    <tr>
-        <td class="p-2">[{hk.key}] </td>
-        <td class="p-2">{hk.name}</td>
-    </tr>
-{/each}
-</tbody>
-    </table>
-    </div>
-
-</Modal2>
-
-<Modal2 bind:showModal={viewStates.views.notes.state} title="Notes" onclose={()=>{theNote.heading=''; theNote.note=''}}>
-    <h2>{theNote.heading}</h2>
-    <ul>
-
-    {#each theNote.note.split("\n") as line}
-    <li>{line}</li>
-    {/each}
-
-    </ul>
-
-    <hr/>
-    <span class="italic text-xs/0">{theNote.footer}</span>
 </Modal2>

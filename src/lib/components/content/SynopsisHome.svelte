@@ -1,7 +1,7 @@
 <script>
 	import NtSynopsisPanel from './NtSynopsisPanel.svelte';
     import CustomParallelViewer from './CustomParallelViewer.svelte';
-	import { SynopsisOptions,getRequestParamsObj,generateURL } from './SynopsisClasses.svelte.js';
+	import { SynopsisOptions3 } from './SynopsisClasses.svelte.js';
 	import { mylog } from '$lib/env/env';
     import {getServer, sbl as sblServer, n1904 as n1904Server} from '$lib/tf/tfServer.js'
     import { N1904Server } from '$lib/n1904/tfN1904';
@@ -18,8 +18,12 @@
     let y = $state();
     let windowHeight=$state();
     let contentHeight = $state();
+
+    /**
+     * @type {{options:SynopsisOptions3}}
+     */
     let {
-        options=new SynopsisOptions(),
+        options=new SynopsisOptions3(),
     } = $props();
 
     mylog("<SynopHome> options:");
@@ -43,7 +47,7 @@
 
     }
 
-    let currentServerName = $state(myServers.lookup(options.nt) ? options.nt : myServers.list[0].abbrev);
+    let currentServerName = $state(myServers.lookup(options.request.nt) ? options.request.nt : myServers.list[0].abbrev);
   //  let serverUserSelectField = $state(currentServerName);
     
     
@@ -60,8 +64,28 @@
        {name:'Custom', 
        comp: CustomParallelViewer}
     ]
-    let selectedPane=$state(options.tab && parseInt(options.tab) ? parseInt(options.tab) : 0);
+
+    const hotkeys={
+        'i':()=>{showInfoModal=!showInfoModal}
+    }
+    let selectedPane=$state(options.request.tab ? options.request.tab : 0);
     
+    let keyEvents=$state([null,null])
+
+    function onkeydown(event){
+        if(enableKeys) {
+                    const key=event.key;
+            if(Object.keys(hotkeys).includes(key)){
+                hotkeys[key]();
+            }
+            else if(selectedPane >= 0 && selectedPane < keyEvents.length){
+                keyEvents[selectedPane]=event;
+            }
+        }
+
+    }
+
+    let enableKeys=$state(true);
     /**
      * @param {number} index 
     */
@@ -71,6 +95,7 @@
             currentServerName=serverUserSelectField;
         }
     }*/
+   $inspect(`options: typeof='${typeof options}'; viewOptions.keys=['${Object.keys(options.viewOptions).join("','")}']`)
 </script>
 <style>
      @reference "tailwindcss";
@@ -100,7 +125,7 @@
     
     Based on Kurt Aland's <i>Synopsis Quattuor Evangeliorum</i>, using <a href="https://www.sblgnt.com">The SBL Greek New Testament (2010)</a> or, optionally, Nestle's 1904 edition of the <i>Greek New Testament.</i>
 {/snippet}
-<svelte:window bind:scrollY={y} bind:innerHeight={windowHeight}/>
+<svelte:window bind:scrollY={y} bind:innerHeight={windowHeight} onkeydown={onkeydown}/>
 
 <div class="relative" bind:clientHeight={contentHeight}>
     <div class="sticky block top-0 z-100 bg-white/70 text-center" bind:clientHeight={headerHeight}>
@@ -123,18 +148,21 @@
         </div>
         <div class="inline-block text-center">
             <ButtonSelect buttonText="i" 
-       buttonStyle="btn btn-xs  btn-circle btn-ghost  p-0" bind:selected={showInfoModal}/>
-
+       buttonStyle="btn btn-xs  btn-circle btn-ghost  p-0" bind:selected={showInfoModal} tooltip="Show site info" tooltipbottom={true}/>
+            <ButtonSelect buttonStyle="btn btn-xs rounded   btn-square btn-ghost  p-1" 
+            bind:selected={enableKeys} buttonText="k" tooltip="Enable/disable hotkeys" tooltipbottom={true}/>
+                
+            
         </div>
     
     </div>
     
-    <div class="clear-right block">
+    <div class="clear-right block btn-square">
     {#each panes as pane, index}
 
     <div id="pane-{pane.name}" class={index==selectedPane ? 'block' : 'hidden'}>
         
-            <pane.comp options={options} live={index==selectedPane} tfServer={tfServer}/>
+            <pane.comp options={options} live={index==selectedPane} tfServer={tfServer} keyevent={keyEvents[index]}/>
         
     </div>
     {/each}

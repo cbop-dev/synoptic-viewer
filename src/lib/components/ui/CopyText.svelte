@@ -1,6 +1,7 @@
 <script>
     import copyIcon from '$lib/components/ui/icons/copy.svg'
     import Icon from './icons/Icon.svelte';
+    import { mylog } from '$lib/env/env';
     let {
         copyText='',
         getTextFunc=null,
@@ -15,8 +16,10 @@
 
     function copyToClipboard(){
         let theText=copyText;
-        if (getTextFunc)
+        if (getTextFunc) {
             theText=getTextFunc();
+//            mylog("called getTextFunc()!")
+        }
         navigator.clipboard.writeText(theText);
     }
 </script>

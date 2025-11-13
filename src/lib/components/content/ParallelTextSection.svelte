@@ -49,6 +49,7 @@
     import Button from '../ui/Button.svelte';
     import BibleTextBlock from './BibleTextBlock.svelte';
     import { ParallelTextGroup } from './parallelTexts.svelte';
+    import { SynopsisOptions3 } from './SynopsisClasses.svelte';
     
    
     
@@ -57,11 +58,10 @@
     /**
      * @type {{parTextGroup: ParallelTextGroup,
      * wordClick:function(number):void,
-     * showIdentical:boolean,
      * cssClassDict:Object<number,string>,
      * cssCustomDict:Object,
      * showUnique:boolean,
-     * highlightOnClick:boolean,
+     * options:SynopsisOptions3,
      * showNotes:boolean,
      * hideApp:boolean
      * showNotesFunction(heading:string,note:string):void
@@ -69,14 +69,15 @@
      */
     let {
         parTextGroup = new ParallelTextGroup(),
-        showUnique=false,
-        showIdentical=true,
+        options=new SynopsisOptions3(),
+        //showUnique=false,
+        //options.viewOptions.showIdentical=true,
         wordClick=(id)=>{},
         cssClassDict={},
         cssCustomDict={},
-        highlightOnClick=true,
+        //options.viewOptions.highlightOnClick=true,
         showNotes=true,
-        hideApp=false,
+        //hideApp=false,
         showNotesFunction=(heading,note)=>{alert(heading+"\n"+note)}
         
     } = $props();
@@ -103,6 +104,8 @@ function notesClick(heading,note){
 //$inspect("ParTexts, focus:", focus)
 //$inspect("numCols", numCols, "colData:", colData)
 //$inspect("ParText, customClass", cssCustomDict);
+$inspect(`options.unique: ${options.viewOptions.unique}`);
+
 </script>
 
 
@@ -126,15 +129,15 @@ function notesClick(heading,note){
                 
                 {#each col.textRefs as textRef, index2}
                 
-                {@const unique = (showUnique && numCols > 1)? col.unique : new Set()}
-               
+                {@const unique = (options.viewOptions.unique && numCols > 1)? col.unique : new Set()}
+                
                
                     {#if index2 > 0}<br/>{/if}
                     <div class="text-left">
                      
-                    <BibleTextBlock {textRef}  parGroup={parTextGroup} {showUnique} {numCols} copyButton={true} {showIdentical}
-                    cssWordClassDict={cssClassDict} cssWordCustomDict={cssCustomDict} hideApp={hideApp}
-                    {showNotes} uniqueSet={unique} bind:highlightOnClick={highlightOnClick} notesClick={showNotesFunction} 
+                    <BibleTextBlock {textRef}  parGroup={parTextGroup} {options} {numCols} copyButton={true} 
+                    cssWordClassDict={cssClassDict} cssWordCustomDict={cssCustomDict} 
+                    {showNotes} uniqueSet={unique} notesClick={showNotesFunction} 
                         {wordClick} 
                     />
                      <!--{@render showText(myOptions,cssClasses)}-->

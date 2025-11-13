@@ -1,7 +1,7 @@
 <script>
-import { onMount } from "svelte";
+import { onMount,untrack } from "svelte";
 import LinkSvg from  '../ui/icons/link.svg';
-import { SynopsisOptions, generateURL  } from "./SynopsisClasses.svelte.js";
+import { SynopsisOptions3  } from "./SynopsisClasses.svelte.js";
 import { ParallelText,Word, TextAndRef,VerseWords,ParallelTextGroup,parseSingleGroup } from "./parallelTexts.svelte.js";
 import ParallelTextSection from "./ParallelTextSection.svelte";
 import { N1904Server, lexemes} from "$lib/n1904/tfN1904";
@@ -31,13 +31,14 @@ import BulletsIcons from '../ui/icons/bullets-outline.svelte';
 import CopyText from '../ui/CopyText.svelte';
 import { findNextAnchor,findPrevAnchor, getAnchors} from '$lib/utils/ui-utils';
 import OptionButton from "../ui/SelectButtons/OptionButton.svelte";
-
+import Footer from './Footer.svelte';
 let {
     live=false,
+    keyevent=null,
     /**
-     * @type {SynopsisOptions} options
+     * @type {SynopsisOptions3} options
     */
-    options=new SynopsisOptions(),
+    options=new SynopsisOptions3(),
     /**
      * @type {TfServer}
     */
@@ -46,7 +47,7 @@ let {
 } = $props();
 
 let currentServer=$state(tfServer);
-let myOptions=$state(SynopsisOptions.makeFrom(options))
+let myOptions=$state(options.copy());
 function setServer(){
     currentServer=tfServer;
 }
@@ -79,7 +80,7 @@ const requestModes =[
     {name: "Batch"}
 ];
 
-let selectedRequestModeIndex = $state( myOptions.mode < requestModes.length ? myOptions.mode : 0);
+let selectedRequestModeIndex = $state( myOptions.request.mode < requestModes.length ? myOptions.request.mode : 0);
 
 let theNote = $state({heading: '', note:'',footer:''});
 
@@ -100,10 +101,10 @@ function displayNote(heading,note) {
 /**
  * @type {string[]} refAreaInputs
  */
-let refAreaInputs = $state(myOptions.columns && myOptions.columns.length ? myOptions.columns : ['Matt 1:1', "Mark 1:1"]); 
+let refAreaInputs = $state(myOptions.request.columns && myOptions.request.columns.length ? myOptions.request.columns : ['Matt 1:1', "Mark 1:1"]); 
 let numCols = $derived(refAreaInputs.length);
 
-let batchInput=$state(myOptions.batch && myOptions.batch.length ? myOptions.batch.join("\n") : 'Matt 1:1|Mark 1:1|John 1:1\nMatt 5:17|Eph 2:14-16');
+let batchInput=$state(myOptions.request.batch && myOptions.request.batch.length ? myOptions.request.batch.join("\n") : 'Matt 1:1|Mark 1:1|John 1:1\nMatt 5:17|Eph 2:14-16');
 
 /**
  * @type {ParallelTextGroup[]} texts
@@ -113,7 +114,7 @@ let texts= $state([]);
 /**
 * @type {number[]} selectedLexes
 */
-let selectedLexes=$state(myOptions.lexes);
+let selectedLexes=$state(myOptions.viewOptions.lexes);
 mylog("initialized selected lexes: " + selectedLexes.join(','));
 
 /**
@@ -250,7 +251,7 @@ async function buildAndFetchPericopes(reset=true){
     //viewStates.views.lookup.state=false;
     //const parRefsOb
     dataReady=false;
-   // landingPage=false;
+   landingPage=false;
     if (reset) {
           
     // mylog("disabling sortFilter and focus...");
@@ -380,7 +381,7 @@ function resetViewOptions(lookup=false){
         selectedLexes.length = 0;
     }
     function toggleLex(id){
-        mylog("toggleLex("+id+")");
+        //mylog("toggleLex("+id+")");
         if(selectedLexes.includes(id)) {
             selectedLexes.splice(selectedLexes.indexOf(id),1);
 
@@ -415,92 +416,111 @@ function resetViewOptions(lookup=false){
         return ret;
     }
 
-    const viewStates=$state({
-        views:{
-            view: { description:  "View Options", hotkeys:['v'], state:false,modal:true},
-            lookup: { description:  "Lookup passage(s) or select section", hotkeys:['l', 's'], state:true,modal:false},
-            words: {description:  "Lexeme/Word Options", hotkeys:['w'], state:false,modal:true},
-            highlightOnClick: { description:  "Enable/disable highlight on click.", hotkeys:['c'], state:myOptions.highlightOnClick,modal:false},
-            info: { description:  "Website and project information.", hotkeys:['i'], state:false,modal:true},
-            unique: { description:  "Toggle Unique Lexeme color outlining", hotkeys:['u'], state:myOptions.unique,modal:false},
-            help: { description:  "Show help menu", hotkeys:['h', '?'], state:false,modal:true},
-            identical: { description:  "Show (bold & underline) morphologically identical words shared by different gospels in a parallel group ",
-             hotkeys:['m'], state:myOptions.identical,modal:false},
-             notes:{description: "Notes on the text",state:false,modal:true}
-              
-        },
-
+const viewStates=$state({
+    views:{
         
-        /**
-         * @param {string} modalName
-         */
-        toggle(modalName){
-            if (this.views[modalName].state) {
-                this.views[modalName].state=false
-            }
-            else{
-                this.views[modalName].state = true;
-            }
-        },
-
-        /**
-         * 
-         * @param {string} key
-         * @returns {string}
-         */
-        getViewNameFromKey(key){
-            let retVal = '';
-            const matchingViews = Object.entries(this.views)
-                .filter(([name,obj])=>obj.hotkeys?.includes(key))
-                .map(([k,v])=>k);this
-            if (matchingViews.length > 0){
-                retVal = matchingViews[0]
-            }
+      //  highlightOnClick: { description:  "Enable/disable highlight on click.", hotkeys:['c'], state: myOptions.viewOptions.highlightOnClick,modal:false},
+       // unique: { description:  "Toggle Unique Lexeme color outlining", hotkeys:['u'], state: myOptions.viewOptions.unique,modal:false},
+      //  identical: { description:  "Show (bold & underline) morphologically identical words shared by different gospels in a parallel group ",
+       //     hotkeys:['m'], state:myOptions.viewOptions.identical,modal:false},
+       // sections: { description:  "Jump to a section", hotkeys:['j'], state:false,modal:true},
+        view: { description:  "View Options", hotkeys:['v'], state:false,modal:true},
+        lookup: { description:  "Toggle Lookup input panel", hotkeys:['l', 's'], state:false,modal:false},
+        words: {description:  "Lexeme/Word Options", hotkeys:['w'], state:false,modal:true},
+       // info: { description:  "Website and project information.", hotkeys:['i'], state:false,modal:true},
+        help: { description:  "Show help menu", hotkeys:['h', '?'], state:false,modal:true},
+        notes:{description: "Notes on the text",state:false,modal:true}
+        
             
-            return retVal;
-        },
-        reset(lookup=true){
+    },
+    
+   
+    /**
+     * @param {string} modalName
+     */
+    toggle(modalName){
+        if (this.views[modalName].state) {
+            this.views[modalName].state=false
+        }
+        else{
+            this.views[modalName].state = true;
+        }
+    },
+
+    /**
+     * 
+     * @param {string} key
+     * @returns {string}
+     */
+    getViewNameFromKey(key){
+        let retVal = '';
+        const matchingViews = Object.entries(this.views)
+            .filter(([name,obj])=>obj.hotkeys?.includes(key))
+            .map(([k,v])=>k);
+        if (matchingViews.length > 0){
+            retVal = matchingViews[0]
+        }
+        
+        return retVal;
+    },
+
+    /**
+     * 
+     * @param {boolean} lookup
+     * @param {string[]} views
+     */
+    reset(lookup=true,views=[]){
+        if (views.length){
+            views.forEach((view)=>{
+                this.views[view].state=false;
+            })
+        }
+        else {
             for (const view of Object.keys(this.views)){
                 this.views[view].state = false;
             }
-            if (lookup){
-                this.views.lookup.state=lookup
-            }
-        },
 
-        /**
-         * 
-         * @param {string} viewName
-         * @returns {boolean}
-         */
-        isVisible(viewName){
-            let retVal = false;
-            const view = this.views[viewName];
-            if(view){
-                retVal = view.state;
-            }
-            return retVal;
-        },
-        /**
-         * @returns {string[]}
-        */
-        getVisible(){
-            return Object.entries(this.views).filter(([viewName,obj])=>obj.state).map(([k,v])=>k);
         }
 
-    });
+        this.views.lookup.state= lookup ? true :false;
+        
+    },
+
+    /**
+     * 
+     * @param {string} viewName
+     * @returns {boolean}
+     */
+    isVisible(viewName){
+        let retVal = false;
+        const view = this.views[viewName];
+        if(view){
+            retVal = view.state;
+        }
+        return retVal;
+    },
+    /**
+     * @returns {string[]}
+    */
+    getVisible(){
+        return Object.entries(this.views).filter(([viewName,obj])=>obj.state).map(([k,v])=>k);
+    }
+
+});
+
+
 
     const hotkeys=[
-        /*
-        {key: 'n', name:'Next Section',function: jumpToNextSection},
-        {key:'p',name:'Previous Section',function: jumpToPrevSection},
-        {key:'t',name:'Top/First Section',function: jumpToFirstSection},
-        {key:'b',name:'Bottom/Last Section',function: jumpToLastSection},
-        */
-         
+      
+
+        {key:'c',name:'Highlight on Click',function: ()=>{myOptions.viewOptions.highlightOnClick =!myOptions.viewOptions.highlightOnClick}},
+        {key:'u',name:'Unique Lexemes',function: ()=>{myOptions.viewOptions.unique =!myOptions.viewOptions.unique}},
+        {key:'m',name:'Identical Words',function: ()=>{myOptions.viewOptions.identical =!myOptions.viewOptions.identical}},
     ];
 
     let textAreaFocused=$state(false);
+
+    
 
     function textAreaFocus(event){
         textAreaFocused=true;
@@ -509,26 +529,40 @@ function resetViewOptions(lookup=false){
         textAreaFocused=false;
     }
     function onkeydown(event){
-        mylog("CustomPanel.keydown:" + event)
+        //mylog(`CustomPanel.keydown: ${event.key}; live: ${live}; textAreaFocused: ${textAreaFocused}`);
         if(live && !textAreaFocused ){
+//            mylog("live and no text area focus!");
             const matchedView=viewStates.getViewNameFromKey(event.key);
             const modalVisibles=viewStates.getVisible().filter((name)=>(viewStates.views[name].modal)); 
+            
             if (matchedView) {
                     
                 if (!modalVisibles.length){
+                    viewStates.toggle(matchedView);
+//                    mylog(`we're HERE 0 for ${event.key} `);
                     
-                    if (matchedView){
-                        viewStates.toggle(matchedView);
-                    }
-                }  
+                }
+                else{
+//                    mylog(`we're HERE 1 for ${event.key} `);
+                }
             }
             else if (!modalVisibles.length && hotkeys){
                 const matchedHotkey=hotkeys.filter((o)=>o.key==event.key);
                 if (matchedHotkey.length){
                     matchedHotkey[0].function();
+//                    mylog(`we're HERE 2 for ${event.key} `);
+                }
+                else{
+//                    mylog(`we're HERE 3 for ${event.key} `);
                 }
             }
+            else{
+//                mylog(`WHOA -- got not matchedView for ${event.key}`)
+            }
              
+        }
+        else{
+//            mylog(`customParView.onkeydown(${event.key}) did nothing!`);
         }
     }
 
@@ -563,24 +597,24 @@ function resetViewOptions(lookup=false){
     }
 
 function makeURL(){
-    let opt = new SynopsisOptions(viewStates.views.unique.state,viewStates.views.identical.state,
-        viewStates.views.highlightOnClick.state,selectedLexes);
+    let opt = myOptions.copy();
     
-    opt.greekStrings=myOptions.greekStrings;
+    //opt.viewOptions.greekStrings=myOptions.viewOptions.greekStrings;
     if(selectedRequestModeIndex==0){
-        opt.columns=refAreaInputs;
+        opt.request.columns=refAreaInputs;
     }
     else{
-        opt.batch=batchInput.split("\n");
-        opt.mode=1;
+        opt.request.batch=batchInput.split("\n");
+        opt.request.mode=1;
+        
     }
     
-    opt.tab=1;
+    opt.request.tab=1;
     
     
-    
-    let url = generateURL(opt);
-    return url;
+    const baseurl = window.location.protocol  + "//" + window.location.host + "/";
+    return baseurl + opt.generateURI();
+   
 }
 
 function loadRequestOptions(){
@@ -599,15 +633,20 @@ function loadRequestOptions(){
 
 }
 
-let gotRequest = ((myOptions.columns && myOptions.columns.length) || (myOptions.batch && myOptions.batch.length));
+//let gotRequest = ((myOptions.columns && myOptions.columns.length) || (myOptions.batch && myOptions.batch.length));
 let mounted=$state(false);
+$effect(()=>{
+    if (keyevent){
 
+        untrack(()=> onkeydown(keyevent));
+    }
+})
 onMount(() => {
-    if (gotRequest){
-        //landingPage=false;
+    if (myOptions.request.fromURL){
+        landingPage=false;
         
         loadRequestOptions();
-        viewStates.views.lookup.state=false;
+        //viewStates.views.lookup.state=false;
         lookup(false);
 
     }
@@ -616,13 +655,27 @@ onMount(() => {
     }
     mounted = true;
 });
-$inspect(myOptions.hideApp)
+//$inspect(myOptions.hideApp)
+$inspect(`refarea.0:'${refAreaInputs[0]}`);
 </script>
+{#snippet appTitle(headingTag="h1")}
+    <svelte:element this={headingTag}>NT Gospel Synopsis Viewer</svelte:element> 
+{/snippet}
+{#snippet appSummary(heading=true,headingTag="h1")}
 
+    {#if heading}
+        {@render appTitle(headingTag)}
+        <hr/>
+    {/if}
+    
+    Based on Kurt Aland's <i>Synopsis Quattuor Evangeliorum</i>, using <a href="https://www.sblgnt.com">The SBL Greek New Testament (2010)</a> or, optionally, Nestle's 1904 edition of the <i>Greek New Testament.</i><br/>
+    Enter some NT references in the columns, or select "batch" mode to trying something more fancy.
+{/snippet}
 <div class="self-center text-center sticky top-0 bg-white z-40" >
 
   
 <h1 class="text-3xl bold underline">Custom NT Synopsis!</h1>
+{#if viewStates.views.lookup.state}
 <h3 class="italic">Choose your <span class="line-through">weapons</span> NT Bible passages:<ButtonSelect buttonStyle="btn btn-neutral btn-outline btn-circle btn-xs p-0 m-0"
             buttonText="?"
             bind:selected={viewStates.views.help.state}/></h3>
@@ -641,7 +694,7 @@ $inspect(myOptions.hideApp)
             <span class="label-text">Column {index+1}:</span></label>  
         <textarea id="refarea{index}" class="align-middle resize" rows="1"
                     bind:value={refAreaInputs[index]}
-                
+                onfocus={textAreaFocus} onblur={textAreaBlur}
                     ></textarea>
     </div>         
         
@@ -653,50 +706,57 @@ $inspect(myOptions.hideApp)
     </div>
 {:else}
     <br/>
-    <textarea bind:value={batchInput} cols="20" rows="10"/><br/>
+    <textarea value={batchInput} cols="20" rows="10"
+    onfocus={textAreaFocus} onblur={textAreaBlur}
+    /><br/>
 {/if}
 
 <Button onclick={lookup} buttonText="Lookup!" ready={!fetching}/>
+{/if}
 <div id="texts1" class="block">
-{#if mounted && dataReady}
 <hr/>
 
-<ButtonSelect bind:selected={viewStates.views.unique.state} buttonText="Outline Unique Lexemes"/>
-<ButtonSelect bind:selected={viewStates.views.identical.state} tooltip="Toggle Bold/underline setting for morphologically identical words." 
-           buttonText="Identical words"/>
-<ButtonSelect buttonText="Highlight on Click" bind:selected={viewStates.views.highlightOnClick.state}/>
-<ButtonSelect buttonText="Word Options" bind:selected={viewStates.views.words.state}/>  
-{#if myOptions.nt==SblGntServer.abbrev}<label for="hide-app-check">Hide appart?</label>
-<input name="hide-app-check" type="checkbox" bind:checked={myOptions.hideApp}/>
-    {/if}       
-<br/>
-<hr/>
-<h2>Parallel NT Texts from {currentServer.name}:
-    <CopyText icon={LinkSvg} 
-            copyText={makeURL()} 
-            tooltip='Copy URL'
-            
-            />
-
-</h2>
-{#each texts as textGroup,i}
-<hr class=" m-1 p-1"/>
-{#if texts.length > 1}<h3 class="font-bold underline">Group #{i+1}</h3>{/if}
-<ParallelTextSection parTextGroup={textGroup} showUnique={viewStates.views.unique.state} wordClick={toggleLex} 
-                    cssClassDict={lexClasses}
-                    cssCustomDict={customGreekClasses}
-                    showIdentical={viewStates.views.identical.state}
-                    highlightOnClick={viewStates.views.highlightOnClick.state}
-                    showNotes={true} hideApp={myOptions.hideApp}
-                    showNotesFunction={displayNote}
-                    />
-{/each}
+{#if !(mounted && dataReady)}
+    <span class="italic mt-3 pt-5"> Enter some valid NT references and click "Lookup!"</span>
 {:else}
+    <ButtonSelect bind:selected={viewStates.views.lookup.state} buttonText="Again!" tooltip="Toggle lookup panel." />
+    <ButtonSelect bind:selected={myOptions.viewOptions.unique} buttonText="Outline Unique Lexemes"/>
+    <ButtonSelect bind:selected={myOptions.viewOptions.identical} tooltip="Toggle Bold/underline setting for morphologically identical words." 
+            buttonText="Identical words"/>
+    <ButtonSelect buttonText="Highlight on Click" bind:selected={myOptions.viewOptions.highlightOnClick}/>
+    <ButtonSelect buttonText="Word Options" bind:selected={viewStates.views.words.state}/>  
+        {#if currentServer.abbrev==SblGntServer.abbrev}<label for="hide-app-check">Hide appart?</label>
+        <input name="hide-app-check" class="toggle" type="checkbox" bind:checked={myOptions.viewOptions.hideApp}/>
+        
+        {/if}       
+    <br/>
+    <hr/>
+    <h2>Parallel NT Texts from {currentServer.name}:
+        <CopyText icon={LinkSvg} 
+                getTextFunc={makeURL}
+                tooltip='Copy URL'
+                
+                />
 
-<span class="italic mt-3 pt-5"> Enter some valid NT references and click "Lookup!"</span>
+    </h2>
+    {#each texts as textGroup,i}
+    <hr class=" m-1 p-1"/>
+    {#if texts.length > 1}<h3 class="font-bold underline">Group #{i+1}</h3>{/if}
+    <ParallelTextSection parTextGroup={textGroup}  wordClick={toggleLex} 
+                        cssClassDict={lexClasses}
+                        cssCustomDict={customGreekClasses}
+                        options={myOptions}
+                        showNotes={true} 
+                        showNotesFunction={displayNote}
+                        />
+    {/each}
+    
+
+        
 {/if}
 </div>
 </div>
+
 
 
 <Modal2 bind:showModal={viewStates.views.words.state}>
@@ -862,6 +922,37 @@ $inspect(myOptions.hideApp)
     
             </div>
    
+   <hr class="m-5"/>
+            <h2 class="inline text-center ">Hotkeys: <i>The keyboard is your friend!</i></h2>
+            
+            <table class="table-auto self-center m-auto text-left "><tbody>
+                <tr class="border-0  border-b border-collapse border-gray-200" ><th>Key</th><th>Function</th></tr>
+                <tr><td class="p-2">[i]</td><td class="p-2">Website and project nfo</td></tr>
+        {#each Object.entries(viewStates.views) as [theViewName,theViewObj]}
+            {#if theViewObj.hotkeys && theViewObj.hotkeys.length}
+            <tr>
+                <td class="p-2">{theViewObj.hotkeys.map((k)=>"["+k+"]").join(",")} </td>
+                <td class="p-2">{theViewObj.description}</td>
+            </tr>
+            {/if}
+        {/each}
+        {#each hotkeys as hk}
+            <tr>
+                <td class="p-2">[{hk.key}] </td>
+                <td class="p-2">{hk.name}</td>
+            </tr>
+        {/each}
+        </tbody>
+            </table>
     </div>
 
 </Modal2>
+
+<!--<Modal2 bind:showModal={viewStates.views.info.state}>
+    <div class="text-left m-auto inline">
+        {@render appSummary()}
+        <hr/>
+        <Footer/>
+    </div>
+    <div class="btn-sm"></div>
+</Modal2>-->

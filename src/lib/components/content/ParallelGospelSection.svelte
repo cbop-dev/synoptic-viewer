@@ -6,7 +6,7 @@
     import CopyText     from '../ui/CopyText.svelte';
     import { GreekUtils } from '$lib/utils/greek-utils';
 	import Button from '../ui/Button.svelte';
-    
+    import { SynopsisOptions3 } from './SynopsisClasses.svelte.js';
     import BibleTextBlock from './BibleTextBlock.svelte';
     const gospels = gospelParallels.gospels;
     
@@ -15,29 +15,28 @@
     
     /**
      * @type {{parGroup: GospelPericopeGroup,
+     * options:SynopsisOptions3,
      * focus:string,
      * wordClick:function(number):void,
-     * showIdentical:boolean,
      * cssClassDict:Object,
      * cssCustomDict:Object,
-     * showUnique:boolean,
-     * highlightOnClick:boolean,
      * showNotes:boolean,
-     * hideApp:boolean,
      * showNotesFunction(heading:string,note:string):void
      * }}
      */
     let {
         parGroup = new GospelPericopeGroup(),
-        focus = '',
-        showUnique=false,
-        showIdentical=true,
+        options=new SynopsisOptions3(),
+       focus = '',
+       /* showUnique=false,
+        showIdentical=true,*/
         wordClick=(id)=>{},
         cssClassDict={},
         cssCustomDict={},
-        highlightOnClick=true,
+        /*highlightOnClick=true,
+        
+        hideApp=false,*/
         showNotes=false,
-        hideApp=false,
         showNotesFunction=(heading,note)=>{alert(heading+"\n"+note)}
 
         
@@ -205,16 +204,16 @@ function isUnique(wordid, uniqueSet){
                 
                 {#each col.textRefs as textRef, index2}
                 
-                {@const unique = (showUnique && numCols > 1)? col.unique : new Set()}
+                {@const unique = (options.viewOptions.unique && numCols > 1)? col.unique : new Set()}
                
               
                     {#if index2 > 0}<br/>{/if}
                     <div class="text-left">
                     
-                       <BibleTextBlock {textRef}  {parGroup} {showUnique} {numCols} copyButton={true} {showIdentical}
+                       <BibleTextBlock {textRef}  {parGroup} {options} {numCols} copyButton={true} 
                     cssWordClassDict={cssClassDict} cssWordCustomDict={cssCustomDict} 
-                    {showNotes} uniqueSet={unique} bind:highlightOnClick={highlightOnClick} notesClick={showNotesFunction} 
-                        {wordClick} {hideApp}
+                    {showNotes} uniqueSet={unique} notesClick={showNotesFunction} 
+                        {wordClick} 
                     />
 
                    <!-- {@render showText(myOptions,cssClasses)}-->
@@ -238,10 +237,10 @@ function isUnique(wordid, uniqueSet){
                
                 <div class="rounded-box bg-base-200 other inline-block m-1 p-1 text-left m:flex-1">
 
-                         <BibleTextBlock {textRef}  {parGroup} {showUnique} {numCols} copyButton={true} {showIdentical}
+                         <BibleTextBlock {textRef}  {parGroup} {options} {numCols} copyButton={true} 
                     cssWordClassDict={cssClassDict} cssWordCustomDict={cssCustomDict} 
-                    {showNotes} bind:highlightOnClick={highlightOnClick} notesClick={showNotesFunction} 
-                        {wordClick} {hideApp}
+                    {showNotes} notesClick={showNotesFunction} 
+                        {wordClick} 
                     />
                 <!--{@render showText(myOptions)}-->
             
@@ -254,14 +253,14 @@ function isUnique(wordid, uniqueSet){
      <div class="rounded-box   text-3xl  column gospel gospel-column  gospel-column-0 column-{colData.focusIndex}">
         {#each colData.cols[colData.focusIndex].textRefs as textRef, index}
         
-        {@const unique = (showUnique && numCols > 1)? colData.cols[colData.focusIndex].unique : new Set()}
+        {@const unique = (options.viewOptions.unique && numCols > 1)? colData.cols[colData.focusIndex].unique : new Set()}
         
                  
         <div class="rounded-box  inline-block p-2 m-1 {Object.values(gospels.abbreviations)[colData.focusIndex]} text-left">
-                 <BibleTextBlock {textRef}  {parGroup} {showUnique} {numCols} copyButton={true} {showIdentical}
+                 <BibleTextBlock {textRef}  {parGroup} {options} {numCols} copyButton={true} 
                     cssWordClassDict={cssClassDict} cssWordCustomDict={cssCustomDict} 
-                    {showNotes} uniqueSet={unique} bind:highlightOnClick={highlightOnClick} notesClick={showNotesFunction} 
-                        {wordClick} {hideApp}
+                    {showNotes} uniqueSet={unique}  notesClick={showNotesFunction} 
+                        {wordClick} 
                     />
         <!--{@render showText(myOptions)}-->
         </div>
@@ -280,10 +279,10 @@ function isUnique(wordid, uniqueSet){
                     
                 {#if index > 0}<br/>{/if}
                 <div >
-                         <BibleTextBlock {textRef}  {parGroup} {showUnique} {numCols} copyButton={true} {showIdentical}
+                         <BibleTextBlock {textRef}  {parGroup} {options}  {numCols} copyButton={true} 
                     cssWordClassDict={cssClassDict} cssWordCustomDict={cssCustomDict} 
-                    {showNotes} uniqueSet={col.unique} bind:highlightOnClick={highlightOnClick} notesClick={showNotesFunction} 
-                        {wordClick} {hideApp}
+                    {showNotes} uniqueSet={col.unique} notesClick={showNotesFunction} 
+                        {wordClick} 
                     />
                 <!--{@render showText(myOptions)}-->
                 </div>
@@ -304,10 +303,10 @@ function isUnique(wordid, uniqueSet){
                  
                  
                 <div class="rounded-box other bg-base-200 inline-block m-1 text-left">
-                         <BibleTextBlock {textRef}  {parGroup} {showUnique} {numCols} copyButton={true} {showIdentical}
+                         <BibleTextBlock {textRef}  {parGroup} {options}  {numCols} copyButton={true} 
                     cssWordClassDict={cssClassDict} cssWordCustomDict={cssCustomDict} 
-                    {showNotes}  bind:highlightOnClick={highlightOnClick} notesClick={showNotesFunction} 
-                        {wordClick} {hideApp}
+                    {showNotes}  notesClick={showNotesFunction} 
+                        {wordClick}
                     />
                     <!--{@render showText(myOptions)}-->
                 </div>

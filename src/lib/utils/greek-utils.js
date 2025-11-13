@@ -1,5 +1,5 @@
 import { mylog, debug } from "$lib/env/env"
-debug.set(true);
+//debug.set(true);
 
 class GreekUtils {
 	static greekLetters
@@ -68,7 +68,7 @@ class GreekUtils {
 
 	static removeApparatusMarks(greek){
 		const theREstring="[" + GreekUtils.apparatusMarks +"]+";
-		mylog(`trying re expression: '${theREstring}'`, true)
+//		mylog(`trying re expression: '${theREstring}'`)
 		return greek.trim().replaceAll(new RegExp(theREstring,'g'),'').trim().replaceAll(/\s+/g,' ');
 	}
 	/** TODO 
