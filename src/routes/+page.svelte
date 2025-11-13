@@ -31,7 +31,7 @@
 //    mylog("Got no options!")
    }
    else{
-    mylog("page.svelte got options! E.g., highlight on click:"+options.viewOptions.highlightOnClick,true )
+    //mylog("page.svelte got options! E.g., highlight on click:"+options.viewOptions.highlightOnClick)
    }
    
     
