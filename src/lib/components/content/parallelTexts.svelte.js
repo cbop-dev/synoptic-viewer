@@ -33,7 +33,7 @@ export class VerseWords{
      * @returns {VerseWords[]}
      */
     static buildFromObj(objArray){
-        mylog(`buildFromObj param=${objArray}`,true )
+       // mylog(`buildFromObj param=${objArray}`,true )
         const vWordsArray=[]
         
             
@@ -505,25 +505,27 @@ export class ParallelColumnGroup {
                     //We can simply count the "-1" separators leading up to the first index, since this was used to separate the texref ids in the combined array:
                     
                     let combinedSeparatorIndicies=[0]
-                    for (let i=0; i<=combinedColumnIds.length && i<=start; i++){
+                    for (let i=0; i<=combinedColumnIds[colIndex].length && i<=start; i++){
                         if (combinedColumnIds[colIndex][i]==-1) {
                             
                             combinedSeparatorIndicies.push(i);
                         }
                     }
                     const correctTextRefIdx=combinedSeparatorIndicies.length-1;
-                    const correctedStart=start+combinedSeparatorIndicies[correctTextRefIdx]
-                    const correctedEnd=end+combinedSeparatorIndicies[correctTextRefIdx];
+                    const correctedStart=start-combinedSeparatorIndicies[correctTextRefIdx]-correctTextRefIdx;
+                    const correctedEnd=end-combinedSeparatorIndicies[correctTextRefIdx]-correctTextRefIdx;
                     const phraseRange=mathUtils.range(correctedEnd-correctedStart+1,correctedStart);
                     const tRef=this.parallelColumns[colIndex].textRefs[correctTextRefIdx];
-                    // Magic!
+                    //mylog(`buildLexphrases: got tRefindex=${correctTextRefIdx}`,true);
+                   // mylog(`buildLexphrases: got combinedSeparatorIndicies=${combinedSeparatorIndicies.join("'")}`,true);
+                    // TODO: doesn't seem to work yet for text below first one :-(
 
 
                     /**
                      * @type {Word[]}
                      */
                     const words = phraseRange.map((trIdx)=>tRef.getWordByIndex(trIdx)).filter((w)=>w!=null);
-                    mylog(`Got words in matching phrase:[${words.map((w)=>w.word)}]`, true)
+                   // mylog(`Got words in matching phrase:[${words.map((w)=>w.word)}]`, true)
                     if (!this.lexIdenticalPhrasesMap.has(lexPhrase)){
                         this.lexIdenticalPhrasesMap.set(lexPhrase,{words:words, css:new Set(['lexical-phrase'])})
                     }
@@ -653,7 +655,7 @@ export class ParallelColumnGroup {
         for (const [index,par] of this.parallelColumns.entries().filter(([i,p])=>!exclude.includes(i))){
             if(par.textRefs.length) {
                 const refsMapped = par.textRefs.map((tr)=>tr.reference)
-                mylog(`getRefs.refsMapped=[${refsMapped.join("//")}]`, true);
+                //mylog(`getRefs.refsMapped=[${refsMapped.join("//")}]`);
                 refs.push(formatBibRefs(refsMapped.join(";")))
             }
             

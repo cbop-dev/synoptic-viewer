@@ -24,16 +24,19 @@ export const levels = {
     LOG: 2,
     WARNING: 3,
     ERROR: 4,
-    NONE: 100
+    NONE: 100,
+    SILENCE: 100000
 };
+
 let defaultLevel = 0; 
+//defaultLevel=levels.SILENCE;
 /*debugLevel.subscribe((v)=>{
     defaultLevel = v;
 })*/
 //$: defaultLevel = debugLevel.value;
 //debugLevel.set(levels.DEBUG);
 
-export function mylog(msg, debugOn=get(debug),thelevel=defaultLevel) {
+export function mylog(msg, debugOn=get(debug),thelevel=levels.INFO) {
     //mylog("mylog with debug val = " + get(debug))
     if (debugOn && thelevel >= defaultLevel ) {
      //   mylog("mylog level at " + defaultLevel)

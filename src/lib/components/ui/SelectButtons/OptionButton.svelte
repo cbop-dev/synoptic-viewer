@@ -42,14 +42,14 @@
 
   export function deselect() {
       selected = false;
-      mylog('selected = false');
+      //mylog('selected = false');
       /*theButton.classList.replace("btn-neutral", "btn-primary");
       theButton.classList.replace("btn-active", "btn-outline");*/
       
   }
   export function select() {
       selected = true;
-      mylog("selected = 'true'");
+      //mylog("selected = 'true'");
       /*
       theButton.classList.replace( "btn-primary", "btn-neutral");
       theButton.classList.replace("btn-outline", "btn-active"); */

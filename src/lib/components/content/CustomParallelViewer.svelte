@@ -773,7 +773,7 @@ $inspect(`refarea.0:'${refAreaInputs[0]}`);
     </div>
 {:else}
     <br/>
-    <textarea value={batchInput} cols="20" rows="10"
+    <textarea bind:value={batchInput} cols="20" rows="10"
     onfocus={textAreaFocus} onblur={textAreaBlur}
     /><br/>
 {/if}
