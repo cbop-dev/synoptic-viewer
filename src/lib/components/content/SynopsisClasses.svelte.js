@@ -269,9 +269,11 @@ export class SynopsisOptions3{
          * @type {string[]} viewUri
          */
         const validProps=Object.entries(SynopsisOptions3.SynopsisUrlParamsMap).filter(([k,v])=>!v.noURL).map(([k,v])=>k);
+        const urlParams= new URLSearchParams();
 
-        const theUris = [...Object.entries(this.viewOptions),...Object.entries(this.request)].filter(([k,v])=>validProps.includes(k))
-        .map(([name,val])=> {
+
+        [...Object.entries(this.viewOptions),...Object.entries(this.request)].filter(([k,v])=>validProps.includes(k))
+        .forEach(([name,val])=> {
             //const pRow = SynopsisOptions3.SynopsisUrlParamsMap[name];
             let str=''
         
@@ -285,7 +287,7 @@ export class SynopsisOptions3{
             }//otherwise, it's a string, leave as is.
             
             if(name && val && valStr){
-                str=`${name}=${valStr}`;
+                urlParams.set(name,valStr);
 //                mylog(`Got url param: '${name}'='${valStr}'`)
             }
             else {
@@ -296,13 +298,13 @@ export class SynopsisOptions3{
             
             
             return str;
-        }).filter((s)=>s);
+        });
         
         
         
 //        mylog(`generateURI() returning: '${theUris}'`)
         
-        return theUris.length ? "?" + theUris.join("&") : '';
+        return urlParams.size ? "?" + urlParams.toString() : '';
 
     }
     
@@ -613,7 +615,7 @@ export function getRequestParamsObj3(searchParamsObj){
      * @type {URLParam[]}
      */
     const paramObjs=[];
-    Object.entries(SynopsisUrlParamsMap).forEach(([paramName,paramDetails])=>{
+    Object.entries(SynopsisOptions3.SynopsisUrlParamsMap).forEach(([paramName,paramDetails])=>{
         if(searchParamsObj.has(paramName)){
             const pObj=new URLParam(paramName,searchParamsObj.get(paramName),paramDetails.type, 
                 Object.hasOwn(paramDetails,'split') ? paramDetails.split : '');
