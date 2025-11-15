@@ -686,6 +686,7 @@ $inspect(`refarea.0:'${refAreaInputs[0]}`);
 {#snippet appSummary(heading=true,headingTag="h1")}
 
     {#if heading}
+
         {@render appTitle(headingTag)}
         <hr/>
     {/if}
@@ -693,25 +694,30 @@ $inspect(`refarea.0:'${refAreaInputs[0]}`);
     Based on Kurt Aland's <i>Synopsis Quattuor Evangeliorum</i>, using <a href="https://www.sblgnt.com">The SBL Greek New Testament (2010)</a> or, optionally, Nestle's 1904 edition of the <i>Greek New Testament.</i><br/>
     Enter some NT references in the columns, or select "batch" mode to trying something more fancy.
 {/snippet}
-{#snippet resultsNav(short=false)}
+{#snippet resultsNav(short=false,tag='li',classes=[])}
+    {@const theTag = tag ? tag : 'span'}    
     {#if mounted && dataReady}
     
-        <li><ButtonSelect bind:selected={viewStates.views.lookup.state} buttonText="Again!" tooltip="Toggle lookup panel." /></li>
-        <li><ButtonSelect buttonText="Similar Phrases" bind:selected={myOptions.viewOptions.similarPhrases} tooltip="Show lexically similar phrases (same lexemes, but possibly different forms/morphology)"/></li>
-        <li><ButtonSelect bind:selected={myOptions.viewOptions.unique} buttonText="Unique Lexemes" tooltip="Outline all lexemes unique to each column."/></li>
-        <li><ButtonSelect bind:selected={myOptions.viewOptions.identical} tooltip="Toggle Bold/underline setting for morphologically identical words." 
-                buttonText="Identical words"/></li>
-        <li><ButtonSelect buttonText="Highlight on Click" bind:selected={myOptions.viewOptions.highlightOnClick} tooltip="If enabled, clicking on any word will highlight all instances of the lexem."/></li>
-        <li><ButtonSelect buttonText="Word Options" bind:selected={viewStates.views.words.state} tooltip="View Lexeme and custom Greek options."/></li>  
-        {#if currentServer.abbrev==SblGntServer.abbrev}
         
-         <li><label class="label" for="hide-app-check{short? '-short':''}">
-<input  class="toggle" id="hide-app-check{short? '-short':''}" type="checkbox" bind:checked={myOptions.viewOptions.hideApp}/>Hide appar{#if !short}aratus marks{:else}.{/if}</label>
-     </li>
-            {/if}  
+           <!-- <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={viewStates.views.lookup.state} buttonText="Again!" tooltip="Toggle lookup panel." /></svelte:element>-->
+            <svelte:element this={theTag} class={classes}><ButtonSelect buttonText="Similar" bind:selected={myOptions.viewOptions.similarPhrases} tooltipbottom tooltip="Show lexically similar phrases (same lexemes, but possibly different forms/morphology)"/></svelte:element>
+            <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={myOptions.viewOptions.unique} buttonText="Unique" tooltipbottom  tooltip="Outline all lexemes unique to each column."/></svelte:element>
+            <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={myOptions.viewOptions.identical} tooltipbottom tooltip="Toggle Bold/underline morphologically identical words, even if they are in diverse positions. This generates 'false positives.'" 
+                    buttonText="Identical"/></svelte:element>
+            <svelte:element this={theTag} class={classes}><ButtonSelect buttonText="Auto Highlight" bind:selected={myOptions.viewOptions.highlightOnClick}  tooltipbottom  tooltip="If enabled, clicking on any word will highlight all instances of the lexem."/></svelte:element>
+            <svelte:element this={theTag} class={classes}><ButtonSelect buttonText="Word Options" bind:selected={viewStates.views.words.state} tooltipbottom  tooltip="View Lexeme and custom Greek options."/></svelte:element> 
+            
+            {#if currentServer.abbrev==SblGntServer.abbrev}
+                <svelte:element this={theTag} class={[classes,["tooltip","tooltip-bottom","menu"]]} 
+                data-tip="Show/hide the SBL GNT apparatus marks in the text. This also effects the 'copy' buttons."> <label class="label" for="hide-app-check{short? '-short':''}">
+                    <input  class="toggle " id="hide-app-check{short? '-short':''}" type="checkbox"
+                    bind:checked={myOptions.viewOptions.hideApp}/>Hide appar{#if !short}aratus{:else}.{/if}</label>
+                </svelte:element>
+                {/if}  
+        
     {/if}
 {/snippet}
-<div class="self-center text-center sticky top-0 bg-white z-40" >
+<div class="self-center text-center sticky bg-white z-40 top-3.5" >
 
   <!--<div class="block"><h1 class="text-3xl bold block underline self-center "><span class="self-center inline">Custom NT Synopsis!</span>
 <ButtonSelect buttonStyle="btn btn-neutral btn-outline btn-circle btn-xs p-0 m-0 "
@@ -726,7 +732,7 @@ $inspect(`refarea.0:'${refAreaInputs[0]}`);
       <div tabindex="0" role="button" class="btn btn-ghost lg:hidden">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16" /> </svg>
       </div>
-
+      
       <ul tabindex="0"
        class="menu  dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow text-left ">
         {@render resultsNav(true)} 
@@ -739,21 +745,24 @@ $inspect(`refarea.0:'${refAreaInputs[0]}`);
 
   </div>
   <div class="hidden md:navbar-center self-center m-auto">
-         <div class="text-center self-center border-0"> 
-           <div id="title-panel">
+         <div class="text-center self-center border-0 "> 
+           <div class="title-panel m-0 p-0 block">
              {@render appTitle()}
             </div>
-             <ul class="bg-white menu menu-horizontal ">
-
-                {@render resultsNav()}
-             </ul>
+            <br/>
+             <!--<ul class="bg-white  menu menu-horizontal p-0">-->
+            <div class="flex flex-wrap">
+                {@render resultsNav(false,'div')}
+             <!--</ul>-->
+             </div>
              
          </div>
     </div>
   <div class="navbar-end hidden">
   </div>
 </div>
-
+</div>
+<div class="self-center text-center bg-white z-20" >
 {#if viewStates.views.lookup.state}
 <h3 class="italic">Choose your <span class="line-through">weapons</span> NT Bible passages:</h3>
 
@@ -828,8 +837,8 @@ $inspect(`refarea.0:'${refAreaInputs[0]}`);
         
 {/if}
 </div>
-</div>
 
+</div>
 
 
 <Modal2 bind:showModal={viewStates.views.words.state}>

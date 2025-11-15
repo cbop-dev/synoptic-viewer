@@ -126,7 +126,7 @@ let focused=$derived.by(()=>{
 let sort = $state(false);
 
 let callSortFilter=$derived(myOptions.viewOptions.hideSolos || (gospelParallels.gospels.isValid(selectedGospel)   &&
-( sort ||myOptions.viewOptions.hideNonPrimary || myOptions.viewOptions.focusOn|| myOptions.viewOptions.hideNonPrimarySolos)));
+( myOptions.viewOptions.sort ||myOptions.viewOptions.hideNonPrimary || myOptions.viewOptions.focusOn|| myOptions.viewOptions.hideNonPrimarySolos)));
 
 /**
  * @description Array of pericopes groups, with refs for each gospel (matt,mark,luke,john,other),
@@ -206,7 +206,7 @@ let alandPericopeNums = $state(myOptions.request.pericopes);
 let filteredPericopes=$derived.by(()=>{
     let alands= (alandPericopeNums ? [...alandPericopeNums] : []); //copy of alands for sorting/filtering...
     if (callSortFilter) {
-        if (sort && gospelParallels.gospels.isValid(selectedGospel)) {//sort!
+        if (myOptions.viewOptions.sort && gospelParallels.gospels.isValid(selectedGospel)) {//sort!
             // mylog("before sorting Alands for "+ selectedGospel +": ["+alands.join(',')+"]",true);
             gospelParallels.sortAlandPericopes(alands,selectedGospel);
             // mylog("after sorting Alands: ["+alands.join(',')+"]",true);
@@ -922,15 +922,15 @@ $inspect(`myOptions.nt:${myOptions.request.nt}`)
 {#snippet resultsButtons(short=false)}
     {#if !short}    
        <li >
-        <ButtonSelect bind:selected={viewStates.views.lookup.state} buttonText="☰ Lookup" buttonStyle="btn"/>
+        <ButtonSelect bind:selected={viewStates.views.lookup.state} tooltipbottom tooltip="Show Lookup panel pop-up" buttonText="☰ Lookup" buttonStyle="btn"/>
       </li>
       {/if}
 
       {#if alandPericopeNums && alandPericopeNums.length}
-      <li><ButtonSelect bind:selected={viewStates.views.view.state} buttonText="☰ View Options"/></li>
+      <li><ButtonSelect bind:selected={viewStates.views.view.state} tooltipbottom tooltip="Show other viewing options (sort, etc.)"  buttonText="☰ Options"/></li>
 
      {#if dataReady}
-       <li><ButtonSelect buttonText="Similar Phrases" bind:selected={myOptions.viewOptions.similarPhrases} tooltip="Show lexically similar phrases (same lexemes, but possibly different forms/morphology)"/></li>
+       <li><ButtonSelect buttonText="Similar" bind:selected={myOptions.viewOptions.similarPhrases} tooltip="Show lexically similar phrases (same lexemes, but possibly different forms/morphology)"/></li>
        <li> <ButtonSelect buttonText="☰ Jump to ↓" bind:selected={viewStates.views.sections.state}/></li>       
         <li><ButtonSelect bind:selected={viewStates.views.words.state} buttonText="☰ Words" /></li>
         <li><ButtonSelect bind:selected={myOptions.viewOptions.highlightOnClick} buttonText="Auto Highlight" 
@@ -1001,7 +1001,7 @@ $inspect(`myOptions.nt:${myOptions.request.nt}`)
             
         <li><ButtonSelect buttonText="?" buttonStyle="btn btn-xs btn-circle btn-ghost p-0" bind:selected={viewStates.views.help.state}/>
             </li>
-        <li >
+        <li>
             <ButtonSelect bind:selected={viewStates.views.lookup.state} buttonText="" 
             buttonStyle="btn btn-xs btn-circle btn-ghost p-0" >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3">
@@ -1293,12 +1293,12 @@ $inspect(`myOptions.nt:${myOptions.request.nt}`)
 
     <div class="max-w-full block text-center">
                 <h3>Highlight Features:</h3>
-            <ButtonSelect bind:selected={myOptions.viewOptions.unique} buttonText="Outline Unique Lexemes"/>
-            <ButtonSelect buttonText="Similar Phrases" bind:selected={myOptions.viewOptions.similarPhrases} tooltip="Show lexically similar phrases (same lexemes, but possibly different forms/morphology)"/>
-            <ButtonSelect bind:selected={myOptions.viewOptions.identical} tooltip="Toggle Bold/underline setting for morphologically identical words." 
-            buttonText="Identical words"/>
-            <ButtonSelect bind:selected={myOptions.viewOptions.highlightOnClick} 
-            buttonText="Highlight Lexeme on click" 
+            <ButtonSelect bind:selected={myOptions.viewOptions.unique} buttonText="Unique" tooltipbottom  tooltip="Outline all lexemes unique to each column."/>
+            <ButtonSelect buttonText="Similar" tooltipbottom bind:selected={myOptions.viewOptions.similarPhrases} tooltip="Show lexically similar phrases (same lexemes, but possibly different forms/morphology)"/>
+            <ButtonSelect bind:selected={myOptions.viewOptions.identical} tooltipbottom tooltip="Toggle Bold/underline setting for morphologically identical words." 
+            buttonText="Identical"/>
+            <ButtonSelect bind:selected={myOptions.viewOptions.highlightOnClick}   tooltipbottom 
+            buttonText="Auto Highlight" 
             tooltip="If enabled, clicking/tapping on a word will toggle highlighting of that lexeme."/>
     
         <ButtonSelect buttonStyle="btn btn-neutral btn-outline btn-circle btn-xs p-0 m-0"
