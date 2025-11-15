@@ -580,6 +580,7 @@ const hotkeys=[
     {key:'c',name:'Highlight on Click',function: ()=>{myOptions.viewOptions.highlightOnClick =!myOptions.viewOptions.highlightOnClick}},
     {key:'u',name:'Unique Lexemes',function: ()=>{myOptions.viewOptions.unique =!myOptions.viewOptions.unique}},
     {key:'m',name:'Identical Words',function: ()=>{myOptions.viewOptions.identical =!myOptions.viewOptions.identical}},
+    {key:'i',name:'Similar Phrases',function: ()=>{myOptions.viewOptions.similarPhrases =!myOptions.viewOptions.similarPhrases}},
         
 ];
 
@@ -1293,7 +1294,7 @@ $inspect(`myOptions.nt:${myOptions.request.nt}`)
     <div class="max-w-full block text-center">
                 <h3>Highlight Features:</h3>
             <ButtonSelect bind:selected={myOptions.viewOptions.unique} buttonText="Outline Unique Lexemes"/>
-            
+            <ButtonSelect buttonText="Similar Phrases" bind:selected={myOptions.viewOptions.similarPhrases} tooltip="Show lexically similar phrases (same lexemes, but possibly different forms/morphology)"/>
             <ButtonSelect bind:selected={myOptions.viewOptions.identical} tooltip="Toggle Bold/underline setting for morphologically identical words." 
             buttonText="Identical words"/>
             <ButtonSelect bind:selected={myOptions.viewOptions.highlightOnClick} 

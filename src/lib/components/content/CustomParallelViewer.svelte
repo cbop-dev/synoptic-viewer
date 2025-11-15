@@ -519,7 +519,7 @@ const viewStates=$state({
 
     const hotkeys=[
       
-
+        {key:'i',name:'Similar Phrases',function: ()=>{myOptions.viewOptions.similarPhrases =!myOptions.viewOptions.similarPhrases}},
         {key:'c',name:'Highlight on Click',function: ()=>{myOptions.viewOptions.highlightOnClick =!myOptions.viewOptions.highlightOnClick}},
         {key:'u',name:'Unique Lexemes',function: ()=>{myOptions.viewOptions.unique =!myOptions.viewOptions.unique}},
         {key:'m',name:'Identical Words',function: ()=>{myOptions.viewOptions.identical =!myOptions.viewOptions.identical}},
@@ -665,8 +665,23 @@ onMount(() => {
 //$inspect(myOptions.hideApp)
 $inspect(`refarea.0:'${refAreaInputs[0]}`);
 </script>
+{#snippet titleButtons(hideLookup=false,hideHelp=false)}
+        <ul class="bg-white menu menu-horizontal ">
+        <li><ButtonSelect buttonText="?" buttonStyle="btn btn-xs btn-circle btn-ghost p-0" bind:selected={viewStates.views.help.state}/>
+            </li>
+        <li >
+            <ButtonSelect bind:selected={viewStates.views.lookup.state} buttonText="" 
+            buttonStyle="btn btn-xs btn-circle btn-ghost p-0" >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+            </svg>
+            </ButtonSelect>
+        </li></ul>
+{/snippet}
 {#snippet appTitle(headingTag="h1", short=false, classes=[])}
-    <svelte:element this={headingTag} class={classes}>{#if !short}Custom {/if} NT Synopsis</svelte:element> 
+    <svelte:element this={headingTag} class={[classes, "inline-block"]}>{#if !short}Custom {/if} NT Synopsis</svelte:element> 
+    {@render titleButtons()}
+   
 {/snippet}
 {#snippet appSummary(heading=true,headingTag="h1")}
 
@@ -703,7 +718,7 @@ $inspect(`refarea.0:'${refAreaInputs[0]}`);
             buttonText="?"
             bind:selected={viewStates.views.help.state} /></h1>
 </div>-->
-{#if !landingPage}
+
 <div class="navbar bg-base-100 text-center  shadow-sm ">
   <div class="navbar-start text-left max-w-full w-full m-auto md:hidden">
     <div class="dropdown  text-left">
@@ -719,18 +734,7 @@ $inspect(`refarea.0:'${refAreaInputs[0]}`);
     </div>
     <div class="text-left ">
         {@render appTitle('h1',true,['inline'])}
-        <ul class="bg-white menu menu-horizontal ">
-            
-        <li><ButtonSelect buttonText="?" buttonStyle="btn btn-xs btn-circle btn-ghost p-0" bind:selected={viewStates.views.help.state}/>
-            </li>
-        <li >
-            <ButtonSelect bind:selected={viewStates.views.lookup.state} buttonText="" 
-            buttonStyle="btn btn-xs btn-circle btn-ghost p-0" >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3">
-            <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-            </svg>
-            </ButtonSelect>
-        </li></ul>
+      
     </div>
 
   </div>
@@ -749,7 +753,7 @@ $inspect(`refarea.0:'${refAreaInputs[0]}`);
   <div class="navbar-end hidden">
   </div>
 </div>
-{/if}
+
 {#if viewStates.views.lookup.state}
 <h3 class="italic">Choose your <span class="line-through">weapons</span> NT Bible passages:</h3>
 
