@@ -567,7 +567,7 @@ export class ParallelColumnGroup {
         
         this.lexIdenticalPhrasesMap.values().forEach((obj,index)=>{
             
-            obj.css.add('lexical-phrase-'+(index+1));
+            obj.css.add('lexical-phrase-'+String((index % 14)+1));
             //obj.css.add('underline').add('bold').add('bg-yellow-50');
         })
 

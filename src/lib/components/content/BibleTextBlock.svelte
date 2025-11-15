@@ -140,9 +140,9 @@ let {
                         
                         <span role="none" 
                         class={["m-0", "word", "lex-"+word.id, 
-                            options.viewOptions.unique && uniqueSet && isUnique(word.id,uniqueSet) && "lex-unique", phraseNum>=0 ? "lexical-test-"+phraseNum : [],
+                            options.viewOptions.unique && uniqueSet && isUnique(word.id,uniqueSet) && "lex-unique",
                             lexCssClasses, customClasses?.length ? customClasses[0] : '', wordClasses, options.viewOptions.similarPhrases ? lexicalPhrases : [],
-                            options.viewOptions.identical && lexCssClasses && parGroup.matchingWords.includes(stripWord(word.word)) && 'underline font-bold'] } 
+                            options.viewOptions.identical && lexCssClasses && parGroup.matchingWords.includes(stripWord(word.word)) && 'identical-word'] } 
                         onclick={()=>{if (options.viewOptions.highlightOnClick) wordClick(word.id)}}>{getText([word],options.viewOptions.hideApp)}{'  '} 
                         
                     {#if word.phrases['lexical']}
@@ -179,8 +179,13 @@ let {
         
     }
 
+    .identical-word{
+        @apply outline-1 outline-dashed;
+    }
+
     .lexical-phrase {
-        @apply border-b-2 font-bold;
+
+        @apply border-b-2 border-t-1 font-bold;
     }
     .lexical-phrase-1 {
         @apply  border-red-600;
@@ -202,6 +207,28 @@ let {
         @apply border-amber-600;
     }
     .lexical-phrase-7 {
+        @apply border-amber-300;
+    }
+      .lexical-phrase-8 {
+        @apply border-b-rose-600;
+    }
+    
+    .lexical-phrase-9 {
+        @apply border-teal-700;
+    }
+    .lexical-phrase-10 {
+        @apply border-purple-800;
+    }
+    .lexical-phrase-11 {
+        @apply border-yellow-950;
+    }
+    .lexical-phrase-12 {
+        @apply border-b-cyan-700;
+    }
+    .lexical-phrase-13 {
+        @apply  border-orange-900;
+    }
+    .lexical-phrase-14 {
         @apply border-amber-300;
     }
     

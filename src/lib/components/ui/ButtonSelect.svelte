@@ -41,7 +41,7 @@
       }
       else {
         selected = true;
-        mylog("selected = 'true'");
+       // mylog("selected = 'true'");
         
         
 
