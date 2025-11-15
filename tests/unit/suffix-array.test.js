@@ -2,7 +2,7 @@ import { describe, it, expect,test} from 'vitest';
 import { mylog } from '$lib/env/env';
 //import {IntegerSuffixArray} from '$lib/utils/suffix-array.js';
 import {findAllCommonSubarraysAmongHybrid} from "$lib/utils/sais-array2.js"
-import * as ISA2 from '$lib/utils/suffix-array2.js';
+//import * as ISA2 from '$lib/utils/suffix-array2.js';
 test('suffix dummy', async () => {
 	const tests=[
         {input: '', output: ''}
