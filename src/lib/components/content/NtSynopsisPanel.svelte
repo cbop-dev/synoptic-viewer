@@ -678,28 +678,9 @@ const viewStates=$state({
 });
 
 
-/*
-$effect(()=>{
-    myOptions.viewOptions.highlightOnClick = viewStates.views.highlightOnClick.state;
-    myOptions.viewOptions.unique = viewStates.views.unique.state;
-    myOptions.viewOptions.identical = viewStates.views.identical.state;
-})*/
 
 function makeURL(){
-    /*let opt = new SynopsisOptions(viewStates.views.unique.state,viewStates.views.identical.state,
-        viewStates.views.highlightOnClick.state,selectedLexes);
-    opt.focusOn=focusOn;
-    opt.greekStrings=myOptions.viewOptions.greekStrings;
-    opt.hideSolos=hideSolos;
-    opt.hideNonPrimarySolos=hideNonPrimarySolos;
-    opt.hideNonPrimary=hideNonPrimary;
-    opt.pericopes=alandPericopeNums;
-    opt.selectedGospelIndex=selectedGospelIndex;
-    opt.sort=sort;
-    opt.unique=viewStates.views.unique.state;
-    opt.identical=viewStates.views.identical.state;
-    opt.focusOn=focusOn;
-    opt.nt=currentServer.param;*/
+
     myOptions.request.pericopes=alandPericopeNums;
 //    mylog("MakeURL: about to call generateURL()!")
     const baseurl = window.location.protocol  + "//" + window.location.host + "/";
@@ -811,18 +792,8 @@ function buildLexiidenticalPhrases(){
 
 
 function loadRequestOptions(){
-    mylog("loadRequestOptions...")
-    /*
-    if(Object.hasOwn(myOptions,"hideSolos")) {mylog("hideSolos =myOptions.hideSolos;"); hideSolos =myOptions.hideSolos;}
-    if(Object.hasOwn(myOptions,"sort")) {mylog("sort =myOptions.sort;"); sort=myOptions.sort;}
-    if(Object.hasOwn(myOptions,"hideNonPrimary")) {mylog("hideNonPrimary=myOptions.hideNonPrimary;"); hideNonPrimary=myOptions.hideNonPrimary;}
-    if(Object.hasOwn(myOptions,"focusOn")) {mylog("focusOn=myOptions.focusOn;"); focusOn=myOptions.focusOn;}
-    if(Object.hasOwn(myOptions,"hideNonPrimarySolos")) {mylog("hideNonPrimarySolos=myOptions.hideNonPrimarySolos;"); hideNonPrimarySolos=myOptions.hideNonPrimarySolos;}
-    if(Object.hasOwn(myOptions,"unique")) {mylog("viewStates.views.unique.state=myOptions.unique;"); viewStates.views.unique.state=myOptions.unique;}
-    if(Object.hasOwn(myOptions,"identical")) {mylog("viewStates.views.identical=myOptions.identical;"); viewStates.views.identical.state=myOptions.identical;}
-    if(Object.hasOwn(myOptions,"selectedGospelIndex")) {mylog("selectedGospelIndex=myOptions.selectedGospelIndex;"); selectedGospelIndex=myOptions.selectedGospelIndex;}
-    if(Object.hasOwn(myOptions,"lexes")) {mylog("got lexes param!"); selectedLexes=myOptions.lexes}
-    if(Object.hasOwn(myOptions,"greekStrings")) {mylog("got greekSrings!"); myOptions.viewOptions.greekStrings=myOptions.greekStrings}*/
+    //mylog("loadRequestOptions...")
+    
 }
 let mounted=$state(false);
 onMount(() => {
@@ -840,14 +811,7 @@ onMount(() => {
     }
     mounted = true;
 });
-//$inspect("filteredPericopes",filteredPericopes, "perGroups:", perGroups, "filteredPerGroups:", filteredPerGroups);
 
-//$inspect("request:", myOptions);
-//$inspect("gotRequest:",gotRequest);
-//$inspect("Landing?:", landingPage);
-$inspect(`myOptions.hideApp: ${myOptions.viewOptions.hideApp}`);
-$inspect(`myOptions.nt: ${myOptions.request.nt}`);
-$inspect(`myOptions.nt:${myOptions.request.nt}`)
 </script>
 <style>
     @reference "tailwindcss";
@@ -919,27 +883,27 @@ $inspect(`myOptions.nt:${myOptions.request.nt}`)
     Based on Kurt Aland's <i>Synopsis Quattuor Evangeliorum</i>, using <a href="https://www.sblgnt.com">The SBL Greek New Testament (2010)</a> or, optionally, Nestle's 1904 edition of the <i>Greek New Testament.</i><br/>
     Enter NT reference to view parallel texts and click "Look up!", or select a section and press "Go!"
 {/snippet}
-{#snippet resultsButtons(short=false)}
-    {#if !short}    
-       <li >
-        <ButtonSelect bind:selected={viewStates.views.lookup.state} tooltipbottom tooltip="Show Lookup panel pop-up" buttonText="☰ Lookup" buttonStyle="btn"/>
-      </li>
+{#snippet resultsButtons(short=false,theTag='li',classes=[])}
+    {#if !short && !(landingPage)}    
+           <svelte:element this={theTag} class={classes}>
+            <ButtonSelect bind:selected={viewStates.views.lookup.state} tooltipbottom tooltip="Show Lookup panel pop-up" buttonText="☰ Lookup" buttonStyle="btn"/>
+            </svelte:element>
       {/if}
 
       {#if alandPericopeNums && alandPericopeNums.length}
-      <li><ButtonSelect bind:selected={viewStates.views.view.state} tooltipbottom tooltip="Show other viewing options (sort, etc.)"  buttonText="☰ Options"/></li>
+      <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={viewStates.views.view.state} tooltipbottom tooltip="Show other viewing options (sort, etc.)"  buttonText="☰ View"/></svelte:element>
 
      {#if dataReady}
-       <li><ButtonSelect buttonText="Similar" bind:selected={myOptions.viewOptions.similarPhrases} tooltip="Show lexically similar phrases (same lexemes, but possibly different forms/morphology)"/></li>
-       <li> <ButtonSelect buttonText="☰ Jump to ↓" bind:selected={viewStates.views.sections.state}/></li>       
-        <li><ButtonSelect bind:selected={viewStates.views.words.state} buttonText="☰ Words" /></li>
-        <li><ButtonSelect bind:selected={myOptions.viewOptions.highlightOnClick} buttonText="Auto Highlight" 
+       <svelte:element this={theTag} class={classes}><ButtonSelect buttonText="Similar" bind:selected={myOptions.viewOptions.similarPhrases} tooltipbottom ="Show lexically similar phrases (same lexemes, but possibly different forms/morphology)"/></svelte:element>
+       <svelte:element this={theTag} class={classes}> <ButtonSelect buttonText="☰ Jump to ↓" bind:selected={viewStates.views.sections.state}/></svelte:element>       
+        <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={viewStates.views.words.state} buttonText="☰ Words" /></svelte:element>
+        <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={myOptions.viewOptions.highlightOnClick} buttonText="Auto Highlight" 
             tooltipbottom={true}
-            tooltip="If enabled, clicking/tapping on a word will toggle highlighting of that lexeme. Press 'c' to toggle this option."/></li>    
+            tooltip="If enabled, clicking/tapping on a word will toggle highlighting of that lexeme. Press 'c' to toggle this option."/></svelte:element>    
         {#if currentServer.abbrev==SblGntServer.abbrev}   
-        <li><label class="label" for="hide-app-check{short? '-short':''}">
+        <svelte:element this={theTag} class={[classes, 'menu']}><label class="label" for="hide-app-check{short? '-short':''}">
 <input  class="toggle" id="hide-app-check{short? '-short':''}" type="checkbox" bind:checked={myOptions.viewOptions.hideApp}/>Hide appar{#if !short}aratus marks{:else}.{/if}</label>
-     </li>
+     </svelte:element>
      {/if}
  
          
@@ -947,15 +911,7 @@ $inspect(`myOptions.nt:${myOptions.request.nt}`)
       {/if}
 
 {/snippet}
-<div class="self-center text-center sticky top-3 bg-white z-10">
-
-    {#if !landingPage}
-        {#if myOptions.request.fromURL && !requestProcessed}
-            
-            <h3><i>Processing Request...</i></h3>
-            <span class="loading loading-spinner loading-xl"></span>
-        {:else}
-
+<div id="header-nav-section" class="self-center text-center fixed bg-white z-40 top-8  m-auto w-full" >
   <div class="navbar bg-base-100 text-center  shadow-sm ">
     <div class="navbar-start text-left max-w-full w-full m-auto md:hidden">
         <div class="dropdown  text-left">
@@ -967,29 +923,7 @@ $inspect(`myOptions.nt:${myOptions.request.nt}`)
         <ul tabindex="0"
         class="menu  dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow text-left ">
         {@render resultsButtons(true)}
-        <!-- 
-
-        {#if alandPericopeNums && alandPericopeNums.length}
-        <li><ButtonSelect bind:selected={viewStates.views.view.state} buttonText="☰ View Options"/></li>
-
-        {#if dataReady}
-        
-        <li> <ButtonSelect buttonText="☰ Jump to    ↓" bind:selected={viewStates.views.sections.state}/></li>       
-            <li><ButtonSelect bind:selected={viewStates.views.words.state} buttonText="☰ Words" /></li>
-            <li><ButtonSelect bind:selected={myOptions.viewOptions.highlightOnClick} buttonText="Auto Highlight" 
-                tooltipbottom={true}
-                tooltip="If enabled, clicking/tapping on a word will toggle highlighting of that lexeme. Press 'c' to toggle this option."/></li>
-            {#if currentServer.abbrev==SblGntServer.abbrev}   <li><label for="hide-app-check1">Hide apparatus marks</label>
-                <input id="hide-app-check1" class="toggle" type="checkbox" bind:checked={myOptions.viewOptions.hideApp}/>
-            </li>
-            {/if}
-            
-                
-            
-            
-        {/if}
-        {/if}
-    -->
+    
         </ul>
         </div>
         <div class="text-left ">
@@ -1021,10 +955,10 @@ $inspect(`myOptions.nt:${myOptions.request.nt}`)
                 </h1>&nbsp;
                 <ButtonSelect buttonText="?" buttonStyle="btn btn-xs btn-circle btn-ghost p-0" bind:selected={viewStates.views.help.state}/>
             </div> 
-        <ul class="bg-white menu menu-horizontal ">
-            
-        {@render resultsButtons(false)}
-        </ul>
+            <div class="bg-white text-center flex flex-wrap block w-full ">
+                
+                {@render resultsButtons(false,'div',['inline-block'])}
+            </div>
         </div>
     </div>
     <div class="navbar-end hidden">
@@ -1032,31 +966,48 @@ $inspect(`myOptions.nt:${myOptions.request.nt}`)
 
 
     </div>
-    </div>
-    {/if}
-    {:else}
-    
-<!--<h1>No request!!!!</h1><hr/>-->
-<div id="landing-panel text-center">
-   <h1 class="block text-center "><span class="hidden lg:inline">Greek NT Gospel Synopsis Viewer</span>
-    <span class="hidden md:inline lg:hidden">NT Gospel Synopsis</span>
-    <span class="md:hidden">NT Synopsis</span>
-</h1>
-    
-        
-        <div class="text-center m-auto">
-    
-            Based on Kurt Aland's <i>Synopsis Quattuor Evangeliorum</i>, using <a href="https://www.sblgnt.com">The SBL Greek New Testament (2010)</a> or, optionally, Nestle's 1904 edition of the <i>Greek New Testament</i>.<br/>
-            Enter NT reference to view parallel texts and click "Look up!", or select a section and press "Go!"
-      </div>
-      <hr/>
+   </div>
 </div>
-
+ 
+        
     
+<div id="main-content-div" class="self-center relative text-center bg-white mt-20 md:mt-30 z-20">
+       {#if !landingPage}
+            {#if myOptions.request.fromURL && !requestProcessed}
+                
+                <h3><i>Processing Request...</i></h3>
+                <span class="loading loading-spinner loading-xl"></span>
+            
+            
+
+            {/if}
+        {:else} 
+
+          <div id="landing-panel text-center">
+    <!--<h1 class="block text-center "><span class="hidden lg:inline">Greek NT Gospel Synopsis Viewer</span>
+        <span class="hidden md:inline lg:hidden">NT Gospel Synopsis</span>
+        <span class="md:hidden">NT Synopsis</span>
+        <ButtonSelect buttonStyle="btn btn-neutral btn-outline btn-circle btn-xs p-0 m-0"
+            buttonText="?"
+            bind:selected={viewStates.views.help.state}/>
+    </h1>-->
+        
+            
+ 
+    
+            <div class="text-center m-auto">
+            
+                    Based on Kurt Aland's <i>Synopsis Quattuor Evangeliorum</i>, using <a href="https://www.sblgnt.com">The SBL Greek New Testament (2010)</a> or, optionally, Nestle's 1904 edition of the <i>Greek New Testament</i>.<br/>
+                    Enter NT reference to view parallel texts and click "Look up!", or select a section and press "Go!"
+            </div>
+            <hr/>
+          </div>
+        {/if}
+
+  
 
 
 
-{/if}
 {#if viewStates.views.lookup.state}
 
 <div id="search-panel" class="text-center ">
@@ -1114,7 +1065,7 @@ $inspect(`myOptions.nt:${myOptions.request.nt}`)
                 {#each filteredPerGroups as group, index }
                 <hr class="mb-2 !border-slate-200"/>
                 <div class='anchor text-center' id="section-{group.id}">
-                    <h2 class="inline-block"><b><u>{group.title}: {group.getRefs()}</u></b><CopyText copyText={group.getRefs()} tooltip='Copy parallel group references'/></h2>
+                    <h2 class="inline-block"><u><b>{group.title}:</b></u><br/> {group.getRefs()}<CopyText copyText={group.getRefs()} tooltip='Copy parallel group references'/></h2>
                     
                 <h3>            {#if group.lexIdenticalPhrasesLocations.length > 0}
                   <!-- (TODO: remove) Got some phrases: {group.lexIdenticalPhrasesLocations} -->
@@ -1169,8 +1120,8 @@ $inspect(`myOptions.nt:${myOptions.request.nt}`)
         </i></div>
     {/if}
 
-</div>
 
+</div>
 {#if dataReady}
 <Modal2 bind:showModal={viewStates.views.sections.state}>
             <div id="results-navigation"  class=" text-left">
@@ -1242,6 +1193,7 @@ $inspect(`myOptions.nt:${myOptions.request.nt}`)
                     <li>Enabling <b>"Outline Unique Lexemes"</b> will draw <span class="outline outline-blue-400">an outline</span> (one color per gospel) around each lexeme that is unique to a specific gospel, i.e., that shows up in only one column of a single parallel group.</li>
                     <li>Enabling <b>"Identical words"</b> will <span class="font-bold underline">bold and underline</span> all morphologically identical words shared by at least two gospels in the same parallel group </li>
                     <li>Enabling <b>"Highlight Lexeme on Click"</b> will toggle <span class="bg-cyan-500 text-white">highlighting</span> of all instances of the lexeme.</li>
+                    <li>Enabling <b>"Similar"</b> will underline "lexically-identical" phrases that are common between at least two columns. "Lexically identical" here refers to those phrases which have the same lexemes in the same sequence even if they differ morphologically. This crosses verse boundaries.</li>
                 </ul>
     
             </div>

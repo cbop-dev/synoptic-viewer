@@ -705,7 +705,7 @@ $inspect(`refarea.0:'${refAreaInputs[0]}`);
             <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={myOptions.viewOptions.identical} tooltipbottom tooltip="Toggle Bold/underline morphologically identical words, even if they are in diverse positions. This generates 'false positives.'" 
                     buttonText="Identical"/></svelte:element>
             <svelte:element this={theTag} class={classes}><ButtonSelect buttonText="Auto Highlight" bind:selected={myOptions.viewOptions.highlightOnClick}  tooltipbottom  tooltip="If enabled, clicking on any word will highlight all instances of the lexem."/></svelte:element>
-            <svelte:element this={theTag} class={classes}><ButtonSelect buttonText="Word Options" bind:selected={viewStates.views.words.state} tooltipbottom  tooltip="View Lexeme and custom Greek options."/></svelte:element> 
+            <svelte:element this={theTag} class={classes}><ButtonSelect buttonText="☰ Words" bind:selected={viewStates.views.words.state} tooltipbottom  tooltip="View Lexeme and custom Greek options."/></svelte:element> 
             
             {#if currentServer.abbrev==SblGntServer.abbrev}
                 <svelte:element this={theTag} class={[classes,["tooltip","tooltip-bottom","menu"]]} 
@@ -717,7 +717,7 @@ $inspect(`refarea.0:'${refAreaInputs[0]}`);
         
     {/if}
 {/snippet}
-<div class="self-center text-center sticky bg-white z-40 top-3.5" >
+<div id="header-nav-section" class="self-center text-center fixed bg-white z-40 top-8  m-auto w-full" >
 
   <!--<div class="block"><h1 class="text-3xl bold block underline self-center "><span class="self-center inline">Custom NT Synopsis!</span>
 <ButtonSelect buttonStyle="btn btn-neutral btn-outline btn-circle btn-xs p-0 m-0 "
@@ -749,7 +749,7 @@ $inspect(`refarea.0:'${refAreaInputs[0]}`);
            <div class="title-panel m-0 p-0 block">
              {@render appTitle()}
             </div>
-            <br/>
+            
              <!--<ul class="bg-white  menu menu-horizontal p-0">-->
             <div class="flex flex-wrap">
                 {@render resultsNav(false,'div')}
@@ -762,7 +762,7 @@ $inspect(`refarea.0:'${refAreaInputs[0]}`);
   </div>
 </div>
 </div>
-<div class="self-center text-center bg-white z-20" >
+<div id="main-content-div" class="self-center relative text-center bg-white z-20 mt-20 md:mt-30" >
 {#if viewStates.views.lookup.state}
 <h3 class="italic">Choose your <span class="line-through">weapons</span> NT Bible passages:</h3>
 
@@ -997,9 +997,10 @@ $inspect(`refarea.0:'${refAreaInputs[0]}`);
     <h2 class="underline">Results Options: Unique and Identical Words</h2>
              <div class=" m-auto inline-block text-left">
                 <ul class="list-disc ml-9">
-                    <li>Enabling <b>"Outline Unique Lexemes"</b> will draw <span class="outline outline-blue-400">an outline</span> (one color per gospel) around each lexeme that is unique to a specific gospel, i.e., that shows up in only one column of a single parallel group.</li>
-                    <li>Enabling <b>"Identical words"</b> will <span class="font-bold underline">bold and underline</span> all morphologically identical words shared by at least two gospels in the same parallel group </li>
-                    <li>Enabling <b>"Highlight Lexeme on Click"</b> will toggle <span class="bg-cyan-500 text-white">highlighting</span> of all instances of the lexeme.</li>
+                    <li>Enabling <b>"Unique"</b> will draw <span class="outline outline-blue-400">an outline</span> (one color per gospel) around each lexeme that is unique to a specific gospel, i.e., that shows up in only one column of a single parallel group.</li>
+                    <li>Enabling <b>"Identical"</b> will <span class="font-bold underline">bold and underline</span> all morphologically identical words shared by at least two gospels in the same parallel group </li>
+                    <li>Enabling <b>"Auto Highlight"</b> will toggle <span class="bg-cyan-500 text-white">highlighting</span> of all instances of the lexeme.</li>
+                    <li>Enabling <b>"Similar"</b> will underline "lexically-identical" phrases that are common between at least two columns. "Lexically identical" here refers to those phrases which have the same lexemes in the same sequence even if they differ morphologically. This crosses verse boundaries.</li>
                 </ul>
     
             </div>

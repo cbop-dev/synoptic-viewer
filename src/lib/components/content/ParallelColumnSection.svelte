@@ -103,7 +103,7 @@ function notesClick(heading,note){
 //$inspect("ParTexts, focus:", focus)
 //$inspect("numCols", numCols, "colData:", colData)
 //$inspect("ParText, customClass", cssCustomDict);
-$inspect(`options.unique: ${options.viewOptions.unique}`);
+//$inspect(`options.unique: ${options.viewOptions.unique}`);
 
 </script>
 

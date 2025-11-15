@@ -95,7 +95,7 @@
             currentServerName=serverUserSelectField;
         }
     }*/
-   $inspect(`options: typeof='${typeof options}'; viewOptions.keys=['${Object.keys(options.viewOptions).join("','")}']`)
+   //$inspect(`options: viewOptions.similarPhrases=${options.viewOptions.similarPhrases}`)
 </script>
 <style>
      @reference "tailwindcss";
