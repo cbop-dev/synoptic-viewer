@@ -7,7 +7,7 @@ import Icon from '../ui/icons/Icon.svelte';
 import LinkIcon from '../ui/icons/link-icon.svelte';
 import LinkSvg from  '../ui/icons/link.svg';
 import {gospelParallels} from '@cbop-dev/aland-gospel-synopsis'
-import parallelTextsSvelte, { ParallelText, GospelPericopeGroup,Word, TextAndRef,VerseWords } from "./parallelTexts.svelte";
+import parallelColumnsSvelte, { ParallelColumn, GospelPericopeGroup,Word, TextAndRef,VerseWords } from "./parallelTexts.svelte";
 import { N1904Server, lexemes} from "$lib/n1904/tfN1904";
 import { SblGntServer } from '$lib/sblgnt/sblgnt.js';
 
@@ -333,19 +333,7 @@ let bestMatchedLexes=$state([]);
  */
 let otherMatchedLexes=$state([]);
 
-/*
-async function fetchPostTextsBatch(){
-//todo: refactor in another .svelte.js file, then test
-    fetchedTextsResponse = null;
-*/
-    /**
-     * @type {{book:string,chapter:number|null,verses:number[]}[]} bcvFetchArray
-     */
-/*    const bcvFetchArray=currentServer.getBCVarrayFromRefs(groupsRefsArray);
-    
-    fetchedTextsResponse = await currentServer.getTexts(bcvFetchArray,true,true);
-    
-}*/
+
 async function buildAndFetchPericopes(reset=true){
     viewStates.views.lookup.state=false;
     dataReady=false;
@@ -385,6 +373,7 @@ function buildLexArrays(){
 
     
 }
+
 function populateGroupsText(words=false){
     // mylog("v==================================v", true);
     //mylog("populateGroupTexts()...",true);
@@ -405,15 +394,16 @@ function populateGroupsText(words=false){
                     }
                     if (words){
                         
-                        textRef.words=fetchedTextsResponse['texts'][queryIndex].words;
+                        textRef.vwords=VerseWords.buildFromObj(fetchedTextsResponse['texts'][queryIndex].words);
                     }
                     // mylog("populating fetched text for group index "+index + ", ref: '" + textRef.reference
                     // + "', queryIndex = " + queryIndex +", text='"+textRef.text +"'", true);
                 }
-                
+
             }
         }
-        group.markUniqueAndIdenticalWords();        
+        group.markUniqueAndIdenticalWords();    
+        group.buildLexIdenticalPhrases(3);    
     }
     mylog("DONE! Populated the GroupTexts()!")
     mylog("^==================================^")
@@ -806,6 +796,17 @@ $effect(()=>{customGreekInputText=GreekUtils.removeDiacritics(
 });
 //$inspect(customGreekClasses);
 
+function buildLexiidenticalPhrases(){
+    mylog("buildLexiidenticalPhrases()!")
+    if(dataReady && fetchedTextsResponse && filteredPerGroups.length){
+        for (const [i,perGroup] of filteredPerGroups.entries()){
+            mylog(`about to build identical phrases for Group #{$i} (${perGroup.getRefs()})`, true);
+            perGroup.buildLexIdenticalPhrases(3);
+
+        }
+    }
+           
+}
 
 
 function loadRequestOptions(){
@@ -928,7 +929,7 @@ $inspect(`myOptions.nt:${myOptions.request.nt}`)
       <li><ButtonSelect bind:selected={viewStates.views.view.state} buttonText="☰ View Options"/></li>
 
      {#if dataReady}
-     
+       <li><ButtonSelect buttonText="Similar Phrases" bind:selected={myOptions.viewOptions.similarPhrases} tooltip="Show lexically similar phrases (same lexemes, but possibly different forms/morphology)"/></li>
        <li> <ButtonSelect buttonText="☰ Jump to ↓" bind:selected={viewStates.views.sections.state}/></li>       
         <li><ButtonSelect bind:selected={viewStates.views.words.state} buttonText="☰ Words" /></li>
         <li><ButtonSelect bind:selected={myOptions.viewOptions.highlightOnClick} buttonText="Auto Highlight" 
@@ -1112,8 +1113,13 @@ $inspect(`myOptions.nt:${myOptions.request.nt}`)
                 {#each filteredPerGroups as group, index }
                 <hr class="mb-2 !border-slate-200"/>
                 <div class='anchor text-center' id="section-{group.id}">
-                    <h2 class="inline-block"><b><u>{group.title}</u></b><CopyText copyText={group.getRefs()} tooltip='Copy parallel group references'/></h2>
-                    </div>
+                    <h2 class="inline-block"><b><u>{group.title}: {group.getRefs()}</u></b><CopyText copyText={group.getRefs()} tooltip='Copy parallel group references'/></h2>
+                    
+                <h3>            {#if group.lexIdenticalPhrasesLocations.length > 0}
+                  <!-- (TODO: remove) Got some phrases: {group.lexIdenticalPhrasesLocations} -->
+            {:else}
+                    {/if}</h3>
+                </div>
                 <div class="float-right mr-2 break-after-all">
                     <a href="" class="" title="Jump to section"
                     onclick={()=>{viewStates.views.sections.state=true}}><BulletsIcons height={20} width={20}/></a>

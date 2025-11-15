@@ -48,7 +48,7 @@
   
     import Button from '../ui/Button.svelte';
     import BibleTextBlock from './BibleTextBlock.svelte';
-    import { ParallelTextGroup } from './parallelTexts.svelte';
+    import { ParallelColumnGroup } from './parallelTexts.svelte';
     import { SynopsisOptions3 } from './SynopsisClasses.svelte';
     
    
@@ -56,19 +56,17 @@
    
     
     /**
-     * @type {{parTextGroup: ParallelTextGroup,
+     * @type {{parTextGroup: ParallelColumnGroup,
      * wordClick:function(number):void,
      * cssClassDict:Object<number,string>,
      * cssCustomDict:Object,
-     * showUnique:boolean,
      * options:SynopsisOptions3,
      * showNotes:boolean,
-     * hideApp:boolean
      * showNotesFunction(heading:string,note:string):void
      * }}
      */
     let {
-        parTextGroup = new ParallelTextGroup(),
+        parTextGroup = new ParallelColumnGroup(),
         options=new SynopsisOptions3(),
         //showUnique=false,
         //options.viewOptions.showIdentical=true,
@@ -82,7 +80,8 @@
         
     } = $props();
 
-  
+  let showSimilarPhrases=$state(true);
+
    /**
  * * @param {string} heading 
  * @param {string} note 
@@ -91,7 +90,7 @@ function notesClick(heading,note){
     showNotesFunction(heading,note);
 }
 
-    let numCols=$derived(parTextGroup.parallelTexts.length)
+    let numCols=$derived(parTextGroup.parallelColumns.length)
  
     
     let columnStyle = $derived('grid-cols-'+numCols);
@@ -119,8 +118,8 @@ $inspect(`options.unique: ${options.viewOptions.unique}`);
         numCols ==5 ? "lg:grid-cols-5 gap-1" :
         ""
     } grid-cols-1 text-2xl">
-    
-        {#each parTextGroup.parallelTexts as col, index}
+           
+        {#each parTextGroup.parallelColumns as col, index}
             
         {#if col.textRefs && col.textRefs.length}
             <div class="rounded-box  m-1 p-2 column column-{index}">
@@ -131,12 +130,12 @@ $inspect(`options.unique: ${options.viewOptions.unique}`);
                 
                 {@const unique = (options.viewOptions.unique && numCols > 1)? col.unique : new Set()}
                 
-               
+                
                     {#if index2 > 0}<br/>{/if}
                     <div class="text-left">
-                     
+   
                     <BibleTextBlock {textRef}  parGroup={parTextGroup} {options} {numCols} copyButton={true} 
-                    cssWordClassDict={cssClassDict} cssWordCustomDict={cssCustomDict} 
+                    cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} 
                     {showNotes} uniqueSet={unique} notesClick={showNotesFunction} 
                         {wordClick} 
                     />

@@ -1,5 +1,5 @@
 import ParTexts from "./parallelTexts.svelte.js";
-import {ParallelText, ParallelTextGroup, GospelPericopeGroup,TextAndRef,VerseWords,Word,GospelPericopeGroupIndices} from "./parallelTexts.svelte.js";
+import {ParallelColumn, ParallelColumnGroup, GospelPericopeGroup,TextAndRef,VerseWords,Word,GospelPericopeGroupIndices} from "./parallelTexts.svelte.js";
 import * as env from '$lib/env/env.js'
 import gospelParallels from '@cbop-dev/aland-gospel-synopsis'
 import { mylog } from "$lib/env/env";
@@ -12,7 +12,7 @@ import * as MathUtils from '$lib/utils/math-utils.js';
  * 
  * @param {string} bookAbbrev
  * @param {string} ref
- * @returns {{reference: string, text: string}[]}
+ * @returns {TextAndRef}[]}
  */
 export function getTextRefsArray(bookAbbrev, ref){
     let textRefArray = [];
@@ -66,15 +66,15 @@ export function getGroupsArray(pericopeNums){
         perGroup.id = row.pericope;
         perGroup.title = row.pericope + ": " + row.title;
         if (row.Matt.ref)
-            perGroup.matt.textRefs.push(...getTextRefsArray("Matt", row.Matt.ref));
+            perGroup.gospelCols.matt.textRefs.push(...getTextRefsArray("Matt", row.Matt.ref));
         if (row.Mark.ref)
-            perGroup.mark.textRefs.push(...getTextRefsArray("Mark", row.Mark.ref));
+            perGroup.gospelCols.mark.textRefs.push(...getTextRefsArray("Mark", row.Mark.ref));
         if (row.Luke.ref)
-            perGroup.luke.textRefs.push(...getTextRefsArray("Luke", row.Luke.ref));
+            perGroup.gospelCols.luke.textRefs.push(...getTextRefsArray("Luke", row.Luke.ref));
         if (row.John.ref)
-            perGroup.john.textRefs.push(...getTextRefsArray("John", row.John.ref));
+            perGroup.gospelCols.john.textRefs.push(...getTextRefsArray("John", row.John.ref));
         if (row.other.ref)
-            perGroup.other.textRefs.push(...getTextRefsArray("", row.other.ref));
+            perGroup.gospelCols.other.textRefs.push(...getTextRefsArray("", row.other.ref));
             
         return perGroup;
 
@@ -83,7 +83,7 @@ export function getGroupsArray(pericopeNums){
 
 /**
  * 
- * @param {ParallelTextGroup[]} groupsArray 
+ * @param {ParallelColumnGroup[]} groupsArray 
  * @returns {{groupsIndices: number[][][], refsArray: string[]}} 
  * @description does some weird magic: returns two arrays:
  *  - groupsIndices: 3-dimensiona array of indices. 
@@ -111,7 +111,7 @@ export function getParallelGroupsRefsArrays(groupsArray)
          */
         const thisGroupIndices=[];
         
-        for (const parText of group.parallelTexts){
+        for (const parText of group.parallelColumns){
             const thisColIndices=[]
             for (const ref of parText.textRefs){
                 /**
@@ -139,15 +139,15 @@ export function getParallelGroupsRefsArrays(groupsArray)
 }
 /**
  * 
- *  @param {ParallelText[]} parallelTexts 
+ *  @param {ParallelColumn[]} parallelColumns 
  *  @return {{parallelIndices: number[][], refsArray: string[]}} 
  *  @description returns two arrays: parallelIndices, a 2-dimensional array of numbers. 
- *  The first indices of this corresponds with the indices of parallelTexts.  The second-level array contains indices into refsArray, 
+ *  The first indices of this corresponds with the indices of parallelColumns.  The second-level array contains indices into refsArray, 
  *  which in turn contains the reference (e.g., "Matt 3:16") for each bible text queried. This removes duplicate queries the same text 
  *  is wanted multiple times. Thus, the resulting `refsArray` of the return object function can be used to query the TfServer,
- *  and the result of this can be used refsArray to populate the texts in parallelTexts. 
+ *  and the result of this can be used refsArray to populate the texts in parallelColumns. 
  */
-export function getParallelRefsArrays(parallelTexts){
+export function getParallelRefsArrays(parallelColumns){
      //let refIndex = 0;
     /**
      * @type {number[][]} groupsIndices
@@ -159,7 +159,7 @@ export function getParallelRefsArrays(parallelTexts){
     const refsArray=[];
 
     
-    for (let [index, parText] of parallelTexts.entries()){
+    for (let [index, parText] of parallelColumns.entries()){
         const thisParIndices=[];
         
         for (const [i,txtAndRef] of parText.textRefs.entries()){
@@ -187,17 +187,58 @@ export function getParallelRefsArrays(parallelTexts){
 
 
 
+/**
+ * 
+ * @param {GospelPericopeGroup[]} perGroups
+ * @param {Object} response 
+ * @param {GospelPericopeGroupIndices[]} perGroupsIndices 
+ * @param {boolean} words 
+ */
+export function populateGroupsText(perGroups,response,perGroupsIndices,words=true){
+    // mylog("v==================================v", true);
+    //mylog("populateGroupTexts()...",true);
+    
+    for (const [index,group] of perGroups.entries()){
+        mylog("checking group # " + group.id +" , title: '"+ group.title + ", index: " + index);
+        for (const book of ['matt', 'mark', 'luke', 'john','other']){
+            for (const [i,textRef] of group[book].textRefs.entries()){
+                mylog("checking ref: " + textRef.reference);
+                const queryIndex= perGroupsIndices[index][book][i];
+                if (response && response['texts'] && response['texts'][queryIndex]){
+                    textRef.text= response['texts'][queryIndex].text;
+                    if (response['texts'][queryIndex].notes){
+                        const notes = response['texts'][queryIndex].notes.filter((n)=>n.length).join("\n");
+                        if (notes.length){
+                            textRef.note=notes;
+                        }
+                    }
+                    if (words){
+                        
+                        textRef.vwords=VerseWords.buildFromObj(response['texts'][queryIndex].words);
+                    }
+                    // mylog("populating fetched text for group index "+index + ", ref: '" + textRef.reference
+                    // + "', queryIndex = " + queryIndex +", text='"+textRef.text +"'", true);
+                }
+
+            }
+        }
+        group.markUniqueAndIdenticalWords();
+        group.buildLexIdenticalPhrases(3);           
+    }
+    mylog("DONE! Populated the GroupTexts()!")
+    mylog("^==================================^")
+}
 
 /**
- * @param {ParallelTextGroup} parallelTextGroup 
+ * @param {ParallelColumnGroup} parallelColumnGroup 
  * @param {Object} response
- * @param {number[][]} parallelIndices - first index corresponding to that of parallelTextGroup, then containing indices into response.text
+ * @param {number[][]} parallelIndices - first index corresponding to that of parallelColumnGroup, then containing indices into response.text
  * @param {boolean} [words=true] 
  */
-export function populateTextGroup(parallelTextGroup, response, parallelIndices, words=true){
+export function populateTextGroup(parallelColumnGroup, response, parallelIndices, words=true){
 
 
-    for (const [index,par] of parallelTextGroup.parallelTexts.entries()){
+    for (const [index,par] of parallelColumnGroup.parallelColumns.entries()){
     
         for (const [i,textRef] of par.textRefs.entries()){
             // mylog("checking ref: " + textRef.reference);
@@ -206,7 +247,8 @@ export function populateTextGroup(parallelTextGroup, response, parallelIndices, 
                 textRef.text= response.texts[queryIndex].text;
                 if (words){
                     
-                    textRef.words=response.texts[queryIndex].words;
+                    const vWords = VerseWords.buildFromObj(response.texts[queryIndex].words);
+                    textRef.vwords=vWords;
                 }
                 if (response.texts[queryIndex].notes){
                     const theNotes = response.texts[queryIndex].notes.filter((n)=>n.length).join("\n");
@@ -220,7 +262,8 @@ export function populateTextGroup(parallelTextGroup, response, parallelIndices, 
             
         }
         
-        parallelTextGroup.markUniqueAndIdenticalWords();        
+        parallelColumnGroup.markUniqueAndIdenticalWords();
+        parallelColumnGroup.buildLexIdenticalPhrases(3);   
     }
  
 

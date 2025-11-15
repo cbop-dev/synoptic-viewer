@@ -1,9 +1,9 @@
 import { describe, it, expect,test} from 'vitest';
 import {N1904Server } from '$lib/n1904/tfN1904.js';
 import { mylog } from '$lib/env/env.js';
-import { ParallelText, GospelPericopeGroup,TextAndRef,VerseWords,Word, parseSingleGroup} from '$lib/components/content/parallelTexts.svelte.js';
+import { ParallelColumn, GospelPericopeGroup,TextAndRef,VerseWords,Word, parseSingleGroup} from '$lib/components/content/parallelTexts.svelte.js';
 import GP from '@cbop-dev/aland-gospel-synopsis';
-import TfUtils from '$lib/components/content/TfUtils.js';
+import * as TfUtils from '$lib/components/content/TfUtils.js';
 
 const tfServer = new N1904Server();
 test('dummy', async () => {
@@ -29,8 +29,9 @@ test('Groups: unique words', async () => {
         const group = TfUtils.getGroupsArray([t.aland])[0];
         const groupsArrays=TfUtils.getGospelGroupRefsArrays([group]);
       //  mylog("gonna call fetchAndPopulate...");
-        await tfServer.fetchAndPopulateGroupsPericopes([group],true,true,true)
-
+        //await tfServer.fetchAndPopulateGroupsPericopes([group],true,true,true)
+        const response = await tfServer.fetchPostTextsBatch(groupsArrays.refsArray);
+        TfUtils.populateGroupsText([group],response,groupsArrays.groupsIndices)
         //group.markUniqueAndIdenticalWords();
         //console.log("marked uniq words!")
         for (const book of ['matt', 'mark', 'luke','john']){
@@ -46,7 +47,7 @@ test('Groups: unique words', async () => {
 
 test('parseSingleGroup', async () => {
 	const tests =[
-        {input:["Matt 3:12;"],output: [new ParallelText([new TextAndRef("Matt 3:12")])]}
+        {input:["Matt 3:12;"],output: [new ParallelColumn([new TextAndRef("Matt 3:12")])]}
     ]
     
     for (const t of tests){

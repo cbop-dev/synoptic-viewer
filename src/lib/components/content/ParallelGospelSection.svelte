@@ -1,6 +1,6 @@
 <script>
     import { mylog } from '$lib/env/env.js';
-    import { GospelPericopeGroup, ParallelTextGroup, ParallelText ,Word, TextAndRef,VerseWords,stripWord} from './parallelTexts.svelte.js';
+    import { GospelPericopeGroup, ParallelColumnGroup, ParallelColumn ,Word, TextAndRef,VerseWords,stripWord} from './parallelTexts.svelte.js';
     import {gospelParallels} from '@cbop-dev/aland-gospel-synopsis';
     import { ColorUtils } from '$lib/utils/color-utils';
     import CopyText     from '../ui/CopyText.svelte';
@@ -42,6 +42,26 @@
         
     } = $props();
 
+
+    /**
+     * key: bible ref (string) that matches a textAndRef.reference value.
+     * value: 3-d array [x][y]=[array z], where x and y are verse and word indexes into the correponding textAndRef.vwords instance(s):
+     *      x=index for textAndRef.vwords[x] (thus, the verse index)
+     *      y=index of textAndRef.vwords[x][y] (thus, the word index in this verse)
+     * and z= an array of strings, each of which is a css class to be added to the corresponding word in textAndRef.vwords[x][y]
+     *
+     * Capisci?
+     */
+    //wrong description above!
+
+    /**
+     * similarPhrasesDict
+     * key: a string of ordered integers separated by commas; each number is a lex id, 
+     * value: an array of diction
+     * 
+     * {}
+     */
+    let similarPhrasesDb=$state({})
     
     /**
      * * @param {string} heading 
@@ -51,7 +71,7 @@
         showNotesFunction(heading,note);
     }
     /**
-     * @type {{focused: boolean, cols: ParallelText[], focusIndex: number}} colData
+     * @type {{focused: boolean, cols: ParallelColumn[], focusIndex: number}} colData
      */
     let colData = $derived.by(()=>{
 
@@ -66,7 +86,7 @@
          */
        // let bgClasses=[];
         /**
-         * @type {ParallelText[]} cols
+         * @type {ParallelColumn[]} cols
          */
         let cols = [parGroup.matt, parGroup.mark,parGroup.luke,parGroup.john];
         if (focus==gospels.names.MATTHEW){
@@ -198,6 +218,8 @@ function isUnique(wordid, uniqueSet){
         {#each colData.cols as col, index}
 
         {#if col.textRefs && col.textRefs.length}
+            
+
             <div class="rounded-box  {Object.values(gospels.abbreviations)[index]} m-1 p-2 gospel-column gospel column gospel-column-{index} column-{index}">
             {#if col.textRefs.length}
             
@@ -205,13 +227,13 @@ function isUnique(wordid, uniqueSet){
                 {#each col.textRefs as textRef, index2}
                 
                 {@const unique = (options.viewOptions.unique && numCols > 1)? col.unique : new Set()}
-               
+                
               
                     {#if index2 > 0}<br/>{/if}
                     <div class="text-left">
                     
                        <BibleTextBlock {textRef}  {parGroup} {options} {numCols} copyButton={true} 
-                    cssWordClassDict={cssClassDict} cssWordCustomDict={cssCustomDict} 
+                    cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} 
                     {showNotes} uniqueSet={unique} notesClick={showNotesFunction} 
                         {wordClick} 
                     />
@@ -238,7 +260,7 @@ function isUnique(wordid, uniqueSet){
                 <div class="rounded-box bg-base-200 other inline-block m-1 p-1 text-left m:flex-1">
 
                          <BibleTextBlock {textRef}  {parGroup} {options} {numCols} copyButton={true} 
-                    cssWordClassDict={cssClassDict} cssWordCustomDict={cssCustomDict} 
+                    cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} 
                     {showNotes} notesClick={showNotesFunction} 
                         {wordClick} 
                     />
@@ -258,7 +280,7 @@ function isUnique(wordid, uniqueSet){
                  
         <div class="rounded-box  inline-block p-2 m-1 {Object.values(gospels.abbreviations)[colData.focusIndex]} text-left">
                  <BibleTextBlock {textRef}  {parGroup} {options} {numCols} copyButton={true} 
-                    cssWordClassDict={cssClassDict} cssWordCustomDict={cssCustomDict} 
+                    cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} 
                     {showNotes} uniqueSet={unique}  notesClick={showNotesFunction} 
                         {wordClick} 
                     />
@@ -280,7 +302,7 @@ function isUnique(wordid, uniqueSet){
                 {#if index > 0}<br/>{/if}
                 <div >
                          <BibleTextBlock {textRef}  {parGroup} {options}  {numCols} copyButton={true} 
-                    cssWordClassDict={cssClassDict} cssWordCustomDict={cssCustomDict} 
+                    cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} 
                     {showNotes} uniqueSet={col.unique} notesClick={showNotesFunction} 
                         {wordClick} 
                     />
@@ -304,7 +326,7 @@ function isUnique(wordid, uniqueSet){
                  
                 <div class="rounded-box other bg-base-200 inline-block m-1 text-left">
                          <BibleTextBlock {textRef}  {parGroup} {options}  {numCols} copyButton={true} 
-                    cssWordClassDict={cssClassDict} cssWordCustomDict={cssCustomDict} 
+                    cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} 
                     {showNotes}  notesClick={showNotesFunction} 
                         {wordClick}
                     />

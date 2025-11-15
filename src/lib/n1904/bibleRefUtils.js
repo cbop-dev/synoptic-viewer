@@ -673,8 +673,8 @@ export function formatBibRefs(inputString){
 		}	
 	});
 		
-	var output = "";
-    var bdemarc = "";
+	let output = "";
+    let bdemarc = "";
 	Object.keys(books).sort(function(x,y)
 		{ 
 			if (getBookOrder(x) < getBookOrder(y)) 

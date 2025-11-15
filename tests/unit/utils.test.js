@@ -106,7 +106,9 @@ test('string utils', async () => {
 
 test('string sequences', async () => {
 	const tests=[
-        {input: '', output: ''}
+        {text1:"this is a sentence", text2: "this is a sentence", 
+            output:{"this is a sentence":{text1:[0,1,2,3],text2:[0,1,2,3]}}},
+        {text1: 'this is a sentence', text2: 'this is a phrase in a sentence which is a sentence', output:[]},//todo finish this line
 
     ];
     for (const t of tests){
@@ -115,3 +117,28 @@ test('string sequences', async () => {
 	expect(true).toBe(true);
 
 });
+
+//NOPE:
+/*
+test('matth.findCommonNonOverlappingSequences', async () => {
+
+    //findCommonNonOverlappingSequences
+    console.log("my test:", mathUtils.findCommonNonOverlappingSequences([1,2,3,4,5,6,7,8,9,10,11], [1,9,10,11,2,4,5,6,7,3]));
+    const tests=[
+        {ar1:[1,2,6,3,10,11], ar2: [28,400], output: []},
+        {ar1:[1,2,3,4,5], ar2: [1,2,4,5], output: [{seq:[1,2], i:0, j:0},{seq:[4,5],i:3,j:2}]},
+        {ar1:[1,2,3,4,5,6,7,8,9,10,11], ar2: [1,9,10,11,2,4,5,6,7,3], output: [{seq:[4,5,6,7],i:3,j:5},{seq:[9,10,11],i:8,j:2}]}
+
+    ];
+
+    for (const [i,t] of tests.entries()){
+        const seq = mathUtils.findCommonNonOverlappingSequences(t.ar1,t.ar2);
+        console.log(`For test ${i} input ([${t.ar1.join(",")}][${t.ar2.join(",")}])=>`,seq );
+        expect(seq.length).toEqual(t.output.length);
+    }
+	expect(true).toBe(true);
+
+});
+*/
+
+

@@ -126,7 +126,42 @@ export class SynopsisOptions3{
     viewOptions=$state({});
     request=$state({});
 
+    resetProp(propName){
+        let reset=false;
+        if(Object.hasOwn(SynopsisOptions3.SynopsisUrlParamsMap,propName)){
+            const row=SynopsisOptions3.SynopsisUrlParamsMap[propName];
+            let val=row.default ? row.default : null;
 
+            if(!val){
+                if(row.type=='int'){
+                    val=0
+                }
+                else if(row.type=='boolean'){
+                    val=false;
+                }
+                else if(row.type=='str'){
+                    val=''
+                }
+                else{//one of the array types.
+                    val=[]
+                }
+
+            }
+
+            if(row.category=='view'){
+                this.viewOptions[propName]=val;
+                reset=true;
+            }
+            else if(row.category=='request'){
+                this.request[propName]=val;
+                reset=true;
+            }
+
+        }
+
+        return reset;
+        
+    }
     constructor(){
         Object.entries(SynopsisOptions3.SynopsisUrlParamsMap).forEach(([name,row])=>{
             let val=row.default ? row.default : null;
@@ -211,6 +246,7 @@ export class SynopsisOptions3{
         highlightOnClick: { type: 'boolean', category: 'view',noURL:true},
         hideApp: { type: 'boolean', category: 'view'},
         lexes: {type: 'intArray', split: ",", category: 'view'},
+        similarPhrases: {type: 'boolean', category: 'view'},
         selectedGospelIndex: {type:"int",default:0, category: 'view'},
         greekStrings: {type: 'strArray', split: "|", category: 'view'},
         tab: {type:"int",default:0, category: 'request'},
@@ -279,6 +315,10 @@ export class SynopsisOptions3{
         theCopy.viewOptions=copyObject(this.viewOptions);
         theCopy.request=copyObject(this.request)
         return theCopy;
+    }
+
+    softReset(){
+
     }
 }
 

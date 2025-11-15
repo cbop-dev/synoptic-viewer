@@ -2,8 +2,8 @@
 import { onMount,untrack } from "svelte";
 import LinkSvg from  '../ui/icons/link.svg';
 import { SynopsisOptions3  } from "./SynopsisClasses.svelte.js";
-import { ParallelText,Word, TextAndRef,VerseWords,ParallelTextGroup,parseSingleGroup } from "./parallelTexts.svelte.js";
-import ParallelTextSection from "./ParallelTextSection.svelte";
+import { ParallelColumn,Word, TextAndRef,VerseWords,ParallelColumnGroup,parseSingleGroup } from "./parallelTexts.svelte.js";
+import ParallelColumnSection from "./ParallelColumnSection.svelte";
 import { N1904Server, lexemes} from "$lib/n1904/tfN1904";
 import {SblGntServer} from '$lib/sblgnt/sblgnt.js';
 
@@ -114,7 +114,7 @@ let numCols = $derived(refAreaInputs.length);
 let batchInput=$state(myOptions.request.batch && myOptions.request.batch.length ? myOptions.request.batch.join("\n") : 'Matt 1:1|Mark 1:1|John 1:1\nMatt 5:17|Eph 2:14-16');
 
 /**
- * @type {ParallelTextGroup[]} texts
+ * @type {ParallelColumnGroup[]} texts
  */
 let texts= $state([]);
 
@@ -238,15 +238,15 @@ let otherMatchedLexes=$state([]);
 /**
  * 
  * @param {string} theInput
- * @returns {ParallelTextGroup[]}
+ * @returns {ParallelColumnGroup[]}
  */
 function parseGroupsBatch(theInput){
     const lines = theInput.trim().replaceAll(/\n+/g,"\n").split("\n").filter((s)=>s.length);
     const parGroups=[]
 
     for (const line of lines){
-        const group = new ParallelTextGroup();
-        group.parallelTexts=parseSingleGroup(line.split("|").filter((l)=>l.trim().length));
+        const group = new ParallelColumnGroup();
+        group.parallelColumns=parseSingleGroup(line.split("|").filter((l)=>l.trim().length));
         parGroups.push(group);
     }
     return parGroups;
@@ -273,16 +273,16 @@ async function buildAndFetchPericopes(reset=true){
     //fetchTexts();
     mylog(`buildAndFetchPericopes: selectedRequestModeIndex=${selectedRequestModeIndex}`)
     if (selectedRequestModeIndex==0) {
-        texts = [new ParallelTextGroup()];
-        texts[0].parallelTexts = parseSingleGroup(refAreaInputs);
+        texts = [new ParallelColumnGroup()];
+        texts[0].parallelColumns = parseSingleGroup(refAreaInputs);
     }
     else { //presuming batch mode!
         texts = parseGroupsBatch(batchInput);
     }
     
     
-    //mylog("after parsing input, but texts.parTexts[0].ref: " + texts.parallelTexts[0].textRefs[0].reference)
-    //const parRefsObj = TfUtils.getParallelRefsArrays(texts.parallelTexts);
+    //mylog("after parsing input, but texts.parTexts[0].ref: " + texts.parallelColumns[0].textRefs[0].reference)
+    //const parRefsObj = TfUtils.getParallelRefsArrays(texts.parallelColumns);
     const parRefsObj = TfUtils.getParallelGroupsRefsArrays(texts);
 
     response = await currentServer.fetchPostTextsBatch(parRefsObj.refsArray);
@@ -296,7 +296,7 @@ async function buildAndFetchPericopes(reset=true){
     
     //mylog("Got response with " + response.texts.length + " texts. Here's 1:" )
     //mylog(response.texts[0].text)
-   // mylog("here texts.ptexts[0].textR[0].text: " + texts.parallelTexts[0].textRefs[0].text)
+   // mylog("here texts.ptexts[0].textR[0].text: " + texts.parallelColumns[0].textRefs[0].text)
     
 }
 
@@ -682,6 +682,7 @@ $inspect(`refarea.0:'${refAreaInputs[0]}`);
     {#if mounted && dataReady}
     
         <li><ButtonSelect bind:selected={viewStates.views.lookup.state} buttonText="Again!" tooltip="Toggle lookup panel." /></li>
+        <li><ButtonSelect buttonText="Similar Phrases" bind:selected={myOptions.viewOptions.similarPhrases} tooltip="Show lexically similar phrases (same lexemes, but possibly different forms/morphology)"/></li>
         <li><ButtonSelect bind:selected={myOptions.viewOptions.unique} buttonText="Unique Lexemes" tooltip="Outline all lexemes unique to each column."/></li>
         <li><ButtonSelect bind:selected={myOptions.viewOptions.identical} tooltip="Toggle Bold/underline setting for morphologically identical words." 
                 buttonText="Identical words"/></li>
@@ -809,7 +810,7 @@ $inspect(`refarea.0:'${refAreaInputs[0]}`);
     <hr class=" m-1 p-1"/>
     <div class="anchor" id="group-{i+1}">
     {#if texts.length > 1}<h3 class="font-bold underline">Group #{i+1}</h3>{/if}
-    <ParallelTextSection parTextGroup={textGroup}  wordClick={toggleLex} 
+    <ParallelColumnSection parTextGroup={textGroup}  wordClick={toggleLex} 
                         cssClassDict={lexClasses}
                         cssCustomDict={customGreekClasses}
                         options={myOptions}

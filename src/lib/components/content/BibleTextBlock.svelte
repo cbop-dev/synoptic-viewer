@@ -1,5 +1,5 @@
 <script>
-    import {ParallelTextGroup, ParallelText, Word, TextAndRef,VerseWords,stripWord} from './parallelTexts.svelte.js';
+    import {ParallelColumnGroup, ParallelColumn, Word, TextAndRef,VerseWords,stripWord} from './parallelTexts.svelte.js';
     import { SynopsisOptions3 } from './SynopsisClasses.svelte.js';
     import { ColorUtils } from '$lib/utils/color-utils';
     import CopyText     from '../ui/CopyText.svelte';
@@ -21,11 +21,12 @@
 /** 
 * @type {{
 * textRef :  TextAndRef
-* parGroup:  ParallelTextGroup
+* parGroup:  ParallelColumnGroup
 * numCols:  number
 * copyButton:  boolean 
-* cssWordClassDict:  Object<number,string>
-* cssWordCustomDict:  Object<string,string>
+* cssWordClassDict:Object<number,Object<number,string[]>>
+* cssLexClassDict:  Object<number,string>
+* cssCustomStringDict:  Object<string,string>
 * cssUniqueColor: string
 * showNotes:  boolean
 * uniqueSet:  Set<number>
@@ -41,9 +42,15 @@ let {
         //options.viewOptions.unique=false,
         numCols,
         copyButton=true,
-        //options.viewOptions.identical=false,
-        cssWordClassDict={},
-        cssWordCustomDict={},
+        
+
+        //key is index of textRef.vwords, value is array of arrays of css classes (strings) to apply to it. Each array corresponds with a verse/item in textRef.vwords[key]
+        // Thus {2:{3: ["text-blue-300"]}}} would mean that for the third verse, i.e., textRef[2], the fourth word, textRef[2].words[3], should have the class "text-blue-300".
+        cssWordClassDict={},//{2:{3: ["text-blue-300"]}},
+        cssLexClassDict={},
+
+        //based on strings: key:string, value:
+        cssCustomStringDict={},
 //        cssUniqueColor="border-black",
         showNotes=true,
         uniqueSet=new Set(),
@@ -69,7 +76,9 @@ let {
 }
 </script>
 
-<div class="bible-block">
+<div class="bible-block ">
+{#key parGroup &&  parGroup.updatedCounter && parGroup.lexIdenticalPhrasesMap.size && parGroup.lexIdenticalPhrasesMap}
+
 {#if textRef.text}
     <span class="font-bold bg-white/50 rounded-sm border-2 border-black/60 mr-1 ml-0">
     {#if copyButton}
@@ -93,14 +102,14 @@ let {
     
         {textRef.reference}
     {/if}</span>
-    {#if textRef.words && textRef.words.length}
+    {#if textRef.vwords && textRef.vwords.length}
                 
-                {#each textRef.words as verseWords}
+                {#each textRef.vwords as verseWords,verseIndex}
 
                     {@const customMatchedWords=StringUtils.findPhrases(
                     verseWords.words.map((w)=>GreekUtils.onlyPlainGreek(w.word,true,true,true)),
-                        Object.keys(cssWordCustomDict).map((str)=>GreekUtils.onlyPlainGreek(str)))
-                        // NB: first index is that of cssCustomDict; second is into textRef.words
+                        Object.keys(cssCustomStringDict).map((str)=>GreekUtils.onlyPlainGreek(str)))
+                        // NB: first index is that of cssCustomDict; second is into textRef.vwords
                     }
                     
                     <span class="bg-white/40 border-black/40 border-2 m-0 p-0 rounded-xl">
@@ -113,21 +122,36 @@ let {
                         {verseWords.verse}
                     {/if}
                     </span>
-                    {#each verseWords.words as word, index}
                     
-                        {@const wordCssClass=cssWordClassDict[word.id]}
+                    {#each verseWords.words as word, index}
+                         
+                        {@const lexicalPhrases = word.phrases['lexical'] ? Array.from(word.phrases['lexical']).
+                            map((p)=>parGroup.getCssClassesForPhrase(p)).flat()  : []}
+                        
+                        {@const phraseNum = parGroup.lexIdenticalPhrasesLocations.findIndex(
+                            (v)=>(v.phrase==(word.phrases['lexical'] ? Array.from(word.phrases['lexical']) : [null]).flat()[0]))}
+                        
+                       
+                        {@const lexCssClasses=cssLexClassDict[word.id]}
                         {@const plainGreek=GreekUtils.onlyPlainGreek(word.word)}
                         {@const customMatchSearchStrings=Object.entries(customMatchedWords).filter(([searchPhrase,array2d])=>array2d.flat().includes(index)).map(([s,a2d])=>s)}
-                        {@const customClasses = customMatchSearchStrings.map((s)=>cssWordCustomDict[s])}
+                        {@const customClasses = customMatchSearchStrings.map((s)=>cssCustomStringDict[s])}
+                        {@const wordClasses = (cssWordClassDict[verseIndex] && cssWordClassDict[verseIndex][index])? cssWordClassDict[verseIndex][index] : []}
                         
-                        <span role="none"
+                        <span role="none" 
                         class={["m-0", "word", "lex-"+word.id, 
-                            options.viewOptions.unique && uniqueSet && isUnique(word.id,uniqueSet) && "lex-unique", 
-                            wordCssClass, customClasses?.length ? customClasses[0] : '', "test", 
-                            options.viewOptions.identical && wordCssClass && parGroup.matchingWords.includes(stripWord(word.word)) && 'underline font-bold'] } 
-                        onclick={()=>{if (options.viewOptions.highlightOnClick) wordClick(word.id)}}>{getText([word],options.viewOptions.hideApp)}{'  '}</span>
+                            options.viewOptions.unique && uniqueSet && isUnique(word.id,uniqueSet) && "lex-unique", phraseNum>=0 ? "lexical-test-"+phraseNum : [],
+                            lexCssClasses, customClasses?.length ? customClasses[0] : '', wordClasses, options.viewOptions.similarPhrases ? lexicalPhrases : [],
+                            options.viewOptions.identical && lexCssClasses && parGroup.matchingWords.includes(stripWord(word.word)) && 'underline font-bold'] } 
+                        onclick={()=>{if (options.viewOptions.highlightOnClick) wordClick(word.id)}}>{getText([word],options.viewOptions.hideApp)}{'  '} 
+                        
+                    {#if word.phrases['lexical']}
+                        <!--Match!:phraseclasses={phraseClasses}-->
+                    {:else}
+                    {/if}
+            </span>
                     {/each}
-                {/each}
+                {/each}<CopyText linkText="IDs!" getTextFunc={()=>textRef.getWordIdArray().join(',')} />
             {:else if textRef.text}
                 
                 {textRef.text}
@@ -139,6 +163,7 @@ let {
     {#if copyButton && textRef.text}
         <CopyText copyText={textRef.text} tooltip='Copy pericope'/>
 {/if}
+{/key}
 </div>
 
 <style>
@@ -153,4 +178,34 @@ let {
         outline-color: var(--cssUniqueColor,#000);*/
         
     }
+
+    .lexical-phrase {
+        @apply border-b-2 font-bold;
+    }
+    .lexical-phrase-1 {
+        @apply  border-red-600;
+    }
+    
+    .lexical-phrase-2 {
+        @apply border-blue-700;
+    }
+    .lexical-phrase-3 {
+        @apply border-green-500;
+    }
+    .lexical-phrase-4 {
+        @apply border-fuchsia-700;
+    }
+    .lexical-phrase-5 {
+        @apply border-black;
+    }
+    .lexical-phrase-6 {
+        @apply border-amber-600;
+    }
+    .lexical-phrase-7 {
+        @apply border-amber-300;
+    }
+    
+    
+    
+    
 </style>

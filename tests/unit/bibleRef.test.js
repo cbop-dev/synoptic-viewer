@@ -141,4 +141,17 @@ test('formatBibleRefs', async () => {
 	expect(true).toBe(true);
 	//await expect(page.locator('h1')).toBeVisible();
 });
-
+/*
+test('combineRefs', async () => {
+	const tests =[
+        {input: "Matt 1", output:"Matt 1"},
+     
+        
+    ]
+    for (const t of tests) {
+        expect(bibleUtils.formatBibRefs(t.input)).toEqual(t.output);
+    }
+	expect(true).toBe(true);
+	//await expect(page.locator('h1')).toBeVisible();
+});
+*/

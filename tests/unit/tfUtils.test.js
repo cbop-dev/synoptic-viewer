@@ -3,7 +3,7 @@ import { tfServer, TfServer } from '$lib/n1904/tfN1904';
 import * as tfu from '$lib/components/content/TfUtils' ;
 import { mylog } from '$lib/env/env';
 import gospelParallels from '@cbop-dev/aland-gospel-synopsis';
-import { ParallelText, TextAndRef } from '$lib/components/content/parallelTexts.svelte.js';
+import { ParallelColumn, TextAndRef } from '$lib/components/content/parallelTexts.svelte.js';
 
 test('test test!', async () => {
 	//console.log("MODE: " + import.meta.env.MODE);
@@ -36,7 +36,7 @@ test('getParallelRefsArrays test!', async () => {
 	const indices = [[0],[1],[0]]
 	const pars = [];
 	for (const r of refs){
-		pars.push(new ParallelText([new TextAndRef(r)]));
+		pars.push(new ParallelColumn([new TextAndRef(r)]));
 	}
 
 	const ret = tfu.getParallelRefsArrays(pars)
