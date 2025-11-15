@@ -151,7 +151,7 @@ let {
                     {/if}
             </span>
                     {/each}
-                {/each}<CopyText linkText="IDs!" getTextFunc={()=>textRef.getWordIdArray().join(',')} />
+                {/each}<!--<CopyText linkText="IDs!" getTextFunc={()=>textRef.getWordIdArray().join(',')} />-->
             {:else if textRef.text}
                 
                 {textRef.text}
