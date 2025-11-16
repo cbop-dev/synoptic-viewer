@@ -681,10 +681,7 @@ $inspect(`refarea.0:'${refAreaInputs[0]}`);
 {/snippet}
 {#snippet appTitle(headingTag="h1", short=false, classes=[])}
     <svelte:element this={headingTag} class={[classes, "inline-block"]}>
-     {#if !landingPage}
-        <ButtonSelect buttonText="☰" 
-        buttonStyle="btn btn-xs  btn-circle btn-ghost  p-0" bind:selected={options.viewOptions.menuOpen} tooltip="Expand menu options" tooltipbottom={true}/>
-      {/if}
+     
     {#if !short}Custom {/if} NT Synopsis</svelte:element> 
     
     {@render titleButtons()}
@@ -725,6 +722,10 @@ $inspect(`refarea.0:'${refAreaInputs[0]}`);
         
     {/if}
 {/snippet}
+{#snippet menuButton()}
+<ButtonSelect buttonText="☰" 
+        buttonStyle="btn btn-xs  btn-circle btn-ghost  p-0" bind:selected={options.viewOptions.menuOpen} tooltip="Expand menu options" tooltipbottom={true}/>
+{/snippet}
 <div id="header-nav-section" class="self-center text-center fixed bg-white z-40 top-8  m-auto w-full" >
 
   <!--<div class="block"><h1 class="text-3xl bold block underline self-center "><span class="self-center inline">Custom NT Synopsis!</span>
@@ -754,7 +755,10 @@ $inspect(`refarea.0:'${refAreaInputs[0]}`);
   </div>
   <div class="hidden md:navbar-center self-center m-auto">
          <div class="text-center self-center border-0 "> 
-           <div class="title-panel m-0 p-0 block">
+           <div class="title-panel m-0 p-0 block z-40">
+            {#if !landingPage}
+                {@render menuButton()}
+            {/if}
              {@render appTitle()}
             </div>
             
