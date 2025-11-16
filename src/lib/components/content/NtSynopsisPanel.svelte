@@ -1,6 +1,5 @@
 <script>
 import { onMount, untrack } from 'svelte';
-//import { generateURL } from './urlParams.js';
 import Footer from './Footer.svelte';
 import { SynopsisOptions3} from './SynopsisClasses.svelte.js';
 import Icon from '../ui/icons/Icon.svelte';
@@ -573,14 +572,15 @@ function displayNote(heading,note) {
 }
 
 const hotkeys=[
-    {key: 'n', name:'Next Section',function: jumpToNextSection},
-    {key:'p',name:'Previous Section',function: jumpToPrevSection},
+    {key:'>', name:'Next Section',function: jumpToNextSection},
+    {key:'<',name:'Previous Section',function: jumpToPrevSection},
     {key:'t',name:'Top/First Section',function: jumpToFirstSection},
     {key:'b',name:'Bottom/Last Section',function: jumpToLastSection},
     {key:'c',name:'Highlight on Click',function: ()=>{myOptions.viewOptions.highlightOnClick =!myOptions.viewOptions.highlightOnClick}},
     {key:'u',name:'Unique Lexemes',function: ()=>{myOptions.viewOptions.unique =!myOptions.viewOptions.unique}},
-    {key:'m',name:'Identical Words',function: ()=>{myOptions.viewOptions.identical =!myOptions.viewOptions.identical}},
-    {key:'i',name:'Similar Phrases',function: ()=>{myOptions.viewOptions.similarPhrases =!myOptions.viewOptions.similarPhrases}},
+    {key:'i',name:'Identical Words',function: ()=>{myOptions.viewOptions.identical =!myOptions.viewOptions.identical}},
+    {key:'s',name:'Similar Phrases',function: ()=>{myOptions.viewOptions.similarPhrases =!myOptions.viewOptions.similarPhrases}},
+    {key:'m',name:'Show/hide options menu',function: ()=>{myOptions.viewOptions.menuOpen =!myOptions.viewOptions.menuOpen}},
         
 ];
 
@@ -593,7 +593,7 @@ const viewStates=$state({
          //   hotkeys:['m'], state:myOptions.viewOptions.identical,modal:false},
         sections: { description:  "Jump to a section", hotkeys:['j'], state:false,modal:true},
         view: { description:  "View Options", hotkeys:['v'], state:false,modal:true},
-        lookup: { description:  "Lookup passage(s) or select section", hotkeys:['l', 's'], state:false,modal:false},
+        lookup: { description:  "Lookup passage(s) or select section", hotkeys:['l'], state:false,modal:false},
         words: {description:  "Lexeme/Word Options", hotkeys:['w'], state:false,modal:true},
       //  info: { description:  "Website and project information.", hotkeys:['i'], state:false,modal:true},
         help: { description:  "Show help menu", hotkeys:['h', '?'], state:false,modal:true},
@@ -870,8 +870,20 @@ onMount(() => {
 
 
 </style>
-{#snippet appTitle(headingTag="h1")}
-    <svelte:element this={headingTag}>NT Gospel Synopsis Viewer</svelte:element> 
+{#snippet appTitle(headingTag="h1",classes=["text-center","inline"])}
+
+    <svelte:element this={headingTag} class={classes}>        
+      {#if !landingPage}
+        <ButtonSelect buttonText="☰" 
+        buttonStyle="btn btn-xs  btn-circle btn-ghost  p-0" bind:selected={options.viewOptions.menuOpen} tooltip="Expand menu options" tooltipbottom={true}/>
+      {/if}
+            <a href="/" data-sveltekit-reload>
+                <span class="hidden lg:inline">NT Gospel Synopsis Viewer</span>
+                <span class="lg:hidden inline">NT Synopsis</span>
+                <span class="sm:hidden inline">Synopsis</span>
+                </a>
+        
+    </svelte:element> 
 {/snippet}
 {#snippet appSummary(heading=true,headingTag="h1")}
 
@@ -884,92 +896,158 @@ onMount(() => {
     Enter NT reference to view parallel texts and click "Look up!", or select a section and press "Go!"
 {/snippet}
 {#snippet resultsButtons(short=false,theTag='li',classes=[])}
-    {#if !short && !(landingPage)}    
-           <svelte:element this={theTag} class={classes}>
-            <ButtonSelect bind:selected={viewStates.views.lookup.state} tooltipbottom tooltip="Show Lookup panel pop-up" buttonText="☰ Lookup" buttonStyle="btn"/>
-            </svelte:element>
-      {/if}
+      
+        {#if !short && !(landingPage)}    
+            <svelte:element this={theTag} class={classes}>
+                <ButtonSelect bind:selected={viewStates.views.lookup.state} tooltipbottom tooltip="Show Lookup panel pop-up" buttonText="☰ Lookup" buttonStyle="btn"/>
+                </svelte:element>
+        {/if}
 
-      {#if alandPericopeNums && alandPericopeNums.length}
-      <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={viewStates.views.view.state} tooltipbottom tooltip="Show other viewing options (sort, etc.)"  buttonText="☰ View"/></svelte:element>
+        {#if alandPericopeNums && alandPericopeNums.length}
+        <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={viewStates.views.view.state} tooltipbottom tooltip="Show other viewing options (sort, etc.)"  buttonText="☰ View"/></svelte:element>
 
-     {#if dataReady}
-       <svelte:element this={theTag} class={classes}><ButtonSelect buttonText="Similar" bind:selected={myOptions.viewOptions.similarPhrases} tooltipbottom ="Show lexically similar phrases (same lexemes, but possibly different forms/morphology)"/></svelte:element>
-       <svelte:element this={theTag} class={classes}> <ButtonSelect buttonText="☰ Jump to ↓" bind:selected={viewStates.views.sections.state}/></svelte:element>       
-        <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={viewStates.views.words.state} buttonText="☰ Words" /></svelte:element>
-        <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={myOptions.viewOptions.highlightOnClick} buttonText="Auto Highlight" 
-            tooltipbottom={true}
-            tooltip="If enabled, clicking/tapping on a word will toggle highlighting of that lexeme. Press 'c' to toggle this option."/></svelte:element>    
-        {#if currentServer.abbrev==SblGntServer.abbrev}   
-        <svelte:element this={theTag} class={[classes, 'menu']}><label class="label" for="hide-app-check{short? '-short':''}">
-<input  class="toggle" id="hide-app-check{short? '-short':''}" type="checkbox" bind:checked={myOptions.viewOptions.hideApp}/>Hide appar{#if !short}aratus marks{:else}.{/if}</label>
-     </svelte:element>
-     {/if}
- 
-         
-     {/if}
-      {/if}
-
-{/snippet}
-<div id="header-nav-section" class="self-center text-center fixed bg-white z-40 top-8  m-auto w-full" >
-  <div class="navbar bg-base-100 text-center  shadow-sm ">
-    <div class="navbar-start text-left max-w-full w-full m-auto md:hidden">
-        <div class="dropdown  text-left">
-        
-        <div tabindex="0" role="button" class="btn btn-ghost lg:hidden">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16" /> </svg>
-        </div>
-
-        <ul tabindex="0"
-        class="menu  dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow text-left ">
-        {@render resultsButtons(true)}
+        {#if dataReady}
+        <svelte:element this={theTag} class={classes}><ButtonSelect buttonText="Similar" bind:selected={myOptions.viewOptions.similarPhrases} tooltipbottom ="Show lexically similar phrases (same lexemes, but possibly different forms/morphology)"/></svelte:element>
+        <svelte:element this={theTag} class={classes}> <ButtonSelect buttonText="☰ Jump to ↓" bind:selected={viewStates.views.sections.state}/></svelte:element>       
+            <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={viewStates.views.words.state} buttonText="☰ Words" /></svelte:element>
+            <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={myOptions.viewOptions.highlightOnClick} buttonText="Auto Highlight" 
+                tooltipbottom={true}
+                tooltip="If enabled, clicking/tapping on a word will toggle highlighting of that lexeme. Press 'c' to toggle this option."/></svelte:element>    
+            {#if currentServer.abbrev==SblGntServer.abbrev}   
+            <svelte:element this={theTag} class={[classes, 'menu']}><label class="label" for="hide-app-check{short? '-short':''}">
+    <input  class="toggle" id="hide-app-check{short? '-short':''}" type="checkbox" bind:checked={myOptions.viewOptions.hideApp}/>Hide appar{#if !short}aratus marks{:else}.{/if}</label>
+        </svelte:element>
+        {/if}
     
-        </ul>
-        </div>
-        <div class="text-left ">
-        <h1 class="inline">
-            <a href="" data-sveltekit-reload><span class="hidden sm:inline">NT&nbsp;Synopsis</span>
-            <span class="sm:hidden inline">Synopsis</span></a>
-        </h1>    
-        <ul class="bg-white menu menu-horizontal ">
             
-        <li><ButtonSelect buttonText="?" buttonStyle="btn btn-xs btn-circle btn-ghost p-0" bind:selected={viewStates.views.help.state}/>
-            </li>
-        <li>
-            <ButtonSelect bind:selected={viewStates.views.lookup.state} buttonText="" 
-            buttonStyle="btn btn-xs btn-circle btn-ghost p-0" >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3">
-    <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-    </svg>
-            </ButtonSelect>
-        </li></ul>
-        </div>
-    </div>
-    <div class="hidden md:navbar-center self-center m-auto">
+        {/if}
+        {/if}
+    
+{/snippet}
+<div id="top-fixed" class="self-center text-center m-auto w-full fixed top-8  bg-white z-40">
+    <div id="header-nav-section" class="self-center text-center   m-auto w-full" >
+    <div class="navbar bg-base-100 text-center  shadow-sm ">
+        <div class="navbar-start text-left max-w-full w-full m-auto md:hidden">
+            
+            {#if !landingPage && dataReady}
+            <div class="dropdown  text-left">
+            
+            <div tabindex="0" role="button" class="btn btn-ghost lg:hidden">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16" /> </svg>
+            </div>
 
-        <div class="text-center self-center border-0"> 
-            <div id="title-panel">
-                <h1 class="text-center inline"> 
-                <a href="/" data-sveltekit-reload><span class="hidden lg:inline">NT Gospel Synopsis Viewer</span>
-                <span class="lg:hidden inline">NT Synopsis</span></a>
-                </h1>&nbsp;
-                <ButtonSelect buttonText="?" buttonStyle="btn btn-xs btn-circle btn-ghost p-0" bind:selected={viewStates.views.help.state}/>
-            </div> 
-            <div class="bg-white text-center flex flex-wrap block w-full ">
+            <ul tabindex="0"
+            class="menu  dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow text-left ">
+            {@render resultsButtons(true)}
+        
+            </ul>
+            </div>
+            {/if}
+            <div class="text-left ">
+            <h1 class="inline">
+                <a href="" data-sveltekit-reload><span class="hidden sm:inline">NT&nbsp;Synopsis</span>
+                <span class="sm:hidden inline">Synopsis</span></a>
+            </h1>    
+            <ul class="bg-white menu menu-horizontal ">
                 
-                {@render resultsButtons(false,'div',['inline-block'])}
+            <li><ButtonSelect buttonText="?" buttonStyle="btn btn-xs btn-circle btn-ghost p-0" bind:selected={viewStates.views.help.state}/>
+                </li>
+            <li>
+                <ButtonSelect bind:selected={viewStates.views.lookup.state} buttonText="" 
+                buttonStyle="btn btn-xs btn-circle btn-ghost p-0" >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3">
+        <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+        </svg>
+                </ButtonSelect>
+            </li></ul>
             </div>
         </div>
-    </div>
-    <div class="navbar-end hidden">
-    
+        <div class="hidden md:navbar-center self-center m-auto">
 
+            <div class="text-center self-center border-0"> 
+                <div id="title-panel">
+                    {@render appTitle()}&nbsp;
+                    <ButtonSelect buttonText="?" buttonStyle="btn btn-xs btn-circle btn-ghost p-0" bind:selected={viewStates.views.help.state}/>
+                </div> 
 
-    </div>
-   </div>
-</div>
- 
+                {#if myOptions.viewOptions.menuOpen}
+                <div class="bg-white text-center flex flex-wrap block w-full ">
+                    
+                    {@render resultsButtons(false,'div',['inline-block'])}
+                </div>
+                {/if}
+            </div>
+        </div>
+        <div class="navbar-end hidden">
         
+
+
+        </div>
+    </div>
+    </div>
+    <div id='landing'>
+
+        {#if landingPage}
+        <div id="landing-panel text-center">
+
+            
+            <div class="text-center m-auto">
+            
+                    Based on Kurt Aland's <i>Synopsis Quattuor Evangeliorum</i>, using <a href="https://www.sblgnt.com">The SBL Greek New Testament (2010)</a> or, optionally, Nestle's 1904 edition of the <i>Greek New Testament</i>.<br/>
+                    Enter NT reference to view parallel texts and click "Look up!", or select a section and press "Go!"
+            </div>
+            <hr/>
+          </div>
+          {/if}
+    </div>
+    <div id="lookup">
+        {#if !mounted}
+        <div class="bg-transparent m-10 p-10">
+            <h3><i>Page Loading...</i></h3>
+        <span class="loading loading-spinner loading-xl"></span>    
+        </div>
+        
+        {:else if viewStates.views.lookup.state}
+
+        <div id="search-panel" class="text-center ">
+            Choose One:
+                    <h2 class="cursor-default">Enter References</h2><div class="inline-block mb-1">
+                        <textarea id="refarea" class="inline-block align-middle" 
+                        rows="1" bind:value={refAreaText}
+                        onfocus={textAreaFocus} onblur={textAreaBlur}
+                        ></textarea>
+            <button onclick={lookupShowNtParallels} class="btn btn-primary inline-block ">Look up!</button></div>
+                    
+                        
+                    <br/> OR:
+                    <h2 class="cursor-default">Select a section:</h2> 
+                    <select bind:value={selectedSection} >
+                    
+                    {#each gospelParallels.alandSynopsis.sections as section}
+                    <option value={mathUtils.createNumArrayFromStringListRange(section.pericopes)}>{mathUtils.romanize(section.section)}: {section.title}</option>
+                    <hr/>
+                    {/each}
+                    {#each gospelParallels.alandSynopsis.pericopes as per }
+                    {#if per.pericope == 1 }
+                    <option value={[per.pericope]} selected="selected">{per.pericope}: {per.title}</option>
+                    {:else}
+                    <option value={[per.pericope]} >{per.pericope}: {per.title}</option>
+                    {/if}
+                    {/each}
+                    
+                    {#if allowEverything}
+                    <hr/>
+                    <option value={gospelParallels.alandSynopsis.pericopes.map((p)=>p.pericope)}>Everything!!</option>
+                    {/if}
+                </select>
+                <button onclick={selectSection} class="align-top btn btn-primary inline-block m-1">Go!</button>
+        </div>
+        <hr class="!border-slate-300 m-6"/>
+        {/if}
+
+    </div>
+
+</div><!--end fixed section-->
     
 <div id="main-content-div" class="self-center relative text-center bg-white mt-20 md:mt-30 z-20">
        {#if !landingPage}
@@ -980,71 +1058,10 @@ onMount(() => {
             
             
 
-            {/if}
-        {:else} 
-
-          <div id="landing-panel text-center">
-    <!--<h1 class="block text-center "><span class="hidden lg:inline">Greek NT Gospel Synopsis Viewer</span>
-        <span class="hidden md:inline lg:hidden">NT Gospel Synopsis</span>
-        <span class="md:hidden">NT Synopsis</span>
-        <ButtonSelect buttonStyle="btn btn-neutral btn-outline btn-circle btn-xs p-0 m-0"
-            buttonText="?"
-            bind:selected={viewStates.views.help.state}/>
-    </h1>-->
-        
-            
- 
-    
-            <div class="text-center m-auto">
-            
-                    Based on Kurt Aland's <i>Synopsis Quattuor Evangeliorum</i>, using <a href="https://www.sblgnt.com">The SBL Greek New Testament (2010)</a> or, optionally, Nestle's 1904 edition of the <i>Greek New Testament</i>.<br/>
-                    Enter NT reference to view parallel texts and click "Look up!", or select a section and press "Go!"
-            </div>
-            <hr/>
-          </div>
+            {/if}          
         {/if}
 
-  
 
-
-
-{#if viewStates.views.lookup.state}
-
-<div id="search-panel" class="text-center ">
-     Choose One:
-            <h2 class="cursor-default">Enter References</h2><div class="inline-block mb-1">
-                <textarea id="refarea" class="inline-block align-middle" 
-                rows="1" bind:value={refAreaText}
-                onfocus={textAreaFocus} onblur={textAreaBlur}
-                ></textarea>
-    <button onclick={lookupShowNtParallels} class="btn btn-primary inline-block ">Look up!</button></div>
-             
-                
-               <br/> OR:
-            <h2 class="cursor-default">Select a section:</h2> 
-             <select bind:value={selectedSection} >
-            
-            {#each gospelParallels.alandSynopsis.sections as section}
-            <option value={mathUtils.createNumArrayFromStringListRange(section.pericopes)}>{mathUtils.romanize(section.section)}: {section.title}</option>
-            <hr/>
-            {/each}
-            {#each gospelParallels.alandSynopsis.pericopes as per }
-            {#if per.pericope == 1 }
-            <option value={[per.pericope]} selected="selected">{per.pericope}: {per.title}</option>
-            {:else}
-             <option value={[per.pericope]} >{per.pericope}: {per.title}</option>
-            {/if}
-            {/each}
-            
-            {#if allowEverything}
-            <hr/>
-            <option value={gospelParallels.alandSynopsis.pericopes.map((p)=>p.pericope)}>Everything!!</option>
-            {/if}
-        </select>
-        <button onclick={selectSection} class="align-top btn btn-primary inline-block m-1">Go!</button>
-</div>
-<hr class="!border-slate-300 m-6"/>
-{/if}
 </div>
 <div class="text-center mt-3">
    

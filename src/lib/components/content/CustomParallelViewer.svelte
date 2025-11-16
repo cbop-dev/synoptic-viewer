@@ -432,7 +432,7 @@ const viewStates=$state({
        //     hotkeys:['m'], state:myOptions.viewOptions.identical,modal:false},
        // sections: { description:  "Jump to a section", hotkeys:['j'], state:false,modal:true},
         view: { description:  "View Options", hotkeys:['v'], state:false,modal:true},
-        lookup: { description:  "Toggle Lookup input panel", hotkeys:['l', 's'], state:false,modal:false},
+        lookup: { description:  "Toggle Lookup input panel", hotkeys:['l',], state:false,modal:false},
         words: {description:  "Lexeme/Word Options", hotkeys:['w'], state:false,modal:true},
        // info: { description:  "Website and project information.", hotkeys:['i'], state:false,modal:true},
         help: { description:  "Show help menu", hotkeys:['h', '?'], state:false,modal:true},
@@ -519,10 +519,11 @@ const viewStates=$state({
 
     const hotkeys=[
       
-        {key:'i',name:'Similar Phrases',function: ()=>{myOptions.viewOptions.similarPhrases =!myOptions.viewOptions.similarPhrases}},
+        {key:'s',name:'Similar Phrases',function: ()=>{myOptions.viewOptions.similarPhrases =!myOptions.viewOptions.similarPhrases}},
         {key:'c',name:'Highlight on Click',function: ()=>{myOptions.viewOptions.highlightOnClick =!myOptions.viewOptions.highlightOnClick}},
         {key:'u',name:'Unique Lexemes',function: ()=>{myOptions.viewOptions.unique =!myOptions.viewOptions.unique}},
-        {key:'m',name:'Identical Words',function: ()=>{myOptions.viewOptions.identical =!myOptions.viewOptions.identical}},
+        {key:'i',name:'Identical Words',function: ()=>{myOptions.viewOptions.identical =!myOptions.viewOptions.identical}},
+        {key:'m',name:'Show/hide options menu',function: ()=>{myOptions.viewOptions.menuOpen =!myOptions.viewOptions.menuOpen}},
     ];
 
     let textAreaFocused=$state(false);
@@ -679,8 +680,15 @@ $inspect(`refarea.0:'${refAreaInputs[0]}`);
         </li></ul>
 {/snippet}
 {#snippet appTitle(headingTag="h1", short=false, classes=[])}
-    <svelte:element this={headingTag} class={[classes, "inline-block"]}>{#if !short}Custom {/if} NT Synopsis</svelte:element> 
+    <svelte:element this={headingTag} class={[classes, "inline-block"]}>
+     {#if !landingPage}
+        <ButtonSelect buttonText="☰" 
+        buttonStyle="btn btn-xs  btn-circle btn-ghost  p-0" bind:selected={options.viewOptions.menuOpen} tooltip="Expand menu options" tooltipbottom={true}/>
+      {/if}
+    {#if !short}Custom {/if} NT Synopsis</svelte:element> 
+    
     {@render titleButtons()}
+   
    
 {/snippet}
 {#snippet appSummary(heading=true,headingTag="h1")}
@@ -751,10 +759,12 @@ $inspect(`refarea.0:'${refAreaInputs[0]}`);
             </div>
             
              <!--<ul class="bg-white  menu menu-horizontal p-0">-->
+             {#if myOptions.viewOptions.menuOpen}
             <div class="flex flex-wrap">
                 {@render resultsNav(false,'div')}
              <!--</ul>-->
              </div>
+             {/if}
              
          </div>
     </div>

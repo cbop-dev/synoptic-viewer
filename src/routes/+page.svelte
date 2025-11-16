@@ -4,11 +4,11 @@
     import { onMount } from "svelte";
     import ParallelGospelSection from "$lib/components/content/ParallelGospelSection.svelte";
     import SynopsisHome from "$lib/components/content/SynopsisHome.svelte";
-    import { SynopsisUrlParamsMap} from "$lib/components/content/SynopsisClasses.svelte";
+    //import { SynopsisOptions3.SynopsisUrlParamsMap} from "$lib/components/content/SynopsisClasses.svelte";
     import { URLParam } from "$lib/components/content/urlParams";
     import { SynopsisOptions3 } from "$lib/components/content/SynopsisClasses.svelte";
     import '../app.css';
-    import { mylog } from "$lib/env/env";
+    import { mylog } from "$lib/env/env.js";
     function onkeydown(event){
         if(event.key=='p'){
             
@@ -40,11 +40,13 @@
     window.history.pushState({}, document.title, "/");
    })
 </script>
+<div id="page-top-div" class="anchor"></div>
 <SynopsisHome options={options}/>
 
 <!--<ParallelGospelSection/>-->
 <!--<NtSynopsisPanel/>-->
 <hr class="p0 mt-3"/>
-<div class="italic text-sm text-center">
+<div id="page-footer-div" class="italic text-sm text-center bottom-1">
 <Footer/>
 </div>
+<div id="page-bottom-div" class=" anchor"></div>

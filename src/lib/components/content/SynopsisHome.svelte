@@ -147,6 +147,8 @@
             {/each}
         </div>
         <div class="inline-block text-center">
+            
+            
             <ButtonSelect buttonText="i" 
        buttonStyle="btn btn-xs  btn-circle btn-ghost  p-0" bind:selected={showInfoModal} tooltip="Show site info" tooltipbottom={true}/>
             <ButtonSelect buttonStyle="btn btn-xs rounded   btn-square btn-ghost  p-1" 
@@ -161,12 +163,13 @@
     {#each panes as pane, index}
 
     <div id="pane-{pane.name}" class={index==selectedPane ? 'block' : 'hidden'}>
-        
+            
             {#if options.request.tab==index}
             <pane.comp options={options.copy()} live={index==selectedPane} tfServer={tfServer} keyevent={keyEvents[index]}/>
             {:else}
             <pane.comp live={index==selectedPane} tfServer={tfServer} keyevent={keyEvents[index]}/>
             {/if}
+            
         
     </div>
     {/each}
