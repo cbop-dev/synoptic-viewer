@@ -39,7 +39,7 @@ export class N1904Server extends TfUtils.TfServer {
             for (const book of ['matt', 'mark', 'luke', 'john','other']){
                 for (const [i,textRef] of group[book].textRefs.entries()){
                     //mylog("checking ref: " + textRef.reference);
-                    const queryIndex= refsArrays.groupsIndices[0][book][i];
+                    const queryIndex= refsArrays.groupsIndices[0][book].main[i];
                     if (fetchedResponse && fetchedResponse['texts'] && fetchedResponse['texts'][queryIndex]){
                         textRef.text= fetchedResponse['texts'][queryIndex].text;
                         if (lexemes){

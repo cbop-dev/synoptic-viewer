@@ -1,4 +1,4 @@
-import ParTexts from "./parallelTexts.svelte.js";
+//import ParTexts from "./parallelTexts.svelte.js";
 import {ParallelColumn, ParallelColumnGroup, GospelPericopeGroup,TextAndRef,VerseWords,Word,GospelPericopeGroupIndices} from "./parallelTexts.svelte.js";
 import * as env from '$lib/env/env.js'
 import gospelParallels from '@cbop-dev/aland-gospel-synopsis'
@@ -12,9 +12,12 @@ import * as MathUtils from '$lib/utils/math-utils.js';
  * 
  * @param {string} bookAbbrev
  * @param {string} ref
- * @returns {TextAndRef}[]}
+ * @returns {TextAndRef[]}
  */
 export function getTextRefsArray(bookAbbrev, ref){
+    /**
+     * @type {TextAndRef[]}
+     */
     let textRefArray = [];
         for (const r of ref.split(";")){
            
@@ -23,9 +26,8 @@ export function getTextRefsArray(bookAbbrev, ref){
             if(c && vv) {
                 if (vv.includes(',')){ //got indivdual verses/ranges
                     
-                    
                     for (const v of vv.split(',')){
-                        const textRef = new ParTexts.TextAndRef();
+                        const textRef = new TextAndRef();
                         let theRef = bookAbbrev? bookAbbrev + " " : " ";
                         theRef += c+":";
                         theRef += v;
@@ -36,21 +38,21 @@ export function getTextRefsArray(bookAbbrev, ref){
                 }   
                 else{
                     const theRef =  bookAbbrev? bookAbbrev + " " + r : r;
-                    const textRef = new ParTexts.TextAndRef();
+                    const textRef = new TextAndRef();
                     textRef.reference=theRef;
                     textRefArray.push(textRef);
                 }
             }
             else{
-                theRef =  bookAbbrev? bookAbbrev + " " + ref : ref;
-                const textRef = new ParTexts.TextAndRef();
+                const theRef =  bookAbbrev? bookAbbrev + " " + ref : ref;
+                const textRef = new TextAndRef();
                     textRef.reference=theRef;
                     textRefArray.push(textRef);
             }
                 
      
         }
-        return textRefArray;
+    return textRefArray;
 }
 
 
@@ -59,20 +61,36 @@ export function getTextRefsArray(bookAbbrev, ref){
  * @param {number[]} pericopeNums
  * @returns  {GospelPericopeGroup[]}
  */
-export function getGroupsArray(pericopeNums){
+export function getGroupsArray(pericopeNums,includeSecondary=false){
     return pericopeNums.map((pericope)=>{
         const row = gospelParallels.alandSynopsis.lookupPericope(pericope);
         const perGroup = new GospelPericopeGroup();
         perGroup.id = row.pericope;
         perGroup.title = row.pericope + ": " + row.title;
-        if (row.Matt.ref)
+        if (row.Matt.ref){
             perGroup.gospelCols.matt.textRefs.push(...getTextRefsArray("Matt", row.Matt.ref));
-        if (row.Mark.ref)
+            if(includeSecondary && row.Matt.secondary && row.Matt.secondary.length) {
+                perGroup.gospelCols.matt.secondary.push(...getTextRefsArray("Matt", row.Matt.secondary));
+            }
+        }
+        if (row.Mark.ref) {
             perGroup.gospelCols.mark.textRefs.push(...getTextRefsArray("Mark", row.Mark.ref));
-        if (row.Luke.ref)
+            if(includeSecondary && row.Mark.secondary && row.Mark.secondary.length) {
+                perGroup.gospelCols.mark.secondary.push(...getTextRefsArray("Mark", row.Mark.secondary));
+            }
+        }
+        if (row.Luke.ref){
             perGroup.gospelCols.luke.textRefs.push(...getTextRefsArray("Luke", row.Luke.ref));
-        if (row.John.ref)
+            if(includeSecondary && row.Luke.secondary && row.Luke.secondary.length) {
+                perGroup.gospelCols.luke.secondary.push(...getTextRefsArray("Luke", row.Luke.secondary));
+            }
+        }
+        if (row.John.ref) {
             perGroup.gospelCols.john.textRefs.push(...getTextRefsArray("John", row.John.ref));
+            if(includeSecondary && row.John.secondary && row.John.secondary.length) {
+                perGroup.gospelCols.john.secondary.push(...getTextRefsArray("John", row.John.secondary));
+            }
+        }
         if (row.other.ref)
             perGroup.gospelCols.other.textRefs.push(...getTextRefsArray("", row.other.ref));
             
@@ -203,7 +221,7 @@ export function populateGroupsText(perGroups,response,perGroupsIndices,words=tru
         for (const book of ['matt', 'mark', 'luke', 'john','other']){
             for (const [i,textRef] of group[book].textRefs.entries()){
                 mylog("checking ref: " + textRef.reference);
-                const queryIndex= perGroupsIndices[index][book][i];
+                const queryIndex= perGroupsIndices[index][book].main[i];
                 if (response && response['texts'] && response['texts'][queryIndex]){
                     textRef.text= response['texts'][queryIndex].text;
                     if (response['texts'][queryIndex].notes){
@@ -275,7 +293,7 @@ export function populateTextGroup(parallelColumnGroup, response, parallelIndices
  * @param  {GospelPericopeGroup[]} groupsArray
  * @returns {{groupsIndices: GospelPericopeGroupIndices[], refsArray: string[]}} 
  **/
-export function getGospelGroupRefsArrays(groupsArray){
+export function getGospelGroupRefsArrays(groupsArray,includeSecondary=false){
     let refIndex = 0;
     /**
      * @type {GospelPericopeGroupIndices[]} groupsIndices
@@ -292,14 +310,29 @@ export function getGospelGroupRefsArrays(groupsArray){
         for (const book of ['matt','mark','luke','john','other']){
             for (const ref of group[book].textRefs){
                 if (refsArray.includes(ref.reference)){ //already fetching this ref. Double-dip!
-                    groupIndices[book].push(refsArray.indexOf(ref.reference));
+                    groupIndices[book].main.push(refsArray.indexOf(ref.reference));
                 }
                 else{
                     refsArray.push(ref.reference);
-                    groupIndices[book].push(refIndex);
+                    groupIndices[book].main.push(refIndex);
                     refIndex++; 
                 }
                 
+            }
+
+            if(includeSecondary && group[book].secondary && group[book].secondary.length){
+                for (const ref of group[book].secondary){
+                    mylog(`found secondary ref group (id: ${group.id}) for ${book}: ${ref}`,true)
+                    if (refsArray.includes(ref.reference)){ //already fetching this ref. Double-dip!
+                        groupIndices[book].secondary.push(refsArray.indexOf(ref.reference));
+                    }
+                    else{
+                        refsArray.push(ref.reference);
+                        groupIndices[book].secondary.push(refIndex);
+                        refIndex++; 
+                    }
+                
+                }
             }
 
         }
@@ -372,16 +405,23 @@ export class TfServer{
         return resp.json();
     }
     
-
+/**
+ * 
+ * @param {string[]} refs 
+ * @returns 
+ */
     getBCVarrayFromRefs(refs){
     /**
      * @type {{book:string,chapter:number|null,verses:number[]}[]} bcvArray
      */
         const bcvArray = [];
-        for (const ref of refs){
+        for (const [i,ref] of refs.entries()){
             const bookCv=BibleUtils.getBookChapVerseFromRef(ref);
             bookCv.chap = bookCv.chap ? bookCv.chap.replaceAll(/[a-zA-Z]/g,'') : ''
             bookCv.v = bookCv.v ? bookCv.v.replaceAll(/[a-zA-Z]/g,'') : ''
+            if (!bookCv.book) {
+                mylog(`getBCVarrayFromRefs('${refs.join(';')}'): Got no book name for row ${i} chap: ${bookCv.chap} and ${bookCv.v}`, true);
+            }
             const bookName = this.getBookNameBySyn(bookCv.book);
             //mylog('fetchGroupText got bookname ' + bookName + " for: " + bookCv.book);
 
@@ -581,7 +621,7 @@ export class TfServer{
      * @param {Object|null} options 
      * @returns the response object from getTexts()
      */
-    async fetchPostTextsBatch(refsArray=[],options=null){
+    async fetchPostTextsBatch(refsArray=[],options=null,secondary=false){
          /**
          * @type {{book:string,chapter:number|null,verses:number[]}[]} bcvFetchArray
          */
@@ -653,9 +693,12 @@ export class TfServer{
      * @returns 
      */
     getBookNameBySyn(syn){
-    
-        const id = this.getBookID(syn)
-        const name = this.getBookName(id);
+        
+        const id = syn ? this.getBookID(syn) : 0
+        if (!id){
+            mylog("got not book name synonymn!")
+        }
+        const name =  id ? this.getBookName(id) : ''
         mylog("getBookNameBySyn("+syn+")->id:"+id+", name:" +name)
         return name;
     }

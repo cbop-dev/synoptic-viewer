@@ -1,14 +1,15 @@
 
 //import { mylog } from '../env/env';
-import { mylog,apiURI } from '$lib/env/env.js';
+//import { mylog,apiURI } from '$lib/env/env.js';
+import { mylog} from '$lib/env/env.js';
 import ntlexemes from './sblgnt-lexemes.json';
 import { tfNtBooksDict } from './ntbooks.js';
 //import * as bibleUtils from './bibleRefUtils.js';
-import sblgntlexemes from './sblgnt-lexemes.json';
+//import sblgntlexemes from './sblgnt-lexemes.json';
 import * as env from '$lib/env/env.js'
-import TfUtils from '$lib/components/content/TfUtils.js';
+//import TfUtils from '$lib/components/content/TfUtils.js';
 import { N1904Server } from '$lib/n1904/tfN1904.js';
-import { ParallelColumn, GospelPericopeGroup,TextAndRef,VerseWords,Word,GospelPericopeGroupIndices } from '$lib/components/content/parallelTexts.svelte';
+//import { ParallelColumn, GospelPericopeGroup,TextAndRef,VerseWords,Word,GospelPericopeGroupIndices } from '$lib/components/content/parallelTexts.svelte';
 
 const debugOn=true;
 export const lexemes = ntlexemes;

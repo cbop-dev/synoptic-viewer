@@ -43,6 +43,6 @@
 		"vitest": "^3.0.0"
 	},
 	"dependencies": {
-		"@cbop-dev/aland-gospel-synopsis": "^0.1.8"
+		"@cbop-dev/aland-gospel-synopsis": "^0.1.9"
 	}
 }

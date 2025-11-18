@@ -3,9 +3,10 @@ import { mylog } from "$lib/env/env.js";
 import { GreekUtils } from "$lib/utils/greek-utils";
 import {combineRefs, formatBibRefs,expandRefs} from '$lib/n1904/bibleRefUtils.js';
 import * as BibleUtils from '$lib/n1904/bibleRefUtils.js'
-import { findAllCommonSubarraysAmongHybrid } from "$lib/utils/sais-array2";
+//import { findAllCommonSubarraysAmongHybrid } from "$lib/utils/sais-array2";
+import {findMaximalCommonSubarraysAcrossColumns} from  "$lib/utils/column-subarrays2.js";
 import mathUtils from "$lib/utils/math-utils";
-import { form } from "$app/server";
+//import { form } from "$app/server";
 
 /**
  * @class
@@ -246,6 +247,10 @@ export class ParallelColumn {
      */
     unique= new Set();
 
+    /**
+     * @type {TextAndRef[]}
+     */
+    secondary=$state([])
     
 
 
@@ -260,51 +265,52 @@ export class ParallelColumn {
     }
     /**
      * 
-     * @param {TextAndRef[]}     textRefs
+     * @param {TextAndRef[]} [textRefs=[]]
+     * @param {TextAndRef[]} [secondary=[]] 
      */
-    constructor(textRefs=[]){
-        this.textRefs = textRefs
-        
+    constructor(textRefs=[], secondary=[]){
+        this.textRefs = textRefs;
+        this.secondary=secondary;
      
     }
 }
 
 export class GospelPericopeGroupIndices {
     /**
-     * @type {number[]} matt
+     * @type {{main: number[], secondary: number[]}} matt
      */
-    matt=[];
+    matt={main:[], secondary:[]};
     /**
-     * @type {number[]} mark
+     * @type {{main: number[], secondary: number[]}} mark
      */
-    mark=[];
+    mark={main:[], secondary:[]};
     /**
-     * @type {number[]} luke
+     * @type {{main: number[], secondary: number[]}} luke
      */
-    luke=[];
-        /**
-     * @type {number[]} john
-     */
-    john=[];
+    luke={main:[], secondary:[]};
     /**
-     * @type {number[]} other
+     * @type {{main: number[], secondary: number[]}}john
      */
-    other=[];
+    john={main:[], secondary:[]};
+    /**
+     * @type {{main: number[], secondary: number[]}}
+     */
+    other={main:[], secondary:[]};
 
     /**
      * 
-     * @param {number[]} matt 
-     * @param {number[]} mark 
-     * @param {number[]} luke 
-     * @param {number[]} john 
+     * @param {number[]} matt - the main textRefs for Matt. Secondary must be added manually!
+     * @param {number[]}  mark - the main textRefs for Mark. Secondary must be added manually!
+     * @param {number[]}  luke - the main textRefs for Luke. Secondary must be added manually!
+     * @param {number[]}  john - the main textRefs for John. Secondary must be added manually!
      * @param {number[]} other 
      */
-    constructor(matt=[],mark=[],luke=[],john=[],other=[]){
-        this.matt=matt;
-        this.mark=mark;
-        this.luke=luke;
-        this.john=john;
-        this.other=other;
+    constructor(mattMain=[],markMain=[],lukeMain=[],johnMain=[],otherMain=[]){
+        this.matt.main =mattMain
+        this.mark.main=markMain;
+        this.luke.main=lukeMain;
+        this.john.main=johnMain;
+        this.other.main=otherMain;
     }
 }
 
@@ -340,7 +346,7 @@ export function parseSingleGroup(inputStrings){
         thePars.push(new ParallelColumn(tAndRefs));
     });
 
-     
+
     return thePars;
 }
 
@@ -350,8 +356,15 @@ export function parseSingleGroup(inputStrings){
  * @description stores single location of a phrase (which can be multiple words): at column, textAndRef, verse, and word(s).
  */
 export class ParallelPhraseLocation{
-    constructor(column=0,phraseLocation=new TextRefVersePhraseLocation()){
+    /**
+     * 
+     * @param {number} [column=0]
+     * @param {TextRefVersePhraseLocation} [phraseLocation=newTextRefVersePhraseLocation()] 
+     * @param {boolean} [secondary=false] whether the location is found in the secondary texts.
+     */
+    constructor(column=0,phraseLocation=new TextRefVersePhraseLocation(),secondary=false){
         this.column=column;
+        this.secondary=false;
         this.singleColumnLocation=phraseLocation;
     }
     
@@ -461,9 +474,11 @@ export class ParallelColumnGroup {
      *
      * @description finds all the lexically identical phrases across columns! amazing!
      */
-    buildLexIdenticalPhrases(minLenth=2){
+    buildLexIdenticalPhrases(minLenth=2,includeSecondary=false){
         mylog(`ParColGroup.buildLexidentical()...`);
-        const combinedColumnIds=this.parallelColumns.map((col)=>col.textRefs.reduce(
+        const combinedColumnIds=this.parallelColumns.map((col)=> {
+            const theRefsList = includeSecondary && col.secondary && col.secondary.length  ?  [...col.textRefs, ...col.secondary ] : col.textRefs;
+            return theRefsList.reduce(
             /**
              * 
              * @param {number[]} array 
@@ -477,10 +492,85 @@ export class ParallelColumnGroup {
             else{
                 return  tr.getWordIdArray();
             }
-        },[]));
+        },[])});
 
+
+        
+        // ############################## TO DO: use findMaximalCommonSubarraysAcrossColumns here instead! #############
+        //TODO: implement with findMaximalCommonSubarraysAcrossColumns instead!
+        const theColumns =this.parallelColumns.map((col)=> 
+            [...col.textRefs.map((tr)=>tr.getWordIdArray()), ...col.secondary.map((sec)=>sec.getWordIdArray())]);
+
+        const commonSubarrays2=findMaximalCommonSubarraysAcrossColumns(theColumns,3);
+        
+        this.lexIdenticalPhrasesLocations=[];
+        for (const subarray of commonSubarrays2){ 
+            const lexPhrase = new LexicalPhrase(subarray.subarray);
+            const lexPhraseAndLocations= new LexPhraseAndLocations(lexPhrase);
+            for (const occurrence of subarray.occurrences){  //second loop: each column, of that phrase
+                const colIndex=occurrence.columnIndex;
+                const isSecondary =occurrence.textIndex>=this.parallelColumns[colIndex].textRefs.length;
+                const textIndex = isSecondary? occurrence.textIndex-this.parallelColumns[colIndex].textRefs.length : occurrence.textIndex;
+                const tRef = isSecondary ? this.parallelColumns[colIndex].secondary[textIndex] : this.parallelColumns[colIndex].textRefs[textIndex];
+                for (const {start:start,end:end} of occurrence.spans){ 
+                     
+                    const phraseRange=mathUtils.range(end-start+1,start);
+                    /**
+                    * @type {Word[]}
+                    */
+                    const words = phraseRange.map((trIdx)=>tRef.getWordByIndex(trIdx)).filter((w)=>w!=null);
+
+                    const vWIndices = tRef.getVerseWordIndices(start)
+                    const phraseLocation=new ParallelPhraseLocation(colIndex,new TextRefVersePhraseLocation(textIndex,));
+                    if (!this.lexIdenticalPhrasesMap.has(lexPhrase)){
+                        this.lexIdenticalPhrasesMap.set(lexPhrase,{words:words, css:new Set(['lexical-phrase'])})
+                    }
+                    else{
+                        this.lexIdenticalPhrasesMap.get(lexPhrase)?.words?.push(...words);
+                    }
+
+                    words.forEach((w)=>{
+                        if (!w.phrases['lexical']){
+                            w.phrases['lexical']=new Set();
+
+                        }
+                        w.phrases['lexical'].add(lexPhrase);
+                        
+                    });
+
+                    /**
+                     * @type {VerseWordIndex[]}
+                     */
+                    const vWordIndices=phraseRange.map((wIdx)=>tRef.getVerseWordIndices(wIdx)).filter((o)=>o!=null);
+                    if (vWordIndices && vWordIndices.length) {
+                        const trVpL = new TextRefVersePhraseLocation(textIndex,vWordIndices);
+                        phraseLocation.singleColumnLocation=trVpL;
+                    }
+                    lexPhraseAndLocations.multiColumnLocations.push(phraseLocation);
+
+                     
+                }
+            }
+
+            this.lexIdenticalPhrasesLocations.push(lexPhraseAndLocations);
+            this.updatedCounter++;
+
+        }
+        
+        let numPhrases = this.lexIdenticalPhrasesMap.size;
+        
+        this.lexIdenticalPhrasesMap.values().forEach((obj,index)=>{
+            
+            obj.css.add('lexical-phrase-'+String((index % 14)+1));
+            //obj.css.add('underline').add('bold').add('bg-yellow-50');
+        });
+
+/*        
         const commonSubarrays = findAllCommonSubarraysAmongHybrid(combinedColumnIds,minLenth);
+        
 
+
+        //$$$$$$$$$$$$$$$$$$$ OLD $$$$$$$$$$$$$$$$$$$$$$$
         this.lexIdenticalPhrasesLocations=[];
 
         //this.lexIdenticalPhrases=new Map();
@@ -494,37 +584,53 @@ export class ParallelColumnGroup {
                 
                 for (const [start,end] of rangesObj.ranges){ 
                     //3rd loop: each instance of the phrase in a single column. need to split this into its separate bible sections if the column has more than one
-                    
+*/                    
                     /**
                     * @description one location of current phrase
                     */
-                    const phraseLocation=new ParallelPhraseLocation(colIndex);//single location of this phrase identified by column, textAndRef, verse, word(s)
+/*                    const phraseLocation=new ParallelPhraseLocation(colIndex);//single location of this phrase identified by column, textAndRef, verse, word(s)
 
                     
-                    //We had combined all textRefs, so we must figure out which one this is. 
+                    //We had combined all main textRefs+secondary, so we must figure out which one this is. 
                     //We can simply count the "-1" separators leading up to the first index, since this was used to separate the texref ids in the combined array:
                     
                     let combinedSeparatorIndicies=[0]
-                    for (let i=0; i<=combinedColumnIds[colIndex].length && i<=start; i++){
+                    for (let i=0; i<combinedColumnIds[colIndex].length && i<=start; i++){
                         if (combinedColumnIds[colIndex][i]==-1) {
                             
                             combinedSeparatorIndicies.push(i);
                         }
                     }
-                    const correctTextRefIdx=combinedSeparatorIndicies.length-1;
-                    const correctedStart=start-combinedSeparatorIndicies[correctTextRefIdx]-correctTextRefIdx;
-                    const correctedEnd=end-combinedSeparatorIndicies[correctTextRefIdx]-correctTextRefIdx;
+                    
+                    //const correctTextRefIdx=combinedSeparatorIndicies.length-1;
+                    const textIdx=combinedSeparatorIndicies.length-1;
+                    const isSecondary=textIdx>=this.parallelColumns[colIndex].textRefs.length; 
+                    const secondaryIdx=textIdx-this.parallelColumns[colIndex].secondary.length;
+                    const correctTextRefIdxOffset = isSecondary?secondaryIdx : textIdx;
+                    
+
+                    //TODO: fix this. these indexes are not correct after first text, and get more wrong as it goes. Need to subtract more?
+                    //this is tricky: what index in the actual textAndRef object do we start and end with?
+                    const correctedStart=start-combinedSeparatorIndicies[textIdx]-textIdx;
+                    const correctedEnd=end-combinedSeparatorIndicies[textIdx]-textIdx; 
+                    //if beyond textRefs array, uswe have a secondary text, in col.secondary!
+                    
+                    //calculating secondaryIdx. We need to know which 
+                    //const secondaryRefidx=isSecondary ? correctTextRefIdx-this.parallelColumns[colIndex].textRefs.length : 0
+                    //const realRefIdx=isSecondary? secondaryRefidx: correctTextRefIdx;
+
+                    
                     const phraseRange=mathUtils.range(correctedEnd-correctedStart+1,correctedStart);
-                    const tRef=this.parallelColumns[colIndex].textRefs[correctTextRefIdx];
+                    const tRef=isSecondary ? this.parallelColumns[colIndex].secondary[secondaryIdx] : this.parallelColumns[colIndex].textRefs[textIdx];
                     //mylog(`buildLexphrases: got tRefindex=${correctTextRefIdx}`,true);
                    // mylog(`buildLexphrases: got combinedSeparatorIndicies=${combinedSeparatorIndicies.join("'")}`,true);
                     // TODO: doesn't seem to work yet for text below first one :-(
-
+*/
 
                     /**
                      * @type {Word[]}
                      */
-                    const words = phraseRange.map((trIdx)=>tRef.getWordByIndex(trIdx)).filter((w)=>w!=null);
+/*                    const words = phraseRange.map((trIdx)=>tRef.getWordByIndex(trIdx)).filter((w)=>w!=null);
                    // mylog(`Got words in matching phrase:[${words.map((w)=>w.word)}]`, true)
                     if (!this.lexIdenticalPhrasesMap.has(lexPhrase)){
                         this.lexIdenticalPhrasesMap.set(lexPhrase,{words:words, css:new Set(['lexical-phrase'])})
@@ -545,12 +651,12 @@ export class ParallelColumnGroup {
                     words.forEach((w)=>{
                         
                     })
-                    /**
+*/                    /**
                      * @type {VerseWordIndex[]}
                      */
-                    const vWordIndices=phraseRange.map((wIdx)=>tRef.getVerseWordIndices(wIdx)).filter((o)=>o!=null);
+/*                    const vWordIndices=phraseRange.map((wIdx)=>tRef.getVerseWordIndices(wIdx)).filter((o)=>o!=null);
                     if (vWordIndices && vWordIndices.length) {
-                        const trVpL = new TextRefVersePhraseLocation(correctTextRefIdx,vWordIndices);
+                        const trVpL = new TextRefVersePhraseLocation(correctTextRefIdxOffset,vWordIndices);
                         phraseLocation.singleColumnLocation=trVpL;
                     }
                     lexPhraseAndLocations.multiColumnLocations.push(phraseLocation);
@@ -563,7 +669,7 @@ export class ParallelColumnGroup {
             this.updatedCounter++;
         }
 
-        const numPhrases = this.lexIdenticalPhrasesMap.size;
+        numPhrases = this.lexIdenticalPhrasesMap.size;
         
         this.lexIdenticalPhrasesMap.values().forEach((obj,index)=>{
             
@@ -571,7 +677,7 @@ export class ParallelColumnGroup {
             //obj.css.add('underline').add('bold').add('bg-yellow-50');
         })
 
-        
+*/        
     
         /*
         mylog("========================================================",true)
@@ -583,7 +689,7 @@ export class ParallelColumnGroup {
     }
 
 
-    markUniqueAndIdenticalWords(){
+    markUniqueAndIdenticalWords(includeSecondary=false){
         /**
          * @type {Object<string,Set<number>>} wordsBooks
          */
@@ -598,7 +704,8 @@ export class ParallelColumnGroup {
 
         //this.wordIds=new Set()
         for (const [index,par] of this.parallelColumns.entries()){
-            for (const tR of par.textRefs){
+            const theRefsList = includeSecondary && par.secondary && par.secondary.length  ?  [...par.textRefs, ...par.secondary ] : par.textRefs;
+            for (const tR of theRefsList){
                 for (const vW of tR.vwords){
                     for (const word of vW.words){
                         
@@ -649,7 +756,7 @@ export class ParallelColumnGroup {
      * @param {number[]} exclude - the indexes of parallelColumns to exclude
      * @returns {string} a single string which combines and consolidates all the references in the includes ParallelColumns
      */
-    getRefs(exclude=[]){
+    getRefs(exclude=[], includeSecondary=false){
         let refs=[];
         
         for (const [index,par] of this.parallelColumns.entries().filter(([i,p])=>!exclude.includes(i))){
@@ -657,6 +764,11 @@ export class ParallelColumnGroup {
                 const refsMapped = par.textRefs.map((tr)=>tr.reference)
                 //mylog(`getRefs.refsMapped=[${refsMapped.join("//")}]`);
                 refs.push(formatBibRefs(refsMapped.join(";")))
+            }
+            if(includeSecondary && par.secondary && par.secondary.length){
+                const secondaryRefsMapped = par.secondary.map((tr)=>tr.reference)
+                //mylog(`getRefs.refsMapped=[${refsMapped.join("//")}]`);
+                refs.push(formatBibRefs(secondaryRefsMapped.join(";")))
             }
             
         }

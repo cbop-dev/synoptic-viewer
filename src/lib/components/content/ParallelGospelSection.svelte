@@ -10,13 +10,14 @@
     import BibleTextBlock from './BibleTextBlock.svelte';
     const gospels = gospelParallels.gospels;
     
-
+    //let showSecondary=$state(true);
     //mylog("loading ParTextSecion Component");
     
     /**
      * @type {{parGroup: GospelPericopeGroup,
      * options:SynopsisOptions3,
      * focus:string,
+     * enableSecondary:boolean,
      * wordClick:function(number):void,
      * cssClassDict:Object,
      * cssCustomDict:Object,
@@ -27,6 +28,7 @@
     let {
         parGroup = new GospelPericopeGroup(),
         options=new SynopsisOptions3(),
+        enableSecondary=false,
        focus = '',
        /* showUnique=false,
         showIdentical=true,*/
@@ -200,6 +202,10 @@ function isUnique(wordid, uniqueSet){
        /* border-color: var(--borderColor,#eee)*/
     }
 
+
+    .column .secondary {
+        @apply text-sm;
+    }
     
 
 
@@ -216,39 +222,50 @@ function isUnique(wordid, uniqueSet){
     } grid-cols-1 text-2xl">
     
         {#each colData.cols as col, index}
-
-        {#if col.textRefs && col.textRefs.length}
-            
-
+            {#if (col.textRefs && col.textRefs.length) || (enableSecondary && col.secondary && col.secondary.length)}
             <div class="rounded-box  {Object.values(gospels.abbreviations)[index]} m-1 p-2 gospel-column gospel column gospel-column-{index} column-{index}">
-            {#if col.textRefs.length}
-            
+                {#if col.textRefs && col.textRefs.length}
+                    {#if col.textRefs.length}
+                        {#each col.textRefs as textRef, index2}
+                        
+                            {@const unique = (options.viewOptions.unique && numCols > 1)? col.unique : new Set()}
+                            {#if index2 > 0}<br/>{/if}
+                            <div class="text-left">    
+                                <BibleTextBlock {textRef}  {parGroup} {options} {numCols} copyButton={true} 
+                                    cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} 
+                                    {showNotes} uniqueSet={unique} notesClick={showNotesFunction} 
+                                        {wordClick} 
+                                />
+                            </div>
+                            
+                        {/each}       
+                    {/if}  
+                {/if}
+                {#if enableSecondary && col.secondary && col.secondary.length}
+                    <h3 class="italic">Secondary parallels:</h3>  
+                    <div class="rounded-box secondary {Object.values(gospels.abbreviations)[index]} ">
                 
-                {#each col.textRefs as textRef, index2}
-                
-                {@const unique = (options.viewOptions.unique && numCols > 1)? col.unique : new Set()}
-                
-              
-                    {#if index2 > 0}<br/>{/if}
-                    <div class="text-left">
+                    {#each col.secondary as secondaryTextRef, index2}
                     
-                       <BibleTextBlock {textRef}  {parGroup} {options} {numCols} copyButton={true} 
-                    cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} 
-                    {showNotes} uniqueSet={unique} notesClick={showNotesFunction} 
-                        {wordClick} 
-                    />
-
-                   <!-- {@render showText(myOptions,cssClasses)}-->
+                        {@const unique = (options.viewOptions.unique && numCols > 1)? col.unique : new Set()}
+                        {#if index2 > 0}<br/>{/if}
+                        
+                        <div class="text-left">
+                        
+                        <BibleTextBlock textRef={secondaryTextRef}  {parGroup} {options} {numCols} copyButton={true} 
+                        cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} 
+                        {showNotes} uniqueSet={unique} notesClick={showNotesFunction} 
+                            {wordClick} 
+                        />
+                        </div>
+                            
+                    {/each}   
+                
                     </div>
-                    
-                {/each}
-                
-            
-            {/if}
+
+                {/if}
             </div>
-        
-                
-        {/if}
+            {/if}
         {/each}
 
 

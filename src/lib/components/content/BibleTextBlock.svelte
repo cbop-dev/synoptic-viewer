@@ -74,6 +74,7 @@ let {
       mylog(`isUnique(${wordid},(${uniqueSet}))=>${retVal}`)
     return retVal;
 }
+$inspect(`<BibleTextBlock>: textRef.ref=${textRef.reference}`)
 </script>
 
 <div class="bible-block ">

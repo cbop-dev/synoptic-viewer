@@ -83,7 +83,7 @@ let showLookupPanel = $state(true);
   //  || myOptions.request.sections && myOptions.request.sections.length) : false;
 let landingPage = $state(!myOptions.request.fromURL);
 let requestProcessed = $state(false);
-
+let enableSecondary=$state(true);
 
 let showInfoModal=$state(false);
 let maxLexesToShow=$state(30);
@@ -145,7 +145,7 @@ let filteredPerGroups=$derived(perGroups.filter((g)=>filteredPericopes.includes(
 let perGroupsIndices=$derived.by(()=>{
     let retVal = [];
     if (perGroups && perGroups.length){
-        retVal = TfUtils.getGospelGroupRefsArrays(perGroups).groupsIndices;
+        retVal = TfUtils.getGospelGroupRefsArrays(perGroups,enableSecondary).groupsIndices;
     }
     return retVal;
 });
@@ -155,7 +155,7 @@ let perGroupsIndices=$derived.by(()=>{
 let groupsRefsArray=$derived.by(()=>{
     let retVal = [];
     if (perGroups && perGroups.length){
-        retVal = TfUtils.getGospelGroupRefsArrays(perGroups).refsArray;
+        retVal = TfUtils.getGospelGroupRefsArrays(perGroups,enableSecondary).refsArray;
     }
     return retVal;
 });
@@ -190,7 +190,7 @@ function buildPericopeRefs(){
 
     //  mylog("sorting pericopes. Sorted state = " + alandPericopeNums.join(","));
     
-    perGroups = TfUtils.getGroupsArray(filteredPericopes);
+    perGroups = TfUtils.getGroupsArray(filteredPericopes,true);
 
     // mylog("ran geRefsArrays!")
 
@@ -352,7 +352,7 @@ async function buildAndFetchPericopes(reset=true){
     
     fetchedTextsResponse = await currentServer.fetchPostTextsBatch(groupsRefsArray);
     //buildLexArrays();
-    populateGroupsText(true);
+    populateGroupsText(true,enableSecondary);
     dataReady= true;
 }
 //let lemmasByID={}
@@ -373,16 +373,16 @@ function buildLexArrays(){
     
 }
 
-function populateGroupsText(words=false){
-    // mylog("v==================================v", true);
-    //mylog("populateGroupTexts()...",true);
+function populateGroupsText(words=false,includeSecondary=false){
+    mylog("v==================================v", true);
+    mylog(`populateGroupTexts(includeSecondary:${includeSecondary})...`,true);
     
     for (const [index,group] of perGroups.entries()){
         mylog("checking group # " + group.id +" , title: '"+ group.title + ", index: " + index);
         for (const book of ['matt', 'mark', 'luke', 'john','other']){
             for (const [i,textRef] of group[book].textRefs.entries()){
                 mylog("checking ref: " + textRef.reference);
-                const queryIndex= perGroupsIndices[index][book][i];
+                const queryIndex= perGroupsIndices[index][book].main[i];
                 if (fetchedTextsResponse && fetchedTextsResponse['texts'] && fetchedTextsResponse['texts'][queryIndex]){
                     textRef.text= fetchedTextsResponse['texts'][queryIndex].text;
                     if (fetchedTextsResponse['texts'][queryIndex].notes){
@@ -400,9 +400,35 @@ function populateGroupsText(words=false){
                 }
 
             }
+
+            if (includeSecondary && group[book].secondary && group[book].secondary.length){
+                for (const [i,textRef] of group[book].secondary.entries()){
+                    mylog("checking ref: " + textRef.reference);
+                    const queryIndex= perGroupsIndices[index][book].secondary[i];
+                    if (fetchedTextsResponse && fetchedTextsResponse['texts'] && fetchedTextsResponse['texts'][queryIndex]){
+                        textRef.text= fetchedTextsResponse['texts'][queryIndex].text;
+                        if (fetchedTextsResponse['texts'][queryIndex].notes){
+                            const notes = fetchedTextsResponse['texts'][queryIndex].notes.filter((n)=>n.length).join("\n");
+                            if (notes.length){
+                                textRef.note=notes;
+                            }
+                        }
+                        if (words){
+                            
+                            textRef.vwords=VerseWords.buildFromObj(fetchedTextsResponse['texts'][queryIndex].words);
+                        }
+                        // mylog("populating fetched text for group index "+index + ", ref: '" + textRef.reference
+                        // + "', queryIndex = " + queryIndex +", text='"+textRef.text +"'", true);
+                    }
+
+                }
+
+
+            }
+
         }
         group.markUniqueAndIdenticalWords();    
-        group.buildLexIdenticalPhrases(3);    
+        group.buildLexIdenticalPhrases(3,true);    
     }
     mylog("DONE! Populated the GroupTexts()!")
     mylog("^==================================^")
@@ -778,17 +804,6 @@ $effect(()=>{customGreekInputText=GreekUtils.removeDiacritics(
 });
 //$inspect(customGreekClasses);
 
-function buildLexiidenticalPhrases(){
-    mylog("buildLexiidenticalPhrases()!")
-    if(dataReady && fetchedTextsResponse && filteredPerGroups.length){
-        for (const [i,perGroup] of filteredPerGroups.entries()){
-            mylog(`about to build identical phrases for Group #{$i} (${perGroup.getRefs()})`, true);
-            perGroup.buildLexIdenticalPhrases(3);
-
-        }
-    }
-           
-}
 
 
 function loadRequestOptions(){
@@ -812,6 +827,9 @@ onMount(() => {
     mounted = true;
 });
 
+$inspect("fetchedTextsResponse",fetchedTextsResponse);
+$inspect("groupsRefsArray", groupsRefsArray);
+$inspect('perGroups', perGroups);
 </script>
 <style>
     @reference "tailwindcss";
@@ -904,26 +922,25 @@ onMount(() => {
         {/if}
 
         {#if alandPericopeNums && alandPericopeNums.length}
-        <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={viewStates.views.view.state} tooltipbottom tooltip="Show other viewing options (sort, etc.)"  buttonText="☰ View"/></svelte:element>
-
-        {#if dataReady}
-        <svelte:element this={theTag} class={classes}><ButtonSelect buttonText="Similar" bind:selected={myOptions.viewOptions.similarPhrases} tooltipbottom ="Show lexically similar phrases (same lexemes, but possibly different forms/morphology)"/></svelte:element>
-        <svelte:element this={theTag} class={classes}> <ButtonSelect buttonText="☰ Jump to ↓" bind:selected={viewStates.views.sections.state}/></svelte:element>       
-            <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={viewStates.views.words.state} buttonText="☰ Words" /></svelte:element>
-            <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={myOptions.viewOptions.highlightOnClick} buttonText="Auto Highlight" 
-                tooltipbottom={true}
-                tooltip="If enabled, clicking/tapping on a word will toggle highlighting of that lexeme. Press 'c' to toggle this option."/></svelte:element>    
-            {#if currentServer.abbrev==SblGntServer.abbrev}   
-            <svelte:element this={theTag} class={[classes, 'menu']}><label class="label" for="hide-app-check{short? '-short':''}">
-    <input  class="toggle" id="hide-app-check{short? '-short':''}" type="checkbox" bind:checked={myOptions.viewOptions.hideApp}/>Hide appar{#if !short}aratus marks{:else}.{/if}</label>
-        </svelte:element>
-        {/if}
-    
-            
-        {/if}
+            {#if dataReady}
+                <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={viewStates.views.view.state} tooltipbottom tooltip="Show other viewing options (sort, etc.)"  buttonText="☰ View"/></svelte:element>
+                <svelte:element this={theTag} class={classes}><ButtonSelect buttonText="Similar" bind:selected={myOptions.viewOptions.similarPhrases} tooltipbottom ="Show lexically similar phrases (same lexemes, but possibly different forms/morphology)"/></svelte:element>
+                <svelte:element this={theTag} class={classes}> <ButtonSelect buttonText="☰ Jump to ↓" bind:selected={viewStates.views.sections.state}/></svelte:element>       
+                    <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={viewStates.views.words.state} buttonText="☰ Words" /></svelte:element>
+                    <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={myOptions.viewOptions.highlightOnClick} buttonText="Auto Highlight" 
+                        tooltipbottom={true}
+                        tooltip="If enabled, clicking/tapping on a word will toggle highlighting of that lexeme. Press 'c' to toggle this option."/></svelte:element>    
+                    {#if currentServer.abbrev==SblGntServer.abbrev}   
+                    <svelte:element this={theTag} class={[classes, 'menu']}><label class="label" for="hide-app-check{short? '-short':''}">
+            <input  class="toggle" id="hide-app-check{short? '-short':''}" type="checkbox" bind:checked={myOptions.viewOptions.hideApp}/>Hide appar{#if !short}aratus marks{:else}.{/if}</label>
+                </svelte:element>
+                    {/if}
+                    
+            {/if}
         {/if}
     
 {/snippet}
+
 <div id="top-fixed" class="self-center text-center m-auto w-full fixed top-8  bg-white z-40">
     <div id="header-nav-section" class="self-center text-center   m-auto w-full" >
     <div class="navbar bg-base-100 text-center  shadow-sm ">
@@ -1048,7 +1065,7 @@ onMount(() => {
     </div>
 
 </div><!--end fixed section-->
-    
+
 <div id="main-content-div" class="self-center relative text-center bg-white mt-20 md:mt-30 z-20">
        {#if !landingPage}
             {#if myOptions.request.fromURL && !requestProcessed}
@@ -1066,18 +1083,19 @@ onMount(() => {
 <div class="text-center mt-3">
    
     {#if alandPericopeNums.length}
-         <h1 class="text-center">Results from {currentServer.name}:
+         
+
+    <div id="results">
+
+
+        {#if dataReady && fetchedTextsResponse}
+            <h1 class="text-center">Results from {currentServer.name}:
             {#key myOptions.viewOptions}<CopyText icon={LinkSvg} 
             getTextFunc={makeURL} 
             tooltip='Copy stuff'
             
             />{/key}</h1>
         
-
-    <div id="results">
-
-
-        {#if dataReady && fetchedTextsResponse}
             {#if filteredPerGroups.length}
                 {#each filteredPerGroups as group, index }
                 <hr class="mb-2 !border-slate-200"/>
@@ -1107,6 +1125,7 @@ onMount(() => {
                 <div>
                     <ParallelGospelSection parGroup={group} options={myOptions} focus={focused}
                     wordClick={toggleLex}
+                    {enableSecondary}
                     cssClassDict={lexClasses}
                     cssCustomDict={customGreekClasses}
                     showNotes={currentServer.showNotes}
