@@ -496,8 +496,7 @@ export class ParallelColumnGroup {
 
 
         
-        // ############################## TO DO: use findMaximalCommonSubarraysAcrossColumns here instead! #############
-        //TODO: implement with findMaximalCommonSubarraysAcrossColumns instead!
+        
         const theColumns =this.parallelColumns.map((col)=> 
             [...col.textRefs.map((tr)=>tr.getWordIdArray()), ...col.secondary.map((sec)=>sec.getWordIdArray())]);
 
@@ -564,120 +563,7 @@ export class ParallelColumnGroup {
             obj.css.add('lexical-phrase-'+String((index % 14)+1));
             //obj.css.add('underline').add('bold').add('bg-yellow-50');
         });
-
-/*        
-        const commonSubarrays = findAllCommonSubarraysAmongHybrid(combinedColumnIds,minLenth);
-        
-
-
-        //$$$$$$$$$$$$$$$$$$$ OLD $$$$$$$$$$$$$$$$$$$$$$$
-        this.lexIdenticalPhrasesLocations=[];
-
-        //this.lexIdenticalPhrases=new Map();
-        for (const subarray of commonSubarrays){ //first loop: by phrase
-            const lexPhrase = new LexicalPhrase(subarray.subarray);
-            const lexPhraseAndLocations= new LexPhraseAndLocations(lexPhrase);
-            //need to gather all location of this phrase. LexPhraseAndLocations contains all location, spanning several columns.  here we go:
-            for (const rangesObj of subarray.arrays){  //second loop: each column, of that phrase
-                const colIndex=rangesObj.arrayIndex;  //NB: rangesObj.arrayIndex is the column index.
-                
-                
-                for (const [start,end] of rangesObj.ranges){ 
-                    //3rd loop: each instance of the phrase in a single column. need to split this into its separate bible sections if the column has more than one
-*/                    
-                    /**
-                    * @description one location of current phrase
-                    */
-/*                    const phraseLocation=new ParallelPhraseLocation(colIndex);//single location of this phrase identified by column, textAndRef, verse, word(s)
-
-                    
-                    //We had combined all main textRefs+secondary, so we must figure out which one this is. 
-                    //We can simply count the "-1" separators leading up to the first index, since this was used to separate the texref ids in the combined array:
-                    
-                    let combinedSeparatorIndicies=[0]
-                    for (let i=0; i<combinedColumnIds[colIndex].length && i<=start; i++){
-                        if (combinedColumnIds[colIndex][i]==-1) {
-                            
-                            combinedSeparatorIndicies.push(i);
-                        }
-                    }
-                    
-                    //const correctTextRefIdx=combinedSeparatorIndicies.length-1;
-                    const textIdx=combinedSeparatorIndicies.length-1;
-                    const isSecondary=textIdx>=this.parallelColumns[colIndex].textRefs.length; 
-                    const secondaryIdx=textIdx-this.parallelColumns[colIndex].secondary.length;
-                    const correctTextRefIdxOffset = isSecondary?secondaryIdx : textIdx;
-                    
-
-                    //TODO: fix this. these indexes are not correct after first text, and get more wrong as it goes. Need to subtract more?
-                    //this is tricky: what index in the actual textAndRef object do we start and end with?
-                    const correctedStart=start-combinedSeparatorIndicies[textIdx]-textIdx;
-                    const correctedEnd=end-combinedSeparatorIndicies[textIdx]-textIdx; 
-                    //if beyond textRefs array, uswe have a secondary text, in col.secondary!
-                    
-                    //calculating secondaryIdx. We need to know which 
-                    //const secondaryRefidx=isSecondary ? correctTextRefIdx-this.parallelColumns[colIndex].textRefs.length : 0
-                    //const realRefIdx=isSecondary? secondaryRefidx: correctTextRefIdx;
-
-                    
-                    const phraseRange=mathUtils.range(correctedEnd-correctedStart+1,correctedStart);
-                    const tRef=isSecondary ? this.parallelColumns[colIndex].secondary[secondaryIdx] : this.parallelColumns[colIndex].textRefs[textIdx];
-                    //mylog(`buildLexphrases: got tRefindex=${correctTextRefIdx}`,true);
-                   // mylog(`buildLexphrases: got combinedSeparatorIndicies=${combinedSeparatorIndicies.join("'")}`,true);
-                    // TODO: doesn't seem to work yet for text below first one :-(
-*/
-
-                    /**
-                     * @type {Word[]}
-                     */
-/*                    const words = phraseRange.map((trIdx)=>tRef.getWordByIndex(trIdx)).filter((w)=>w!=null);
-                   // mylog(`Got words in matching phrase:[${words.map((w)=>w.word)}]`, true)
-                    if (!this.lexIdenticalPhrasesMap.has(lexPhrase)){
-                        this.lexIdenticalPhrasesMap.set(lexPhrase,{words:words, css:new Set(['lexical-phrase'])})
-                    }
-                    else{
-                        this.lexIdenticalPhrasesMap.get(lexPhrase)?.words?.push(...words);
-                    }
-
-                    words.forEach((w)=>{
-                        if (!w.phrases['lexical']){
-                            w.phrases['lexical']=new Set();
-
-                        }
-                        w.phrases['lexical'].add(lexPhrase);
-                        
-                    });
-
-                    words.forEach((w)=>{
-                        
-                    })
-*/                    /**
-                     * @type {VerseWordIndex[]}
-                     */
-/*                    const vWordIndices=phraseRange.map((wIdx)=>tRef.getVerseWordIndices(wIdx)).filter((o)=>o!=null);
-                    if (vWordIndices && vWordIndices.length) {
-                        const trVpL = new TextRefVersePhraseLocation(correctTextRefIdxOffset,vWordIndices);
-                        phraseLocation.singleColumnLocation=trVpL;
-                    }
-                    lexPhraseAndLocations.multiColumnLocations.push(phraseLocation);
-                    //const tRidx=new TextRefVersePhraseLocation(correctTextRefIdx,vWordI);   
-                }
-                    
-            }
-            
-            this.lexIdenticalPhrasesLocations.push(lexPhraseAndLocations);
-            this.updatedCounter++;
-        }
-
-        numPhrases = this.lexIdenticalPhrasesMap.size;
-        
-        this.lexIdenticalPhrasesMap.values().forEach((obj,index)=>{
-            
-            obj.css.add('lexical-phrase-'+String((index % 14)+1));
-            //obj.css.add('underline').add('bold').add('bg-yellow-50');
-        })
-
-*/        
+       
     
         /*
         mylog("========================================================",true)

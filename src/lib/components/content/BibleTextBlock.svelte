@@ -81,11 +81,11 @@ $inspect(`<BibleTextBlock>: textRef.ref=${textRef.reference}`)
 {#key parGroup &&  parGroup.updatedCounter && parGroup.lexIdenticalPhrasesMap.size && parGroup.lexIdenticalPhrasesMap}
 
 {#if textRef.text}
-    <span class="font-bold bg-white/50 rounded-sm border-2 border-black/60 mr-1 ml-0">
+    <span class="font-bold bg-white/50 rounded-sm border-2 border-black/60 mr-1 ml-0 bible-text-block">
     {#if copyButton}
         <CopyText copyText={textRef.reference} 
         linkText={textRef.reference}
-        btnSizeCssClass="text-xl m-0 p-0 hover:link"
+        btnCssClass="m-0 p-0 hover:link bible-ref"
         tooltip="Copy reference to clipboard."
         showButton={false}
         

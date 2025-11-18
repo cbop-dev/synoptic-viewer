@@ -59,9 +59,9 @@
    // let { data=null } = $props();
     
     const panes=[
-       {name: 'Gospels', 
+       {name: 'Gospels', short:"Gos",
         comp: NtSynopsisPanel},
-       {name:'Custom', 
+       {name:'Custom', short:"Cust",
        comp: CustomParallelViewer}
     ]
 
@@ -84,6 +84,7 @@
         }
 
     }
+    let showNTselect=$state(false);
 
     let enableKeys=$state(true);
     /**
@@ -128,8 +129,26 @@
 <svelte:window bind:scrollY={y} bind:innerHeight={windowHeight} onkeydown={onkeydown}/>
 
 <div class="relative" bind:clientHeight={contentHeight}>
-    <div class="sticky block top-0 z-100 bg-white/70 text-center" bind:clientHeight={headerHeight}>
-        <div class="inline-block float-right">
+    <div class="sticky block top-0 z-100 bg-white/80  text-center items-center w-full" bind:clientHeight={headerHeight}>
+        
+        
+        <div role="tablist" class="block fixed top-0 left-1 tabs tabs-lifted ">
+            {#each panes as pane, index}
+            <a role="tab" class="tab {selectedPane==index ? 'tab-active' : ''} " tabindex=index onclick={()=>{selectedPane=index}} ><span class="sm:inline hidden">{pane.name}</span><span class="inline sm:hidden">{pane.short}</span></a>
+            {/each}
+        </div>
+        <div class="inline-block self-center mr-1 mt-1">
+            
+            
+            <ButtonSelect buttonText="i" 
+       buttonStyle="btn btn-xs  btn-circle btn-ghost p-0" bind:selected={showInfoModal} tooltip="Show site info" tooltipbottom={true}/> <ButtonSelect buttonStyle="btn btn-xs rounded   btn-square btn-ghost  p-0.5 m-0" 
+            bind:selected={enableKeys} buttonText="k" tooltip="Enable/disable hotkeys" tooltipbottom={true}/> <ButtonSelect buttonText={`☰ ${currentServerName}`} 
+       buttonStyle="btn btn-xs  btn-round btn-ghost  p-0.5 m-0" bind:selected={showNTselect} tooltip="Select NT version. This only takes effect after submitting a new lookup query." tooltipbottom={true}/>
+            
+        </div>
+
+        {#if showNTselect}
+        <div class="block  items-center absolute w-full m-auto  p-5 bg-white/70">
             
 
             <label for="ntversion" class="hidden md:inline m-0 p-0 text-sm">NT version:</label>
@@ -140,26 +159,11 @@
             </select>
             <!--<Button buttonText="Switch!" textSize="text-sm" buttonStyle="btn btn-ghost btn-xs" onclick={switchNT}/>-->
         </div>
-        
-        <div role="tablist" class="inline-block float-left tabs tabs-lifted">
-            {#each panes as pane, index}
-            <a role="tab" class="tab {selectedPane==index ? 'tab-active' : ''} " tabindex=index onclick={()=>{selectedPane=index}} >{pane.name}</a>
-            {/each}
-        </div>
-        <div class="inline-block text-center">
-            
-            
-            <ButtonSelect buttonText="i" 
-       buttonStyle="btn btn-xs  btn-circle btn-ghost  p-0" bind:selected={showInfoModal} tooltip="Show site info" tooltipbottom={true}/>
-            <ButtonSelect buttonStyle="btn btn-xs rounded   btn-square btn-ghost  p-1" 
-            bind:selected={enableKeys} buttonText="k" tooltip="Enable/disable hotkeys" tooltipbottom={true}/>
-                
-            
-        </div>
+        {/if}
     
     </div>
     
-    <div class="clear-right block btn-square">
+    <div id="main-panes" class="clear-right relative block top-30">
     {#each panes as pane, index}
 
     <div id="pane-{pane.name}" class={index==selectedPane ? 'block' : 'hidden'}>

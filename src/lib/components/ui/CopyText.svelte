@@ -10,6 +10,7 @@
         linkText='',
         showButton=true,
         btnSizeCssClass='btn-sm',
+        btnCssClass='',
         width=0,
         height=0
     } = $props();
@@ -23,7 +24,7 @@
         navigator.clipboard.writeText(theText);
     }
 </script>
-<button title={tooltip} onclick={copyToClipboard} class={["btn btn-ghost p-0.5",btnSizeCssClass]}>
+<button title={tooltip} onclick={copyToClipboard} class={["btn btn-ghost p-0.5",btnSizeCssClass, btnCssClass]}>
     {#if linkText}
     {linkText}
     {/if}

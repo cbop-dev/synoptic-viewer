@@ -15,7 +15,7 @@
   /** @type {Props} */
   let {
     buttonText = "",
-    buttonStyle = " btn btn-outline btn-primary  font-bold hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 ",
+    buttonStyle = " btn btn-outline btn-primary m-1 font-bold hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 ",
     textSize = "base",
     tooltip='',
     tooltipbottom=false,
@@ -72,7 +72,7 @@
   </style>
   
   <button  data-tip={tooltip} onclick={()=>{if(!disable){toggle()}}} bind:this={theButton} 
-  class=" {tooltip ? 'tooltip' : ''}  {tooltipbottom ? 'tooltip-bottom' : ''} {selectStyle()} m-1 {disable ? 'btn-disabled' : ''} {buttonStyle}">
+  class=" {tooltip ? 'tooltip' : ''}  {tooltipbottom ? 'tooltip-bottom' : ''} {selectStyle()} {disable ? 'btn-disabled' : ''} {buttonStyle}">
     {buttonText}
     {#if children}
 		{@render children?.()}

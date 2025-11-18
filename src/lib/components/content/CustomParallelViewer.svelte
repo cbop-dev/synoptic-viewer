@@ -6,7 +6,7 @@ import { ParallelColumn,Word, TextAndRef,VerseWords,ParallelColumnGroup,parseSin
 import ParallelColumnSection from "./ParallelColumnSection.svelte";
 import { N1904Server, lexemes} from "$lib/n1904/tfN1904";
 import {SblGntServer} from '$lib/sblgnt/sblgnt.js';
-
+import { Hotkey,SynopsisHotkeys } from "../ui/hotkeys.svelte.js";
 
 import ParallelGospelSection from "./ParallelGospelSection.svelte";
 import { mylog } from "$lib/env/env";
@@ -516,14 +516,15 @@ const viewStates=$state({
 });
 
 
-
-    const hotkeys=[
+    const hotkeys=new SynopsisHotkeys(myOptions);
+    const hotkeys2=[
       
-        {key:'s',name:'Similar Phrases',function: ()=>{myOptions.viewOptions.similarPhrases =!myOptions.viewOptions.similarPhrases}},
-        {key:'c',name:'Highlight on Click',function: ()=>{myOptions.viewOptions.highlightOnClick =!myOptions.viewOptions.highlightOnClick}},
-        {key:'u',name:'Unique Lexemes',function: ()=>{myOptions.viewOptions.unique =!myOptions.viewOptions.unique}},
-        {key:'i',name:'Identical Words',function: ()=>{myOptions.viewOptions.identical =!myOptions.viewOptions.identical}},
-        {key:'m',name:'Show/hide options menu',function: ()=>{myOptions.viewOptions.menuOpen =!myOptions.viewOptions.menuOpen}},
+       
+        {key:'c',name:'Highlight on Click',optionName:"highlightOnClick",function: ()=>{myOptions.viewOptions.highlightOnClick =!myOptions.viewOptions.highlightOnClick},navLetterButton:true},
+        {key:'u',name:'Unique Lexemes',optionName:"unique",function: ()=>{myOptions.viewOptions.unique =!myOptions.viewOptions.unique},navLetterButton:true},
+        {key:'i',name:'Identical Words',optionName:"identical",function: ()=>{myOptions.viewOptions.identical =!myOptions.viewOptions.identical},navLetterButton:true},
+         {key:'s',name:'Similar Phrases',optionName:"similarPhrases",function: ()=>{myOptions.viewOptions.similarPhrases =!myOptions.viewOptions.similarPhrases},navLetterButton:true},
+        {key:'m',name:'Show/hide options menu',optionName:"menuOpen",function: ()=>{myOptions.viewOptions.menuOpen =!myOptions.viewOptions.menuOpen}},
     ];
 
     let textAreaFocused=$state(false);
@@ -555,14 +556,7 @@ const viewStates=$state({
                 }
             }
             else if (!modalVisibles.length && hotkeys){
-                const matchedHotkey=hotkeys.filter((o)=>o.key==event.key);
-                if (matchedHotkey.length){
-                    matchedHotkey[0].function();
-//                    mylog(`we're HERE 2 for ${event.key} `);
-                }
-                else{
-//                    mylog(`we're HERE 3 for ${event.key} `);
-                }
+                hotkeys.keypress(event.key);
             }
             else{
 //                mylog(`WHOA -- got not matchedView for ${event.key}`)
@@ -667,22 +661,38 @@ onMount(() => {
 $inspect(`refarea.0:'${refAreaInputs[0]}`);
 </script>
 {#snippet titleButtons(hideLookup=false,hideHelp=false)}
-        <ul class="bg-white menu menu-horizontal ">
-        <li><ButtonSelect buttonText="?" buttonStyle="btn btn-xs btn-circle btn-ghost p-0" bind:selected={viewStates.views.help.state}/>
+        <ul class="bg-white menu menu-horizontal w-auto ">
+        
+        {#if !landingPage }<li class="m-0 p-0 hidden md:list-item">   {@render menuButton()}</li>{/if}
+        
+        <li class="m-0 p-0"><ButtonSelect buttonText="?" buttonStyle="btn btn-xs btn-circle btn-ghost p-0 m-0 sm:ml-0.5" bind:selected={viewStates.views.help.state}/>
             </li>
-        <li >
+        <li class="m-0 p-0" >
             <ButtonSelect bind:selected={viewStates.views.lookup.state} buttonText="" 
-            buttonStyle="btn btn-xs btn-circle btn-ghost p-0" >
+            buttonStyle="btn btn-xs btn-circle btn-ghost p-0 m-0 sm:ml-0.5" >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3">
             <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
             </svg>
             </ButtonSelect>
-        </li></ul>
+        </li>
+        
+
+        
+            {#each hotkeys.getNavButtonKeys() as hk}
+                <li class={[!myOptions.viewOptions.menuOpen && dataReady ? 'sm:list-item': '', 'hidden','m-0','p-0' ]}>
+                    <ButtonSelect buttonText={hk.key} buttonStyle="btn btn-xs btn-circle btn-ghost p-0 m-0 sm:ml-0.5 " 
+                    bind:selected={myOptions.viewOptions[hk.optionName]} tooltip={hk.name} tooltipbottom
+                    />
+                </li>
+        
+        {/each}
+        
+    </ul>
 {/snippet}
 {#snippet appTitle(headingTag="h1", short=false, classes=[])}
     <svelte:element this={headingTag} class={[classes, "inline-block"]}>
      
-    {#if !short}Custom {/if} NT Synopsis</svelte:element> 
+    {#if !short}Custom NT{/if} Synopsis</svelte:element> 
     
     {@render titleButtons()}
    
@@ -728,14 +738,10 @@ $inspect(`refarea.0:'${refAreaInputs[0]}`);
 {/snippet}
 <div id="header-nav-section" class="self-center text-center fixed bg-white z-40 top-8  m-auto w-full" >
 
-  <!--<div class="block"><h1 class="text-3xl bold block underline self-center "><span class="self-center inline">Custom NT Synopsis!</span>
-<ButtonSelect buttonStyle="btn btn-neutral btn-outline btn-circle btn-xs p-0 m-0 "
-            buttonText="?"
-            bind:selected={viewStates.views.help.state} /></h1>
-</div>-->
 
-<div class="navbar bg-base-100 text-center  shadow-sm ">
+<div class="navbar bg-base-100 text-center  shadow-sm pb-0 mb-0 sm:mb-1 sm:pb-1 ">
   <div class="navbar-start text-left max-w-full w-full m-auto md:hidden">
+    {#if dataReady}
     <div class="dropdown  text-left">
                
       <div tabindex="0" role="button" class="btn btn-ghost lg:hidden">
@@ -747,6 +753,7 @@ $inspect(`refarea.0:'${refAreaInputs[0]}`);
         {@render resultsNav(true)} 
       </ul>
     </div>
+    {/if}
     <div class="text-left ">
         {@render appTitle('h1',true,['inline'])}
       
@@ -756,27 +763,26 @@ $inspect(`refarea.0:'${refAreaInputs[0]}`);
   <div class="hidden md:navbar-center self-center m-auto">
          <div class="text-center self-center border-0 "> 
            <div class="title-panel m-0 p-0 block z-40">
-            {#if !landingPage}
-                {@render menuButton()}
-            {/if}
+           
              {@render appTitle()}
             </div>
-            
+            <div class="flex flex-wrap">
+
              <!--<ul class="bg-white  menu menu-horizontal p-0">-->
              {#if myOptions.viewOptions.menuOpen}
-            <div class="flex flex-wrap">
+            
                 {@render resultsNav(false,'div')}
              <!--</ul>-->
-             </div>
-             {/if}
              
+             {/if}
+             </div>
          </div>
     </div>
   <div class="navbar-end hidden">
   </div>
 </div>
 </div>
-<div id="main-content-div" class="self-center relative text-center bg-white z-20 mt-20 md:mt-30" >
+<div id="main-content-div" class="self-center relative text-center bg-white z-20 mt-1 " >
 {#if viewStates.views.lookup.state}
 <h3 class="italic">Choose your <span class="line-through">weapons</span> NT Bible passages:</h3>
 

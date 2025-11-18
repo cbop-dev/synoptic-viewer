@@ -122,3 +122,11 @@ div.bible-block {
     }
 
 }
+
+.bible-text-block .bible-ref {
+    @apply text-lg;
+}
+
+.secondary .bible-text-block .bible-ref {
+    @apply text-sm;
+}

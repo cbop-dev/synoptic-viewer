@@ -242,7 +242,7 @@ function isUnique(wordid, uniqueSet){
                     {/if}  
                 {/if}
                 {#if enableSecondary && col.secondary && col.secondary.length}
-                    <h3 class="italic">Secondary parallels:</h3>  
+                    <span class="italic text-base">Secondary parallels:</span>  
                     <div class="rounded-box secondary {Object.values(gospels.abbreviations)[index]} ">
                 
                     {#each col.secondary as secondaryTextRef, index2}

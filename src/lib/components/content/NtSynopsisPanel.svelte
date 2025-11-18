@@ -1066,7 +1066,7 @@ $inspect('perGroups', perGroups);
 
 </div><!--end fixed section-->
 
-<div id="main-content-div" class="self-center relative text-center bg-white mt-20 md:mt-30 z-20">
+<div id="main-content-div" class="self-center relative text-center bg-white mt-10 z-20">
        {#if !landingPage}
             {#if myOptions.request.fromURL && !requestProcessed}
                 
