@@ -875,7 +875,7 @@ $inspect(`refarea.0:'${refAreaInputs[0]}`);
         </div>
         
             <div class="{selectedWordTabIndex== 0 ? 'block' : 'hidden'}">
-             <h1>Highlighted Lexemes</h1>
+             <h1>Selected Lexemes</h1>
             {#if selectedLexes.length}
             
             <h2>Selected Lexemes:</h2>
@@ -960,9 +960,9 @@ $inspect(`refarea.0:'${refAreaInputs[0]}`);
            
            <!-- custom greek: -->
              <div class="{selectedWordTabIndex== 1 ? 'block' : 'hidden'}">
-             <h1>Custom Greek Highlights</h1>
+             <h1>Custom Greek Expressions</h1>
 
-             <i>Enter some text in the text box below, then press enter. Type in Latin characters, which will automatically convert to Greek.</i><br/>
+             <i>Enter some text in the text box below, then press enter. Type in Latin characters, which will αυτοματως convert to Greek.</i><br/>
              <input type="text" size="15" 
                 bind:value={customGreekInputText} placeholder="Type here" 
                 class="input input-bordered w-full max-w-xs" 

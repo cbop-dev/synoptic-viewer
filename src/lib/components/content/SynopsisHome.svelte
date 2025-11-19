@@ -141,11 +141,11 @@
         
             
             <ButtonSelect buttonText="i" 
-       buttonStyle="btn btn-xs  btn-circle btn-ghost bg-white p-0" bind:selected={showInfoModal} tooltip="Show site info" tooltipbottom={true}/> 
+       buttonStyle="btn btn-xs  btn-circle btn-ghost  p-0" bind:selected={showInfoModal} tooltip="Show site info" tooltipbottom={true}/> 
        <ButtonSelect buttonStyle="btn btn-xs rounded   btn-square  p-0.5 m-0" 
             bind:selected={enableKeys} buttonText="k" tooltip="Enable/disable hotkeys" tooltipbottom={true}/> 
             <ButtonSelect buttonText={`☰ ${currentServerName}`} 
-       buttonStyle="btn btn-xs  btn-round btn-ghost  bg-white p-0.5 m-0" bind:selected={showNTselect} tooltip="Select NT version. This only takes effect after submitting a new lookup query." tooltipbottom={true}/>
+       buttonStyle="btn btn-xs  btn-round btn-ghost   p-0.5 m-0" bind:selected={showNTselect} tooltip="Select NT version. This only takes effect after submitting a new lookup query." tooltipbottom={true}/>
             
         </div>
 

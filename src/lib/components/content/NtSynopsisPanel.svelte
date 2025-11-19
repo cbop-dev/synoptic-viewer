@@ -1237,6 +1237,7 @@ $inspect("Exact phrases: '"+ (perGroups.length ? Object.keys(perGroups[0].exactl
                     <li>Enabling <b>"Identical words"</b> will <span class="font-bold underline">bold and underline</span> all morphologically identical words shared by at least two gospels in the same parallel group </li>
                     <li>Enabling <b>"Highlight Lexeme on Click"</b> will toggle <span class="bg-cyan-500 text-white">highlighting</span> of all instances of the lexeme.</li>
                     <li>Enabling <b>"Similar"</b> will underline "lexically-identical" phrases that are common between at least two columns. "Lexically identical" here refers to those phrases which have the same lexemes in the same sequence even if they differ morphologically. This crosses verse boundaries.</li>
+                    <li>Enabling <b>"Exact"</b> will double-underline and overline <i>exact</i> matches (same lexemes, same order, same morphology) of phrases that are common between at least two columns.</li>
                 </ul>
     
             </div>
@@ -1287,44 +1288,20 @@ $inspect("Exact phrases: '"+ (perGroups.length ? Object.keys(perGroups[0].exactl
     
 
     <div class="max-w-full block text-center">
-                <h3>Highlight Features:</h3>
-            <ButtonSelect bind:selected={myOptions.viewOptions.unique} buttonText="Unique" tooltipbottom  tooltip="Outline all lexemes unique to each column."/>
-            <ButtonSelect buttonText="Similar" tooltipbottom bind:selected={myOptions.viewOptions.similarPhrases} tooltip="Show lexically similar phrases (same lexemes, but possibly different forms/morphology)"/>
-            <ButtonSelect bind:selected={myOptions.viewOptions.identical} tooltipbottom tooltip="Toggle Bold/underline setting for morphologically identical words." 
-            buttonText="Identical"/>
-            <ButtonSelect bind:selected={myOptions.viewOptions.highlightOnClick}   tooltipbottom 
-            buttonText="Auto Highlight" 
-            tooltip="If enabled, clicking/tapping on a word will toggle highlighting of that lexeme."/>
-    
-        <ButtonSelect buttonStyle="btn btn-neutral btn-outline btn-circle btn-xs p-0 m-0"
-            buttonText="?"
-            bind:selected={showLexOptionsInfo}/>
-            {#if showLexOptionsInfo}
-            <div class="md:max-w-3/4  self-center m-auto">
-                <h2 class="underline">Unique and Identical Words Options:</h2>
-                                        <div class="inline-block text-left">
-                <ul class="list-disc">
-                    <li>Enabling <b>"Outline Unique Lexemes"</b> will draw <span class="outline outline-blue-400">an outline</span> (one color per gospel) around each lexeme that is unique to a specific gospel, i.e., that shows up in only one column of a single parallel group.</li>
-                    <li>Enabling <b>"Identical words"</b> will <span class="font-bold underline">bold and underline</span> all morphologically identical words shared by at least two gospels in the same parallel group </li>
-                    <li>Enabling <b>"Highlight Lexeme on Click"</b> will toggle <span class="bg-cyan-500 text-white">highlighting</span> of all instances of the lexeme.</li>
-                </ul>
-                </div>
-            </div>
-            {/if}
-
+              
 
  
 
             
            
-            <hr/>
+            
         <div role="tablist" class="tabs tabs-lifted">
             <a role="tab" class="tab {selectedWordTabIndex==0 ? 'tab-active' : ''} " tabindex=0 onclick={()=>{selectedWordTabIndex=0}} >Lexemes</a>
             <a role="tab" class="tab {selectedWordTabIndex==1 ? 'tab-active' : ''} " tabindex=1 onclick={()=>{selectedWordTabIndex=1}}>Custom</a>
         </div>
         
             <div class="{selectedWordTabIndex== 0 ? 'block' : 'hidden'}">
-             <h1>Highlighted Lexemes</h1>
+             <h1>Selected Lexemes</h1>
             {#if selectedLexes.length}
             
             <h2>Selected Lexemes:</h2>
