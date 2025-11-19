@@ -14,7 +14,25 @@ import mathUtils from "$lib/utils/math-utils";
 export class Word{
     id=0;
     word='';
+    clean=''
+    /**
+     * 
+     * @param {number} id 
+     * @param {string} word 
+     */
+    constructor(id=0,word=''){
+        this.id=id;
+        this.word=word.trim();
+        this.clean = word ? GreekUtils.removeApparatusMarks(this.word).trim() : '';
+        //if (this.word!=this.clean){
+            //mylog(`Word(${this.word}) cleaned of apparatus marks='${this.clean}'`)
+        //}
 
+    }
+    /**
+     * @type {Set<string>}
+     */
+    specialCss=new Set();
     /**
      * @description various types of phrase that this word instance is in. Useful, e.g., for assigning css classes for matching phrases.
      * @type {Object<string,Set<LexicalPhrase>>}
@@ -47,9 +65,7 @@ export class VerseWords{
             
                 for (const word of verseObj.words){
                     if (word.id && word.word) {
-                        const wordObj=new Word()
-                        wordObj.id=word.id;
-                        wordObj.word=word.word;
+                        const wordObj=new Word(word.id, word.word);
                         vWords.words.push(wordObj);
                     }
                 }
@@ -367,6 +383,7 @@ export class ParallelPhraseLocation{
         this.secondary=false;
         this.singleColumnLocation=phraseLocation;
     }
+
     
 }
 
@@ -385,6 +402,8 @@ export class LexPhraseAndLocations{
         this.phrase=phrase;
         this.multiColumnLocations=locations;
     }
+
+
 }
 
 
@@ -438,6 +457,19 @@ export class ParallelColumnGroup {
     */
    lexIdenticalPhrasesCssClasses=[];
    
+
+   /**
+    * @description phrases that are perfect matches--same lexemes, same form (exact string match).
+    * @type {Object<string,ParallelPhraseLocation[]>}
+    */
+   exactlyIdenticalPhrases={}
+
+
+   /**
+    * @description reverse map from location to whether word is part of exact phrase match.
+    * @type {Map}
+    */
+   //exactPhrasesLocations=
    /**
     * @param {LexicalPhrase} phrase 
     */
@@ -474,7 +506,7 @@ export class ParallelColumnGroup {
      *
      * @description finds all the lexically identical phrases across columns! amazing!
      */
-    buildLexIdenticalPhrases(minLenth=2,includeSecondary=false){
+    buildLexIdenticalPhrases(minLenth=2,includeSecondary=false,markidenticalPhrases=false){
         mylog(`ParColGroup.buildLexidentical()...`);
         const combinedColumnIds=this.parallelColumns.map((col)=> {
             const theRefsList = includeSecondary && col.secondary && col.secondary.length  ?  [...col.textRefs, ...col.secondary ] : col.textRefs;
@@ -519,8 +551,8 @@ export class ParallelColumnGroup {
                     */
                     const words = phraseRange.map((trIdx)=>tRef.getWordByIndex(trIdx)).filter((w)=>w!=null);
 
-                    const vWIndices = tRef.getVerseWordIndices(start)
-                    const phraseLocation=new ParallelPhraseLocation(colIndex,new TextRefVersePhraseLocation(textIndex,));
+                    //const vWIndices = tRef.getVerseWordIndices(start)
+                    
                     if (!this.lexIdenticalPhrasesMap.has(lexPhrase)){
                         this.lexIdenticalPhrasesMap.set(lexPhrase,{words:words, css:new Set(['lexical-phrase'])})
                     }
@@ -540,18 +572,61 @@ export class ParallelColumnGroup {
                     /**
                      * @type {VerseWordIndex[]}
                      */
+                    //const phraseLocation=new ParallelPhraseLocation(colIndex,new TextRefVersePhraseLocation(textIndex));
                     const vWordIndices=phraseRange.map((wIdx)=>tRef.getVerseWordIndices(wIdx)).filter((o)=>o!=null);
                     if (vWordIndices && vWordIndices.length) {
                         const trVpL = new TextRefVersePhraseLocation(textIndex,vWordIndices);
-                        phraseLocation.singleColumnLocation=trVpL;
+                        const phraseLocation = new ParallelPhraseLocation(colIndex,trVpL);
+                        lexPhraseAndLocations.multiColumnLocations.push(phraseLocation);
                     }
-                    lexPhraseAndLocations.multiColumnLocations.push(phraseLocation);
+                    
 
                      
                 }
             }
 
             this.lexIdenticalPhrasesLocations.push(lexPhraseAndLocations);
+
+            if(markidenticalPhrases){
+                
+                this.exactlyIdenticalPhrases={}
+                for (const phraseAndLoc of this.lexIdenticalPhrasesLocations){
+                    for (const loc of phraseAndLoc.multiColumnLocations){
+                        
+                       // const vWordsIdx= loc.singleColumnLocation.vWordIndices;
+                        //const tR= this.getTextRefByLocation(loc);
+                        const exactPhrase = this.getTextFromLocation(loc,true).trim(); 
+                            /*vWordsIdx.map((vw)=>tR.getWordByIndices(vw.verseIndex,vw.wordIndex)?.word)
+                            .filter((w)=>w!=null && w!=undefined)
+                            .join(" "); */
+                        if(exactPhrase){
+                            if (!Object.keys(this.exactlyIdenticalPhrases).includes(exactPhrase)){
+                                this.exactlyIdenticalPhrases[exactPhrase]=[];
+                            }
+                            
+                            this.exactlyIdenticalPhrases[exactPhrase].push(loc);
+
+                        }
+
+                    }
+                    
+                }
+
+                
+                for (const [phrase,locs] of Object.entries(this.exactlyIdenticalPhrases)
+                                           .filter(([phrase,loc])=>loc.length > 1))
+                {//adding a css entry for each word:
+                    mylog(`Got exact phrase: '${phrase}', ${locs.length} times`, true)
+                    locs.forEach((loc)=>{
+                        
+                        this.getWordsFromLocation(loc).forEach((w)=>{
+                            w.specialCss.add('exact-phrase')
+                        })
+
+                        
+                    });
+                }
+            }
             this.updatedCounter++;
 
         }
@@ -564,7 +639,7 @@ export class ParallelColumnGroup {
             //obj.css.add('underline').add('bold').add('bg-yellow-50');
         });
        
-    
+        
         /*
         mylog("========================================================",true)
         mylog("Build the lexIdenPhrasesIndexDict. Here it is:", true)
@@ -664,6 +739,50 @@ export class ParallelColumnGroup {
         return refs.join('; ');  
     }
 
+     /**
+     * 
+     * @param {ParallelPhraseLocation} parLocation 
+     * @returns {Word[]}
+     */
+    getWordsFromLocation(parLocation){
+        const vWordsIdx= parLocation.singleColumnLocation.vWordIndices;
+        const tR = this.getTextRefByLocation(parLocation);
+        
+        /*parLocation.secondary ?
+            this.parallelColumns[parLocation.column].secondary[parLocation.singleColumnLocation.trIndex] 
+            :
+            this.parallelColumns[parLocation.column].textRefs[parLocation.singleColumnLocation.trIndex];
+            */
+
+        const words = tR? vWordsIdx.map((vw)=>tR.getWordByIndices(vw.verseIndex,vw.wordIndex)).filter((w)=>w!=null) : [];
+        return words ? words : [];
+    
+    }
+
+    /**
+     * 
+     * @param {ParallelPhraseLocation} parLocation 
+     * @returns {string}
+     */
+    getTextFromLocation(parLocation, hideApp=false) {
+        return this.getWordsFromLocation(parLocation).filter((w)=>w.word)
+            .map((w)=>hideApp ? w.clean : w.word )
+            .join(" ");
+        
+    }
+
+    /**
+     * 
+     * @param {ParallelPhraseLocation} parLocation 
+     */
+    getTextRefByLocation(parLocation){
+
+        return parLocation.secondary ? 
+            this.parallelColumns[parLocation.column].secondary[parLocation.singleColumnLocation.trIndex] 
+            :
+            this.parallelColumns[parLocation.column].textRefs[parLocation.singleColumnLocation.trIndex];
+
+    }
 }
 
 export class LexicalPhrase{
@@ -862,6 +981,8 @@ export class GospelPericopeGroup extends ParallelColumnGroup{
     
        
     }
+
+   
 }
 
 

@@ -72,6 +72,9 @@ export class SynopsisOptions3{
         })
         
     }
+
+    
+
     /**
      * 
      * @param {URLParam[]} urlParams 
@@ -114,6 +117,7 @@ export class SynopsisOptions3{
         hideApp: { type: 'boolean', category: 'view'},
         lexes: {type: 'intArray', split: ",", category: 'view'},
         similarPhrases: {type: 'boolean', category: 'view'},
+        exactPhrases: {type: 'boolean', category: 'view'},
         selectedGospelIndex: {type:"int",default:0, category: 'view'},
         greekStrings: {type: 'strArray', split: "|", category: 'view'},
         tab: {type:"int",default:0, category: 'request'},
@@ -125,6 +129,7 @@ export class SynopsisOptions3{
         nt: {type:'str', category: 'request', default:'sblgnt'},           
         fromURL: {type:'boolean', category: 'request',noURL:true},
         menuOpen: {type:'boolean', default: true, category: 'view',noURL:true},
+        showLookup: {type:'boolean', default: true, category: 'view',noURL:true},
     }
 
     /**

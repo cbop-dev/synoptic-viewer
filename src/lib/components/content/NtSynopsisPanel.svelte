@@ -33,8 +33,8 @@ import ArrowTop from '../ui/icons/arrow-top-icon.svelte';
 import BulletsIcons from '../ui/icons/bullets-outline.svelte';
 import CopyText from '../ui/CopyText.svelte';
 import { findNextAnchor,findPrevAnchor, getAnchors} from '$lib/utils/ui-utils';
-
-
+import TitleNavbar from './title-navbar.svelte';
+import { Hotkey, SynopsisHotkeys } from '../ui/hotkeys.svelte';
 //import { generateHslColorGradient } from '../ui/chartUtils';
    /**
      * @type {{options:SynopsisOptions2,
@@ -298,7 +298,7 @@ let lexClasses= $derived.by(()=>{// id->css color (e.g., "#eee")
             
             let classes = "lex-"+id;
             if(selectedLexes.includes(id)){
-                classes += " " + getColorOfLex(id)
+                classes += " " + getColorOfLex(id,true);
             } 
             //  mylog("setting lex " + id + " to: " + classes,true);
             ret[id] = classes;
@@ -428,7 +428,7 @@ function populateGroupsText(words=false,includeSecondary=false){
 
         }
         group.markUniqueAndIdenticalWords();    
-        group.buildLexIdenticalPhrases(3,true);    
+        group.buildLexIdenticalPhrases(3,true,true);    
     }
     mylog("DONE! Populated the GroupTexts()!")
     mylog("^==================================^")
@@ -518,12 +518,12 @@ function getColorOfGreek(greekString){
  * 
  * @param {number} lexid
  */
-function getColorOfLex(lexid){
+function getColorOfLex(lexid,important=false){
 
     let colorString = ''
     if (selectedLexes.includes(lexid)){
         const selectedIndex = selectedLexes.indexOf(lexid)
-        colorString += ' '+ ColorUtils.getCustomBgTextColorClasses(selectedIndex);
+        colorString += ' '+ ColorUtils.getCustomBgTextColorClasses(selectedIndex,important);
     }
     
     return colorString;
@@ -596,8 +596,9 @@ function displayNote(heading,note) {
     theNote.footer=currentServer.getNoteFooter();
     viewStates.views.notes.state = true;
 }
+const hotkeys=new SynopsisHotkeys(myOptions);
 
-const hotkeys=[
+const hotkeys2=[
     {key:'>', name:'Next Section',function: jumpToNextSection},
     {key:'<',name:'Previous Section',function: jumpToPrevSection},
     {key:'t',name:'Top/First Section',function: jumpToFirstSection},
@@ -606,7 +607,9 @@ const hotkeys=[
     {key:'u',name:'Unique Lexemes',function: ()=>{myOptions.viewOptions.unique =!myOptions.viewOptions.unique}},
     {key:'i',name:'Identical Words',function: ()=>{myOptions.viewOptions.identical =!myOptions.viewOptions.identical}},
     {key:'s',name:'Similar Phrases',function: ()=>{myOptions.viewOptions.similarPhrases =!myOptions.viewOptions.similarPhrases}},
+    {key:'e',name:'Exact Phrases',function: ()=>{myOptions.viewOptions.exactPhrases =!myOptions.viewOptions.exactPhrases}},
     {key:'m',name:'Show/hide options menu',function: ()=>{myOptions.viewOptions.menuOpen =!myOptions.viewOptions.menuOpen}},
+    
         
 ];
 
@@ -766,9 +769,9 @@ function onkeydown(event){
             }  
         }
         else if (!modalVisibles.length){
-            const matchedHotkey=hotkeys.filter((o)=>o.key==event.key);
-            if (matchedHotkey.length){
-                matchedHotkey[0].function();
+            const matchedHotkey=hotkeys.getKeyObj(event.key)
+            if (matchedHotkey){
+                matchedHotkey.toggle();
             }
         }
             
@@ -830,6 +833,7 @@ onMount(() => {
 $inspect("fetchedTextsResponse",fetchedTextsResponse);
 $inspect("groupsRefsArray", groupsRefsArray);
 $inspect('perGroups', perGroups);
+$inspect("Exact phrases: '"+ (perGroups.length ? Object.keys(perGroups[0].exactlyIdenticalPhrases).join("'','")+"'" : ''));
 </script>
 <style>
     @reference "tailwindcss";
@@ -900,7 +904,7 @@ $inspect('perGroups', perGroups);
                 <span class="lg:hidden inline">NT Synopsis</span>
                 <span class="sm:hidden inline">Synopsis</span>
                 </a>
-        
+     
     </svelte:element> 
 {/snippet}
 {#snippet appSummary(heading=true,headingTag="h1")}
@@ -916,17 +920,22 @@ $inspect('perGroups', perGroups);
 {#snippet resultsButtons(short=false,theTag='li',classes=[])}
       
         {#if !short && !(landingPage)}    
-            <svelte:element this={theTag} class={classes}>
-                <ButtonSelect bind:selected={viewStates.views.lookup.state} tooltipbottom tooltip="Show Lookup panel pop-up" buttonText="☰ Lookup" buttonStyle="btn"/>
-                </svelte:element>
+            <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={viewStates.views.lookup.state} tooltipbottom tooltip="Show Lookup panel pop-up" buttonText="☰ Lookup" /></svelte:element>
         {/if}
 
         {#if alandPericopeNums && alandPericopeNums.length}
             {#if dataReady}
                 <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={viewStates.views.view.state} tooltipbottom tooltip="Show other viewing options (sort, etc.)"  buttonText="☰ View"/></svelte:element>
-                <svelte:element this={theTag} class={classes}><ButtonSelect buttonText="Similar" bind:selected={myOptions.viewOptions.similarPhrases} tooltipbottom ="Show lexically similar phrases (same lexemes, but possibly different forms/morphology)"/></svelte:element>
-                <svelte:element this={theTag} class={classes}> <ButtonSelect buttonText="☰ Jump to ↓" bind:selected={viewStates.views.sections.state}/></svelte:element>       
-                    <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={viewStates.views.words.state} buttonText="☰ Words" /></svelte:element>
+                <svelte:element this={theTag} class={classes}><ButtonSelect buttonText='Similar' bind:selected={myOptions.viewOptions.similarPhrases} tooltipbottom tooltip="Show lexically similar phrases (same lexemes, but possibly different forms/morphology)"/></svelte:element>
+                <svelte:element this={theTag} class={classes}><ButtonSelect buttonText="Exact" bind:selected={myOptions.viewOptions.exactPhrases} tooltipbottom tooltip="Show exactly matching phrases (same lexemes in same order, with same /morphology)"/></svelte:element>
+                <svelte:element this={theTag} class={classes}> <ButtonSelect buttonText="☰ Jump to ↓" 
+                bind:selected={viewStates.views.sections.state}
+                tooltipbottom tooltip="Jump to a section"
+                /></svelte:element>       
+                    <svelte:element this={theTag} class={classes}><ButtonSelect 
+                    bind:selected={viewStates.views.words.state} 
+                    buttonText="☰ Words" tooltipbottom tooltip="Show lexeme options"
+                     /></svelte:element>
                     <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={myOptions.viewOptions.highlightOnClick} buttonText="Auto Highlight" 
                         tooltipbottom={true}
                         tooltip="If enabled, clicking/tapping on a word will toggle highlighting of that lexeme. Press 'c' to toggle this option."/></svelte:element>    
@@ -941,9 +950,9 @@ $inspect('perGroups', perGroups);
     
 {/snippet}
 
-<div id="top-fixed" class="self-center text-center m-auto w-full fixed top-8  bg-white z-40">
+<div id="top-fixed" class="self-center fixed text-center w-full top-8  bg-white z-40">
     <div id="header-nav-section" class="self-center text-center   m-auto w-full" >
-    <div class="navbar bg-base-100 text-center  shadow-sm ">
+    <div class="navbar bg-base-100 text-center  min-h-12 shadow-sm ">
         <div class="navbar-start text-left max-w-full w-full m-auto md:hidden">
             
             {#if !landingPage && dataReady}
@@ -983,8 +992,11 @@ $inspect('perGroups', perGroups);
 
             <div class="text-center self-center border-0"> 
                 <div id="title-panel">
-                    {@render appTitle()}&nbsp;
-                    <ButtonSelect buttonText="?" buttonStyle="btn btn-xs btn-circle btn-ghost p-0" bind:selected={viewStates.views.help.state}/>
+                      <TitleNavbar title="Greek New Testament Synopsis" mediumtitle="Greek NT Synopsis" shorttitle="NT Synopsis" 
+                        viewStates={viewStates}
+                        {hotkeys} bind:options={myOptions} 
+                        showResultsButtons={dataReady} 
+                        hideLookup={!dataReady || landingPage} />
                 </div> 
 
                 {#if myOptions.viewOptions.menuOpen}
@@ -1002,7 +1014,7 @@ $inspect('perGroups', perGroups);
         </div>
     </div>
     </div>
-    <div id='landing'>
+     <div id='landing'>
 
         {#if landingPage}
         <div id="landing-panel text-center">
@@ -1010,14 +1022,14 @@ $inspect('perGroups', perGroups);
             
             <div class="text-center m-auto">
             
-                    Based on Kurt Aland's <i>Synopsis Quattuor Evangeliorum</i>, using <a href="https://www.sblgnt.com">The SBL Greek New Testament (2010)</a> or, optionally, Nestle's 1904 edition of the <i>Greek New Testament</i>.<br/>
-                    Enter NT reference to view parallel texts and click "Look up!", or select a section and press "Go!"
+                    {@render appSummary(false)}
             </div>
             <hr/>
           </div>
           {/if}
-    </div>
-    <div id="lookup">
+        </div>
+
+        <div id="lookup">
         {#if !mounted}
         <div class="bg-transparent m-10 p-10">
             <h3><i>Page Loading...</i></h3>
@@ -1038,7 +1050,7 @@ $inspect('perGroups', perGroups);
                         
                     <br/> OR:
                     <h2 class="cursor-default">Select a section:</h2> 
-                    <select bind:value={selectedSection} >
+                    <select bind:value={selectedSection} class="max-w-1/2!">
                     
                     {#each gospelParallels.alandSynopsis.sections as section}
                     <option value={mathUtils.createNumArrayFromStringListRange(section.pericopes)}>{mathUtils.romanize(section.section)}: {section.title}</option>
@@ -1062,12 +1074,15 @@ $inspect('perGroups', perGroups);
         <hr class="!border-slate-300 m-6"/>
         {/if}
 
-    </div>
+    </div>  
 
 </div><!--end fixed section-->
 
 <div id="main-content-div" class="self-center relative text-center bg-white mt-10 z-20">
-       {#if !landingPage}
+
+ 
+    
+    {#if !landingPage}
             {#if myOptions.request.fromURL && !requestProcessed}
                 
                 <h3><i>Processing Request...</i></h3>
@@ -1122,7 +1137,7 @@ $inspect('perGroups', perGroups);
         
             
                 <br class="break-all"/>
-                <div>
+                <div >
                     <ParallelGospelSection parGroup={group} options={myOptions} focus={focused}
                     wordClick={toggleLex}
                     {enableSecondary}
@@ -1208,14 +1223,6 @@ $inspect('perGroups', perGroups);
 </div>
         </Modal2>
 
-<!--<Modal2 bind:showModal={viewStates.views.info.state}>
-    <div class="text-left m-auto inline">
-        {@render appSummary()}
-        <hr/>
-        <Footer/>
-    </div>
-    <div class="btn-sm"></div>
-</Modal2>-->
 <Modal2 bind:showModal={viewStates.views.help.state} title="Help">
     
     <div class="m-auto  items-center text-center ">
@@ -1248,7 +1255,7 @@ $inspect('perGroups', perGroups);
     </tr>
     {/if}
 {/each}
-{#each hotkeys as hk}
+{#each hotkeys.getEnabledKeys() as hk}
     <tr>
         <td class="p-2">[{hk.key}] </td>
         <td class="p-2">{hk.name}</td>

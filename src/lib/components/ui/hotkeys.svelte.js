@@ -71,7 +71,8 @@ export class SynopsisHotkeys{
         {key:'c',name:'Highlight on Click',optionName:"highlightOnClick",function: ()=>{this.options.viewOptions.highlightOnClick =!this.options.viewOptions.highlightOnClick},navLetterButton:true},
         {key:'u',name:'Unique Lexemes',optionName:"unique",function: ()=>{this.options.viewOptions.unique =!this.options.viewOptions.unique},navLetterButton:true},
         {key:'i',name:'Identical Words',optionName:"identical",function: ()=>{this.options.viewOptions.identical =!this.options.viewOptions.identical},navLetterButton:true},
-         {key:'s',name:'Similar Phrases',optionName:"similarPhrases",function: ()=>{this.options.viewOptions.similarPhrases =!this.options.viewOptions.similarPhrases},navLetterButton:true},
+        {key:'s',name:'Similar Phrases',optionName:"similarPhrases",function: ()=>{this.options.viewOptions.similarPhrases =!this.options.viewOptions.similarPhrases},navLetterButton:true},
+        {key:'e',name:'Exact Phrases',optionName:"exactPhrases",function: ()=>{this.options.viewOptions.exactPhrases =!this.options.viewOptions.exactPhrases},navLetterButton:true},
         {key:'m',letter:'☰', name:'Show/hide options menu',optionName:"menuOpen",function: ()=>{this.options.viewOptions.menuOpen =!this.options.viewOptions.menuOpen},navLetterButton:false},
    
         
@@ -82,8 +83,8 @@ export class SynopsisHotkeys{
      * @param {string} hotkeysEnabled a string of hotkeys letters to be enabled. Each char is one key.
      * @param {SynopsisOptions3} options 
      */
-    constructor(options,hotkeysEnabled='cuism'){
-        this.hotkeysEnabled=hotkeysEnabled.split('');
+    constructor(options=new SynopsisOptions3(),hotkeysEnabled='cuisme'){
+        this.hotkeysEnabled=new Set(hotkeysEnabled.split(''));
         this.options=options;
         for (const k of hotkeysEnabled){
             const kRow = this.hotkeysTable.find((r)=>r.key==k);
@@ -93,6 +94,10 @@ export class SynopsisHotkeys{
         }
     }
 
+    enableHotkey(key){
+        this.hotkeysEnabled.add(key)
+    }
+    
     /**
      * 
      * @param {string} key 
@@ -113,7 +118,7 @@ export class SynopsisHotkeys{
 
 
     keypress(key){
-        if (this.hotkeysEnabled.includes(key)){
+        if (this.hotkeysEnabled.has(key)){
             const theKeyObj = this.getKeyObj(key)
             if (theKeyObj){
                 theKeyObj.toggle();
@@ -135,14 +140,14 @@ export class SynopsisHotkeys{
      * @returns {Hotkey[]}
      */
     getEnabledKeys(){
-        return this.hotkeys.filter((k)=>this.hotkeysEnabled.includes(k.key));
+        return this.hotkeys.filter((k)=>this.hotkeysEnabled.has(k.key));
 
     }
     /**
      * @returns {Hotkey[]}
      */
     getNavButtonKeys(){
-        return this.hotkeys.filter((k)=>this.hotkeysEnabled.includes(k.key) && k.showNavButton);
+        return this.hotkeys.filter((k)=>this.hotkeysEnabled.has(k.key) && k.showNavButton);
     }
 
     //getNavButtonKeys

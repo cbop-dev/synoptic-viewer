@@ -129,21 +129,23 @@
 <svelte:window bind:scrollY={y} bind:innerHeight={windowHeight} onkeydown={onkeydown}/>
 
 <div class="relative" bind:clientHeight={contentHeight}>
-    <div class="sticky block top-0 z-100 bg-white/80  text-center items-center w-full" bind:clientHeight={headerHeight}>
+    <div class="block top-1 z-100 bg-white/80  w-full text-right fixed" bind:clientHeight={headerHeight}>
         
         
-        <div role="tablist" class="block fixed top-0 left-1 tabs tabs-lifted ">
+        <div role="tablist" class="inline-block fixed  top-0 left-1 tabs tabs-lifted">
             {#each panes as pane, index}
             <a role="tab" class="tab {selectedPane==index ? 'tab-active' : ''} " tabindex=index onclick={()=>{selectedPane=index}} ><span class="sm:inline hidden">{pane.name}</span><span class="inline sm:hidden">{pane.short}</span></a>
             {/each}
         </div>
-        <div class="inline-block self-center mr-1 mt-1">
-            
+        <div class="inline-block mr-1 mt-1">
+        
             
             <ButtonSelect buttonText="i" 
-       buttonStyle="btn btn-xs  btn-circle btn-ghost p-0" bind:selected={showInfoModal} tooltip="Show site info" tooltipbottom={true}/> <ButtonSelect buttonStyle="btn btn-xs rounded   btn-square btn-ghost  p-0.5 m-0" 
-            bind:selected={enableKeys} buttonText="k" tooltip="Enable/disable hotkeys" tooltipbottom={true}/> <ButtonSelect buttonText={`☰ ${currentServerName}`} 
-       buttonStyle="btn btn-xs  btn-round btn-ghost  p-0.5 m-0" bind:selected={showNTselect} tooltip="Select NT version. This only takes effect after submitting a new lookup query." tooltipbottom={true}/>
+       buttonStyle="btn btn-xs  btn-circle btn-ghost bg-white p-0" bind:selected={showInfoModal} tooltip="Show site info" tooltipbottom={true}/> 
+       <ButtonSelect buttonStyle="btn btn-xs rounded   btn-square  p-0.5 m-0" 
+            bind:selected={enableKeys} buttonText="k" tooltip="Enable/disable hotkeys" tooltipbottom={true}/> 
+            <ButtonSelect buttonText={`☰ ${currentServerName}`} 
+       buttonStyle="btn btn-xs  btn-round btn-ghost  bg-white p-0.5 m-0" bind:selected={showNTselect} tooltip="Select NT version. This only takes effect after submitting a new lookup query." tooltipbottom={true}/>
             
         </div>
 

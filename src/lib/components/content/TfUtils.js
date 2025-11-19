@@ -281,7 +281,7 @@ export function populateTextGroup(parallelColumnGroup, response, parallelIndices
         }
         
         parallelColumnGroup.markUniqueAndIdenticalWords();
-        parallelColumnGroup.buildLexIdenticalPhrases(3);   
+        parallelColumnGroup.buildLexIdenticalPhrases(3,true,true);   
     }
  
 
@@ -322,7 +322,7 @@ export function getGospelGroupRefsArrays(groupsArray,includeSecondary=false){
 
             if(includeSecondary && group[book].secondary && group[book].secondary.length){
                 for (const ref of group[book].secondary){
-                    mylog(`found secondary ref group (id: ${group.id}) for ${book}: ${ref}`,true)
+                    //mylog(`found secondary ref group (id: ${group.id}) for ${book}: ${ref}`)
                     if (refsArray.includes(ref.reference)){ //already fetching this ref. Double-dip!
                         groupIndices[book].secondary.push(refsArray.indexOf(ref.reference));
                     }

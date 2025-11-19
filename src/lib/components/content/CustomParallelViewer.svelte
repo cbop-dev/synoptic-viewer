@@ -32,7 +32,7 @@ import CopyText from '../ui/CopyText.svelte';
 import { findNextAnchor,findPrevAnchor, getAnchors} from '$lib/utils/ui-utils';
 import OptionButton from "../ui/SelectButtons/OptionButton.svelte";
 import Footer from './Footer.svelte';
-
+import TitleNavbar from "./title-navbar.svelte";
 
 let {
     live=false,
@@ -715,11 +715,12 @@ $inspect(`refarea.0:'${refAreaInputs[0]}`);
     
         
            <!-- <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={viewStates.views.lookup.state} buttonText="Again!" tooltip="Toggle lookup panel." /></svelte:element>-->
-            <svelte:element this={theTag} class={classes}><ButtonSelect buttonText="Similar" bind:selected={myOptions.viewOptions.similarPhrases} tooltipbottom tooltip="Show lexically similar phrases (same lexemes, but possibly different forms/morphology)"/></svelte:element>
+            <svelte:element this={theTag} class={classes}><ButtonSelect buttonText="Similar" bind:selected={myOptions.viewOptions.similarPhrases} tooltipbottom tooltip="Show lexically similar phrases (same lexemes, but possibly different forms/morphology). With notes of sandlewood and bourbon, this pairs well with the 'Exact' option."/></svelte:element>
+            <svelte:element this={theTag} class={classes}><ButtonSelect buttonText="Exact" bind:selected={myOptions.viewOptions.exactPhrases} tooltipbottom tooltip="Show exactly matching phrases (same lexemes, same order, some forms). This pairs well with the 'Similar' option."/></svelte:element>
             <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={myOptions.viewOptions.unique} buttonText="Unique" tooltipbottom  tooltip="Outline all lexemes unique to each column."/></svelte:element>
             <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={myOptions.viewOptions.identical} tooltipbottom tooltip="Toggle Bold/underline morphologically identical words, even if they are in diverse positions. This generates 'false positives.'" 
                     buttonText="Identical"/></svelte:element>
-            <svelte:element this={theTag} class={classes}><ButtonSelect buttonText="Auto Highlight" bind:selected={myOptions.viewOptions.highlightOnClick}  tooltipbottom  tooltip="If enabled, clicking on any word will highlight all instances of the lexem."/></svelte:element>
+            <svelte:element this={theTag} class={classes}><ButtonSelect buttonText="Auto Highlight" bind:selected={myOptions.viewOptions.highlightOnClick}  tooltipbottom  tooltip="If enabled, clicking on any word will highlight all instances of the lexeme. Like fish with red wine, this does not pair well with 'Similar phrases' highlighting."/></svelte:element>
             <svelte:element this={theTag} class={classes}><ButtonSelect buttonText="☰ Words" bind:selected={viewStates.views.words.state} tooltipbottom  tooltip="View Lexeme and custom Greek options."/></svelte:element> 
             
             {#if currentServer.abbrev==SblGntServer.abbrev}
@@ -755,7 +756,9 @@ $inspect(`refarea.0:'${refAreaInputs[0]}`);
     </div>
     {/if}
     <div class="text-left ">
-        {@render appTitle('h1',true,['inline'])}
+        <!--{@render appTitle('h1',true,['inline'])}-->
+        <TitleNavbar title="Custom NT Synopsis" shorttitle="NT Synopsis" viewStates={viewStates}
+        {hotkeys} bind:options={myOptions} showResultsButtons={dataReady} hideLookup={!dataReady || landingPage} />
       
     </div>
 
@@ -782,7 +785,7 @@ $inspect(`refarea.0:'${refAreaInputs[0]}`);
   </div>
 </div>
 </div>
-<div id="main-content-div" class="self-center relative text-center bg-white z-20 mt-1 " >
+<div id="main-content-div" class="self-center relative text-center bg-white z-20 mt-10 " >
 {#if viewStates.views.lookup.state}
 <h3 class="italic">Choose your <span class="line-through">weapons</span> NT Bible passages:</h3>
 
@@ -1020,7 +1023,8 @@ $inspect(`refarea.0:'${refAreaInputs[0]}`);
                     <li>Enabling <b>"Unique"</b> will draw <span class="outline outline-blue-400">an outline</span> (one color per gospel) around each lexeme that is unique to a specific gospel, i.e., that shows up in only one column of a single parallel group.</li>
                     <li>Enabling <b>"Identical"</b> will <span class="font-bold underline">bold and underline</span> all morphologically identical words shared by at least two gospels in the same parallel group </li>
                     <li>Enabling <b>"Auto Highlight"</b> will toggle <span class="bg-cyan-500 text-white">highlighting</span> of all instances of the lexeme.</li>
-                    <li>Enabling <b>"Similar"</b> will underline "lexically-identical" phrases that are common between at least two columns. "Lexically identical" here refers to those phrases which have the same lexemes in the same sequence even if they differ morphologically. This crosses verse boundaries.</li>
+                    <li>Enabling <b>"Similar"</b> will underline and highlight "lexically-identical" phrases that are common between at least two columns. "Lexically identical" here refers to those phrases which have the same lexemes in the same sequence even if they differ morphologically. This crosses verse boundaries.</li>
+                    <li>Enabling <b>"Exact"</b> will double-underline and overline <i>exact</i> matches (same lexemes, same order, same morphology) of phrases that are common between at least two columns.</li>
                 </ul>
     
             </div>
