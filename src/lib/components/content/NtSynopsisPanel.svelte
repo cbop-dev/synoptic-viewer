@@ -37,15 +37,16 @@ import TitleNavbar from './title-navbar.svelte';
 import { Hotkey, SynopsisHotkeys } from '../ui/hotkeys.svelte';
 //import { generateHslColorGradient } from '../ui/chartUtils';
    /**
-     * @type {{options:SynopsisOptions2,
+     * @type {{options:SynopsisOptions3,
      * allowEverything:boolean,
+     * keyevent:event|null,
      * live:boolean,
      * tfServer:TfServer}}
      */
 let {
     allowEverything=false,
     /**
-     * keyboard event
+     * @type {event}
     */
     keyevent=null,
     /**
@@ -252,7 +253,7 @@ let selectedSection = $state([1]);
 function selectSection(){
 
     landingPage=false;
-    resetViewOptions(false);
+    resetViewOptions();
     alandPericopeNums=[...selectedSection];
 
     buildAndFetchPericopes();
@@ -374,8 +375,8 @@ function buildLexArrays(){
 }
 
 function populateGroupsText(words=false,includeSecondary=false){
-    mylog("v==================================v", true);
-    mylog(`populateGroupTexts(includeSecondary:${includeSecondary})...`,true);
+    //mylog("v==================================v", true);
+    //mylog(`populateGroupTexts(includeSecondary:${includeSecondary})...`,true);
     
     for (const [index,group] of perGroups.entries()){
         mylog("checking group # " + group.id +" , title: '"+ group.title + ", index: " + index);
@@ -430,20 +431,27 @@ function populateGroupsText(words=false,includeSecondary=false){
         group.markUniqueAndIdenticalWords();    
         group.buildLexIdenticalPhrases(3,true,true);    
     }
-    mylog("DONE! Populated the GroupTexts()!")
-    mylog("^==================================^")
+    //mylog("DONE! Populated the GroupTexts()!")
+    //mylog("^==================================^")
 }
 
 
 function resetViewOptions(lookup=false){
-    myOptions.viewOptions.selectedGospelIndex =0;
-    myOptions.viewOptions.sort = false;
+    //myOptions.viewOptions.selectedGospelIndex =0;
+    //myOptions.viewOptions.sort = false;
     viewStates.reset(lookup);
-    myOptions.viewOptions.hideNonPrimary=false;
-    myOptions.viewOptions.focusOn=false;
-    myOptions.viewOptions.unique=false;
-    myOptions.viewOptions.hideSolos=false;
-    myOptions.viewOptions.hideNonPrimarySolos=false;
+    emptySelectedLexemes();
+    emptySelectedCustomGreek();
+    myOptions.reset();
+    //myOptions.viewOptions.hideNonPrimary=false;
+    //myOptions.viewOptions.focusOn=false;
+    //myOptions.viewOptions.unique=false;
+    //myOptions.viewOptions.menuOpen=false;
+    //myOptions.viewOptions.hideSolos=false;
+    //myOptions.viewOptions.hideNonPrimarySolos=false;
+
+    //const toReset=['selectedGospelIndex', 'sort', 'hideNonPrimary', 'focusOn', 'similar', 'exact', 'identical', 'unique', 'menuOpen', //'hideSolos', 'hideNonPrimarySolos',];
+    //toReset.forEach((propName)=>myOptions.resetProp(propName));
     setServer();
     
     //  focus=selectedGospel[selectedGospelIndex].value;
@@ -540,7 +548,7 @@ function getLexClasses(id){
 }
 
 function emptySelectedCustomGreek(){
-    myOptions.viewOptions.greekStrings.length = 0;
+    myOptions.resetProp('greekStrings');
 }
 
 function emptySelectedLexemes(){
@@ -597,7 +605,11 @@ function displayNote(heading,note) {
     viewStates.views.notes.state = true;
 }
 const hotkeys=new SynopsisHotkeys(myOptions);
-
+hotkeys.enableHotkeys('><tb');
+//mylog(`enabled hotkeys: [${[...hotkeys.hotkeys.keys()].join(',')}]`,true);
+if(!hotkeys.getKeyObj(">")){
+    //mylog("Could not find hotkey '>'!", true);
+}
 const hotkeys2=[
     {key:'>', name:'Next Section',function: jumpToNextSection},
     {key:'<',name:'Previous Section',function: jumpToPrevSection},
@@ -613,7 +625,7 @@ const hotkeys2=[
         
 ];
 
-const viewStates=$state({
+let viewStates=$state({
     views:{
         
         //highlightOnClick: { description:  "Enable/disable highlight on click.", hotkeys:['c'], state: myOptions.viewOptions.highlightOnClick,modal:false},
@@ -667,7 +679,7 @@ const viewStates=$state({
      * @param {boolean} lookup
      * @param {string[]} views
      */
-    reset(lookup=true,views=[]){
+    reset(lookup=false,views=[]){
         if (views.length){
             views.forEach((view)=>{
                 this.views[view].state=false;
@@ -752,7 +764,7 @@ function jumpToNextSection(){
 
 
 function onkeydown(event){
-//    mylog("NTSyPanel.onkeydown! event: ");
+    //mylog(`NTSyPanel.onkeydown! event: ${event}`);
     mylog(event);
     if(live && !textAreaFocused ){
 
@@ -769,12 +781,9 @@ function onkeydown(event){
             }  
         }
         else if (!modalVisibles.length){
-            const matchedHotkey=hotkeys.getKeyObj(event.key)
-            if (matchedHotkey){
-                matchedHotkey.toggle();
-            }
+            hotkeys.keypress(event.key);
+            //mylog(`hotkey toggled for '${event.key}'`,true);
         }
-            
     }
     else{
 //        mylog("onkey: text area focused. Doing nothing!")
@@ -830,10 +839,15 @@ onMount(() => {
     mounted = true;
 });
 
-$inspect("fetchedTextsResponse",fetchedTextsResponse);
-$inspect("groupsRefsArray", groupsRefsArray);
-$inspect('perGroups', perGroups);
-$inspect("Exact phrases: '"+ (perGroups.length ? Object.keys(perGroups[0].exactlyIdenticalPhrases).join("'','")+"'" : ''));
+//$inspect("fetchedTextsResponse",fetchedTextsResponse);
+//$inspect("groupsRefsArray", groupsRefsArray);
+//$inspect('perGroups', perGroups);
+//$inspect("Exact phrases: '"+ (perGroups.length ? Object.keys(perGroups[0].exactlyIdenticalPhrases).join("'','")+"'" : ''));
+//$inspect("hotkeys.hotkeysEnabled:", hotkeys.hotkeysEnabled);
+$inspect("myOptions.viewOptions.lexes:", myOptions.viewOptions.lexes)
+$inspect("selectedLexes:", selectedLexes)
+
+
 </script>
 <style>
     @reference "tailwindcss";
@@ -850,7 +864,7 @@ $inspect("Exact phrases: '"+ (perGroups.length ? Object.keys(perGroups[0].exactl
     }
 
     .anchor{
-        @apply md:-mt-30 md:pt-30 -mt-20 pt-20;
+        @apply md:-mt-40 md:pt-40 -mt-30 pt-30;
     }
 
 
@@ -919,12 +933,13 @@ $inspect("Exact phrases: '"+ (perGroups.length ? Object.keys(perGroups[0].exactl
 {/snippet}
 {#snippet resultsButtons(short=false,theTag='li',classes=[])}
       
-        {#if !short && !(landingPage)}    
+        {#if false && !short && !(landingPage)}    
             <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={viewStates.views.lookup.state} tooltipbottom tooltip="Show Lookup panel pop-up" buttonText="☰ Lookup" /></svelte:element>
         {/if}
 
         {#if alandPericopeNums && alandPericopeNums.length}
             {#if dataReady}
+            
                 <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={viewStates.views.view.state} tooltipbottom tooltip="Show other viewing options (sort, etc.)"  buttonText="☰ View"/></svelte:element>
                 <svelte:element this={theTag} class={classes}><ButtonSelect buttonText='Similar' bind:selected={myOptions.viewOptions.similarPhrases} tooltipbottom tooltip="Show lexically similar phrases (same lexemes, but possibly different forms/morphology)"/></svelte:element>
                 <svelte:element this={theTag} class={classes}><ButtonSelect buttonText="Exact" bind:selected={myOptions.viewOptions.exactPhrases} tooltipbottom tooltip="Show exactly matching phrases (same lexemes in same order, with same /morphology)"/></svelte:element>
@@ -932,113 +947,37 @@ $inspect("Exact phrases: '"+ (perGroups.length ? Object.keys(perGroups[0].exactl
                 bind:selected={viewStates.views.sections.state}
                 tooltipbottom tooltip="Jump to a section"
                 /></svelte:element>       
-                    <svelte:element this={theTag} class={classes}><ButtonSelect 
-                    bind:selected={viewStates.views.words.state} 
-                    buttonText="☰ Words" tooltipbottom tooltip="Show lexeme options"
-                     /></svelte:element>
-                    <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={myOptions.viewOptions.highlightOnClick} buttonText="Auto Highlight" 
-                        tooltipbottom={true}
-                        tooltip="If enabled, clicking/tapping on a word will toggle highlighting of that lexeme. Press 'c' to toggle this option."/></svelte:element>    
-                    {#if currentServer.abbrev==SblGntServer.abbrev}   
+                <svelte:element this={theTag} class={classes}><ButtonSelect 
+                bind:selected={viewStates.views.words.state} 
+                buttonText="☰ Words" tooltipbottom tooltip="Show lexeme options"
+                    /></svelte:element>
+                <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={myOptions.viewOptions.highlightOnClick} buttonText="Auto Highlight" 
+                    tooltipbottom={true}
+                    tooltip="If enabled, clicking/tapping on a word will toggle highlighting of that lexeme. Press 'c' to toggle this option."/></svelte:element>  
+                <svelte:element this={theTag} class={classes}><Button buttonText="Reset" tooltipbottom  tooltip="Reset options" buttonColors={"btn-primary"}
+                onclick={()=>myOptions.reset()}
+            /></svelte:element> 
+                {#if currentServer.abbrev==SblGntServer.abbrev}   
                     <svelte:element this={theTag} class={[classes, 'menu']}><label class="label" for="hide-app-check{short? '-short':''}">
-            <input  class="toggle" id="hide-app-check{short? '-short':''}" type="checkbox" bind:checked={myOptions.viewOptions.hideApp}/>Hide appar{#if !short}aratus marks{:else}.{/if}</label>
-                </svelte:element>
-                    {/if}
+                    <input  class="toggle" id="hide-app-check{short? '-short':''}" type="checkbox" bind:checked={myOptions.viewOptions.hideApp}/>Hide appar{#if !short}aratus marks{:else}.{/if}</label>
+                        </svelte:element>
+                {/if}
                     
+            {:else}
             {/if}
         {/if}
     
 {/snippet}
-
-<div id="top-fixed" class="self-center fixed text-center w-full top-8  bg-white z-40">
-    <div id="header-nav-section" class="self-center text-center   m-auto w-full" >
-    <div class="navbar bg-base-100 text-center  min-h-12 shadow-sm ">
-        <div class="navbar-start text-left max-w-full w-full m-auto md:hidden">
-            
-            {#if !landingPage && dataReady}
-            <div class="dropdown  text-left">
-            
-            <div tabindex="0" role="button" class="btn btn-ghost lg:hidden">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16" /> </svg>
-            </div>
-
-            <ul tabindex="0"
-            class="menu  dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow text-left ">
-            {@render resultsButtons(true)}
-        
-            </ul>
-            </div>
-            {/if}
-            <div class="text-left ">
-            <h1 class="inline">
-                <a href="" data-sveltekit-reload><span class="hidden sm:inline">NT&nbsp;Synopsis</span>
-                <span class="sm:hidden inline">Synopsis</span></a>
-            </h1>    
-            <ul class="bg-white menu menu-horizontal ">
-                
-            <li><ButtonSelect buttonText="?" buttonStyle="btn btn-xs btn-circle btn-ghost p-0" bind:selected={viewStates.views.help.state}/>
-                </li>
-            <li>
-                <ButtonSelect bind:selected={viewStates.views.lookup.state} buttonText="" 
-                buttonStyle="btn btn-xs btn-circle btn-ghost p-0" >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3">
-        <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-        </svg>
-                </ButtonSelect>
-            </li></ul>
-            </div>
-        </div>
-        <div class="hidden md:navbar-center self-center m-auto">
-
-            <div class="text-center self-center border-0"> 
-                <div id="title-panel">
-                      <TitleNavbar title="Greek New Testament Synopsis" mediumtitle="Greek NT Synopsis" shorttitle="NT Synopsis" 
-                        viewStates={viewStates}
-                        {hotkeys} bind:options={myOptions} 
-                        showResultsButtons={dataReady} 
-                        hideLookup={!dataReady || landingPage} />
-                </div> 
-
-                {#if myOptions.viewOptions.menuOpen}
-                <div class="bg-white text-center flex flex-wrap block w-full ">
-                    
-                    {@render resultsButtons(false,'div',['inline-block'])}
-                </div>
-                {/if}
-            </div>
-        </div>
-        <div class="navbar-end hidden">
-        
-
-
-        </div>
+{#snippet lookup()}
+ {#if !mounted}
+    <div class="bg-transparent m-10 p-10">
+        <h3><i>Page Loading...</i></h3>
+    <span class="loading loading-spinner loading-xl"></span>    
     </div>
-    </div>
-     <div id='landing'>
+    
+ {:else }
 
-        {#if landingPage}
-        <div id="landing-panel text-center">
-
-            
-            <div class="text-center m-auto">
-            
-                    {@render appSummary(false)}
-            </div>
-            <hr/>
-          </div>
-          {/if}
-        </div>
-
-        <div id="lookup">
-        {#if !mounted}
-        <div class="bg-transparent m-10 p-10">
-            <h3><i>Page Loading...</i></h3>
-        <span class="loading loading-spinner loading-xl"></span>    
-        </div>
-        
-        {:else if viewStates.views.lookup.state}
-
-        <div id="search-panel" class="text-center ">
+        <div  class="text-center overflow-auto scroll-auto">
             Choose One:
                     <h2 class="cursor-default">Enter References</h2><div class="inline-block mb-1">
                         <textarea id="refarea" class="inline-block align-middle" 
@@ -1072,15 +1011,81 @@ $inspect("Exact phrases: '"+ (perGroups.length ? Object.keys(perGroups[0].exactl
                 <button onclick={selectSection} class="align-top btn btn-primary inline-block m-1">Go!</button>
         </div>
         <hr class="!border-slate-300 m-6"/>
-        {/if}
+    {/if}
 
-    </div>  
+{/snippet}
+<div id="top-fixed" class="self-center fixed text-center w-full top-8  bg-white z-40  ">
+    <div id="header-nav-section" class="block self-center text-center   m-auto w-full" >
+    <div class="navbar bg-base-100 text-center  min-h-12 shadow-sm ">
+  
+        <div class="navbar-start text-left sm:navbar-center sm:self-center  w-full m-auto">
 
-</div><!--end fixed section-->
+            <div class="text-center self-center w-full border-0"> 
+                <div id="title-panel">
+                      <TitleNavbar title="Greek New Testament Synopsis" mediumtitle="Greek NT Synopsis" shorttitle="NT Synopsis" 
+                        bind:viewStates={viewStates}
+                        {hotkeys} bind:options={myOptions} 
+                        showResultsButtons={dataReady} 
+                        hideLookup={!dataReady || landingPage} />
+                </div> 
+
+                {#if myOptions.viewOptions.menuOpen}
+                <div class="m-auto dropdown text-left">
+                    
+                    <ul 
+                    class="menu menu-horizontal bg-base-100 rounded-box z-1 mt-3 w-auto p-2 shadow text-left ">
+                    {@render resultsButtons(true,'li')}
+                    
+                    </ul>
+                    
+                </div>
+                
+
+                
+                {/if}
+            </div>
+        </div>
+        <div class="navbar-end hidden">
+        
+
+
+        </div>
+    </div>
+    </div>
+   
+</div>
+ 
+
+  {#if landingPage}
+     <div id="landing-lookup" class="bg-white block top-0 overflow-auto">
+        <div id='landing'>
+
+            
+            <div id="landing-panel text-center">
+
+                
+                <div class="text-center m-auto">
+                
+                        {@render appSummary(false)}
+                </div>
+                <hr/>
+            </div>
+            
+     
+        </div>
+
+        <div id="landinglookup" class={['bg-white','overflow-auto','scroll-auto',]}>
+           {@render lookup()}
+    </div> 
+
+
+    </div>
+{/if}
+<!--end fixed section-->
 
 <div id="main-content-div" class="self-center relative text-center bg-white mt-10 z-20">
 
- 
+   
     
     {#if !landingPage}
             {#if myOptions.request.fromURL && !requestProcessed}
@@ -1414,4 +1419,8 @@ $inspect("Exact phrases: '"+ (perGroups.length ? Object.keys(perGroups[0].exactl
             </div>
 
     </div>
+</Modal2>
+
+<Modal2 bind:showModal={viewStates.views.lookup.state}>
+     {@render lookup()}
 </Modal2>

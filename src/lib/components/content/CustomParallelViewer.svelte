@@ -127,7 +127,7 @@ mylog("initialized selected lexes: " + selectedLexes.join(','));
 /**
 * @type {string[]} selectedGreekStrings
 */
-let selectedGreekStrings=$state([]);
+let selectedGreekStrings=$state(myOptions.viewOptions.greekStrings);
 
 let showLexOptionsInfo = $state(false);
     
@@ -263,8 +263,7 @@ async function buildAndFetchPericopes(reset=true){
           
     // mylog("disabling sortFilter and focus...");
         resetViewOptions();
-        emptySelectedLexemes();
-        emptySelectedCustomGreek();
+       
     }
     
     
@@ -322,8 +321,9 @@ function resetViewOptions(lookup=false){
     
     viewStates.reset(lookup);
     
-    showUnique=false;
-    
+    myOptions.reset();
+    emptySelectedLexemes();
+    emptySelectedCustomGreek();
     
     //  focus=selectedGospel[selectedGospelIndex].value;
 }
@@ -381,7 +381,8 @@ function resetViewOptions(lookup=false){
     }
 
     function emptySelectedCustomGreek(){
-        selectedGreekStrings.length = 0;
+        //selectedGreekStrings.length = 0;
+            options.resetProp('greekStrings');
     }
 
     function emptySelectedLexemes(){
@@ -476,7 +477,7 @@ const viewStates=$state({
      * @param {boolean} lookup
      * @param {string[]} views
      */
-    reset(lookup=true,views=[]){
+    reset(lookup=false,views=[]){
         if (views.length){
             views.forEach((view)=>{
                 this.views[view].state=false;
@@ -489,7 +490,7 @@ const viewStates=$state({
 
         }
 
-        this.views.lookup.state= lookup ? true :false;
+        this.views.lookup.state= lookup
         
     },
 
@@ -517,6 +518,7 @@ const viewStates=$state({
 
 
     const hotkeys=new SynopsisHotkeys(myOptions);
+    hotkeys.enableHotkeys('><tb');
     const hotkeys2=[
       
        
@@ -722,7 +724,9 @@ $inspect(`refarea.0:'${refAreaInputs[0]}`);
                     buttonText="Identical"/></svelte:element>
             <svelte:element this={theTag} class={classes}><ButtonSelect buttonText="Auto Highlight" bind:selected={myOptions.viewOptions.highlightOnClick}  tooltipbottom  tooltip="If enabled, clicking on any word will highlight all instances of the lexeme. Like fish with red wine, this does not pair well with 'Similar phrases' highlighting."/></svelte:element>
             <svelte:element this={theTag} class={classes}><ButtonSelect buttonText="☰ Words" bind:selected={viewStates.views.words.state} tooltipbottom  tooltip="View Lexeme and custom Greek options."/></svelte:element> 
-            
+            <svelte:element this={theTag} class={classes}><Button buttonText="Reset" tooltipbottom  tooltip="Reset options" buttonColors={"btn-primary"}
+                onclick={()=>myOptions.reset()}
+            /></svelte:element> 
             {#if currentServer.abbrev==SblGntServer.abbrev}
                 <svelte:element this={theTag} class={[classes,["tooltip","tooltip-bottom","menu"]]} 
                 data-tip="Show/hide the SBL GNT apparatus marks in the text. This also effects the 'copy' buttons."> <label class="label" for="hide-app-check{short? '-short':''}">
@@ -737,92 +741,92 @@ $inspect(`refarea.0:'${refAreaInputs[0]}`);
 <ButtonSelect buttonText="☰" 
         buttonStyle="btn btn-xs  btn-circle btn-ghost  p-0" bind:selected={options.viewOptions.menuOpen} tooltip="Expand menu options" tooltipbottom={true}/>
 {/snippet}
-<div id="header-nav-section" class="self-center text-center fixed bg-white z-40 top-8  m-auto w-full" >
-
-
-<div class="navbar bg-base-100 text-center  shadow-sm pb-0 mb-0 sm:mb-1 sm:pb-1 ">
-  <div class="navbar-start text-left max-w-full w-full m-auto md:hidden">
-    {#if dataReady}
-    <div class="dropdown  text-left">
-               
-      <div tabindex="0" role="button" class="btn btn-ghost lg:hidden">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16" /> </svg>
-      </div>
-      
-      <ul tabindex="0"
-       class="menu  dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow text-left ">
-        {@render resultsNav(true)} 
-      </ul>
-    </div>
-    {/if}
-    <div class="text-left ">
-        <!--{@render appTitle('h1',true,['inline'])}-->
-        <TitleNavbar title="Custom NT Synopsis" shorttitle="NT Synopsis" viewStates={viewStates}
-        {hotkeys} bind:options={myOptions} showResultsButtons={dataReady} hideLookup={!dataReady || landingPage} />
-      
-    </div>
-
-  </div>
-  <div class="hidden md:navbar-center self-center m-auto">
-         <div class="text-center self-center border-0 "> 
-           <div class="title-panel m-0 p-0 block z-40">
-           
-             {@render appTitle()}
-            </div>
-            <div class="flex flex-wrap">
-
-             <!--<ul class="bg-white  menu menu-horizontal p-0">-->
-             {#if myOptions.viewOptions.menuOpen}
-            
-                {@render resultsNav(false,'div')}
-             <!--</ul>-->
-             
-             {/if}
-             </div>
-         </div>
-    </div>
-  <div class="navbar-end hidden">
-  </div>
-</div>
-</div>
-<div id="main-content-div" class="self-center relative text-center bg-white z-20 mt-10 " >
-{#if viewStates.views.lookup.state}
+{#snippet lookupPanel()}
+<div class="block text-center items-center">
 <h3 class="italic">Choose your <span class="line-through">weapons</span> NT Bible passages:</h3>
 
 
-{#if selectedRequestModeIndex == 0}
-    {#each refAreaInputs as areaInput, index}
-    <div class="inline-block m-3 text-left">
-        <label for="refarea{index}" class="label cursor-pointer block  ">
-            <span class="label-text">Column {index+1}:</span></label>  
-        <textarea id="refarea{index}" class="align-middle resize" rows="1"
-                    bind:value={refAreaInputs[index]}
-                onfocus={textAreaFocus} onblur={textAreaBlur}
-                    ></textarea>
-    </div>         
-        
+    {#if selectedRequestModeIndex == 0}
+        {#each refAreaInputs as areaInput, index}
+        <div class="inline-block m-3 text-left">
+            <label for="refarea{index}" class="label cursor-pointer block  ">
+                <span class="label-text">Column {index+1}:</span></label>  
+            <textarea id="refarea{index}" class="align-middle resize" rows="1"
+                        bind:value={refAreaInputs[index]}
+                    onfocus={textAreaFocus} onblur={textAreaBlur}
+                        ></textarea>
+        </div>         
+            
 
-    {/each}
-    <div class="block">
-    {#if numCols <= maxCols}<Button buttonStyle="btn btn-sm btn-ghost" onclick={addCol} buttonText="+" tooltip="Add Column"/>{/if}
-    {#if numCols >1 }<Button onclick={removeCol} buttonStyle="btn btn-sm btn-ghost"  buttonText="-" tooltip="Remove Last Column"/>{/if}
+        {/each}
+        <div class="block">
+        {#if numCols <= maxCols}<Button buttonStyle="btn btn-sm btn-ghost" onclick={addCol} buttonText="+" tooltip="Add Column"/>{/if}
+        {#if numCols >1 }<Button onclick={removeCol} buttonStyle="btn btn-sm btn-ghost"  buttonText="-" tooltip="Remove Last Column"/>{/if}
+        </div>
+    {:else}
+        <br/>
+        <textarea bind:value={batchInput} cols="20" rows="10"
+        onfocus={textAreaFocus} onblur={textAreaBlur}
+        /><br/>
+    {/if}
+    <div class="mb-2">
+    <label for="request-mode">Mode:</label>
+    <select name="request-mode" bind:value={selectedRequestModeIndex}>
+        {#each requestModes as rMode,i}
+            <option value={i}>{rMode.name}</option>
+        {/each}
+
+    </select>
+    <Button onclick={lookup} buttonText="Lookup!" ready={!fetching}/>
     </div>
-{:else}
-    <br/>
-    <textarea bind:value={batchInput} cols="20" rows="10"
-    onfocus={textAreaFocus} onblur={textAreaBlur}
-    /><br/>
-{/if}
-<div class="mb-2">
-<label for="request-mode">Mode:</label>
-<select name="request-mode" bind:value={selectedRequestModeIndex}>
-    {#each requestModes as rMode,i}
-        <option value={i}>{rMode.name}</option>
-    {/each}
-
-</select>
-<Button onclick={lookup} buttonText="Lookup!" ready={!fetching}/>
 </div>
+{/snippet}
+<div id="header-nav-section" class="self-center text-center fixed bg-white z-40 top-8  m-auto w-full" >
+
+
+<div class="navbar bg-base-100 text-left sm:text-center  shadow-sm pb-0 mb-0 sm:mb-1 sm:pb-1 ">
+  
+  <div class="text-left sm:navbar-center sm:self-center  sm:w-full sm:m-auto">
+
+            <div class="text-left sm:text-center sm:self-center w-full border-0"> 
+                <div id="title-panel">
+                      <TitleNavbar title="Custom Greek NT Synopsis" mediumtitle="Custom NT Synopsis" shorttitle="NT Synopsis" 
+                        viewStates={viewStates}
+                        {hotkeys} bind:options={myOptions} 
+                        showResultsButtons={dataReady} 
+                        hideLookup={!dataReady || landingPage} />
+                </div> 
+
+                {#if myOptions.viewOptions.menuOpen}
+                <div class="absolute left-0 m-auto dropdown sm:hidden text-left overflow-auto">
+                    
+                    <ul 
+                    class="menu menu-horizontal bg-base-100 rounded-box z-1 mt-3 w-auto p-2 shadow text-left ">
+                    {@render resultsNav(true,'li')}
+                    
+                    </ul>
+                    
+                </div>
+                
+
+                <div class="bg-white text-left sm:text-center m-auto hidden  menu-horizontal flex-wrap sm:block lex-wrap w-full ">
+                    
+                    {@render resultsNav(false,'div',['inline-block'])}
+                </div>
+                {/if}
+            </div>
+        </div>
+  <div class="navbar-end hidden">
+  </div>
+</div>
+
+
+</div>
+<div id="main-content-div" class="self-center relative text-center bg-white z-20 mt-10 " >
+{#if landingPage}
+<div id="landing-lookup">
+    {@render lookupPanel()}
+    </div>
 {/if}
 
 <div id="texts1" class="block">
@@ -1055,11 +1059,7 @@ $inspect(`refarea.0:'${refAreaInputs[0]}`);
 
 </Modal2>
 
-<!--<Modal2 bind:showModal={viewStates.views.info.state}>
-    <div class="text-left m-auto inline">
-        {@render appSummary()}
-        <hr/>
-        <Footer/>
-    </div>
-    <div class="btn-sm"></div>
-</Modal2>-->
+<Modal2 bind:showModal={viewStates.views.lookup.state} title="Lookup!">
+    {@render lookupPanel()}
+
+</Modal2>

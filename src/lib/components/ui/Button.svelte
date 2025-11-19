@@ -9,6 +9,7 @@
    * @property {boolean} [ready]
    * @property {string} [tooltip]
    * @property {string} [buttonColors]
+   * @property {boolean} [tooltipbottom=false]
    * @property {function} [onclick]
    */
 
@@ -22,6 +23,7 @@
     ready = true,
     buttonColors=' focus:ring-blue-300 hover:bg-blue-700 ',
     tooltip='',
+    tooltipbottom=false,
     onclick=()=>{}
   } = $props();
   </script>
@@ -47,6 +49,6 @@
   </style>
   
   <button  data-tip={tooltip} disabled={!ready} {onclick} 
-  class="{tooltip ? 'tooltip' : ''} {textSize} {buttonStyle} {buttonType} {buttonColors} shadow-xl {style}">
+  class="{tooltip ? 'tooltip' : ''} {textSize} {buttonStyle} {buttonType} {buttonColors} shadow-xl {style}"  {tooltipbottom}>
     {buttonText}
   </button>

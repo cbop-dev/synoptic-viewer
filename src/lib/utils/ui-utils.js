@@ -1,4 +1,6 @@
-function findCurrentAnchorInfo() {
+import { mylog } from "$lib/env/env.js";
+
+export function findCurrentAnchorInfo() {
   const maxTop=30;
     const anchors = getAnchors();
     /**
@@ -62,7 +64,7 @@ export function findNextAnchor(){
 
 }
 /* //working todo: finish!!
-function findTopMostAnchorInfo() {
+export function findTopMostAnchorInfo() {
     const anchors = document.querySelectorAll('div[id].anchor');
     let topMost = null;
     let minTop = Infinity;
@@ -90,11 +92,11 @@ function findTopMostAnchorInfo() {
     return topMost ? {id: topMost.id, top: minTop} : null;
   }*/
 
-  export function findTopMostAnchorId(){
+  /*export function findTopMostAnchorId(){
     return findTopMostAnchorInfo()?.id;
-  }
+  }*/
 
-  function findLastAnchor(){
+export function findLastAnchor(){
     const anchors = document.querySelectorAll('div[id].anchor');
     const last= anchors[anchors.length-1].id ? anchors[anchors.length-1].id : '';
     
@@ -110,4 +112,45 @@ export function getDivAnchorIdsArray(){
 export function copyToClipboard(text){
   navigator.clipboard.writeText(theText);
 }
+
+export function jumpToPrevSection(){
+    const nextId=findPrevAnchor()
+    if (nextId){
+        document.location=document.location.toString().split('#')[0]+'#'+nextId;
+    }
+}
+export function jumpToTop(){
+  document.location=document.location=document.location.toString().split('#')[0]+"#";
+}
+
+export function jumpToFirstSection(){
+    const anchors = getAnchors();
+    if (anchors && anchors.length) {
+        document.location=document.location.toString().split('#')[0]+'#'+anchors[0].id;
+
+    }     
+    
+}
+
+export function jumpToLastSection(){
+    const anchors = getAnchors();
+    if (anchors && anchors.length) {
+        document.location=document.location.toString().split('#')[0]+'#'+anchors[anchors.length-1].id;
+
+    }     
+    
+}
+
+
+export function jumpToNextSection(){
+    const nextId=findNextAnchor()
+    if (nextId){
+        const loc=document.location.toString().split('#')[0]+'#'+nextId;
+        document.location=loc;
+        mylog(`jumpToNextSection->${loc}`)
+    }
+}
+
+
   //export {findTopMostAnchor, findLastAnchor,getDivAnchorIdsArray}
+

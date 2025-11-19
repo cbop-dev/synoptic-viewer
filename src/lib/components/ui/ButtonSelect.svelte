@@ -74,8 +74,6 @@
   <button  data-tip={tooltip} onclick={()=>{if(!disable){toggle()}}} bind:this={theButton} 
   class=" {tooltip ? 'tooltip' : ''}  {tooltipbottom ? 'tooltip-bottom' : ''} {selectStyle()} {disable ? 'btn-disabled' : ''} {buttonStyle}">
     {buttonText}
-    {#if children}
-		{@render children?.()}
-		<hr />
+    {#if children}{@render children?.()}<hr />
 		{/if}
   </button>

@@ -616,7 +616,7 @@ export class ParallelColumnGroup {
                 for (const [phrase,locs] of Object.entries(this.exactlyIdenticalPhrases)
                                            .filter(([phrase,loc])=>loc.length > 1))
                 {//adding a css entry for each word:
-                    mylog(`Got exact phrase: '${phrase}', ${locs.length} times`, true)
+                    //mylog(`Got exact phrase: '${phrase}', ${locs.length} times`)
                     locs.forEach((loc)=>{
                         
                         this.getWordsFromLocation(loc).forEach((w)=>{
@@ -641,10 +641,10 @@ export class ParallelColumnGroup {
        
         
         /*
-        mylog("========================================================",true)
-        mylog("Build the lexIdenPhrasesIndexDict. Here it is:", true)
-        mylog(this.lexIdenticalPhrasesIndexDict, true)
-        mylog("========================================================",true)
+        //mylog("========================================================",true)
+        //mylog("Build the lexIdenPhrasesIndexDict. Here it is:", true)
+        //mylog(this.lexIdenticalPhrasesIndexDict, true)
+        //mylog("========================================================",true)
         */
         
     }

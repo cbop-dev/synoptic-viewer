@@ -7,10 +7,22 @@ export class SynopsisOptions3{
     viewOptions=$state({});
     request=$state({});
 
+
+    reset(){
+        //const theCopy=new SynopsisOptions3();
+        //this.viewOptions=copyObject(theCopy.viewOptions);
+        //this.request=copyObject(theCopy.request);
+        for (const [propName,row] of Object.entries(SynopsisOptions3.SynopsisUrlParamsMap)){
+            this.resetProp(propName);
+        }
+
+    }
     resetProp(propName){
         let reset=false;
         if(Object.hasOwn(SynopsisOptions3.SynopsisUrlParamsMap,propName)){
             const row=SynopsisOptions3.SynopsisUrlParamsMap[propName];
+            
+            
             let val=row.default ? row.default : null;
 
             if(!val){
@@ -23,21 +35,44 @@ export class SynopsisOptions3{
                 else if(row.type=='str'){
                     val=''
                 }
-                else{//one of the array types.
-                    val=[]
-                }
+               /* else if (Object.keys(this.viewOptions).includes(propName) && this.viewOptions[propName] && this.viewOptions[propName]?.length){ //an array type
+                    //this.viewOptions[propName].length=0;
+                }*/
+                
 
             }
 
             if(row.category=='view'){
-                this.viewOptions[propName]=val;
-                reset=true;
+                if (val) {
+                    this.viewOptions[propName]=val;
+                    reset=true;
+                }
+
+                else if (row.type.includes('Array')){
+                    if (this.viewOptions[propName].length){
+                        this.viewOptions[propName].length=0
+                    }
+
+                }
+
+                
             }
             else if(row.category=='request'){
-                this.request[propName]=val;
-                reset=true;
-            }
+                if (val) {
+                    this.request[propName]=val;
+                    reset=true;
+                }
+                else if (row.type.includes('Array')){
+                    if (this.request[propName].length){
+                        this.request[propName].length=0
+                    }
 
+                }
+            }
+            //mylog(`myOptions.resetProp('${propName}'): reset: ${reset}, to: ${val}`, true)
+        }
+        else{
+           // mylog(`myOptions.resetProp('${propName}'): not found`, true)
         }
 
         return reset;
@@ -128,8 +163,8 @@ export class SynopsisOptions3{
         batch: {type: 'strArray', split:"^", category: 'request'},
         nt: {type:'str', category: 'request', default:'sblgnt'},           
         fromURL: {type:'boolean', category: 'request',noURL:true},
-        menuOpen: {type:'boolean', default: true, category: 'view',noURL:true},
-        showLookup: {type:'boolean', default: true, category: 'view',noURL:true},
+        menuOpen: {type:'boolean', default: false, category: 'view',noURL:true},
+        showLookup: {type:'boolean', default: false, category: 'view',noURL:true},
     }
 
     /**
@@ -161,10 +196,10 @@ export class SynopsisOptions3{
             
             if(name && val && valStr){
                 urlParams.set(name,valStr);
-//                mylog(`Got url param: '${name}'='${valStr}'`)
+                //mylog(`Got url param: '${name}'='${valStr}'`);
             }
             else {
-//                mylog(`Couldn't add url param for name:'${name}', strVal: '${valStr}'`);
+                //mylog(`Couldn't add url param for name:'${name}', strVal: '${valStr}'`);
             
 
             }

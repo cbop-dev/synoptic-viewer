@@ -41,12 +41,14 @@
    })
 </script>
 <div id="page-top-div" class="anchor"></div>
+
+
 <SynopsisHome options={options}/>
 
 <!--<ParallelGospelSection/>-->
 <!--<NtSynopsisPanel/>-->
 <hr class="p0 mt-3"/>
-<div id="page-footer-div" class="italic text-sm text-center bottom-1">
+<div id="page-footer-div" class="border-t-1 bg-white/90 block italic text-sm text-center w-full *:clear-both z-50">
 <Footer/>
 </div>
 <div id="page-bottom-div" class=" anchor"></div>

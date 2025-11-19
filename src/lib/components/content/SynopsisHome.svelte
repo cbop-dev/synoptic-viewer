@@ -61,8 +61,10 @@
     const panes=[
        {name: 'Gospels', short:"Gos",
         comp: NtSynopsisPanel},
+        
        {name:'Custom', short:"Cust",
        comp: CustomParallelViewer}
+       
     ]
 
     const hotkeys={
@@ -73,6 +75,7 @@
     let keyEvents=$state([null,null])
 
     function onkeydown(event){
+        //mylog(`SynHome onkeydown=${event}`,true);
         if(enableKeys) {
                     const key=event.key;
             if(Object.keys(hotkeys).includes(key)){
@@ -165,7 +168,7 @@
     
     </div>
     
-    <div id="main-panes" class="clear-right relative block top-30">
+    <div id="main-panes" class="clear-right relative block mt-40">
     {#each panes as pane, index}
 
     <div id="pane-{pane.name}" class={index==selectedPane ? 'block' : 'hidden'}>
@@ -207,7 +210,7 @@
     <div class="block">
     <a href="#bottom-div"  class="inline bg-white/60 border-slate-400/80 border-1 p-0.5 rounded-lg" title="Bottom">
         <ArrowDown height={20} width={20}/></a>
-    </div>
+</div>
 {/if}
     
 </div>

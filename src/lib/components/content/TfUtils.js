@@ -420,7 +420,7 @@ export class TfServer{
             bookCv.chap = bookCv.chap ? bookCv.chap.replaceAll(/[a-zA-Z]/g,'') : ''
             bookCv.v = bookCv.v ? bookCv.v.replaceAll(/[a-zA-Z]/g,'') : ''
             if (!bookCv.book) {
-                mylog(`getBCVarrayFromRefs('${refs.join(';')}'): Got no book name for row ${i} chap: ${bookCv.chap} and ${bookCv.v}`, true);
+                //mylog(`getBCVarrayFromRefs('${refs.join(';')}'): Got no book name for row ${i} chap: ${bookCv.chap} and ${bookCv.v}`, true);
             }
             const bookName = this.getBookNameBySyn(bookCv.book);
             //mylog('fetchGroupText got bookname ' + bookName + " for: " + bookCv.book);

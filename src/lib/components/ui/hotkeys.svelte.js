@@ -1,39 +1,7 @@
 import { SynopsisOptions3 } from "../content/SynopsisClasses.svelte";
 import { findNextAnchor,findPrevAnchor, getAnchors} from '$lib/utils/ui-utils';
-
-function jumpToPrevSection(){
-    const nextId=findPrevAnchor()
-    if (nextId){
-        document.location=document.location.toString().split('#')[0]+'#'+nextId;
-    }
-}
-
-
-function jumpToFirstSection(){
-    const anchors = getAnchors();
-    if (anchors && anchors.length) {
-        document.location=document.location.toString().split('#')[0]+'#'+anchors[0].id;
-
-    }     
-    
-}
-
-function jumpToLastSection(){
-    const anchors = getAnchors();
-    if (anchors && anchors.length) {
-        document.location=document.location.toString().split('#')[0]+'#'+anchors[anchors.length-1].id;
-
-    }     
-    
-}
-
-
-function jumpToNextSection(){
-    const nextId=findNextAnchor()
-    if (nextId){
-        document.location=document.location.toString().split('#')[0]+'#'+nextId;
-    }
-}
+import { mylog } from "$lib/env/env";
+import * as UiUtils from '$lib/utils/ui-utils.js';
 
 export class Hotkey{
 
@@ -57,17 +25,18 @@ export class Hotkey{
     }
 }
 
+
 export class SynopsisHotkeys{
     /**
-     * @type {Hotkey[]} hotkeys
+     * @type {Map<string,Hotkey>} hotkeys
      */
-    hotkeys=$state([]);
+    hotkeys=$state(new Map());
     options=$state(new SynopsisOptions3());
     hotkeysTable=[
-        {key:'>', name:'Next Section',function: jumpToNextSection},
-        {key:'<',name:'Previous Section',function: jumpToPrevSection},
-        {key:'t',name:'Top/First Section',function: jumpToFirstSection},
-        {key:'b',name:'Bottom/Last Section',function: jumpToLastSection},
+        {key:'>', name:'Next Section',function: UiUtils.jumpToNextSection},
+        {key:'<',name:'Previous Section',function: UiUtils.jumpToPrevSection},
+        {key:'t',name:'Top/First Section',function: UiUtils.jumpToTop},
+        {key:'b',name:'Bottom/Last Section',function: UiUtils.jumpToLastSection},
         {key:'c',name:'Highlight on Click',optionName:"highlightOnClick",function: ()=>{this.options.viewOptions.highlightOnClick =!this.options.viewOptions.highlightOnClick},navLetterButton:true},
         {key:'u',name:'Unique Lexemes',optionName:"unique",function: ()=>{this.options.viewOptions.unique =!this.options.viewOptions.unique},navLetterButton:true},
         {key:'i',name:'Identical Words',optionName:"identical",function: ()=>{this.options.viewOptions.identical =!this.options.viewOptions.identical},navLetterButton:true},
@@ -84,20 +53,71 @@ export class SynopsisHotkeys{
      * @param {SynopsisOptions3} options 
      */
     constructor(options=new SynopsisOptions3(),hotkeysEnabled='cuisme'){
-        this.hotkeysEnabled=new Set(hotkeysEnabled.split(''));
+        this.hotkeys=new Map();
         this.options=options;
         for (const k of hotkeysEnabled){
-            const kRow = this.hotkeysTable.find((r)=>r.key==k);
-            if(kRow){
-                this.hotkeys.push(new Hotkey(k,kRow.name,kRow.function,kRow.optionName ? kRow.optionName : '',kRow.navLetterButton? true: false,kRow.letter? kRow.letter: ''));
-            }
+            this.enableHotkey(k);
         }
     }
 
+    /**
+     * 
+     * @param {string} key 
+     * @returns {Object|null}
+     */
+    getKeyRowFromTable(key){
+        let ret= this.hotkeysTable.find((row)=>row.key==key);
+        return ret ? ret : null;
+    }
+
+    disableHotkey(key){
+     
+        this.hotkeys.delete(key);
+    }
+
+
+    /**
+     * 
+     * @param {string} key 
+     * @returns boolean
+     */
+    isEnabled(key){
+        return this.hotkeys.has(key);
+    }
+    /**
+     * 
+     * @param {string} keys one char per key. No spaces needed.
+     */
+    disableHotkeys(keys){
+        keys.split("").forEach((k)=>this.disableHotkey(k));
+    }
+
+    /**
+     * 
+     * @param {string} key a single character key to remove
+     */
     enableHotkey(key){
-        this.hotkeysEnabled.add(key)
+        if (!this.isEnabled(key)){
+            const kRow = this.getKeyRowFromTable(key);
+                        
+            if(kRow && !this.isEnabled(key) ){
+                this.hotkeys.set(key,new Hotkey(key,kRow.name,kRow.function,kRow.optionName ? kRow.optionName : '',kRow.navLetterButton? true: false,kRow.letter? kRow.letter: ''));
+            
+            }
+        }
+        
+        
+        
     }
     
+    /**
+     * 
+     * @param {string} keyString one char per key to enabl
+     */
+    enableHotkeys(keyString){
+        keyString.split('').forEach((k)=>this.enableHotkey(k));
+
+    }
     /**
      * 
      * @param {string} key 
@@ -107,31 +127,43 @@ export class SynopsisHotkeys{
         /**
          * @type {Hotkey|null}
          */
-        let ret = null;
-        const found = this.hotkeys.find((keyO)=>keyO.key==key);
-        if (found){
-            ret = found;
+        let ret = this.hotkeys.get(key);
+        if (ret){
+            
+           // mylog(`found hotkey object for key '${key}'`,true)
         }
-        return ret;
+        else {
+            //mylog(`could NOT find hotkey object for key '${key}'`,true)
+        }
+        return ret ? ret : null;
 
     }
 
+    
 
     keypress(key){
-        if (this.hotkeysEnabled.has(key)){
-            const theKeyObj = this.getKeyObj(key)
+        //mylog(`hotkeys.keypress(${key})`,true);
+        if (this.hotkeys.has(key)){
+            const theKeyObj = this.getKeyObj(key);
+           // mylog(`hotkeys.keypress(${key}), got keyObj '${theKeyObj?.name}'`,true)
             if (theKeyObj){
                 theKeyObj.toggle();
             }
+            else{
+                mylog("go not keyobject")
+            }
 
+        }
+        else{
+           // mylog(`key '${key}' not enabled!`,true)
         }
 
     }
 
     getOptionName(key){
-        const row = this.hotkeysTable.find((row)=>row.key==key && row.optionName);
-        if (row && row.optionName){
-            return row.optionName
+        const hkO = this.hotkeys.get(key)
+        if (hkO && hkO.optionName){
+            return hkO.optionName
         }
         else return '';
     }
@@ -140,14 +172,14 @@ export class SynopsisHotkeys{
      * @returns {Hotkey[]}
      */
     getEnabledKeys(){
-        return this.hotkeys.filter((k)=>this.hotkeysEnabled.has(k.key));
+        return Array.from(this.hotkeys.values().filter((k)=>this.hotkeys.has(k.key)));
 
     }
     /**
      * @returns {Hotkey[]}
      */
     getNavButtonKeys(){
-        return this.hotkeys.filter((k)=>this.hotkeysEnabled.has(k.key) && k.showNavButton);
+        return Array.from(this.hotkeys.values().filter((k)=>this.hotkeys.has(k.key) && k.showNavButton));
     }
 
     //getNavButtonKeys

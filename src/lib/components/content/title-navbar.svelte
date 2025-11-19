@@ -16,31 +16,34 @@
         hideLookup=false,
         headingTag="h1",
         short=false,
+        //shortBoundary='sm',
         titleClasses=['inline-block']
     }=$props();
 
     
 </script>
     
+     {#if showResultsButtons}
+            
+            
+                <ButtonSelect buttonText="☰" buttonStyle="btn  btn-ghost btn-circle btn-sm p-0 pr-1 m-0 pl-1 ml-0.5" 
+                bind:selected={options.viewOptions.menuOpen} tooltip="Expand menu options" tooltipbottom={true}/>
+            
+        {/if}
     <svelte:element this={headingTag} class={[titleClasses]}>
-     
+
     {#if short && shorttitle}{shorttitle}
     {:else}
-        <span class="sm:inline hidden md:hidden">{mediumtitle ? mediumtitle : shorttitle ? shorttitle : title}</span>
-        <span class="md:inline hidden sm:hidden">{title}</span>
+        <span class={"sm:hidden inline text-nowrap"}>{ shorttitle ? shorttitle: mediumtitle ? mediumtitle : title}</span>
+        <span class={"sm:inline md:hidden text-nowrap hidden"}>{mediumtitle ? mediumtitle : shorttitle ? shorttitle : title}</span>
+        <span class={"md:inline hidden "}>{title}</span>
     
     
     {/if}</svelte:element> 
 
         <ul class="bg-white menu menu-horizontal w-auto ">
             
-        {#if showResultsButtons}
-            
-            <li class="m-0 p-0 hidden md:list-item">
-                <ButtonSelect buttonText="☰" buttonStyle="btn btn-xs  btn-circle btn-ghost  p-0 ml-0.5" 
-                bind:selected={options.viewOptions.menuOpen} tooltip="Expand menu options" tooltipbottom={true}/>
-            </li>
-        {/if}
+        
         <li><ButtonSelect buttonText="?" buttonStyle="btn btn-xs btn-circle btn-ghost p-0 ml-0.5" 
             bind:selected={viewStates.views.help.state} tooltipbottom tooltip="Show help."/>
             </li>
