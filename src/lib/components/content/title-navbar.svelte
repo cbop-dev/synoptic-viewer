@@ -2,7 +2,18 @@
     import ButtonSelect from '../ui/ButtonSelect.svelte';
     import { Hotkey,SynopsisHotkeys } from '../ui/hotkeys.svelte';
     import { SynopsisOptions3 } from './SynopsisClasses.svelte';
+    
+     /**
+     * @type {{hotkeys:SynopsisHotkeys,
+     * title:string,
+     * 
+     * }}
+     */
+    
     let {
+        /**
+         * @type {SynopsisHotKey[]} hotkeys
+        */ 
         hotkeys=new SynopsisHotkeys(),
         options=$bindable(new SynopsisOptions3()),
         title,
@@ -57,9 +68,10 @@
         </li>
          {#if showResultsButtons && !options.viewOptions.menuOpen}   
               {#each hotkeys.getNavButtonKeys() as hk}
+              
                 <li class={[showResultsButtons? 'sm:list-item': '', 'hidden' ]}>
-                    <ButtonSelect buttonText={hk.key} buttonStyle="btn btn-xs btn-circle btn-ghost p-0 ml-0.5"  
-                    bind:selected={options.viewOptions[hk.optionName]} tooltipbottom tooltip={hk.name}
+                    <ButtonSelect buttonText={hk.key} buttonStyle={"btn btn-xs btn-circle btn-ghost p-0 ml-0.5 text-md " +( hk.navKeyClasses ? hk.navKeyClasses  : '')}  
+                    bind:selected={options.viewOptions[hk.optionName]} tooltipbottom tooltip={hk.description ? hk.description : hk.name}
                     />
                 </li>
         

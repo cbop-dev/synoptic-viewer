@@ -62,7 +62,7 @@ let {
 }=$props();
 //mylog("NTSynPanel: about to copy options")
 mylog(`typeof options: ${typeof options}`)
-let myOptions=options;
+let myOptions=$state(options);
 
 let fetching = $state(false);
 let expecting = $state(0);
@@ -84,7 +84,7 @@ let showLookupPanel = $state(true);
   //  || myOptions.request.sections && myOptions.request.sections.length) : false;
 let landingPage = $state(!myOptions.request.fromURL);
 let requestProcessed = $state(false);
-let enableSecondary=$state(true);
+let enableSecondary=$derived(!myOptions.viewOptions.hideSecondary);
 
 let showInfoModal=$state(false);
 let maxLexesToShow=$state(30);
@@ -98,7 +98,7 @@ let selectedLexes=$state(myOptions.viewOptions.lexes);
 * @type {string[]} myOptions.viewOptions.greekStrings
 */
 //let myOptions.viewOptions.greekStrings=$state(myOptions);
-myOptions.viewOptions.greekStrings
+//myOptions.viewOptions.greekStrings
 //let selectedGospelIndex =$state(0);
 const gospelOptions =[
 {value: '', name: "None", abbrev:""},
@@ -605,8 +605,8 @@ function displayNote(heading,note) {
     viewStates.views.notes.state = true;
 }
 const hotkeys=new SynopsisHotkeys(myOptions);
-hotkeys.enableHotkeys('><tb');
-//mylog(`enabled hotkeys: [${[...hotkeys.hotkeys.keys()].join(',')}]`,true);
+hotkeys.enableHotkeys('><tb2');
+//mylog(`enabled hotkeys: [${[...hotkeys.hotkeys.keys()].join(',')}]`);
 if(!hotkeys.getKeyObj(">")){
     //mylog("Could not find hotkey '>'!", true);
 }
@@ -844,10 +844,11 @@ onMount(() => {
 //$inspect('perGroups', perGroups);
 //$inspect("Exact phrases: '"+ (perGroups.length ? Object.keys(perGroups[0].exactlyIdenticalPhrases).join("'','")+"'" : ''));
 //$inspect("hotkeys.hotkeysEnabled:", hotkeys.hotkeysEnabled);
-$inspect("myOptions.viewOptions.lexes:", myOptions.viewOptions.lexes)
-$inspect("selectedLexes:", selectedLexes)
+//$inspect("myOptions.viewOptions.lexes:", myOptions.viewOptions.lexes)
+//$inspect("selectedLexes:", selectedLexes)
 
 
+$inspect("myOptions.viewOptions.similarPhrases: ", myOptions.viewOptions.similarPhrases);
 </script>
 <style>
     @reference "tailwindcss";
@@ -940,28 +941,39 @@ $inspect("selectedLexes:", selectedLexes)
         {#if alandPericopeNums && alandPericopeNums.length}
             {#if dataReady}
             
-                <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={viewStates.views.view.state} tooltipbottom tooltip="Show other viewing options (sort, etc.)"  buttonText="☰ View"/></svelte:element>
-                <svelte:element this={theTag} class={classes}><ButtonSelect buttonText='Similar' bind:selected={myOptions.viewOptions.similarPhrases} tooltipbottom tooltip="Show lexically similar phrases (same lexemes, but possibly different forms/morphology)"/></svelte:element>
-                <svelte:element this={theTag} class={classes}><ButtonSelect buttonText="Exact" bind:selected={myOptions.viewOptions.exactPhrases} tooltipbottom tooltip="Show exactly matching phrases (same lexemes in same order, with same /morphology)"/></svelte:element>
-                <svelte:element this={theTag} class={classes}> <ButtonSelect buttonText="☰ Jump to ↓" 
+            <svelte:element this={theTag} class={classes}> <ButtonSelect buttonText="☰ Jump to ↓" 
                 bind:selected={viewStates.views.sections.state}
                 tooltipbottom tooltip="Jump to a section"
-                /></svelte:element>       
+                /></svelte:element>      
+            <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={viewStates.views.view.state} tooltipbottom tooltip="Show other viewing options (sort, etc.)"  buttonText="☰ View"/></svelte:element>
+                
                 <svelte:element this={theTag} class={classes}><ButtonSelect 
                 bind:selected={viewStates.views.words.state} 
                 buttonText="☰ Words" tooltipbottom tooltip="Show lexeme options"
                     /></svelte:element>
+                <svelte:element this={theTag} class={classes}><ButtonSelect buttonText='Similar' bind:selected={myOptions.viewOptions.similarPhrases} tooltipbottom tooltip="Show lexically identical phrases"/></svelte:element>
+                <svelte:element this={theTag} class={classes}><ButtonSelect buttonText="Exact" bind:selected={myOptions.viewOptions.exactPhrases} tooltipbottom tooltip="Show exactly matching phrases"/></svelte:element>
+                 <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={myOptions.viewOptions.unique} buttonText="Unique" tooltipbottom  tooltip="Outline all lexemes unique to each column."/></svelte:element>
+            <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={myOptions.viewOptions.identical} tooltipbottom tooltip="Bold/underline all morphologically identical words. (This generates many 'false positives.')" 
+                    buttonText="Identical"/></svelte:element>
+                
                 <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={myOptions.viewOptions.highlightOnClick} buttonText="Auto Highlight" 
                     tooltipbottom={true}
                     tooltip="If enabled, clicking/tapping on a word will toggle highlighting of that lexeme. Press 'c' to toggle this option."/></svelte:element>  
-                <svelte:element this={theTag} class={classes}><Button buttonText="Reset" tooltipbottom  tooltip="Reset options" buttonColors={"btn-primary"}
-                onclick={()=>myOptions.reset()}
-            /></svelte:element> 
+               
+                 <svelte:element this={theTag} class={[classes, 'menu']}><label class="label tooltip" 
+                 data-tip="Hide secondary parallels from search results."    
+                 for="hide-secondary-check{short? '-short':''}">
+                    <input  class="toggle" id="hide-secondary-check{short? '-short':''}" type="checkbox" bind:checked={myOptions.viewOptions.hideSecondary}/>Hide {#if short}2nd{:else}secondary parallels{/if}</label>
+                    </svelte:element>
                 {#if currentServer.abbrev==SblGntServer.abbrev}   
-                    <svelte:element this={theTag} class={[classes, 'menu']}><label class="label" for="hide-app-check{short? '-short':''}">
+                    <svelte:element this={theTag} class={[classes, 'menu']}><label class="label tooltip"   data-tip="Show/hide apparatus marks." for="hide-app-check{short? '-short':''}">
                     <input  class="toggle" id="hide-app-check{short? '-short':''}" type="checkbox" bind:checked={myOptions.viewOptions.hideApp}/>Hide appar{#if !short}aratus marks{:else}.{/if}</label>
                         </svelte:element>
                 {/if}
+                 <svelte:element this={theTag} class={classes}><Button buttonText="Reset" tooltipbottom  tooltip="Reset options" buttonColors={"btn-primary"}
+                onclick={()=>{myOptions.reset(); myOptions.viewOptions.menuOpen=true}}
+            /></svelte:element> 
                     
             {:else}
             {/if}
@@ -1083,7 +1095,7 @@ $inspect("selectedLexes:", selectedLexes)
 {/if}
 <!--end fixed section-->
 
-<div id="main-content-div" class="self-center relative text-center bg-white mt-10 z-20">
+<div id="main-content-div" class="self-center relative text-center bg-white mt-45 z-20">
 
    
     
@@ -1100,14 +1112,11 @@ $inspect("selectedLexes:", selectedLexes)
 
 
 </div>
-<div class="text-center mt-3">
+<div class="text-center mt-10">
    
     {#if alandPericopeNums.length}
          
-
     <div id="results">
-
-
         {#if dataReady && fetchedTextsResponse}
             <h1 class="text-center">Results from {currentServer.name}:
             {#key myOptions.viewOptions}<CopyText icon={LinkSvg} 

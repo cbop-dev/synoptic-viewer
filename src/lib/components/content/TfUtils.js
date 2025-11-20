@@ -69,30 +69,36 @@ export function getGroupsArray(pericopeNums,includeSecondary=false){
         perGroup.title = row.pericope + ": " + row.title;
         if (row.Matt.ref){
             perGroup.gospelCols.matt.textRefs.push(...getTextRefsArray("Matt", row.Matt.ref));
-            if(includeSecondary && row.Matt.secondary && row.Matt.secondary.length) {
-                perGroup.gospelCols.matt.secondary.push(...getTextRefsArray("Matt", row.Matt.secondary));
-            }
+            
         }
         if (row.Mark.ref) {
             perGroup.gospelCols.mark.textRefs.push(...getTextRefsArray("Mark", row.Mark.ref));
-            if(includeSecondary && row.Mark.secondary && row.Mark.secondary.length) {
-                perGroup.gospelCols.mark.secondary.push(...getTextRefsArray("Mark", row.Mark.secondary));
-            }
+           
         }
         if (row.Luke.ref){
             perGroup.gospelCols.luke.textRefs.push(...getTextRefsArray("Luke", row.Luke.ref));
-            if(includeSecondary && row.Luke.secondary && row.Luke.secondary.length) {
-                perGroup.gospelCols.luke.secondary.push(...getTextRefsArray("Luke", row.Luke.secondary));
-            }
+            
         }
         if (row.John.ref) {
             perGroup.gospelCols.john.textRefs.push(...getTextRefsArray("John", row.John.ref));
-            if(includeSecondary && row.John.secondary && row.John.secondary.length) {
-                perGroup.gospelCols.john.secondary.push(...getTextRefsArray("John", row.John.secondary));
-            }
+           
         }
-        if (row.other.ref)
+        if (row.other.ref) {
             perGroup.gospelCols.other.textRefs.push(...getTextRefsArray("", row.other.ref));
+        }
+
+        if(includeSecondary && row.Matt.secondary && row.Matt.secondary.length) {
+            perGroup.gospelCols.matt.secondary.push(...getTextRefsArray("Matt", row.Matt.secondary));
+        }
+        if(includeSecondary && row.Mark.secondary && row.Mark.secondary.length) {
+                perGroup.gospelCols.mark.secondary.push(...getTextRefsArray("Mark", row.Mark.secondary));
+        }
+        if(includeSecondary && row.Luke.secondary && row.Luke.secondary.length) {
+                perGroup.gospelCols.luke.secondary.push(...getTextRefsArray("Luke", row.Luke.secondary));
+        }
+        if(includeSecondary && row.John.secondary && row.John.secondary.length) {
+                perGroup.gospelCols.john.secondary.push(...getTextRefsArray("John", row.John.secondary));
+        }
             
         return perGroup;
 

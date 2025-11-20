@@ -660,7 +660,7 @@ onMount(() => {
     mounted = true;
 });
 //$inspect(myOptions.hideApp)
-$inspect(`refarea.0:'${refAreaInputs[0]}`);
+//$inspect(`refarea.0:'${refAreaInputs[0]}`);
 </script>
 {#snippet titleButtons(hideLookup=false,hideHelp=false)}
         <ul class="bg-white menu menu-horizontal w-auto ">
@@ -725,7 +725,7 @@ $inspect(`refarea.0:'${refAreaInputs[0]}`);
             <svelte:element this={theTag} class={classes}><ButtonSelect buttonText="Auto Highlight" bind:selected={myOptions.viewOptions.highlightOnClick}  tooltipbottom  tooltip="If enabled, clicking on any word will highlight all instances of the lexeme. Like fish with red wine, this does not pair well with 'Similar phrases' highlighting."/></svelte:element>
             <svelte:element this={theTag} class={classes}><ButtonSelect buttonText="☰ Words" bind:selected={viewStates.views.words.state} tooltipbottom  tooltip="View Lexeme and custom Greek options."/></svelte:element> 
             <svelte:element this={theTag} class={classes}><Button buttonText="Reset" tooltipbottom  tooltip="Reset options" buttonColors={"btn-primary"}
-                onclick={()=>myOptions.reset()}
+                onclick={()=>{myOptions.reset(); myOptions.viewOptions.menuOpen=true}}
             /></svelte:element> 
             {#if currentServer.abbrev==SblGntServer.abbrev}
                 <svelte:element this={theTag} class={[classes,["tooltip","tooltip-bottom","menu"]]} 

@@ -92,27 +92,27 @@
          */
         let cols = [parGroup.matt, parGroup.mark,parGroup.luke,parGroup.john];
         if (focus==gospels.names.MATTHEW){
-            if (parGroup.matt.textRefs.length){
+            if (parGroup.matt.textRefs.length || parGroup.matt.secondary?.length){
                 focusIndex = 0;
                 focused=true;            
             }
             
         }
         else if (focus==gospels.names.MARK){
-              if (parGroup.mark.textRefs.length){
+              if (parGroup.mark.textRefs.length || parGroup.mark.secondary?.length){
                  focusIndex = 1;
                     focused=true; 
                // bgClasses=['mark','matt','luke','john'];
             }
         }
         else if (focus==gospels.names.LUKE){
-              if (parGroup.luke.textRefs.length){
+              if (parGroup.luke.textRefs.length || parGroup.luke.secondary?.length){
                 focusIndex = 2;
                 focused=true; 
             }
         }
         else if (focus==gospels.names.JOHN){
-              if (parGroup.john.textRefs.length){
+              if (parGroup.john.textRefs.length || parGroup.john.secondary?.length){
                 focusIndex = 3;
                 focused=true; 
             }
@@ -130,7 +130,9 @@
 
     //let colData =$derived.by([parGroup.matt, parGroup.mark, parGroup.luke, parGroup.john].filter((o)=>o.textRefs.length));
     let otherData= $derived(parGroup.other?.textRefs?.length ? parGroup.other : null);
-    let numCols=$derived(colData.cols.filter((col)=>col.textRefs && col.textRefs.length).length)
+    let numCols=$derived(colData.cols.filter((col)=>
+            (col.textRefs && col.textRefs.length) ||(enableSecondary && col.secondary && col.secondary.length)
+        ).length)
     let columnStyle = $derived(numCols ? "!grid-cols-"+numCols : 'grid-cols-3');
 
    
@@ -274,9 +276,9 @@ function isUnique(wordid, uniqueSet){
     <div class="mt-2 p-2 flex flex-wrap">
         {#each otherData.textRefs as textRef, index}
                
-                <div class="rounded-box bg-base-200 other inline-block m-1 p-1 text-left m:flex-1">
+                <div class="rounded-box bg-base-200 other inline-block m-1 p-1 text-left lg:flex-1">
 
-                         <BibleTextBlock {textRef}  {parGroup} {options} {numCols} copyButton={true} 
+                    <BibleTextBlock {textRef}  {parGroup} {options} {numCols} copyButton={true} 
                     cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} 
                     {showNotes} notesClick={showNotesFunction} 
                         {wordClick} 
@@ -289,34 +291,49 @@ function isUnique(wordid, uniqueSet){
     {/if}
 {:else if colData.focused}<!--focusing on one gospel:-->
 <div class="grid {numCols > 1 ? 'sm:!grid-cols-2' :''} gap-1 grid-cols-1">
-     <div class="rounded-box   text-3xl  column gospel gospel-column  gospel-column-0 column-{colData.focusIndex}">
+     <div class="rounded-box   text-3xl  column gospel gospel-column  gospel-column-0 column-{colData.focusIndex}">        
         {#each colData.cols[colData.focusIndex].textRefs as textRef, index}
         
         {@const unique = (options.viewOptions.unique && numCols > 1)? colData.cols[colData.focusIndex].unique : new Set()}
-        
-                 
         <div class="rounded-box  inline-block p-2 m-1 {Object.values(gospels.abbreviations)[colData.focusIndex]} text-left">
                  <BibleTextBlock {textRef}  {parGroup} {options} {numCols} copyButton={true} 
                     cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} 
                     {showNotes} uniqueSet={unique}  notesClick={showNotesFunction} 
                         {wordClick} 
                     />
-        <!--{@render showText(myOptions)}-->
         </div>
         {/each}
+        {#if enableSecondary && colData.cols[colData.focusIndex].secondary  && colData.cols[colData.focusIndex].secondary.length}
+
+             <span class="italic text-base">Secondary parallels:</span>  
+             <div class="rounded-box secondary {Object.values(gospels.abbreviations)[colData.focusIndex]} text-left flex flex-wrap">
+            {#each colData.cols[colData.focusIndex].secondary as secondRef, index}
+            
+            {@const unique = (options.viewOptions.unique && numCols > 1)? colData.cols[colData.focusIndex].unique : new Set()}
+            
+            <div class="rounded-box  inline-block p-2 m-1 {Object.values(gospels.abbreviations)[colData.focusIndex]} text-left lg:flex-1">
+                    <BibleTextBlock textRef={secondRef}  {parGroup} {options} {numCols} copyButton={true} 
+                        cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} 
+                        {showNotes} uniqueSet={unique}  notesClick={showNotesFunction} 
+                            {wordClick} 
+                        />
+            <!--{@render showText(myOptions)}-->
+            </div>
+            {/each}
+            </div>
+                
+        {/if}
+
      </div>
      {#if numCols >1}
      <div class="text-2xl gospel column gospel-column-unfocused">
         {#each colData.cols as col,index}
         {#if index!=colData.focusIndex}
-        {#if col.textRefs.length}
+        {#if col.textRefs?.length || col.secondary?.length}
         
-             <div class="rounded-box {Object.values(gospels.abbreviations)[index]} m-1 text-left gospel-column gospel-column-{index+1} nonfocused   p-2">
-       
-            {#each col.textRefs as textRef, index}
-                
-                    
-                {#if index > 0}<br/>{/if}
+             <div class="rounded-box {Object.values(gospels.abbreviations)[index]} m-1 text-left gospel-column gospel-column-{index+1} nonfocused p-2">
+            {#each col.textRefs as textRef, tIndex}   
+                <!--{#if index > 0}{/if}-->
                 <div >
                          <BibleTextBlock {textRef}  {parGroup} {options}  {numCols} copyButton={true} 
                     cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} 
@@ -327,7 +344,27 @@ function isUnique(wordid, uniqueSet){
                 </div>
                 
             {/each}
+            {#if enableSecondary && col.secondary && col.secondary.length}
             
+             <span class="italic text-base">Secondary parallels:</span>  
+             <div class="rounded-box secondary {Object.values(gospels.abbreviations)[index]} text-left flex flex-wrap">
+                {#each col.secondary as secRef, twoindex}
+                    
+                    
+                    {#if index > 0}<br/>{/if}
+                    <div >
+                            <BibleTextBlock textRef={secRef}  {parGroup} {options}  {numCols} copyButton={true} 
+                        cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} 
+                        {showNotes} uniqueSet={col.unique} notesClick={showNotesFunction} 
+                            {wordClick} 
+                        />
+                    <!--{@render showText(myOptions)}-->
+                    </div>
+                    
+                {/each}
+             </div>
+             {/if}
+
             </div>
         {/if}
         
@@ -341,7 +378,7 @@ function isUnique(wordid, uniqueSet){
         {#each otherData.textRefs as textRef, index}
                  
                  
-                <div class="rounded-box other bg-base-200 inline-block m-1 text-left">
+                <div class="rounded-box other bg-base-200 inline-block m-1  text-left">
                          <BibleTextBlock {textRef}  {parGroup} {options}  {numCols} copyButton={true} 
                     cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} 
                     {showNotes}  notesClick={showNotesFunction} 

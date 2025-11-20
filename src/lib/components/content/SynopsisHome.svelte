@@ -148,25 +148,32 @@
        <ButtonSelect buttonStyle="btn btn-xs rounded   btn-square  p-0.5 m-0" 
             bind:selected={enableKeys} buttonText="k" tooltip="Enable/disable hotkeys" tooltipbottom={true}/> 
             <ButtonSelect buttonText={`☰ ${currentServerName}`} 
-       buttonStyle="btn btn-xs  btn-round btn-ghost   p-0.5 m-0" bind:selected={showNTselect} tooltip="Select NT version. This only takes effect after submitting a new lookup query." tooltipbottom={true}/>
+       buttonStyle="btn btn-xs  btn-round btn-ghost   p-0.5 m-0" bind:selected={showNTselect} tooltip="Select NT version" tooltipbottom={true}/>
             
         </div>
 
         {#if showNTselect}
-        <div class="block  items-center absolute w-full m-auto  p-5 bg-white/70">
+        <div class="block items-center absolute right-0 m-2 p-5 bg-white/90 rounded-2xl outline-2">
             
 
             <label for="ntversion" class="hidden md:inline m-0 p-0 text-sm">NT version:</label>
-            <select name="ntversion" class="m-0 ml-1 mr-1 p-0 text-sm" bind:value={currentServerName}>
+            <select name="ntversion" class="m-2 ml-1 mr-1 p-1 text-sm" bind:value={currentServerName}>
                 {#each myServers.list as serverOption, index}
                 <option value={serverOption.abbrev}>{serverOption.name}</option>
                 {/each}
-            </select>
+            </select> <br class="hidden md:block"/>
+            <span class="italic text-sm hidden md:inline-block">Takes effect after submitting a new query.</span>
+            <Button tooltip="Close" 
+			buttonStyle="btn btn-xs btn-circle m-0 b-0 float-right  tooltip-left absolute top-0 right-0 " 
+			buttonColors="bg-gray-500 text-white"
+			onclick={()=>{showNTselect=false}}
+			buttonText="✕"
+			/>
             <!--<Button buttonText="Switch!" textSize="text-sm" buttonStyle="btn btn-ghost btn-xs" onclick={switchNT}/>-->
         </div>
         {/if}
     
-    </div>
+     </div>
     
     <div id="main-panes" class="clear-right relative block mt-40">
     {#each panes as pane, index}

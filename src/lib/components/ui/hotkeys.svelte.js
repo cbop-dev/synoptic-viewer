@@ -13,7 +13,7 @@ export class Hotkey{
      * @param {string} description 
      * @param {function} toggle 
      */
-    constructor(key,name,toggle=()=>{},optionName='',showNavButton=false,singleletter='',description='',shortName=''){
+    constructor(key,name,toggle=()=>{},optionName='',showNavButton=false,singleletter='',description='',shortName='',navKeyClasses=''){
         this.key=key;
         this.singleletter=singleletter? singleletter:key;
         this.name=name;
@@ -22,6 +22,7 @@ export class Hotkey{
         this.shortName=shortName ? shortName : name;
         this.optionName=optionName;
         this.showNavButton=showNavButton;
+        this.navKeyClasses=navKeyClasses;
     }
 }
 
@@ -37,6 +38,7 @@ export class SynopsisHotkeys{
         {key:'<',name:'Previous Section',function: UiUtils.jumpToPrevSection},
         {key:'t',name:'Top/First Section',function: UiUtils.jumpToTop},
         {key:'b',name:'Bottom/Last Section',function: UiUtils.jumpToLastSection},
+        {key:'2', name:'Show/hide secondary parallels',optionName:"hideSecondary", function: ()=>{this.options.viewOptions.hideSecondary= !this.options.viewOptions.hideSecondary}, navLetterButton:true,navKeyClasses:'line-through text-lg'},
         {key:'c',name:'Highlight on Click',optionName:"highlightOnClick",function: ()=>{this.options.viewOptions.highlightOnClick =!this.options.viewOptions.highlightOnClick},navLetterButton:true},
         {key:'u',name:'Unique Lexemes',optionName:"unique",function: ()=>{this.options.viewOptions.unique =!this.options.viewOptions.unique},navLetterButton:true},
         {key:'i',name:'Identical Words',optionName:"identical",function: ()=>{this.options.viewOptions.identical =!this.options.viewOptions.identical},navLetterButton:true},
@@ -101,7 +103,9 @@ export class SynopsisHotkeys{
             const kRow = this.getKeyRowFromTable(key);
                         
             if(kRow && !this.isEnabled(key) ){
-                this.hotkeys.set(key,new Hotkey(key,kRow.name,kRow.function,kRow.optionName ? kRow.optionName : '',kRow.navLetterButton? true: false,kRow.letter? kRow.letter: ''));
+                this.hotkeys.set(key,new Hotkey(key,kRow.name,kRow.function,kRow.optionName ? kRow.optionName : '',
+                    kRow.navLetterButton? true: false,kRow.letter? kRow.letter: '','','',
+                    kRow.navKeyClasses ? kRow.navKeyClasses : ''));
             
             }
         }
@@ -142,20 +146,20 @@ export class SynopsisHotkeys{
     
 
     keypress(key){
-        //mylog(`hotkeys.keypress(${key})`,true);
+       // mylog(`hotkeys.keypress(${key})`);
         if (this.hotkeys.has(key)){
             const theKeyObj = this.getKeyObj(key);
-           // mylog(`hotkeys.keypress(${key}), got keyObj '${theKeyObj?.name}'`,true)
+           // mylog(`hotkeys.keypress(${key}), got keyObj '${theKeyObj?.name}'`);
             if (theKeyObj){
                 theKeyObj.toggle();
             }
             else{
-                mylog("go not keyobject")
+                //mylog("go not keyobject")
             }
 
         }
         else{
-           // mylog(`key '${key}' not enabled!`,true)
+        //mylog(`key '${key}' not enabled!`)
         }
 
     }

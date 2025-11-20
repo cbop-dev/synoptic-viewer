@@ -14,26 +14,61 @@ export class SynopsisOptions3{
         //this.request=copyObject(theCopy.request);
         for (const [propName,row] of Object.entries(SynopsisOptions3.SynopsisUrlParamsMap)){
             this.resetProp(propName);
+
         }
 
     }
+
+    getPropVal(propName){
+       // mylog(`In getPropVal(${propName})`,true)
+        if (Object.hasOwn(SynopsisOptions3.SynopsisUrlParamsMap,propName)){
+            const row = SynopsisOptions3.SynopsisUrlParamsMap[propName];
+            if (row.category=='view' && Object.hasOwn(this.viewOptions,propName)){
+                //mylog(`getPropVal('${propName}') got a val!'`)
+                return this.viewOptions[propName];
+                
+            }
+            else if (row.category=='request' && Object.hasOwn(this.request,propName)){
+                //mylog(`In request section`)
+                return this.request[propName];
+            }
+            else{
+                //mylog(`row type == ${row.type} but got no value!`)
+                return null;
+            }
+
+        }
+        else{
+        //    mylog(`could not find propname '${propName}'`);
+            return null;
+        }
+
+    }
+
+    /**
+     * 
+     * @param {string} propName 
+     * @returns true if the property was actually reset
+     */
     resetProp(propName){
         let reset=false;
+        let origVal=this.getPropVal(propName);
+       // mylog(`in resetProp(${propName}), origVal='${origVal}'`)
         if(Object.hasOwn(SynopsisOptions3.SynopsisUrlParamsMap,propName)){
             const row=SynopsisOptions3.SynopsisUrlParamsMap[propName];
             
             
-            let val=row.default ? row.default : null;
+            let theDefault=Object.hasOwn(row,'default') ? row.default : null;
 
-            if(!val){
+            if(theDefault==null ){
                 if(row.type=='int'){
-                    val=0
+                    theDefault=0
                 }
                 else if(row.type=='boolean'){
-                    val=false;
+                    theDefault=false;
                 }
                 else if(row.type=='str'){
-                    val=''
+                    theDefault=''
                 }
                /* else if (Object.keys(this.viewOptions).includes(propName) && this.viewOptions[propName] && this.viewOptions[propName]?.length){ //an array type
                     //this.viewOptions[propName].length=0;
@@ -43,14 +78,14 @@ export class SynopsisOptions3{
             }
 
             if(row.category=='view'){
-                if (val) {
-                    this.viewOptions[propName]=val;
+                if (theDefault!=null) {
+                    this.viewOptions[propName]=theDefault;
                     reset=true;
                 }
-
                 else if (row.type.includes('Array')){
                     if (this.viewOptions[propName].length){
-                        this.viewOptions[propName].length=0
+                        this.viewOptions[propName].length=0;
+                        reset = true;
                     }
 
                 }
@@ -58,21 +93,22 @@ export class SynopsisOptions3{
                 
             }
             else if(row.category=='request'){
-                if (val) {
-                    this.request[propName]=val;
+                if (theDefault != null) {
+                    this.request[propName]=theDefault;
                     reset=true;
                 }
                 else if (row.type.includes('Array')){
                     if (this.request[propName].length){
-                        this.request[propName].length=0
+                        this.request[propName].length=0;
+                        reset=true;
                     }
 
                 }
             }
-            //mylog(`myOptions.resetProp('${propName}'): reset: ${reset}, to: ${val}`, true)
+        //    mylog(`myOptions.resetProp('${propName}'): reset from '${origVal}', to: '${theDefault}'`)
         }
         else{
-           // mylog(`myOptions.resetProp('${propName}'): not found`, true)
+            //mylog(`myOptions.resetProp('${propName}'): not found`)
         }
 
         return reset;
@@ -165,6 +201,7 @@ export class SynopsisOptions3{
         fromURL: {type:'boolean', category: 'request',noURL:true},
         menuOpen: {type:'boolean', default: false, category: 'view',noURL:true},
         showLookup: {type:'boolean', default: false, category: 'view',noURL:true},
+        hideSecondary: {type:'boolean', default: false, category: 'view',noURL:false},
     }
 
     /**
