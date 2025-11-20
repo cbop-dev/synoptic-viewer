@@ -1,6 +1,6 @@
 import { describe, it, expect,test} from 'vitest';
-import { tfServer, TfServer } from '$lib/n1904/tfN1904';
-import * as tfu from '$lib/components/content/TfUtils' ;
+//import { tfServer, TfServer } from '$lib/n1904/tfN1904';
+import * as tfu from '$lib/components/content/TfUtils.js' ;
 import { mylog } from '$lib/env/env';
 import gospelParallels from '@cbop-dev/aland-gospel-synopsis';
 import { ParallelColumn, TextAndRef } from '$lib/components/content/parallelTexts.svelte.js';

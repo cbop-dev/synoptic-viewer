@@ -5,6 +5,7 @@ import gospelParallels from '@cbop-dev/aland-gospel-synopsis'
 import { mylog } from "$lib/env/env";
 import * as BibleUtils from '$lib/n1904/bibleRefUtils.js'
 import * as MathUtils from '$lib/utils/math-utils.js';
+import { Lexeme, LexemeInfo } from "../datastructures/lexeme.js";
 
 
 
@@ -502,6 +503,25 @@ export class TfServer{
     }
 
 
+    /**
+     * 
+     * @param lexID {number|string}
+     * @returns {Promise<LexemeInfo>}
+     */
+    async fetchLexInfo(lexID) {
+        const lemma=new LexemeInfo();
+        const getLexUrl = this.getApiUri() + "/lex/";
+        const url = getLexUrl + lexID.toString();
+        //console.debug("Fetching " + url);
+        const res = await fetch(url);
+       // query.sent = true;
+        
+        const theJsonObj = await res.json();
+        const foundLex = new Lexeme(theJsonObj.id,theJsonObj.lemma,theJsonObj.gloss,theJsonObj.total, theJsonObj.pos,theJsonObj.total,theJsonObj.beta).copy()
+        lemma.copyFrom(foundLex);
+
+        return lemma;
+    }
 
 
     /**
@@ -662,6 +682,78 @@ export class TfServer{
         return nodeid;
     }
 
+
+
+    /**
+     * 
+     * @param {number} lexID 
+     * @param {number[]|null} theSections
+     * @param {Lexeme} [lexObj] optional
+     * @returns {Promise<LexemeInfo>} a promise 
+     *  - will contain the references in the results.refs property, an array of strings, one per ref (e.g., ["Gen 1:1", "2 Macc 3:4"])
+     *  - propert 'ready' will be true when 'results.refs' is done
+     */
+    async fetchRefs(lexID,theSections=null,lexObj=null) {
+        
+        const lemmaInfo= new LexemeInfo(lexID);
+        if (lexObj){
+            lemmaInfo.copyFrom(lexObj);
+        }
+        
+
+        const url = this.getApiUri() + "/getrefs/" + lexID +
+            (theSections ? "?sections=" + theSections.join(',') : '');
+
+        
+       // console.debug("Fetching " + url);
+        const res = await fetch(url);
+        
+        const theJsonObj = await res.json();
+        
+        const refs = theJsonObj['refs']
+        
+        //mylog(`getRefs(${lexID}) got json object: ${JSON.stringify(theJsonObj.refs)}`,true);
+        //mylog(`getRefs(${lexID}) got refs: [${refs.join(",")}]`,true);
+        const themap=theJsonObj.bookcounts ? 
+                Object.entries(theJsonObj.bookcounts)
+                    .map(([k,v])=>this.booksDict[k] && this.booksDict[k].abbrev ? [this.booksDict[k].abbrev,v] : null).filter((o)=>o) 
+                    :
+                    null;
+        const bookcounts = themap ? Object.fromEntries(themap) : null;
+        
+        if (bookcounts && Object.keys(bookcounts).length){
+            lemmaInfo.bookCounts=bookcounts;
+
+        }
+
+        
+        if(theJsonObj.total){
+            lemmaInfo.total=theJsonObj.total;
+        }
+        if (refs && refs.length){
+            //mylog(`got refs(${lexID}):['${JSON.stringify(refs)}']`, true);
+            lemmaInfo.references=refs.map((r)=>{
+                let ret = r;
+                const bcv = BibleUtils.getBookChapVerseFromRef(r);
+                
+                const book=bcv && bcv.book ? this.getBookAbbrev(bcv.book) : '';
+                if (book){
+                    r = book + ( bcv.chap ? (" " + bcv.chap) : '') + (bcv.v? ":" + bcv.v : '');
+                }
+
+                if (r && r!=book){
+                    ret = r;
+                }
+                return ret;
+            
+            });
+        }else{
+           // mylog(`got not refs for id ${lexID}`,true)
+        }
+        
+        return lemmaInfo;
+    
+    }
 
 
     /**
