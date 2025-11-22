@@ -781,41 +781,44 @@ onMount(() => {
     
         
            <!-- <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={viewStates.views.lookup.state} buttonText="Again!" tooltip="Toggle lookup panel." /></svelte:element>-->
-            <svelte:element this={theTag} class={classes}><ButtonSelect buttonText="Similar" bind:selected={myOptions.viewOptions.similarPhrases} tooltipbottom tooltip="Show lexically similar phrases (same lexemes, but possibly different forms/morphology). With notes of sandlewood and bourbon, this pairs well with the 'Exact' option."/></svelte:element>
+            <svelte:element this={theTag} class={classes}><ButtonSelect buttonText="☰ Words" 
+            bind:selected={viewStates.views.words.state} tooltipbottom  tooltip="View Lexeme and custom Greek options."/></svelte:element>  
+           <svelte:element this={theTag} class={classes}><ButtonSelect buttonText="Similar" bind:selected={myOptions.viewOptions.similarPhrases} tooltipbottom tooltip="Show lexically similar phrases (same lexemes, but possibly different forms/morphology). With notes of sandlewood and bourbon, this pairs well with the 'Exact' option."/></svelte:element>
             <svelte:element this={theTag} class={classes}><ButtonSelect buttonText="Exact" bind:selected={myOptions.viewOptions.exactPhrases} tooltipbottom tooltip="Show exactly matching phrases (same lexemes, same order, some forms). This pairs well with the 'Similar' option."/></svelte:element>
             <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={myOptions.viewOptions.unique} buttonText="Unique" tooltipbottom  tooltip="Outline all lexemes unique to each column."/></svelte:element>
             <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={myOptions.viewOptions.identical} tooltipbottom tooltip="Toggle Bold/underline morphologically identical words, even if they are in diverse positions. This generates 'false positives.'" 
                     buttonText="Identical"/></svelte:element>
             <!--<svelte:element this={theTag} class={classes}><ButtonSelect buttonText="Auto Highlight" bind:selected={myOptions.viewOptions.highlightOnClick}  tooltipbottom  tooltip="If enabled, clicking on any word will highlight all instances of the lexeme. Like fish with red wine, this does not pair well with 'Similar phrases' highlighting."/></svelte:element>-->
-            <svelte:element this={theTag} class={classes}><ButtonSelect buttonText="☰ Words" 
-            bind:selected={viewStates.views.words.state} tooltipbottom  tooltip="View Lexeme and custom Greek options."/></svelte:element> 
-            <svelte:element this={theTag} class={classes}><Button buttonText="Reset" tooltipbottom  tooltip="Reset options" buttonColors={"btn-primary"}
-                onclick={()=>{myOptions.reset(); myOptions.viewOptions.menuOpen=true}}
-            /></svelte:element> 
+           
+         
 
                
                 <svelte:element this={theTag} class={[classes, 'menu']}>
                     <label class="label tooltip" 
                         data-tip="Highlight lexemes"    
-                            for="highlight-click">
-                     <input  class="toggle" id="highlight-click-check" type="checkbox" bind:checked={myOptions.viewOptions.highlightOnClick}/>Highlight{#if short}{:else} Lexemes{/if}
+                            for="highlight-click-check2">
+                     <input  class="toggle" id="highlight-click-check2" type="checkbox" bind:checked={myOptions.viewOptions.highlightOnClick}/>Highlight {#if !short} Lexemes{/if}
                     </label>
                 </svelte:element>
                   <svelte:element this={theTag} class={[classes, 'menu']}>
                     <label class="label tooltip " 
-                        data-tip="Show Lexeme Info"    
-                            for="lexeme-info-click">
-                     <input  class="toggle" id="lexeme-info-click" type="checkbox" bind:checked={myOptions.viewOptions.lexInfoClick}/>Stats{#if short}{:else}{/if}
+                        data-tip="Show Lexeme Info on Click"    
+                            for="lexeme-info-click2">
+                     <input  class="toggle" id="lexeme-info-click2" type="checkbox" bind:checked={myOptions.viewOptions.lexInfoClick}/>Stats{#if short}{:else}{/if}
                     </label>
                 
                 </svelte:element>  
             {#if currentServer.abbrev==SblGntServer.abbrev}
                 <svelte:element this={theTag} class={[classes,["tooltip","tooltip-bottom","menu"]]} 
-                data-tip="Show/hide the SBL GNT apparatus marks in the text. This also effects the 'copy' buttons."> <label class="label" for="hide-app-check{short? '-short':''}">
-                    <input  class="toggle " id="hide-app-check{short? '-short':''}" type="checkbox"
+                data-tip="Show/hide the SBL GNT apparatus marks in the text. This also effects the 'copy' buttons.">
+                <label class="label" for="hide-app-check2">
+                    <input  class="toggle " id="hide-app-check2" type="checkbox"
                     bind:checked={myOptions.viewOptions.hideApp}/>Hide appar{#if !short}atus{:else}.{/if}</label>
                 </svelte:element>
                 {/if}  
+                   <svelte:element this={theTag} class={classes}><Button buttonText="Reset" tooltipbottom  tooltip="Reset options" buttonColors={"btn-primary"}
+                onclick={()=>{myOptions.reset(); myOptions.viewOptions.menuOpen=true}}
+            /></svelte:element> 
         
     {/if}
 {/snippet}

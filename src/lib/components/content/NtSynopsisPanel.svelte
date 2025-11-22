@@ -1019,7 +1019,7 @@ $inspect("chosenLexBookId:",chosenLexBookId);
     Based on Kurt Aland's <i>Synopsis Quattuor Evangeliorum</i>, using <a href="https://www.sblgnt.com">The SBL Greek New Testament (2010)</a> or, optionally, Nestle's 1904 edition of the <i>Greek New Testament.</i><br/>
     Enter NT reference to view parallel texts and click "Look up!", or select a section and press "Go!"
 {/snippet}
-{#snippet resultsButtons(short=false,theTag='li',classes=[])}
+{#snippet resultsButtons(short=false,theTag='li',classes=['ml-0 mr-0 pl-0 pr-0'])}
       
         {#if false && !short && !(landingPage)}    
             <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={viewStates.views.lookup.state} tooltipbottom tooltip="Show Lookup panel pop-up" buttonText="☰ Lookup" /></svelte:element>
@@ -1052,13 +1052,13 @@ $inspect("chosenLexBookId:",chosenLexBookId);
                 <svelte:element this={theTag} class={[classes, 'menu']}>
                     <label class="label tooltip" 
                         data-tip="Highlight lexemes"    
-                            for="highlight-click">
-                     <input  class="toggle" id="highlight-click-check" type="checkbox" bind:checked={myOptions.viewOptions.highlightOnClick}/>Highlight{#if short}{:else}Lexemes{/if}
+                            for="highlight-click-check">
+                     <input  class="toggle" id="highlight-click-check" type="checkbox" bind:checked={myOptions.viewOptions.highlightOnClick}/>Highlight{#if !short} Lexemes{/if}
                     </label>
                 </svelte:element>
                   <svelte:element this={theTag} class={[classes, 'menu']}>
                     <label class="label tooltip " 
-                        data-tip="Show Lexeme Info"    
+                        data-tip="Show Lexeme Info on Click"    
                             for="lexeme-info-click">
                      <input  class="toggle" id="lexeme-info-click" type="checkbox" bind:checked={myOptions.viewOptions.lexInfoClick}/>Stats{#if short}{:else}{/if}
                     </label>

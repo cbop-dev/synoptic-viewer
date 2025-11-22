@@ -794,6 +794,9 @@ export class TfServer{
             return '';
     }
 
+    getBookAbbrevById(id){
+        return this.booksDict[id]?.abbrev ? this.booksDict[id]?.abbrev  : this.getBookName(id);
+    }
 
     getBookSyn(id){
         return this.booksDict[id]?.syn[0] ? this.booksDict[id]?.syn[0] : this.getBookName(id);

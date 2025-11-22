@@ -40,7 +40,7 @@
         hideApp=false,*/
         showNotes=false,
         showNotesFunction=(heading,note)=>{alert(heading+"\n"+note)}
-
+        
         
     } = $props();
 

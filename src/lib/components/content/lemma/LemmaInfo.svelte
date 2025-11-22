@@ -48,8 +48,13 @@ function reset(){
     
 }
 
-let theBookName =$derived(bookID ? tfServer.getBookSyn(bookID) : "");
-let theBookAbbrev=$derived(bookID ? tfServer.getBookAbbrev(theBookName) : "");
+let theBookName =$derived.by(()=>{
+    if(bookID) 
+        return untrack(()=>tfServer.getBookSyn(bookID));
+    else 
+    return "";
+});
+let theBookAbbrev=$derived.by(()=>{return bookID ? untrack(()=>tfServer.getBookAbbrev(theBookName)) : ""});
 
 
 
@@ -82,10 +87,11 @@ let showStats =$state(false);
 0;
 //^---removes IDE complaints! TODO: put correct JS Doc type above!
 
-let lemmaBookCountsChartData=$derived({
+let lemmaBookCountsChartData={
+            
             nums: Object.values(lemmaInfo.stats.bookStats).map((s)=>s.count),
             labels: Object.keys(lemmaInfo.stats.bookStats).map((id)=>tfServer.booksDict[Number(id)].abbrev)
-        });
+        };
     
 
 
@@ -97,7 +103,7 @@ let lemmaBookCountChartOptions =[
         
 ]
 
-let lemmaBookFreqChartData= $derived(lemmaInfo.stats.bookStats && Object.keys(lemmaInfo.stats.bookStats).length ?
+let lemmaBookFreqChartData= lemmaInfo.stats.bookStats && Object.keys(lemmaInfo.stats.bookStats).length ?
         
          {
             nums: Object.entries(lemmaInfo.stats.bookStats).map(([id,obj])=> (1000 * obj.count / tfServer.booksDict[Number(id)].words)),
@@ -105,7 +111,7 @@ let lemmaBookFreqChartData= $derived(lemmaInfo.stats.bookStats && Object.keys(le
         }
         
      :
-       null);
+       null;
     
 
 let lemmaBookTable = 
@@ -136,12 +142,12 @@ onMount(()=>{
    // fetchLemma();
    //}
 });
-let zoomCharts = $state(false);
-let sectionRef = $derived(sections.length ? sections.map((sId)=>
+//let zoomCharts = $state(false);
+/*let sectionRef = $derived(sections.length ? sections.map((sId)=>
     tfServer.booksDict[bookID] ?
         tfServer.booksDict[bookID].abbrev
         : ""
-).filter((b)=>b).join(";") : '');
+).filter((b)=>b).join(";") : '');*/
 //$inspect("bookcounts chart data:", lemmaBookCountsChartData);
 
 let chosenBookId=$state(bookID);
@@ -219,22 +225,28 @@ lexRefQuery={sectionRefsQuery}/>-->
 <!-- STATS/CHARTS-->
 
 {#if showStats}
-{@const tabs=["Data","Small Charts","Large Charts/Table"]}
+{@const tabs=["Basic Stats","Small Charts","Large Charts/Table"]}
 <hr/>
 <h2 class="text-2xl">Stats and Charts</h2>
 
 <Tabs headings={tabs} bind:selectedTabIndex={selectedTab} classes={['inline-block','text-center']}/>
-<div class="inline-block float-right p-1.5 text-sm">
+
+{#if selectedTab != 2}
+<div class="block m-auto p-1.5 text-sm">
+
 See Stats for:
 <select bind:value={chosenBookId} >
             {#each Object.keys(lemmaInfo.stats.bookStats) as bId}
             
-            <option value={Number(bId)}>{tfServer.booksDict[bId].abbrev}</option>
+            <option value={Number(bId)}>{tfServer.getBookAbbrevById(bId) }</option>
             {/each}
         </select><Button buttonText="Go!" onclick={()=>{bookID=chosenBookId}}></Button>
         
 </div>
-<br class="clear-both"/>
+{/if}
+
+
+<hr class="w-1/2  m-auto! mt-3! pt-2"/>
 
 
 
@@ -243,11 +255,12 @@ See Stats for:
         {#key bookID && selectedTab}
             {#if sections.length > 0}
 
-            <h2>Lemma Stats: {theBookName} vs. NT</h2>
+            <h2>Lemma Stats for {lemmaInfo.lemma}: {theBookName} vs. NT</h2>
             
 
 
             <!-- stats section-->
+
             <div class="stats stats-vertical lg:stats-horizontal shadow inline-block">
                 <div class="stat">
                 <div class="stat-title"> Book Word count </div>
@@ -285,20 +298,24 @@ See Stats for:
 
         {/key}
     {:else if selectedTab==1}
-        {#key bookID && selectedTab}
+        {#key bookID }
             {#if  theBookName}
-            <hr/>
+            <h2>Counts and Frequencies Charts: {lemmaInfo.lemma} in {theBookAbbrev} and the NT</h2>
+
+            
+            
             <div class="stats shadow inline-block ">
-                <h2>{theBookName} vs. NT Lemma Count</h2>
+                <h2>{lemmaInfo.lemma}: {theBookAbbrev} vs. Rest of NT </h2>
                 <div class="stat">
-                <div class="stat-title"> % of NT's </div>
+                <div class="stat-title"> {lemmaInfo.stats.bookStats[bookID].count} of {lemmaInfo.stats.count} </div>
                 <PieChart pieData={{nums: [lemmaInfo.stats.bookStats[bookID].count, lemmaInfo.stats.count-lemmaInfo.stats.bookStats[bookID].count]}} />
                 
                 <div class="stat-value">{(100*lemmaInfo.stats.bookStats[bookID].count/lemmaInfo.stats.count).toFixed(2)}%</div>
-                <div class="stat-desc">This section's share of NT's total use of this word.
+                <div class="stat-desc">{theBookAbbrev}'s share of NT's total use of {lemmaInfo.lemma}
                     </div>
                 </div>
             </div>
+            
             {/if}
 
             
@@ -306,12 +323,31 @@ See Stats for:
             {#if lemmaInfo.stats.bookStats[bookID].bookTotalFreqRatio && sections} 
             <div class="stats shadow inline-block">
                 <h2>{theBookName}/NT Frequency Ratio</h2>
+
+
                 <div class="stat">
-                <div class="stat-title"> How much more/less does {theBookAbbrev} use this lemma?</div>
-                <BarChart barData={{nums: [(lemmaInfo.stats.bookStats[bookID].freq).toFixed(3),MathUtils.floatRound(lemmaInfo.stats.totalFreq,3)]}}/>
-                <div class="stat-value">{lemmaInfo.stats.bookStats[bookID].bookTotalFreqRatio.toFixed(3)}</div>
-                <div class="stat-desc">(1.0=same; 2.0=2x; 0.5=half)</div>
+                <div class="stat-title"> How much more/less frequently does {theBookAbbrev} use this word than the NT as a whole?</div>
+                    {#if lemmaInfo.stats.count == lemmaInfo.stats.bookStats[bookID].count}
+                    <div class="stat-value">{#if lemmaInfo.stats.count ==1}Hapax!{:else}No contest!{/if} </div>
+                    <div class="stat-desc">
+                    <span class="italic ">{theBookName} is the only NT book to use {lemmaInfo.lemma}{#if lemmaInfo.stats.count ==1}, and he does so only once{/if}!</span>
+                    </div>
+                    {:else}
+
+
+                        <BarChart barData={{nums: [(lemmaInfo.stats.bookStats[bookID].freq).toFixed(3),MathUtils.floatRound(lemmaInfo.stats.totalFreq,3)]}}/>
+                        <div class="stat-value">{lemmaInfo.stats.bookStats[bookID].bookTotalFreqRatio.toFixed(3)}</div>
+                        <div class="stat-desc">(1.0=same; 2.0=2x; 0.5=half)</div>
+                        <div class="stat-desc font-bold italic">     
+                            And the winner is....
+                            
+                            {#if lemmaInfo.stats.bookStats[bookID].bookTotalFreqRatio > 1.2 }{theBookName}
+                            {:else if  lemmaInfo.stats.bookStats[bookID].bookTotalFreqRatio > 0.8 }too close to call{:else}the NT{/if}!
+                            
+                        </div>
+                {/if}
                 </div>
+                
             </div>
 
             {/if}
@@ -325,10 +361,10 @@ See Stats for:
 
     <!-- CHARTS: -->
 
-    {#key bookID && selectedTab}
+    {#key bookID && selectedTab && lemmaBookCountChartOptionIndex && showStats}
     <div class=""> 
-    <h2>Use by Book:</h2>
-    {#key lemmaBookCountsChartData && lemmaBookCountChartOptionIndex}
+    <h2>Use of {lemmaInfo.lemma} by NT Book:</h2>
+    
     {#if lemmaBookCountsChartData}
 
 
@@ -363,14 +399,14 @@ See Stats for:
         {/key}
     </div>
     {:else if lemmaBookCountChartOptionIndex == 0 && lemmaBookTable?.data}
-    {#key lemmaBookCountChartOptionIndex && showStats}
+    
     <Grid data={lemmaBookTable.data} 
     sort={true} 
     columns={lemmaBookTable.columns}
     pagination={{limit:50}}
     style={"td{'font-family':'SBL BibLit'}"}
     />
-    {/key}
+    
 
     {/if}
 
@@ -384,7 +420,7 @@ See Stats for:
 
 
     {/if}
-    {/key}
+    
     </div>
     {/key}
     {/if }
