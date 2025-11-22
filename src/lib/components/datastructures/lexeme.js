@@ -212,9 +212,9 @@ export class LexStats {
 export class LemmaBookStats{
     /**
      * @param {number} bookCount  the Number of times this lemma appears in this book
-     * @param {number} bookWords the total number of words in this book
+     * @param {number} bookTotal the total number of words in this book
      * @param {number} ntCount the number of times this lemma appears in the entire NT
-     * @param {number} ntWords the total number of words in the NT
+     * @param {number} ntTotal the total number of words in the NT
      
      */
     constructor(bookCount=0,bookTotal=0,ntCount=0,ntTotal=0){

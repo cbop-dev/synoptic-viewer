@@ -595,7 +595,7 @@ export class ParallelColumnGroup {
                         
                        // const vWordsIdx= loc.singleColumnLocation.vWordIndices;
                         //const tR= this.getTextRefByLocation(loc);
-                        const exactPhrase = this.getTextFromLocation(loc,true).trim(); 
+                        const exactPhrase = GreekUtils.onlyPlainGreek(this.getTextFromLocation(loc,true).trim()); 
                             /*vWordsIdx.map((vw)=>tR.getWordByIndices(vw.verseIndex,vw.wordIndex)?.word)
                             .filter((w)=>w!=null && w!=undefined)
                             .join(" "); */
