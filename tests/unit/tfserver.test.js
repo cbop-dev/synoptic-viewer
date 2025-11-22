@@ -30,7 +30,7 @@ test('getLex', async () => {
         expect(Object.keys(lexStats.bookStats).length).toEqual(17);
         expect(Object.keys(lexStats.bookStats).length).toEqual(17);
         Object.entries(t.bookCounts).forEach(([b,count])=>{
-            expect(count).toEqual(lexStats.bookStats[b].count);
+            expect(count).toEqual(lexStats.bookStats[b].lexCounts.book);
         })
 
         expect(lexStats.totalFreq).toBeCloseTo(t.totalFreq);
