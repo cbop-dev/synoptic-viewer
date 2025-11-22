@@ -1,7 +1,7 @@
 <script>
 import { mylog } from '$lib/env/env';
 import Chart from 'chart.js/auto';
-import { generateHslColorGradient } from "$lib/components/ui/chartUtils";
+import { generateHslColorGradient } from "$lib/components/ui/chartUtils.js";
 
 /** 
  *  
