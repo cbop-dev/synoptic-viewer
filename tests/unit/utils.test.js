@@ -118,27 +118,14 @@ test('string sequences', async () => {
 
 });
 
-//NOPE:
-/*
-test('matth.findCommonNonOverlappingSequences', async () => {
-
-    //findCommonNonOverlappingSequences
-    console.log("my test:", mathUtils.findCommonNonOverlappingSequences([1,2,3,4,5,6,7,8,9,10,11], [1,9,10,11,2,4,5,6,7,3]));
-    const tests=[
-        {ar1:[1,2,6,3,10,11], ar2: [28,400], output: []},
-        {ar1:[1,2,3,4,5], ar2: [1,2,4,5], output: [{seq:[1,2], i:0, j:0},{seq:[4,5],i:3,j:2}]},
-        {ar1:[1,2,3,4,5,6,7,8,9,10,11], ar2: [1,9,10,11,2,4,5,6,7,3], output: [{seq:[4,5,6,7],i:3,j:5},{seq:[9,10,11],i:8,j:2}]}
+test('filter empty string items test', async () => {
+	const tests=[
+        {input: ['yes','  ', "no"], output: ['yes','no']}
 
     ];
-
-    for (const [i,t] of tests.entries()){
-        const seq = mathUtils.findCommonNonOverlappingSequences(t.ar1,t.ar2);
-        console.log(`For test ${i} input ([${t.ar1.join(",")}][${t.ar2.join(",")}])=>`,seq );
-        expect(seq.length).toEqual(t.output.length);
+    for (const t of tests){
+        expect(StringUtils.filterEmptyStringItems(t.input)).toEqual(t.output);
     }
 	expect(true).toBe(true);
 
 });
-*/
-
-

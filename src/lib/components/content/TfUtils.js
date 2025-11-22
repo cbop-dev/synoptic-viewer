@@ -20,7 +20,7 @@ export function getTextRefsArray(bookAbbrev, ref){
      * @type {TextAndRef[]}
      */
     let textRefArray = [];
-        for (const r of ref.split(";")){
+        for (const r of ref.trim().split(";").map((s)=>s.trim()).filter((s)=>s)){
            
             const [c,vv] = r.split(":");
             
@@ -29,8 +29,8 @@ export function getTextRefsArray(bookAbbrev, ref){
                     
                     for (const v of vv.split(',')){
                         const textRef = new TextAndRef();
-                        let theRef = bookAbbrev? bookAbbrev + " " : " ";
-                        theRef += c+":";
+                        let theRef = bookAbbrev? bookAbbrev : "";
+                        theRef += (theRef? " " : '') +c+":";
                         theRef += v;
                         textRef.reference=theRef;
                         textRefArray.push(textRef);
@@ -38,7 +38,7 @@ export function getTextRefsArray(bookAbbrev, ref){
 
                 }   
                 else{
-                    const theRef =  bookAbbrev? bookAbbrev + " " + r : r;
+                    const theRef =  bookAbbrev? bookAbbrev + " " + r.trim() : r.trim();
                     const textRef = new TextAndRef();
                     textRef.reference=theRef;
                     textRefArray.push(textRef);

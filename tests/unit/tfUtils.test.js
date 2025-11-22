@@ -6,9 +6,17 @@ import gospelParallels from '@cbop-dev/aland-gospel-synopsis';
 import { ParallelColumn, TextAndRef } from '$lib/components/content/parallelTexts.svelte.js';
 
 test('test test!', async () => {
-	//console.log("MODE: " + import.meta.env.MODE);
+	
+	const tests=[
+		{input:'', output:''}
+
+	];
+	for (const t of tests){
+		
+	}
+
 	expect(import.meta.env.MODE).toEqual("test");
-	//await expect(page.locator('h1')).toBeVisible();
+	
 });
 
 
@@ -51,3 +59,19 @@ test('getParallelRefsArrays test!', async () => {
 		}
 	}
 });
+
+test('getTextRefsArray test!', async () => {
+	
+	const tests=[
+		{book: "Matt", ref:'13:57; 3:1-2;', output:['Matt 13:57',"Matt 3:1-2"]}
+
+	];
+	for (const t of tests){
+		const ret = tfu.getTextRefsArray(t.book,t.ref)
+		expect(ret.map((tr)=>tr.reference)).toEqual(t.output)
+	}
+
+	expect(import.meta.env.MODE).toEqual("test");
+	
+});
+

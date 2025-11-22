@@ -369,7 +369,7 @@ export function expandRefs(refString,splitVerseRanges=true){
     const refArray = [];
     refString = cleanString(refString);
     let latestBook = '';
-    for (const ref of refString.split(";")){
+    for (const ref of refString.split(";").filter((s)=>s)){
         if(ref.length) {
             let bookCv = getBookChapVerseFromRef(ref);
             mylog("expandRefs: bookCv of '"+ref +"'= "+[bookCv.book,bookCv.chap,bookCv.v].join(','));
@@ -604,20 +604,20 @@ export function formatBibRefs(inputString){
 	
 	cleanRepeatedSymbols(inputString).replaceAll(/[\t_]+/g, " ").replace(
 		/(:[0-9-,]+ +)/g,"$1\n").replaceAll(";","\n").split(
-			"\n").map((item)=>item.trim()).forEach(l =>
+			"\n").filter((s)=>s.trim()).map((item)=>item.trim()).forEach(l =>
 	{
 		if (l.trim().length > 0) {
 			
 			let vv = "";
 			let bc  = "";
 			
-			[bc, vv] = l.split(":").map(item=>item.trim());
+			[bc, vv] = l.split(":").map(item=>item.trim()).filter((s)=>s);
 			bc = bc ? bc : "";
 			vv = vv ? vv : "";
 			let b = "";
             let c = "";
 			//console.log("formatBibRefs got vv=" +vv);
-			let bc_array = bc.split(" ").map(item=>item.trim());
+			let bc_array = bc.split(" ").map(item=>item.trim()).filter((s)=>s);
 			if(bc_array.length > 2) /* we have something like 1 Sam 2*/ 
 			{
 				b = bc_array[0] + " " + bc_array[1]
