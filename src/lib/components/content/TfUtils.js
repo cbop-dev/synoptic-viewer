@@ -720,7 +720,7 @@ export class TfServer{
             if (theJsonObj.bookcounts){
                 Object.entries(theJsonObj.bookcounts).forEach(([bookId,theBookCount])=>{
                     const theBookId=parseInt(bookId)
-                    lexStats.calcBookStats(theBookId,theBookCount,this.booksDict[theBookId].words);
+                    lexStats.addAndCalcBookStatsIfNeeded(theBookId,theBookCount,this.booksDict[theBookId].words,theJsonObj.total,this.totalWords);
                 })
             }
     

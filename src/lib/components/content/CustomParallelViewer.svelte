@@ -17,7 +17,7 @@ import * as mathUtils from '$lib/utils/math-utils.js';
 //import Button from '../ui/Button.svelte';
 import ButtonSelect from '../ui/ButtonSelect.svelte';
 import {TfServer, default as TfUtils} from './TfUtils.js';
-
+import { LexemeInfo } from "../datastructures/lexeme";
 import Modal2 from '../ui/Modal2.svelte';
 import ModalButton from '../ui/ModalButton.svelte';
 import Button from '../ui/Button.svelte';
@@ -1152,7 +1152,7 @@ onMount(() => {
 <Modal2 bind:showModal={showLexModal} title="Lexeme Info and Stats">
     
     {#if chosenLexIdToShow && fetchedLexInfo[chosenLexIdToShow]}
-    <LemmaInfo bind:lemmaInfo={fetchedLexInfo[chosenLexIdToShow]} tfServer={currentServer} bookID={chosenLexBookId}/>
+    <LemmaInfo lemmaInfo={fetchedLexInfo[chosenLexIdToShow]} tfServer={currentServer} bookID={chosenLexBookId}/>
     {:else} 
     <div class="block w-full text-center">
     <Loading message="" title="Loading Lexeme Info and Stats..."/>

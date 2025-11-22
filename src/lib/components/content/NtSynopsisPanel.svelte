@@ -1540,7 +1540,7 @@ $inspect("chosenLexBookId:",chosenLexBookId);
 <Modal2 bind:showModal={showLexModal} title="Lexeme Info and Stats">
     
     {#if chosenLexIdToShow && fetchedLexInfo[chosenLexIdToShow]}
-    <LemmaInfo bind:lemmaInfo={fetchedLexInfo[chosenLexIdToShow]} tfServer={currentServer} bookID={chosenLexBookId}/>
+    <LemmaInfo lemmaInfo={fetchedLexInfo[chosenLexIdToShow]} tfServer={currentServer} bookID={chosenLexBookId}/>
     {:else} 
     <div class="block w-full text-center">
     <Loading message="" title="Loading Lexeme Info and Stats..."/>

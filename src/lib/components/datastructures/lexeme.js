@@ -105,7 +105,7 @@ export class LexStats {
      * @param {string[]} references 
      * @param {number} thisLexTotalCount 
      * @param {number} corpusWordsTotal 
-     * @param {Object<number,{count:number,words:number,freq:number,bookTotalFreqRatio:number}>} [bookStats={}] 
+     * @param {Object<number,LemmaBookStats>} [bookStats={}] 
 
      */
     constructor(thisLexTotalCount=0,corpusWordsTotal=0,references=[],bookStats={}) {
@@ -116,7 +116,7 @@ export class LexStats {
         this.totalFreq=0;
         
         /**
-         * @type {Object<number,{count:number,words:number,freq:number,bookTotalFreqRatio:number}>}  bookStats
+         * @type {Object<number,LemmaBookStats>}  bookStats
          */
         this.bookStats=bookStats;
         /*this.sectionFreq=0;
@@ -134,16 +134,25 @@ export class LexStats {
 
     }
 
+    
+
     /**
      * @param {number} bookId 
      * @param {number} bookLexCount 
      * @param {number} bookWordsTotal 
+     * @param {number} ntLexCount 
+     * @param {number} ntWords 
      */
-    calcBookStats(bookId,bookLexCount,bookWordsTotal){
-        if (!this.bookStats[bookId]){
+    addAndCalcBookStatsIfNeeded(bookId,bookLexCount,bookWordsTotal,ntLexCount,ntWords,force=false){
+        if (force || !this.bookStats[bookId]){
+
+            const lbStats=new LemmaBookStats(bookLexCount,bookWordsTotal,ntLexCount,ntWords);
+            this.bookStats[bookId]=lbStats;
+            /*
             const freq = LexStats.calcTotalFrequency(bookLexCount,bookWordsTotal);
             this.bookStats[bookId]={count:bookLexCount,words:bookWordsTotal,
                  freq: freq, bookTotalFreqRatio: LexStats.calcFreqRatio(freq,this.totalFreq)}
+                 */
         }
         //this.calculateFrequencies(true);
     }
@@ -197,5 +206,34 @@ export class LexStats {
         stats.bookStats=Object.fromEntries(Object.entries(this.bookStats));
         stats.references=[...this.references]
         return stats;
+    }
+}
+
+export class LemmaBookStats{
+    /**
+     * @param {number} bookCount  the Number of times this lemma appears in this book
+     * @param {number} bookWords the total number of words in this book
+     * @param {number} ntCount the number of times this lemma appears in the entire NT
+     * @param {number} ntWords the total number of words in the NT
+     
+     */
+    constructor(bookCount=0,bookTotal=0,ntCount=0,ntTotal=0){
+        this.lexCounts={
+            book:bookCount,
+            nt:ntCount,
+            restNT:ntCount-bookCount
+        };
+        this.words={
+            book:bookTotal,
+            nt:ntTotal,
+            restNT:ntTotal-bookTotal
+        }
+        this.freq={
+            book:LexStats.calcTotalFrequency(this.lexCounts.book,this.words.book),
+            nt:LexStats.calcTotalFrequency(this.lexCounts.nt,this.words.nt),
+            restNT:LexStats.calcTotalFrequency(this.lexCounts.restNT,this.words.restNT)
+        }
+        this.freqRatio=LexStats.calcFreqRatio(this.freq.book,this.freq.restNT);
+
     }
 }

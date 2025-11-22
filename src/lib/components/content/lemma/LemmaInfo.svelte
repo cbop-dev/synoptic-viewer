@@ -1,3 +1,10 @@
+
+<!--- 
+NB: this module has been made to not be reactive to the properties sent to it by the parent, because the data charts do not react well to dynamic changes. 
+THUS: any instance used by the parent should be destroyed and re-rendered when the lemmaInfo, bookID, or server info changes. 
+That is, the <LemmaInfo> tag should be surrounded by tags such as : {#key bookID && tfServer && lemmaInfo } {/key} 
+
+-->
 <script>
 import { TfServer } from "../TfUtils";
 import Button from "$lib/components/ui/Button.svelte";
@@ -6,7 +13,7 @@ import Icon from "$lib/components/ui/icons/Icon.svelte";
 import BarsSvg from "$lib/components/ui/icons/colorful-bar-chart.svg";
 import BookSvg from "$lib/components/ui/icons/book-open.svg";
 import CopyText from "$lib/components/ui/CopyText.svelte";
-import { LexemeInfo} from "$lib/components/datastructures/lexeme";
+import { LexemeInfo,LexStats,LemmaBookStats} from "$lib/components/datastructures/lexeme";
 import * as BibleUtils from "$lib/n1904/bibleRefUtils";
 import ButtonSelect from "$lib/components/ui/ButtonSelect.svelte";
 //import LemmaRefs from "./LemmaRefs.svelte";
@@ -30,11 +37,13 @@ import MathUtils from "$lib/utils/math-utils";
  */
 let {
 
-    lemmaInfo=$bindable(),
+    lemmaInfo, //no need to make bindable: we're not gonna change it!
     tfServer,
     //sectionWords=0,
     bookID=0,//optional, if we want to see book stats for this lexeme
 } = $props();
+
+
 
 let makingRequest=$state(false);
 let responseReady=$state(false);
@@ -89,7 +98,7 @@ let showStats =$state(false);
 
 let lemmaBookCountsChartData={
             
-            nums: Object.values(lemmaInfo.stats.bookStats).map((s)=>s.count),
+            nums: Object.values(lemmaInfo.stats.bookStats).map((bs)=>bs.lexCounts.book),
             labels: Object.keys(lemmaInfo.stats.bookStats).map((id)=>tfServer.booksDict[Number(id)].abbrev)
         };
     
@@ -106,7 +115,7 @@ let lemmaBookCountChartOptions =[
 let lemmaBookFreqChartData= lemmaInfo.stats.bookStats && Object.keys(lemmaInfo.stats.bookStats).length ?
         
          {
-            nums: Object.entries(lemmaInfo.stats.bookStats).map(([id,obj])=> (1000 * obj.count / tfServer.booksDict[Number(id)].words)),
+            nums: Object.entries(lemmaInfo.stats.bookStats).map(([id,obj])=> obj.freq.book),
             labels: Object.keys(lemmaInfo.stats.bookStats).map((id)=>tfServer.booksDict[Number(id)].abbrev)
         }
         
@@ -172,6 +181,10 @@ $inspect(`bookid:${bookID}; bookname: ${theBookName}; bookAbbrev: ${theBookAbbre
 
     .stats {
         @apply bg-slate-100/75 m-1 p-2 outline-2 outline-slate-300 shadow-2xl;
+    }
+
+    .stat-title{
+        @apply font-bold underline;
     }
 </style>
 
@@ -264,38 +277,61 @@ See Stats for:
             <div class="stats stats-vertical lg:stats-horizontal shadow inline-block">
                 <div class="stat">
                 <div class="stat-title"> Book Word count </div>
-                <div class="stat-value">{lemmaInfo.stats.bookStats[bookID].count}</div>
-                <div class="stat-desc">Total in Book</div>
+                <div class="stat-value">{lemmaInfo.stats.bookStats[bookID].lexCounts.book}</div>
+                <div class="stat-desc">Total instances of {lemmaInfo.lemma} in {theBookAbbrev}</div>
                 </div>
             </div>
-            {/if}
+            
             <div class="stats shadow inline-block">
                 <div class="stat">
-                <div class="stat-title"> NT Word count </div>
-                <div class="stat-value">{lemmaInfo.stats.count}</div>
-                <div class="stat-desc">Total in {tfServer.name}</div>
+                <div class="stat-title"> Rest of NT Word count (excluding {theBookAbbrev})</div>
+                <div class="stat-value">{lemmaInfo.stats.bookStats[bookID].lexCounts.restNT}</div>
+                <div class="stat-desc">Total instances of {lemmaInfo.lemma} (minus {theBookAbbrev}) in {tfServer.name} </div>
                 </div>
             </div>
 
-            {#if lemmaInfo.stats.bookStats[bookID].freq } 
+            {/if}
+            <div class="stats shadow inline-block">
+                <div class="stat">
+                <div class="stat-title"> NT count </div>
+                <div class="stat-value">{lemmaInfo.stats.count}</div>
+                <div class="stat-desc">Total {lemmaInfo.lemma} count in {tfServer.name}</div>
+                </div>
+            </div>
+
+            {#if lemmaInfo.stats.bookStats[bookID].freq.book } 
             <div class="stats shadow inline-block" >
                 <div class="stat">
                 <div class="stat-title"> Book frequency</div>
-                <div class="stat-value">{lemmaInfo.stats.bookStats[bookID].freq.toFixed(3)}</div>
-                <div class="stat-desc">per 1,000 words</div>
+                <div class="stat-value">{lemmaInfo.stats.bookStats[bookID].freq.book.toFixed(3)}</div>
+                <div class="stat-desc">Frequency of {lemmaInfo.lemma} in {theBookAbbrev} per 1,000 words</div>
                 </div>
             </div>
             {/if}
 
-
             <div class="stats shadow inline-block">
             <div class="stat">
-            <div class="stat-title"> NT frequency</div>
-            <div class="stat-value">{lemmaInfo.stats.totalFreq.toFixed(3)}</div>
+            <div class="stat-title"> Rest of NT frequency (excluding {theBookAbbrev})</div>
+            <div class="stat-value">{lemmaInfo.stats.bookStats[bookID].freq.restNT.toFixed(3)}</div>
             <div class="stat-desc">per 1,000 words</div>
             </div>
             </div>
 
+            <div class="stats shadow inline-block">
+            <div class="stat">
+            <div class="stat-title "> Avgerage NT frequency</div>
+            <div class="stat-value">{lemmaInfo.stats.totalFreq.toFixed(3)}</div>
+            <div class="stat-desc">Frequency of {lemmaInfo.lemma} per 1,000 words in NT</div>
+            </div>
+            </div>
+
+            <div class="stats shadow inline-block">
+            <div class="stat">
+            <div class="stat-title"> Percentage of NT use</div>
+            <div class="stat-value">{(100* lemmaInfo.stats.bookStats[bookID].lexCounts.book / lemmaInfo.stats.count).toFixed(1)}%</div>
+            <div class="stat-desc">Frequency of {lemmaInfo.lemma} per 1,000 words in NT</div>
+            </div>
+            </div>
         {/key}
     {:else if selectedTab==1}
         {#key bookID }
@@ -307,10 +343,10 @@ See Stats for:
             <div class="stats shadow inline-block ">
                 <h2>{lemmaInfo.lemma}: {theBookAbbrev} vs. Rest of NT </h2>
                 <div class="stat">
-                <div class="stat-title"> {lemmaInfo.stats.bookStats[bookID].count} of {lemmaInfo.stats.count} </div>
-                <PieChart pieData={{nums: [lemmaInfo.stats.bookStats[bookID].count, lemmaInfo.stats.count-lemmaInfo.stats.bookStats[bookID].count]}} />
+                <div class="stat-title"> {lemmaInfo.stats.bookStats[bookID].lexCounts.book} of {lemmaInfo.stats.count} </div>
+                <PieChart pieData={{labels:[theBookAbbrev,"Rest of NT"], nums: [lemmaInfo.stats.bookStats[bookID].lexCounts.book, lemmaInfo.stats.bookStats[bookID].lexCounts.restNT]}} />
                 
-                <div class="stat-value">{(100*lemmaInfo.stats.bookStats[bookID].count/lemmaInfo.stats.count).toFixed(2)}%</div>
+                <div class="stat-value">{(100*lemmaInfo.stats.bookStats[bookID].lexCounts.book/lemmaInfo.stats.count).toFixed(2)}%</div>
                 <div class="stat-desc">{theBookAbbrev}'s share of NT's total use of {lemmaInfo.lemma}
                     </div>
                 </div>
@@ -320,14 +356,14 @@ See Stats for:
 
             
 
-            {#if lemmaInfo.stats.bookStats[bookID].bookTotalFreqRatio && sections} 
+            {#if lemmaInfo.stats.bookStats[bookID].freqRatio && sections} 
             <div class="stats shadow inline-block">
                 <h2>{theBookName}/NT Frequency Ratio</h2>
 
 
                 <div class="stat">
-                <div class="stat-title"> How much more/less frequently does {theBookAbbrev} use this word than the NT as a whole?</div>
-                    {#if lemmaInfo.stats.count == lemmaInfo.stats.bookStats[bookID].count}
+                <div class="stat-title">How much more/less frequently does {theBookAbbrev} use {lemmaInfo.lemma} than the rest of the NT?</div>
+                    {#if lemmaInfo.stats.count == lemmaInfo.stats.bookStats[bookID].lexCounts.book}
                     <div class="stat-value">{#if lemmaInfo.stats.count ==1}Hapax!{:else}No contest!{/if} </div>
                     <div class="stat-desc">
                     <span class="italic ">{theBookName} is the only NT book to use {lemmaInfo.lemma}{#if lemmaInfo.stats.count ==1}, and he does so only once{/if}!</span>
@@ -335,14 +371,14 @@ See Stats for:
                     {:else}
 
 
-                        <BarChart barData={{nums: [(lemmaInfo.stats.bookStats[bookID].freq).toFixed(3),MathUtils.floatRound(lemmaInfo.stats.totalFreq,3)]}}/>
-                        <div class="stat-value">{lemmaInfo.stats.bookStats[bookID].bookTotalFreqRatio.toFixed(3)}</div>
+                        <BarChart barData={{labels:[theBookAbbrev + " freq.",'Rest of NT freq.'],nums: [(lemmaInfo.stats.bookStats[bookID].freq.book).toFixed(3),MathUtils.floatRound(lemmaInfo.stats.bookStats[bookID].freq.restNT,3)]}}/>
+                        <div class="stat-value">{lemmaInfo.stats.bookStats[bookID].freqRatio.toFixed(3)}</div>
                         <div class="stat-desc">(1.0=same; 2.0=2x; 0.5=half)</div>
                         <div class="stat-desc font-bold italic">     
                             And the winner is....
                             
-                            {#if lemmaInfo.stats.bookStats[bookID].bookTotalFreqRatio > 1.2 }{theBookName}
-                            {:else if  lemmaInfo.stats.bookStats[bookID].bookTotalFreqRatio > 0.8 }too close to call{:else}the NT{/if}!
+                            {#if lemmaInfo.stats.bookStats[bookID].freqRatio > 1.2 }{theBookName}
+                            {:else if  lemmaInfo.stats.bookStats[bookID].freqRatio > 0.8 }too close to call{:else}the NT{/if}!
                             
                         </div>
                 {/if}
