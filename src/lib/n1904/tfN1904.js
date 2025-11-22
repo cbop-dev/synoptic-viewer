@@ -2,8 +2,17 @@
 //import { mylog } from '../env/env';
 import { mylog,apiURI } from '$lib/env/env.js';
 import * as env from '$lib/env/env.js'
+/**
+ * @type {{lexemes:Object<number,{id:number,count:number,beta:string}>}}
+ * totalWords:number,
+ * numLexes:number}} ntlexemes
+ */
 import ntlexemes from './n1904-lexemes.json';
 import ntChaps from './tfN1904chaps.json';
+
+/**
+* @type {Object<number,{name:string,abbrev:string, syn:string[],words:number,chapters:number,lemmas:number}>} tfNtBooksDict
+*/
 import { tfNtBooksDict } from './ntbooks.js';
 import * as bibleUtils from './bibleRefUtils.js';
 import * as TfUtils from '$lib/components/content/TfUtils.js';
@@ -22,8 +31,14 @@ export class N1904Server extends TfUtils.TfServer {
     param=this.abbrev;
     server=env.tfserverurl;
     dbURI="/nt";
-    lexemes = ntlexemes;
+
+    /**
+     * @type {Object<string,{id:number,count:number, beta:string}>} 
+     */
+    lexemes = ntlexemes.lexemes;
     booksDict=tfNtBooksDict;
+    totalWords=ntlexemes.totalWords;
+    numLexemes=ntlexemes.numLexemes;
  
 
     /**

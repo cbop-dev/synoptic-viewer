@@ -2,7 +2,14 @@
 //import { mylog } from '../env/env';
 //import { mylog,apiURI } from '$lib/env/env.js';
 import { mylog} from '$lib/env/env.js';
+
+/**
+ * @type {{lexemes:Object<number,{name:string,abbrev:string, syn:string[],words:number,chapters:number,lemmas:number}>,
+ * totalWords:number,
+ * numLexes:number}} ntlexemes
+ */
 import ntlexemes from './sblgnt-lexemes.json';
+
 import { tfNtBooksDict } from './ntbooks.js';
 //import * as bibleUtils from './bibleRefUtils.js';
 //import sblgntlexemes from './sblgnt-lexemes.json';
@@ -23,7 +30,17 @@ export class SblGntServer extends N1904Server{
     abbrev=SblGntServer.abbrev;
     server=env.tfserverurl;
     param=this.abbrev;
-    lexemes = ntlexemes;
+    
+    /**
+     * @type {Object<string,{id:number,count:number, beta:string}>} 
+     */
+    lexemes = ntlexemes.lexemes;
+    numLexemes=ntlexemes.numLexemes;
+    totalWords=ntlexemes.totalWords;
+
+    /**
+     * @type {Object<number,{name:string,abbrev:string, syn:string[],words:number,chapters:number,lemmas:number}>} booksDict
+     */
     booksDict=tfNtBooksDict;
     showNotes=true;
 

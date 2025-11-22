@@ -2,7 +2,7 @@ import { describe, it, expect,test} from 'vitest';
 //import { TfServer } from '$lib/components/content/TfUtils';
 //import { N1904Server } from '$lib/n1904/tfN1904';
 import { SblGntServer } from '$lib/sblgnt/sblgnt';
-import { Lexeme } from '$lib/components/datastructures/lexeme';
+import { LexemeInfo, LexStats } from '$lib/components/datastructures/lexeme';
 import { mylog } from '$lib/env/env';
 import gospelParallels from '@cbop-dev/aland-gospel-synopsis';
 const sblgntServer = new SblGntServer();
@@ -16,7 +16,7 @@ test('dummy', async () => {
 test('getLex', async () => {
 	//925:βασιλεία
     const tests=[
-        {id:925,plain:'βασιλεια', total:162, bookCounts:{"Matt":55}, refs:["Matt 4:8","Matt 3:2"], verseCount: 154}
+        {id:925,plain:'βασιλεια', total:162, bookCounts:{137555:55}, refs:["Matt 4:8","Matt 3:2"], verseCount: 154,totalFreq:1.178}
     ]
 
     for (const t of tests){
@@ -24,19 +24,21 @@ test('getLex', async () => {
         expect(lex.id).toEqual(t.id);
         expect(lex.plain).toEqual(t.plain);
 
-        const lexInfo = await sblgntServer.fetchRefs(t.id);
-        expect(lexInfo.total).toEqual(t.total);
+        const lexStats = await sblgntServer.fetchLexRefsCounts(t.id);
+        expect(lexStats.count).toEqual(t.total);
         //expect(lexInfo.plain).toEqual(lex.plain);
-        expect(Object.keys(lexInfo.bookCounts).length).toEqual(17);
-        expect(Object.keys(lexInfo.bookCounts).length).toEqual(17);
+        expect(Object.keys(lexStats.bookStats).length).toEqual(17);
+        expect(Object.keys(lexStats.bookStats).length).toEqual(17);
         Object.entries(t.bookCounts).forEach(([b,count])=>{
-            expect(count).toEqual(lexInfo.bookCounts[b]);
+            expect(count).toEqual(lexStats.bookStats[b].count);
         })
 
-       expect(lexInfo.references.length).toEqual(t.verseCount); //of course, this may not be right. this was just a sanity check too see if we're close.
+        expect(lexStats.totalFreq).toBeCloseTo(t.totalFreq);
+
+       expect(lexStats.references.length).toEqual(t.verseCount); //of course, this may not be right. this was just a sanity check too see if we're close.
         t.refs.forEach((r)=>{
             //mylog(`checking getLex(${t.id}) refs at '${r}'`, true)
-            expect(lexInfo.references.includes(r)).toBe(true);
+            expect(lexStats.references.includes(r)).toBe(true);
         })
 
        // console.log(`refs(${lex.id}): ['${lexInfo.references.join("','")}']`);

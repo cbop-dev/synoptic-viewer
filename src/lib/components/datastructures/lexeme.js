@@ -1,44 +1,31 @@
-import { GreekUtils } from "$lib/utils/greek-utils";
-export class Lexeme {
+import { GreekUtils } from "$lib/utils/greek-utils.js";
+
+export class LexemeInfo {
     /**
      * 
      * @param {number} id 
      * @param {string} lemma 
      * @param {string} gloss 
      * @param {number} count  -- number of times in the selected books
-     * @param {number} total -- number of times in corpus
-     * @param {string} pos 
-     * @param {string} beta 
-     * @param {number|null} [freqSectTotalRatio=null] 
-     * @param {number|null} [sectFreq=null] 
-     * @param {number|null} [totalFreq=null] 
      */
-    constructor(id=0,lemma='',gloss='',count=0,pos='',total=0,beta='',sectFreq=null,totalFreq=null,freqSectTotalRatio=null,posDict={}) {
+    constructor(id=0,lemma='',gloss='',count=0) {
         if (id == 0 || lemma =='')
             this.ready=false;
         else
             this.ready=true;
         this.id=id;
-        this.posDict=posDict;
+        //this.posDict=posDict;
         this.lemma=lemma;
+        
         this.plain = GreekUtils.removeDiacritics(lemma);
         this.gloss=gloss;
-        this.count=count
-        this.pos=pos; 
-        //this.posNum=this.getPosNum();    
-        this.total=total;
-        this.beta=beta;
-        this.sectFreq=sectFreq;
-        this.totalFreq=totalFreq;
-        this.freqSectTotalRatio = freqSectTotalRatio ? 
-            freqSectTotalRatio 
-            : (this.sectFreq && this.sectFreq> 0 &&  this.totalFreq && this.totalFreq > 0) ? 
-                    (this.sectFreq/this.totalFreq).toFixed(4) 
-                    : null;
+        this.stats=new LexStats(count);
+
+      
     }
 
 
-    static posDict = {};
+   // static posDict = {};
 
     /**
      * 
@@ -49,15 +36,16 @@ export class Lexeme {
         return lemma
     }
     /**
-     * 
+     * @returns {LexemeInfo}
      */
     copy() {
-        return new Lexeme(this.id, this.lemma, this.gloss, this.count, this.pos, this.total, this.beta,this.sectFreq,this.totalFreq,
-            this.freqSectTotalRatio,this.posDict)
+        const lex= new LexemeInfo(this.id, this.lemma, this.gloss);
+        lex.stats=this.stats.copy();
+        return lex;
     }
     /**
      * 
-     * @param {Lexeme} lex 
+     * @param {LexemeInfo} lex 
      */
     copyFrom(lex){
         for (const [k,v] of Object.entries(lex)){
@@ -97,23 +85,117 @@ export class Lexeme {
 
 }
 
-export class LexemeInfo extends Lexeme {
+// toString=false,decimals=4){ .toFixed(decimals)
+
+export class LexStats {
+
+
     /**
      * @type {string[]} references
      */
     references=[];
     
     /**
-     * @type{Object<string,string>} counts of this lexeme in each NT book. key: book abbreviation, value: counts for each book.
+     * @type{Object<number,number>} counts of this lexeme in each NT book. key: book id, value: counts for each book.
      */
-    bookCounts={};
+    //bookCounts={};
     
     /**
      * 
-     * @param {number} id 
+     * @param {string[]} references 
+     * @param {number} thisLexTotalCount 
+     * @param {number} corpusWordsTotal 
+     * @param {Object<number,{count:number,words:number,freq:number,bookTotalFreqRatio:number}>} [bookStats={}] 
+
      */
-    constructor(id=0,lemma='',gloss='',count=0,pos='',total=0,beta='',sectFreq=null,totalFreq=null,freqSectTotalRatio=null,posDict={}) {
-            super(id,lemma,gloss,count,pos,total,beta,sectFreq,totalFreq,freqSectTotalRatio,posDict);
+    constructor(thisLexTotalCount=0,corpusWordsTotal=0,references=[],bookStats={}) {
+        this.references=references;
+        //this.bookCounts=bookCounts;
+        this.count=thisLexTotalCount;
+        this.corpusWordTotal=corpusWordsTotal;
+        this.totalFreq=0;
+        
+        /**
+         * @type {Object<number,{count:number,words:number,freq:number,bookTotalFreqRatio:number}>}  bookStats
+         */
+        this.bookStats=bookStats;
+        /*this.sectionFreq=0;
+        this.sectTotalFreqRatio=0;
+        this.sectionCount=lexSectionCount;
+        this.sectionWordsTotal=sectionWordsTotal;
+        */
+        this.calculated=false;
+        if(this.count && this.corpusWordTotal){
+            this.calculateFrequencies();
+            this.calculated=true;
+
+        }
+        
+
     }
 
+    /**
+     * @param {number} bookId 
+     * @param {number} bookLexCount 
+     * @param {number} bookWordsTotal 
+     */
+    calcBookStats(bookId,bookLexCount,bookWordsTotal){
+        if (!this.bookStats[bookId]){
+            const freq = LexStats.calcTotalFrequency(bookLexCount,bookWordsTotal);
+            this.bookStats[bookId]={count:bookLexCount,words:bookWordsTotal,
+                 freq: freq, bookTotalFreqRatio: LexStats.calcFreqRatio(freq,this.totalFreq)}
+        }
+        //this.calculateFrequencies(true);
+    }
+
+    /**
+     */
+    calculateFrequencies(force=false){
+        if (force || !this.calculated){
+            this.totalFreq = this.totalFreq ? this.totalFreq : LexStats.calcTotalFrequency(this.count,this.corpusWordTotal);
+        }
+
+    }
+
+    /**
+     * 
+     * @param {number} particularWordCount the number of times a specific word appears in a corpus
+     * @param {number} totalCorpusWordsCount the total number of ALL words in that corpus
+     * @returns the frequency per 1000 words. namely: 1000 * particularWordCount / totalCorpusWordsCount;
+     */
+    static calcTotalFrequency(particularWordCount,totalCorpusWordsCount){
+        if (totalCorpusWordsCount > 0){
+            return 1000 * particularWordCount / totalCorpusWordsCount;
+        }
+        else
+            return 0;
+
+    }
+
+
+     /**
+     * 
+     * @param {number} sectFreq 
+     * @param {number} totalFreq 
+     * @returns {number} frequency as number or string. Returns 0 if totalFreq=0.
+     */
+    static calcFreqRatio(sectFreq,totalFreq){
+        if (sectFreq && sectFreq> 0 &&  totalFreq && totalFreq > 0) {
+                return sectFreq/totalFreq;
+        }
+        else
+            return 0;
+        
+    }
+    
+    copy(){
+        const stats=new LexStats();
+        for (const [k,v] of Object.entries(this)){
+            if (k!='bookStats' && k!='references')
+                stats[k] = v;
+        }
+        stats.bookStats=Object.fromEntries(Object.entries(this.bookStats));
+        stats.references=[...this.references]
+        return stats;
+    }
 }

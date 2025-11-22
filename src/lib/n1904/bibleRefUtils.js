@@ -162,7 +162,7 @@ export function refIncludes(containingRef, includedRef) {
 }
 
 export function cleanString(str){
-    return str.replaceAll(/\s+/g, ' ').trim();
+    return str.replaceAll(/[\s_]+/g, ' ').trim();
 }
 
 export function cleanNumString(numString){
@@ -425,6 +425,7 @@ export function expandRefs(refString,splitVerseRanges=true){
  * @returns -- a string with the bible references grouped and  combined by book and chapter, such that larger sections swallow smaller ones.
  *         e.g., ["Gen", "Gen 1"] => "Gen", but ["Gen 1", "Gen 2:4", "Exod 3:2"] => "Gen 1; 2:4; Ex 3:2".
  */
+//NB: TODO: fix so it works with "1 Thess","2 Thess", etc.
 export function combineRefs(refArray) {
 
     //console.debug("combineRefs() with:")
@@ -434,9 +435,34 @@ export function combineRefs(refArray) {
      */
     let refList={}
     for (const ref of refArray){
-        const parts = ref.trim().replace(":", " ").split(" ");
+        //const parts = ref.trim().replace(":", " ").split(" ");
+        const bcv = getBookChapVerseFromRef(ref.trim());
+        if (bcv.book && !refList[bcv.book]) { //got a book, maybe chap and verse but  we don't care yet about that.
+            refList[bcv.book]={};
+        }
+        if (!bcv.book && bcv.chap && !bcv.v) { //only got a chapter
+            refList[bcv.chap] ='all';
+        }
+        if (bcv.book && bcv.chap && !bcv.v  && refList[bcv.book] != 'all'){ //got a book and a whole chapter, but don't have whole book
+            refList[bcv.book][bcv.chap] = 'all'; //wipe out whatever was there before!
+        }
+        else if (bcv.book && bcv.chap && bcv.v ) { //bcv!
+            if (!refList[bcv.book][bcv.chap]){
+                refList[bcv.book][bcv.chap] = [bcv.v];
+            }
+            else if (refList[bcv.book][bcv.chap] != 'all' && refList[bcv.book][bcv.chap].push){
+                refList[bcv.book][bcv.chap].push(bcv.v);
+            }
+        } 
+        
+        
+        
         ////console.debug(parts)
         //refList[parts[0]] = parts.slice(1)
+
+
+//updated with bcv
+/*
         if (parts[0] && ! refList[parts[0]]) {
             refList[parts[0]]={};
         }
@@ -454,6 +480,7 @@ export function combineRefs(refArray) {
                 refList[parts[0]][parts[1]].push(parts[2]);
             }
         } 
+*/
     }
     // //console.debug("reflist")
     // //console.debug(refList)
@@ -575,7 +602,7 @@ export function formatBibRefs(inputString){
 	let lastBook = '';
 	
 	
-	cleanRepeatedSymbols(inputString).replaceAll("\t"," ").replace(
+	cleanRepeatedSymbols(inputString).replaceAll(/[\t_]+/g, " ").replace(
 		/(:[0-9-,]+ +)/g,"$1\n").replaceAll(";","\n").split(
 			"\n").map((item)=>item.trim()).forEach(l =>
 	{

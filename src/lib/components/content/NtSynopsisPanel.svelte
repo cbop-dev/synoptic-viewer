@@ -1,5 +1,6 @@
 <script>
 import { onMount, untrack } from 'svelte';
+import Loading from '../ui/Loading.svelte';
 import Footer from './Footer.svelte';
 import { SynopsisOptions3} from './SynopsisClasses.svelte.js';
 import Icon from '../ui/icons/Icon.svelte';
@@ -9,7 +10,7 @@ import {gospelParallels} from '@cbop-dev/aland-gospel-synopsis'
 import parallelColumnsSvelte, { ParallelColumn, GospelPericopeGroup,Word, TextAndRef,VerseWords } from "./parallelTexts.svelte";
 import { N1904Server, lexemes} from "$lib/n1904/tfN1904";
 import { SblGntServer } from '$lib/sblgnt/sblgnt.js';
-
+import { LexemeInfo } from '../datastructures/lexeme';
 //import {tfServer,lexemes} from '$lib/sblgnt/sblgnt.js'
 import ParallelGospelSection from "./ParallelGospelSection.svelte";
 import { mylog } from "$lib/env/env";
@@ -35,6 +36,7 @@ import CopyText from '../ui/CopyText.svelte';
 import { findNextAnchor,findPrevAnchor, getAnchors} from '$lib/utils/ui-utils';
 import TitleNavbar from './title-navbar.svelte';
 import { Hotkey, SynopsisHotkeys } from '../ui/hotkeys.svelte';
+import LemmaInfo from './lemma/LemmaInfo.svelte';
 //import { generateHslColorGradient } from '../ui/chartUtils';
    /**
      * @type {{options:SynopsisOptions3,
@@ -128,6 +130,14 @@ let sort = $state(false);
 let callSortFilter=$derived(myOptions.viewOptions.hideSolos || (gospelParallels.gospels.isValid(selectedGospel)   &&
 ( myOptions.viewOptions.sort ||myOptions.viewOptions.hideNonPrimary || myOptions.viewOptions.focusOn|| myOptions.viewOptions.hideNonPrimarySolos)));
 
+
+/**
+ * @type {Object<number,LexemeInfo>} fetchedLexInfo
+ */
+let fetchedLexInfo=$state({});
+let chosenLexIdToShow=$state(0);
+let chosenLexBookId=$state(0);
+let showLexModal=$state(false);
 /**
  * @description Array of pericopes groups, with refs for each gospel (matt,mark,luke,john,other),
  *  derived from 'filteredPericopes' and (maybe?? see next variable comment) retaining the same order.
@@ -554,6 +564,73 @@ function emptySelectedCustomGreek(){
 function emptySelectedLexemes(){
     selectedLexes.length = 0;
 }
+
+/**
+ * 
+ * @param {number} id
+ * @param {number} bookid 
+ */
+async function showLexInfo(id,bookid=0){
+    if (id) {
+        chosenLexIdToShow=id;
+        chosenLexBookId=bookid;
+
+        showLexModal=true;
+        if (!fetchedLexInfo[id]){
+            lexInfoFetching=true;
+            const lexInfo = await tfServer.fetchLexInfo(id);
+            
+            if (lexInfo){
+                
+                //showLexModal=true;
+                lexInfo.stats=await tfServer.fetchLexRefsCounts(id,true);
+                fetchedLexInfo[id]=lexInfo;
+                
+                //mylog(`fetched lemma info for '${lexInfo.lemma}'`)
+                
+                //fetchedLexInfo[chosenLexIdToShow]=lexInfo;
+            }
+            else{
+                //mylog(`Tried to get lex ${chosenLexIdToShow} but failed.`)
+            }
+            lexInfoFetching=false;
+        }
+        if(fetchedLexInfo[chosenLexIdToShow]){
+            
+            fetchedLexInfo=fetchedLexInfo;
+        }
+        showLexModal= fetchedLexInfo[chosenLexIdToShow] ? true : false;
+    }
+    
+}
+function wordClick(id,bookName=''){
+    const bookid=bookName ? tfServer.getBookID(bookName) : 0;
+    //mylog(`wordclick(${id},${bookName}[id:${bookid}])`)
+    if(myOptions.viewOptions.highlightOnClick){
+        toggleLex(id);
+    }
+    if(myOptions.viewOptions.lexInfoClick){
+        //mylog(`about to call showlexinfo(${id})`)
+        showLexInfo(id,bookid);
+    }
+
+}
+
+let lexInfoFetching=$state(false);
+/**
+ * 
+ * @param {number} lemmaId
+ */
+async function fetchLexStats(lemmaId){
+    //reset();
+    //makingRequest=true;
+    //responseReady = false;
+
+    const stats = await tfServer.fetchLexRefsCounts(lemmaId,true)
+    return stats;
+}
+
+
 function toggleLex(id){
 //    mylog("toggleLex("+id+")");
     if(selectedLexes.includes(id)) {
@@ -605,7 +682,7 @@ function displayNote(heading,note) {
     viewStates.views.notes.state = true;
 }
 const hotkeys=new SynopsisHotkeys(myOptions);
-hotkeys.enableHotkeys('><tb2');
+hotkeys.enableHotkeys('><tb2ax');
 //mylog(`enabled hotkeys: [${[...hotkeys.hotkeys.keys()].join(',')}]`);
 if(!hotkeys.getKeyObj(">")){
     //mylog("Could not find hotkey '>'!", true);
@@ -634,6 +711,7 @@ let viewStates=$state({
          //   hotkeys:['m'], state:myOptions.viewOptions.identical,modal:false},
         sections: { description:  "Jump to a section", hotkeys:['j'], state:false,modal:true},
         view: { description:  "View Options", hotkeys:['v'], state:false,modal:true},
+       // lex: { description:  "Lexeme Information and Stats Options", hotkeys:['x'], state:false,modal:true},
         lookup: { description:  "Lookup passage(s) or select section", hotkeys:['l'], state:false,modal:false},
         words: {description:  "Lexeme/Word Options", hotkeys:['w'], state:false,modal:true},
       //  info: { description:  "Website and project information.", hotkeys:['i'], state:false,modal:true},
@@ -811,8 +889,15 @@ $effect(()=>{
         untrack(()=> onkeydown(keyevent));
     }
 })
-$effect(()=>{customGreekInputText=GreekUtils.removeDiacritics(
-     GreekUtils.beta2Greek(customGreekInputText),true,true).replaceAll('σ ','ς ');
+$effect(()=>{
+    if(customGreekInputText) {
+        untrack(()=>{
+             customGreekInputText=GreekUtils.removeDiacritics(
+            GreekUtils.beta2Greek(customGreekInputText),true,true).replaceAll('σ ','ς ');
+        })
+
+    }
+       
 });
 //$inspect(customGreekClasses);
 
@@ -848,7 +933,9 @@ onMount(() => {
 //$inspect("selectedLexes:", selectedLexes)
 
 
-$inspect("myOptions.viewOptions.similarPhrases: ", myOptions.viewOptions.similarPhrases);
+//$inspect("myOptions.viewOptions.similarPhrases: ", myOptions.viewOptions.similarPhrases);
+$inspect("showLexModal",showLexModal)
+$inspect("chosenLexBookId:",chosenLexBookId);
 </script>
 <style>
     @reference "tailwindcss";
@@ -957,10 +1044,28 @@ $inspect("myOptions.viewOptions.similarPhrases: ", myOptions.viewOptions.similar
             <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={myOptions.viewOptions.identical} tooltipbottom tooltip="Bold/underline all morphologically identical words. (This generates many 'false positives.')" 
                     buttonText="Identical"/></svelte:element>
                 
-                <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={myOptions.viewOptions.highlightOnClick} buttonText="Auto Highlight" 
+               <!-- <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={myOptions.viewOptions.highlightOnClick} buttonText="Auto Highlight" 
                     tooltipbottom={true}
-                    tooltip="If enabled, clicking/tapping on a word will toggle highlighting of that lexeme. Press 'c' to toggle this option."/></svelte:element>  
+                    tooltip="If enabled, clicking/tapping on a word will toggle highlighting of that lexeme. Press 'c' to toggle this option."/></svelte:element>  -->
                
+               
+                <svelte:element this={theTag} class={[classes, 'menu']}>
+                    <label class="label tooltip" 
+                        data-tip="Highlight lexemes"    
+                            for="highlight-click">
+                     <input  class="toggle" id="highlight-click-check" type="checkbox" bind:checked={myOptions.viewOptions.highlightOnClick}/>Highlight{#if short}{:else}Lexemes{/if}
+                    </label>
+                </svelte:element>
+                  <svelte:element this={theTag} class={[classes, 'menu']}>
+                    <label class="label tooltip " 
+                        data-tip="Show Lexeme Info"    
+                            for="lexeme-info-click">
+                     <input  class="toggle" id="lexeme-info-click" type="checkbox" bind:checked={myOptions.viewOptions.lexInfoClick}/>Stats{#if short}{:else}{/if}
+                    </label>
+                
+                </svelte:element>  
+               
+
                  <svelte:element this={theTag} class={[classes, 'menu']}><label class="label tooltip" 
                  data-tip="Hide secondary parallels from search results."    
                  for="hide-secondary-check{short? '-short':''}">
@@ -982,9 +1087,8 @@ $inspect("myOptions.viewOptions.similarPhrases: ", myOptions.viewOptions.similar
 {/snippet}
 {#snippet lookup()}
  {#if !mounted}
-    <div class="bg-transparent m-10 p-10">
-        <h3><i>Page Loading...</i></h3>
-    <span class="loading loading-spinner loading-xl"></span>    
+    <div class="bg-transparent block w-full text-center items-center m-10 p-10">
+       <Loading title="Please wait while the page is loading..."/>   
     </div>
     
  {:else }
@@ -1153,7 +1257,7 @@ $inspect("myOptions.viewOptions.similarPhrases: ", myOptions.viewOptions.similar
                 <br class="break-all"/>
                 <div >
                     <ParallelGospelSection parGroup={group} options={myOptions} focus={focused}
-                    wordClick={toggleLex}
+                    wordClick={wordClick}
                     {enableSecondary}
                     cssClassDict={lexClasses}
                     cssCustomDict={customGreekClasses}
@@ -1169,15 +1273,14 @@ $inspect("myOptions.viewOptions.similarPhrases: ", myOptions.viewOptions.similar
                 or change the <a href="" onclick={()=>{viewStates.toggle('view')}}>View Options</a>{/if}.)
             {/if}
         {:else}
-        <h3><i>Loading...</i></h3>
-        <span class="loading loading-spinner loading-xl"></span>
+        <Loading title="Results loading..." message={[]}/>
         {/if}
 
     </div>
     
     {:else}
         <div class="text-center"><i class="m-auto">Results will show up here. 
-            {#if viewStates.views.lookup.state ==false}<a class="link hover:text-blue-700" 
+            {#if !viewStates.views.lookup.state && !landingPage}<a class="link hover:text-blue-700" 
             href="#" onclick={()=>{viewStates.views.lookup.state=true}}>Search for a text or select a section.</a>
             {:else}
                 Search for a text or select a section above.
@@ -1432,4 +1535,18 @@ $inspect("myOptions.viewOptions.similarPhrases: ", myOptions.viewOptions.similar
 
 <Modal2 bind:showModal={viewStates.views.lookup.state}>
      {@render lookup()}
+</Modal2>
+
+<Modal2 bind:showModal={showLexModal} title="Lexeme Info and Stats">
+    
+    {#if chosenLexIdToShow && fetchedLexInfo[chosenLexIdToShow]}
+    <LemmaInfo bind:lemmaInfo={fetchedLexInfo[chosenLexIdToShow]} tfServer={currentServer} bookID={chosenLexBookId}/>
+    {:else} 
+    <div class="block w-full text-center">
+    <Loading message="" title="Loading Lexeme Info and Stats..."/>
+    </div>
+    
+    
+    {/if}
+
 </Modal2>

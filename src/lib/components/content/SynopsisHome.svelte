@@ -90,6 +90,8 @@
     let showNTselect=$state(false);
 
     let enableKeys=$state(true);
+
+        
     /**
      * @param {number} index 
     */
@@ -137,7 +139,8 @@
         
         <div role="tablist" class="inline-block fixed  top-0 left-1 tabs tabs-lifted">
             {#each panes as pane, index}
-            <a role="tab" class="tab {selectedPane==index ? 'tab-active' : ''} " tabindex=index onclick={()=>{selectedPane=index}} ><span class="sm:inline hidden">{pane.name}</span><span class="inline sm:hidden">{pane.short}</span></a>
+            <a role="tab" class="tab {selectedPane==index ? 'tab-active' : ''} " tabindex={index} onclick={()=>{selectedPane=index}} >
+                <span class="sm:inline hidden">{pane.name}</span><span class="inline sm:hidden">{pane.short}</span></a>
             {/each}
         </div>
         <div class="inline-block mr-1 mt-1">

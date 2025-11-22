@@ -7,7 +7,8 @@
     import * as StringUtils from '$lib/utils/string-utils.js';
     import { mylog } from '$lib/env/env.js';
     import Button from '../ui/Button.svelte';
-
+    import { LexemeInfo } from '../datastructures/lexeme.js';
+    import * as BibleUtils from "$lib/n1904/bibleRefUtils";
     /**
      * 
      * @param {Word[]} words
@@ -35,7 +36,8 @@
 * uniqueSet:  Set<number>
 * options:SynopsisOptions3
 * notesClick:  function
-* wordClick:  function
+* wordClick:  function,
+* lexInfoDict:Object<number,LexemeInfo>
 * }} 
 */
 let {
@@ -59,7 +61,8 @@ let {
         uniqueSet=new Set(),
         //options.viewOptions.highlightOnClick=$bindable(false),
         notesClick=()=>{},
-        wordClick=()=>{},
+        wordClick=(wordid,bookid)=>{},
+        lexInfoDict={}
        // options.viewOptions.hideApp=false,
 }=$props();
 /**
@@ -84,6 +87,7 @@ let {
 {#key parGroup &&  parGroup.updatedCounter && parGroup.lexIdenticalPhrasesMap.size && parGroup.lexIdenticalPhrasesMap}
 
 {#if textRef.text}
+{@const book=BibleUtils.getBookChapVerseFromRef(textRef.reference)?.book}
     <span class="font-bold bg-white/50 rounded-sm border-2 border-black/60 mr-1 ml-0 bible-text-block">
     {#if copyButton}
         <CopyText copyText={textRef.reference} 
@@ -148,7 +152,7 @@ let {
                             customClasses?.length ? customClasses[0] : '', wordClasses, options.viewOptions.similarPhrases ? lexicalPhrases : [],
                             options.viewOptions.identical && lexCssClasses && parGroup.matchingWords.includes(stripWord(word.word)) && 'identical-word',
                             lexCssClasses, ...word.specialCss]} 
-                        onclick={()=>{if (options.viewOptions.highlightOnClick) wordClick(word.id)}}>{getText([word],options.viewOptions.hideApp)}{'  '} 
+                        onclick={()=>{if (options.viewOptions.highlightOnClick || options.viewOptions.lexInfoClick) wordClick(word.id,book)}}>{getText([word],options.viewOptions.hideApp)}{'  '} 
                         
                     {#if word.phrases['lexical']}
                         <!--Match!:phraseclasses={phraseClasses}-->

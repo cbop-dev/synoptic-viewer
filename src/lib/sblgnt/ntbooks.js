@@ -1,3 +1,6 @@
+/**
+* @type {Object<number,{name:string,abbrev:string, syn:string[],words:number,chapters:number,lemmas:number}>} tfNtBooksDict
+*/
 export const tfNtBooksDict=
 {137555: {'name': 'Matthew', 'abbrev': 'Matt', 'syn': ['Matthew', 'Mt', 'Mtt', 'Mat', 'Matt'], 'words': 18329, 'chapters': 28, 'lemmas': 1680},
 137556: {'name': 'Mark', 'abbrev': 'Mark', 'syn': ['Mark', 'Mar', 'Mk', 'Mc'], 'words': 11286, 'chapters': 16, 'lemmas': 1341},

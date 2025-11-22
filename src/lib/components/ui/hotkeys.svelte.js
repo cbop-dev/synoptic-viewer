@@ -44,8 +44,9 @@ export class SynopsisHotkeys{
         {key:'i',name:'Identical Words',optionName:"identical",function: ()=>{this.options.viewOptions.identical =!this.options.viewOptions.identical},navLetterButton:true},
         {key:'s',name:'Similar Phrases',optionName:"similarPhrases",function: ()=>{this.options.viewOptions.similarPhrases =!this.options.viewOptions.similarPhrases},navLetterButton:true},
         {key:'e',name:'Exact Phrases',optionName:"exactPhrases",function: ()=>{this.options.viewOptions.exactPhrases =!this.options.viewOptions.exactPhrases},navLetterButton:true},
+        {key:'a',name:'Hide apparatus marks',optionName:"hideApp",function: ()=>{this.options.viewOptions.hideApp =!this.options.viewOptions.hideApp},navLetterButton:true},
         {key:'m',letter:'☰', name:'Show/hide options menu',optionName:"menuOpen",function: ()=>{this.options.viewOptions.menuOpen =!this.options.viewOptions.menuOpen},navLetterButton:false},
-   
+        {key:'x',name:'Lexeme Info and Stats on Click',optionName:"lexInfoClick",function: ()=>{this.options.viewOptions.lexInfoClick =!this.options.viewOptions.lexInfoClick},navLetterButton:true},
         
     ];
     

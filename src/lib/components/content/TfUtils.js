@@ -5,7 +5,7 @@ import gospelParallels from '@cbop-dev/aland-gospel-synopsis'
 import { mylog } from "$lib/env/env";
 import * as BibleUtils from '$lib/n1904/bibleRefUtils.js'
 import * as MathUtils from '$lib/utils/math-utils.js';
-import { Lexeme, LexemeInfo } from "../datastructures/lexeme.js";
+import { LexemeInfo,LexStats } from "../datastructures/lexeme.js";
 
 
 
@@ -377,15 +377,19 @@ export class TfServer{
     abbrev='';
     param='nt';
     showNotes = false;
-    /**
-     * @type {Object<string,Object>} booksDict
-     */
-    lexemes = {};
-    
-    chaps={};
 
     /**
-     * @type {Object<string,Object>} booksDict
+     * @type {Object<string,{id:number,count:number, beta:string}>} 
+     */
+    lexemes = {};
+    totalWords=0;
+    numLexemes=0;
+    chaps={};
+
+
+   
+    /**
+     * @type {Object<number,{name:string,abbrev:string, syn:string[],words:number,chapters:number,lemmas:number}>}
      */
     booksDict = {};
     dbURI="/nt";
@@ -515,12 +519,12 @@ export class TfServer{
         //console.debug("Fetching " + url);
         const res = await fetch(url);
        // query.sent = true;
-        
+        mylog(`fetchLexInfo(${lexID})....`)
         const theJsonObj = await res.json();
-        const foundLex = new Lexeme(theJsonObj.id,theJsonObj.lemma,theJsonObj.gloss,theJsonObj.total, theJsonObj.pos,theJsonObj.total,theJsonObj.beta).copy()
-        lemma.copyFrom(foundLex);
+        const foundLex = new LexemeInfo(theJsonObj.id,theJsonObj.lemma,theJsonObj.gloss,theJsonObj.total, theJsonObj.pos,theJsonObj.total,theJsonObj.beta)
+        //lemma.copyFrom(foundLex);
 
-        return lemma;
+        return foundLex;
     }
 
 
@@ -683,75 +687,82 @@ export class TfServer{
     }
 
 
-
+    
     /**
-     * 
      * @param {number} lexID 
-     * @param {number[]|null} theSections
-     * @param {Lexeme} [lexObj] optional
-     * @returns {Promise<LexemeInfo>} a promise 
-     *  - will contain the references in the results.refs property, an array of strings, one per ref (e.g., ["Gen 1:1", "2 Macc 3:4"])
-     *  - propert 'ready' will be true when 'results.refs' is done
+     * @returns {Promise<LexStats>} counts fetched and stats calculated for the lexeme
+     * 
      */
-    async fetchRefs(lexID,theSections=null,lexObj=null) {
+    async fetchLexRefsCounts(lexID, calculate=true){//},theSections=null){//},lexObj=null) { //not doing this yet.
         
-        const lemmaInfo= new LexemeInfo(lexID);
-        if (lexObj){
+   
+        /*if (lexObj){
             lemmaInfo.copyFrom(lexObj);
-        }
-        
+        }*/
 
-        const url = this.getApiUri() + "/getrefs/" + lexID +
-            (theSections ? "?sections=" + theSections.join(',') : '');
+        /**
+         * 
+         */
+       // let theSections=[];
+
+        const url = this.getApiUri() + "/getrefs/" + lexID;
 
         
        // console.debug("Fetching " + url);
-        const res = await fetch(url);
-        
-        const theJsonObj = await res.json();
-        
-        const refs = theJsonObj['refs']
-        
-        //mylog(`getRefs(${lexID}) got json object: ${JSON.stringify(theJsonObj.refs)}`,true);
-        //mylog(`getRefs(${lexID}) got refs: [${refs.join(",")}]`,true);
-        const themap=theJsonObj.bookcounts ? 
-                Object.entries(theJsonObj.bookcounts)
-                    .map(([k,v])=>this.booksDict[k] && this.booksDict[k].abbrev ? [this.booksDict[k].abbrev,v] : null).filter((o)=>o) 
-                    :
-                    null;
-        const bookcounts = themap ? Object.fromEntries(themap) : null;
-        
-        if (bookcounts && Object.keys(bookcounts).length){
-            lemmaInfo.bookCounts=bookcounts;
-
-        }
-
-        
-        if(theJsonObj.total){
-            lemmaInfo.total=theJsonObj.total;
-        }
-        if (refs && refs.length){
-            //mylog(`got refs(${lexID}):['${JSON.stringify(refs)}']`, true);
-            lemmaInfo.references=refs.map((r)=>{
-                let ret = r;
-                const bcv = BibleUtils.getBookChapVerseFromRef(r);
-                
-                const book=bcv && bcv.book ? this.getBookAbbrev(bcv.book) : '';
-                if (book){
-                    r = book + ( bcv.chap ? (" " + bcv.chap) : '') + (bcv.v? ":" + bcv.v : '');
-                }
-
-                if (r && r!=book){
-                    ret = r;
-                }
-                return ret;
+        const theJsonObj = await this.jsonFetch(url);
+        const lexStats=new LexStats(0,this.totalWords);
+        if (theJsonObj){
+            if (theJsonObj.total){
+                lexStats.count=theJsonObj.total;
+                lexStats.calculateFrequencies(true);
+            }
             
-            });
-        }else{
-           // mylog(`got not refs for id ${lexID}`,true)
+            if (theJsonObj.bookcounts){
+                Object.entries(theJsonObj.bookcounts).forEach(([bookId,theBookCount])=>{
+                    const theBookId=parseInt(bookId)
+                    lexStats.calcBookStats(theBookId,theBookCount,this.booksDict[theBookId].words);
+                })
+            }
+    
+            //try to make convert book names into their abbreviations
+           /* const themap=theJsonObj.bookcounts ? 
+                    Object.entries(theJsonObj.bookcounts).map(([b,count])=>[book,{count: v,}])
+                        //.map(([k,v])=>this.booksDict[k] && this.booksDict[k].abbrev ? [this.booksDict[k].abbrev, (typeof v == 'number' ? v : parseInt(v))] : null).filter((o)=>o) 
+                        :
+                        null;
+            const bookcounts = themap ? Object.fromEntries(themap) : null;
+            
+            if (bookcounts && Object.keys(bookcounts).length){
+                lexStats.bookCounts=bookcounts;
+
+            }*/
+
+            
+            const refs = theJsonObj.refs;
+            if (refs && refs.length){
+                //mylog(`got refs(${lexID}):['${JSON.stringify(refs)}']`, true);
+                lexStats.references=refs.map((r)=>{
+                    let ret = r;
+                    const bcv = BibleUtils.getBookChapVerseFromRef(r);
+                    
+                    const book=bcv && bcv.book ? this.getBookAbbrev(bcv.book) : '';
+                    if (book){
+                        r = book + ( bcv.chap ? (" " + bcv.chap) : '') + (bcv.v? ":" + bcv.v : '');
+                    }
+
+                    if (r && r!=book){
+                        ret = r;
+                    }
+                    return ret;
+                
+                });
+            }else{
+            // mylog(`got not refs for id ${lexID}`,true)
+            }
         }
+        //lexStats.calculateFrequencies(calculate);
         
-        return lemmaInfo;
+        return lexStats;
     
     }
 
@@ -784,6 +795,9 @@ export class TfServer{
     }
 
 
+    getBookSyn(id){
+        return this.booksDict[id]?.syn[0] ? this.booksDict[id]?.syn[0] : this.getBookName(id);
+    }
 
     /**
      * 

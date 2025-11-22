@@ -41,6 +41,7 @@ test('splitBookChap', async () => {
         {ref: "1 Cor 2", obj: {book: "1 Cor", chap: "2"}},
         {ref: "John 10", obj: {book: "John", chap: "10"}},
         {ref: "John", obj: {book: "John", chap: null}},
+        {ref: "1_Thessalonians 3", obj: {book: "1 Thessalonians", chap: "3"}},
         
     ]
 	
@@ -141,17 +142,37 @@ test('formatBibleRefs', async () => {
 	expect(true).toBe(true);
 	//await expect(page.locator('h1')).toBeVisible();
 });
-/*
+
 test('combineRefs', async () => {
 	const tests =[
-        {input: "Matt 1", output:"Matt 1"},
+        {input: ["Matt 1","1_Thessalonians 3:3"], output:"Matt 1; 1 Thessalonians 3:3"},
+        {input: ["1 Thess 5:17","1 Thess 5:25","2 Thess 1:11"], output:"1 Thess 5:17,25; 2 Thess 1:11"},
+
+        
      
         
     ]
     for (const t of tests) {
-        expect(bibleUtils.formatBibRefs(t.input)).toEqual(t.output);
+        expect(bibleUtils.combineRefs(t.input)).toEqual(t.output);
+       // expect(bibleUtils.formatBibRefs(t.input.join(";"))).toEqual(t.output);
     }
 	expect(true).toBe(true);
 	//await expect(page.locator('h1')).toBeVisible();
 });
-*/
+
+test('formatRefs', async () => {
+	const tests =[
+        {input: ["Matt 1","1_Thessalonians 3:3"], output:"Matt 1; 1 Thess 3:3"},
+        //{input: ["1 Thess 5:17","1 Thess 5:25","2 Thess 1:11"], output:"1 Thess 5:17,25; 2 Thess 1:11"},
+
+        
+     
+        
+    ]
+    for (const t of tests) {
+        //expect(bibleUtils.combineRefs(t.input)).toEqual(t.output);
+        expect(bibleUtils.formatBibRefs(t.input.join(";"))).toEqual(t.output);
+    }
+	expect(true).toBe(true);
+	//await expect(page.locator('h1')).toBeVisible();
+});

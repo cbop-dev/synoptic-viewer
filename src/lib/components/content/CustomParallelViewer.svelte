@@ -1,5 +1,7 @@
 <script>
 import { onMount,untrack } from "svelte";
+import Loading from "../ui/Loading.svelte";
+import LemmaInfo from "./lemma/LemmaInfo.svelte";
 import LinkSvg from  '../ui/icons/link.svg';
 import { SynopsisOptions3  } from "./SynopsisClasses.svelte.js";
 import { ParallelColumn,Word, TextAndRef,VerseWords,ParallelColumnGroup,parseSingleGroup } from "./parallelTexts.svelte.js";
@@ -388,6 +390,20 @@ function resetViewOptions(lookup=false){
     function emptySelectedLexemes(){
         selectedLexes.length = 0;
     }
+
+    function wordClick(id,bookName=''){
+        const bookid=bookName ? tfServer.getBookID(bookName) : 0;
+        //mylog(`wordclick(${id},${bookName}[id:${bookid}])`)
+        if(options.viewOptions.highlightOnClick){
+            toggleLex(id);
+        }
+        if(options.viewOptions.lexInfoClick){
+            //mylog(`about to call showlexinfo(${id})`)
+            showLexInfo(id,bookid);
+        }
+
+    }
+
     function toggleLex(id){
         //mylog("toggleLex("+id+")");
         if(selectedLexes.includes(id)) {
@@ -518,7 +534,7 @@ const viewStates=$state({
 
 
     const hotkeys=new SynopsisHotkeys(myOptions);
-    hotkeys.enableHotkeys('><tb');
+    hotkeys.enableHotkeys('><tbax');
     const hotkeys2=[
       
        
@@ -639,6 +655,54 @@ function loadRequestOptions(){
 
 //let gotRequest = ((myOptions.columns && myOptions.columns.length) || (myOptions.batch && myOptions.batch.length));
 let mounted=$state(false);
+
+/**
+ * @type {Object<number,LexemeInfo>} fetchedLexInfo
+ */
+let fetchedLexInfo=$state({});
+let chosenLexIdToShow=$state(0);
+let chosenLexBookId=$state(0);
+let showLexModal=$state(false);
+let lexInfoFetching=$state(false);
+/**
+ * 
+ * @param {number} id
+ * @param {number} bookid 
+ */
+async function showLexInfo(id,bookid=0){
+    if (id) {
+        chosenLexIdToShow=id;
+        chosenLexBookId=bookid;
+
+        showLexModal=true;
+        if (!fetchedLexInfo[id]){
+            lexInfoFetching=true;
+            const lexInfo = await tfServer.fetchLexInfo(id);
+            
+            if (lexInfo){
+                
+                //showLexModal=true;
+                lexInfo.stats=await tfServer.fetchLexRefsCounts(id,true);
+                fetchedLexInfo[id]=lexInfo;
+                
+              //  mylog(`fetched lemma info for '${lexInfo.lemma}'`)
+                
+                //fetchedLexInfo[chosenLexIdToShow]=lexInfo;
+            }
+            else{
+                //mylog(`Tried to get lex ${chosenLexIdToShow} but failed.`)
+            }
+            lexInfoFetching=false;
+        }
+        if(fetchedLexInfo[chosenLexIdToShow]){
+            
+            fetchedLexInfo=fetchedLexInfo;
+        }
+        showLexModal= fetchedLexInfo[chosenLexIdToShow] ? true : false;
+    }
+    
+}
+
 $effect(()=>{
     if (keyevent){
 
@@ -722,16 +786,34 @@ onMount(() => {
             <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={myOptions.viewOptions.unique} buttonText="Unique" tooltipbottom  tooltip="Outline all lexemes unique to each column."/></svelte:element>
             <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={myOptions.viewOptions.identical} tooltipbottom tooltip="Toggle Bold/underline morphologically identical words, even if they are in diverse positions. This generates 'false positives.'" 
                     buttonText="Identical"/></svelte:element>
-            <svelte:element this={theTag} class={classes}><ButtonSelect buttonText="Auto Highlight" bind:selected={myOptions.viewOptions.highlightOnClick}  tooltipbottom  tooltip="If enabled, clicking on any word will highlight all instances of the lexeme. Like fish with red wine, this does not pair well with 'Similar phrases' highlighting."/></svelte:element>
-            <svelte:element this={theTag} class={classes}><ButtonSelect buttonText="☰ Words" bind:selected={viewStates.views.words.state} tooltipbottom  tooltip="View Lexeme and custom Greek options."/></svelte:element> 
+            <!--<svelte:element this={theTag} class={classes}><ButtonSelect buttonText="Auto Highlight" bind:selected={myOptions.viewOptions.highlightOnClick}  tooltipbottom  tooltip="If enabled, clicking on any word will highlight all instances of the lexeme. Like fish with red wine, this does not pair well with 'Similar phrases' highlighting."/></svelte:element>-->
+            <svelte:element this={theTag} class={classes}><ButtonSelect buttonText="☰ Words" 
+            bind:selected={viewStates.views.words.state} tooltipbottom  tooltip="View Lexeme and custom Greek options."/></svelte:element> 
             <svelte:element this={theTag} class={classes}><Button buttonText="Reset" tooltipbottom  tooltip="Reset options" buttonColors={"btn-primary"}
                 onclick={()=>{myOptions.reset(); myOptions.viewOptions.menuOpen=true}}
             /></svelte:element> 
+
+               
+                <svelte:element this={theTag} class={[classes, 'menu']}>
+                    <label class="label tooltip" 
+                        data-tip="Highlight lexemes"    
+                            for="highlight-click">
+                     <input  class="toggle" id="highlight-click-check" type="checkbox" bind:checked={myOptions.viewOptions.highlightOnClick}/>Highlight{#if short}{:else} Lexemes{/if}
+                    </label>
+                </svelte:element>
+                  <svelte:element this={theTag} class={[classes, 'menu']}>
+                    <label class="label tooltip " 
+                        data-tip="Show Lexeme Info"    
+                            for="lexeme-info-click">
+                     <input  class="toggle" id="lexeme-info-click" type="checkbox" bind:checked={myOptions.viewOptions.lexInfoClick}/>Stats{#if short}{:else}{/if}
+                    </label>
+                
+                </svelte:element>  
             {#if currentServer.abbrev==SblGntServer.abbrev}
                 <svelte:element this={theTag} class={[classes,["tooltip","tooltip-bottom","menu"]]} 
                 data-tip="Show/hide the SBL GNT apparatus marks in the text. This also effects the 'copy' buttons."> <label class="label" for="hide-app-check{short? '-short':''}">
                     <input  class="toggle " id="hide-app-check{short? '-short':''}" type="checkbox"
-                    bind:checked={myOptions.viewOptions.hideApp}/>Hide appar{#if !short}aratus{:else}.{/if}</label>
+                    bind:checked={myOptions.viewOptions.hideApp}/>Hide appar{#if !short}atus{:else}.{/if}</label>
                 </svelte:element>
                 {/if}  
         
@@ -850,7 +932,7 @@ onMount(() => {
     <hr class=" m-1 p-1"/>
     <div class="anchor" id="group-{i+1}">
     {#if texts.length > 1}<h3 class="font-bold underline">Group #{i+1}</h3>{/if}
-    <ParallelColumnSection parTextGroup={textGroup}  wordClick={toggleLex} 
+    <ParallelColumnSection parTextGroup={textGroup}  wordClick={wordClick} 
                         cssClassDict={lexClasses}
                         cssCustomDict={customGreekClasses}
                         options={myOptions}
@@ -1061,5 +1143,19 @@ onMount(() => {
 
 <Modal2 bind:showModal={viewStates.views.lookup.state} title="Lookup!">
     {@render lookupPanel()}
+
+</Modal2>
+
+<Modal2 bind:showModal={showLexModal} title="Lexeme Info and Stats">
+    
+    {#if chosenLexIdToShow && fetchedLexInfo[chosenLexIdToShow]}
+    <LemmaInfo bind:lemmaInfo={fetchedLexInfo[chosenLexIdToShow]} tfServer={currentServer} bookID={chosenLexBookId}/>
+    {:else} 
+    <div class="block w-full text-center">
+    <Loading message="" title="Loading Lexeme Info and Stats..."/>
+    </div>
+    
+    
+    {/if}
 
 </Modal2>

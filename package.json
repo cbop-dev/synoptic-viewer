@@ -1,6 +1,6 @@
 {
 	"name": "@cbop-dev/synoptic-viewer",
-	"version": "0.4.9.18",
+	"version": "0.4.9.19",
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
@@ -43,6 +43,9 @@
 		"vitest": "^3.0.0"
 	},
 	"dependencies": {
-		"@cbop-dev/aland-gospel-synopsis": "^0.1.12"
+		"@cbop-dev/aland-gospel-synopsis": "^0.1.12",
+		"@vortechsolutions/gridjs-svelte": "^2.1.6",
+		"chart.js": "^4.5.1",
+		"gridjs": "^6.2.0"
 	}
 }
