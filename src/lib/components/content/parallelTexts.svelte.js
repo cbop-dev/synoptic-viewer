@@ -612,7 +612,7 @@ export class ParallelColumnGroup {
                     
                 }
 
-                
+                let i = 1;
                 for (const [phrase,locs] of Object.entries(this.exactlyIdenticalPhrases)
                                            .filter(([phrase,loc])=>loc.length > 1))
                 {//adding a css entry for each word:
@@ -620,11 +620,13 @@ export class ParallelColumnGroup {
                     locs.forEach((loc)=>{
                         
                         this.getWordsFromLocation(loc).forEach((w)=>{
-                            w.specialCss.add('exact-phrase')
+                            w.specialCss.add('exact-phrase');
+                            w.specialCss.add('exact-phrase-'+i);
                         })
 
                         
                     });
+                    i++;
                 }
             }
             this.updatedCounter++;

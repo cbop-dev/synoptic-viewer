@@ -240,7 +240,9 @@ lexRefQuery={sectionRefsQuery}/>-->
 {#if showStats}
 {@const tabs=["Basic Stats","Small Charts","Large Charts/Table"]}
 <hr/>
-<h2 class="text-2xl">Stats and Charts</h2>
+<h2 class="text-2xl pb-1">Stats and Charts</h2>
+<span class="greek block text-xs p0 m0" title="τί τὸ σοφώτατον; ἀριθμός· δεύτερον δὲ τὸ τοῖς πράγμασι τὰ ὀνόματα τιθέμενον. In Pythagoras, 'Testimonia, Part C: Attributed Doctrines (D)', LCL 527:118-119">"What is the wisest? Number. The second is what gives things their names." --Pythagorus</span>
+<span class="block text-center text-xs mb-2" title='Twain, Mark. "Chapters from My Autobiography: XX."" The North American Review 185, no. 618 (1907): 465–74. http://www.jstor.org/stable/25105919.'>"There are three kinds of lies: lies, d*mned lies, and statistics." -- Mark Twain</span>
 
 <Tabs headings={tabs} bind:selectedTabIndex={selectedTab} classes={['inline-block','text-center']}/>
 

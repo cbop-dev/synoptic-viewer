@@ -83,7 +83,7 @@ let {
 //$inspect(`<BibleTextBlock>: textRef.ref=${textRef.reference}`)
 </script>
 
-<div class="bible-block {options.viewOptions.exactPhrases ? 'show-exact' : ''}">
+<div class="bible-block {options.viewOptions.exactPhrases ? 'show-exact' : ''} {!options.viewOptions.similarPhrases ? 'hide-similar': ''}">
 {#key parGroup &&  parGroup.updatedCounter && parGroup.lexIdenticalPhrasesMap.size && parGroup.lexIdenticalPhrasesMap}
 
 {#if textRef.text}
@@ -149,7 +149,7 @@ let {
                         <span role="none" 
                         class={["m-0", "word", "lex-"+word.id, 
                             options.viewOptions.unique && uniqueSet && isUnique(word.id,uniqueSet) && "lex-unique",
-                            customClasses?.length ? customClasses[0] : '', wordClasses, options.viewOptions.similarPhrases ? lexicalPhrases : [],
+                            customClasses?.length ? customClasses[0] : '', wordClasses,  lexicalPhrases,
                             options.viewOptions.identical && lexCssClasses && parGroup.matchingWords.includes(stripWord(word.word)) && 'identical-word',
                             lexCssClasses, ...word.specialCss]} 
                         onclick={()=>{if (options.viewOptions.highlightOnClick || options.viewOptions.lexInfoClick) wordClick(word.id,book)}}>{getText([word],options.viewOptions.hideApp)}{'  '} 
@@ -192,58 +192,64 @@ let {
         @apply outline-1 outline-dashed;
     }
 
-    .show-exact .exact-phrase {
-        @apply decoration-double underline border-t-1;
+    .hide-similar .lexical-phrase{
+        @apply bg-transparent;
     }
-    .lexical-phrase {
 
-        @apply border-b-2  font-bold;
+    .show-exact .exact-phrase {
+        @apply  border-t-2 border-b-2  font-bold underline ;
     }
-    .lexical-phrase-1 {
-        @apply  border-red-600 bg-red-600/20;
-    }
+
     
-    .lexical-phrase-2 {
-        @apply border-blue-700 bg-blue-700/20;
-    }
-    .lexical-phrase-3 {
-        @apply border-green-500 bg-green-500/20;
-    }
-    .lexical-phrase-4 {
-        @apply border-fuchsia-700 bg-fuchsia-700/20;
-    }
-    .lexical-phrase-5 {
-        @apply border-black bg-slate-400/30;
-    }
-    .lexical-phrase-6 {
-        @apply border-amber-600 bg-amber-600/20;
-    }
-    .lexical-phrase-7 {
-        @apply border-amber-300 bg-amber-300/40;
-    }
-      .lexical-phrase-8 {
-        @apply border-rose-600 bg-rose-600/20;
-    }
     
-    .lexical-phrase-9 {
-        @apply border-teal-700 bg-teal-700/20;
-    }
-    .lexical-phrase-10 {
-        @apply border-purple-800 bg-purple-800/20;
-    }
-    .lexical-phrase-11 {
-        @apply border-yellow-950 bg-yellow-950/20;
-    }
-    .lexical-phrase-12 {
-        @apply border-b-cyan-700;
-    }
-    .lexical-phrase-13 {
-        @apply  border-orange-900 bg-orange-900/20;
-    }
-    .lexical-phrase-14 {
-        @apply border-amber-300 bg-amber-300/20;
-    }
-    
+        .lexical-phrase {
+
+            
+        }
+       	 .lexical-phrase-1 {
+            @apply  border-red-600 bg-red-600/20 decoration-red-600;
+        }
+        
+        .lexical-phrase-2 {
+            @apply border-blue-700 bg-blue-700/20 decoration-blue-700;
+        }
+        .lexical-phrase-3 {
+            @apply border-green-500 bg-green-500/20 decoration-green-500;
+        }
+        .lexical-phrase-4 {
+            @apply border-fuchsia-700 bg-fuchsia-700/20 decoration-fuchsia-700;
+        }
+        .lexical-phrase-5 {
+            @apply border-black bg-slate-400/30 decoration-black;
+        }
+        .lexical-phrase-6 {
+            @apply border-amber-600 bg-amber-600/20 decoration-amber-600;
+        }
+        .lexical-phrase-7 {
+            @apply border-amber-300 bg-amber-300/40 decoration-amber-300;
+        }
+        .lexical-phrase-8 {
+            @apply border-rose-600 bg-rose-600/20 decoration-rose-600;
+        }
+        
+        .lexical-phrase-9 {
+            @apply border-teal-700 bg-teal-700/20 decoration-teal-700;
+        }
+        .lexical-phrase-10 {
+            @apply border-purple-800 bg-purple-800/20 decoration-purple-800;
+        }
+        .lexical-phrase-11 {
+            @apply border-yellow-950 bg-yellow-950/20 decoration-yellow-950;
+        }
+        .lexical-phrase-12 {
+            @apply border-cyan-700 bg-cyan-700/20 decoration-cyan-700;
+        }
+        .lexical-phrase-13 {
+            @apply  border-orange-900 bg-orange-900/20 decoration-orange-900;
+        }
+        .lexical-phrase-14 {
+            @apply border-amber-300 bg-amber-300/20 decoration-amber-300;
+        }
     
     
     
