@@ -22,6 +22,8 @@
      * cssClassDict:Object,
      * cssCustomDict:Object,
      * showNotes:boolean,
+     * selectedLexes:number[],
+     * selectedLexesPallete:{bg:string,font:string}[]
      * showNotesFunction(heading:string,note:string):void
      * }}
      */
@@ -33,12 +35,14 @@
        /* showUnique=false,
         showIdentical=true,*/
         wordClick=(id)=>{},
+        selectedLexes=[],
         cssClassDict={},
         cssCustomDict={},
         /*highlightOnClick=true,
         
         hideApp=false,*/
         showNotes=false,
+        selectedLexesPallete=[],
         showNotesFunction=(heading,note)=>{alert(heading+"\n"+note)}
         
         
@@ -155,6 +159,7 @@ function isUnique(wordid, uniqueSet){
 //$inspect("ParTexts, focus:", focus)
 //$inspect("numCols", numCols, "colData:", colData)
 //$inspect("ParText, customClass", cssCustomDict);
+$inspect("ParaGoSection.parObj.lexPallet:", parGroup.lexIdenticalPhrasePallete.map((o)=>`bg:${o.bg}, font:${o.font}, border:${o.border}`).join(";"));
 </script>
 <style>
     @reference "tailwindcss";
@@ -234,8 +239,8 @@ function isUnique(wordid, uniqueSet){
                             {#if index2 > 0}<br/>{/if}
                             <div class="text-left">    
                                 <BibleTextBlock {textRef}  {parGroup} {options} {numCols} copyButton={true} 
-                                    cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} 
-                                    {showNotes} uniqueSet={unique} notesClick={showNotesFunction} 
+                                    cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} {selectedLexes}
+                                    {showNotes} uniqueSet={unique} notesClick={showNotesFunction} {selectedLexesPallete}
                                         {wordClick} 
                                 />
                             </div>
@@ -256,7 +261,7 @@ function isUnique(wordid, uniqueSet){
                         
                         <BibleTextBlock textRef={secondaryTextRef}  {parGroup} {options} {numCols} copyButton={true} 
                         cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} 
-                        {showNotes} uniqueSet={unique} notesClick={showNotesFunction} 
+                        {showNotes} uniqueSet={unique} notesClick={showNotesFunction} {selectedLexesPallete}
                             {wordClick} 
                         />
                         </div>
@@ -280,7 +285,7 @@ function isUnique(wordid, uniqueSet){
 
                     <BibleTextBlock {textRef}  {parGroup} {options} {numCols} copyButton={true} 
                     cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} 
-                    {showNotes} notesClick={showNotesFunction} 
+                    {showNotes} notesClick={showNotesFunction} {selectedLexesPallete}
                         {wordClick} 
                     />
                 <!--{@render showText(myOptions)}-->
@@ -298,7 +303,7 @@ function isUnique(wordid, uniqueSet){
         <div class="rounded-box  inline-block p-2 m-1 {Object.values(gospels.abbreviations)[colData.focusIndex]} text-left">
                  <BibleTextBlock {textRef}  {parGroup} {options} {numCols} copyButton={true} 
                     cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} 
-                    {showNotes} uniqueSet={unique}  notesClick={showNotesFunction} 
+                    {showNotes} uniqueSet={unique}  notesClick={showNotesFunction} {selectedLexesPallete}
                         {wordClick} 
                     />
         </div>
@@ -314,7 +319,7 @@ function isUnique(wordid, uniqueSet){
             <div class="rounded-box  inline-block p-2 m-1 {Object.values(gospels.abbreviations)[colData.focusIndex]} text-left lg:flex-1">
                     <BibleTextBlock textRef={secondRef}  {parGroup} {options} {numCols} copyButton={true} 
                         cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} 
-                        {showNotes} uniqueSet={unique}  notesClick={showNotesFunction} 
+                        {showNotes} uniqueSet={unique}  notesClick={showNotesFunction} {selectedLexesPallete}
                             {wordClick} 
                         />
             <!--{@render showText(myOptions)}-->
@@ -337,7 +342,7 @@ function isUnique(wordid, uniqueSet){
                 <div >
                          <BibleTextBlock {textRef}  {parGroup} {options}  {numCols} copyButton={true} 
                     cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} 
-                    {showNotes} uniqueSet={col.unique} notesClick={showNotesFunction} 
+                    {showNotes} uniqueSet={col.unique} notesClick={showNotesFunction} {selectedLexesPallete}
                         {wordClick} 
                     />
                 <!--{@render showText(myOptions)}-->
@@ -355,7 +360,7 @@ function isUnique(wordid, uniqueSet){
                     <div >
                             <BibleTextBlock textRef={secRef}  {parGroup} {options}  {numCols} copyButton={true} 
                         cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} 
-                        {showNotes} uniqueSet={col.unique} notesClick={showNotesFunction} 
+                        {showNotes} uniqueSet={col.unique} notesClick={showNotesFunction} {selectedLexesPallete}
                             {wordClick} 
                         />
                     <!--{@render showText(myOptions)}-->
@@ -380,7 +385,7 @@ function isUnique(wordid, uniqueSet){
                  
                 <div class="rounded-box other bg-base-200 inline-block m-1  text-left">
                          <BibleTextBlock {textRef}  {parGroup} {options}  {numCols} copyButton={true} 
-                    cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} 
+                    cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} {selectedLexesPallete}
                     {showNotes}  notesClick={showNotesFunction} 
                         {wordClick}
                     />

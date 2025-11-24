@@ -1,4 +1,5 @@
 import { mylog } from "$lib/env/env.js";
+import { ColorUtils } from "$lib/utils/color-utils";
 
 import { GreekUtils } from "$lib/utils/greek-utils";
 import {combineRefs, formatBibRefs,expandRefs} from '$lib/n1904/bibleRefUtils.js';
@@ -35,9 +36,9 @@ export class Word{
     specialCss=new Set();
     /**
      * @description various types of phrase that this word instance is in. Useful, e.g., for assigning css classes for matching phrases.
-     * @type {Object<string,Set<LexicalPhrase>>}
+     * @type {{lexical:Set<{phrase:LexicalPhrase, index:number}>,exact:Set<{phrase: string,index:number}>}}
      */
-    phrases={};
+    phrases={lexical:new Set(),exact: new Set()};
 }
 export class VerseWords{
     verse=0;
@@ -398,9 +399,10 @@ export class LexPhraseAndLocations{
      * @param {LexicalPhrase} phrase 
      * @param {ParallelPhraseLocation[]} locations 
      */
-    constructor(phrase=new LexicalPhrase(),locations=[]){
+    constructor(phrase=new LexicalPhrase(),locations=[],phraseIndex=0){
         this.phrase=phrase;
         this.multiColumnLocations=locations;
+        this.phraseIndex=phraseIndex
     }
 
 
@@ -439,13 +441,18 @@ export class ParallelColumnGroup {
     * @type {Map<LexicalPhrase,{words:Word[], css:Set<string>}>}
     */
     lexIdenticalPhrasesMap=$state(new Map());
-   
+    
     
    /**
     * @type {LexPhraseAndLocations[]} lexIdenticalPhrasesLocations
     * @description all the matching lexical phrases and their locations. 
     */
    lexIdenticalPhrasesLocations=[];
+   
+   /**
+    * @type {{bg:string,font:string,border:string}[]}
+    */
+   lexIdenticalPhrasePallete=[];
    /**
     * @description reverse lookup for finding phrases index by location: i.e., lexIdenticalPhrasesIndexDict[col][tR][v][w]=index of lexIdenticalPhrasesLocations and of lexIdenticalPhrasesCssClasses;
     * @type {Object<number,Object<number,Object<number,Object<number,number>>>>}
@@ -535,9 +542,9 @@ export class ParallelColumnGroup {
         const commonSubarrays2=findMaximalCommonSubarraysAcrossColumns(theColumns,3);
         
         this.lexIdenticalPhrasesLocations=[];
-        for (const subarray of commonSubarrays2){ 
+        for (const [phraseIndex,subarray] of commonSubarrays2.entries()){ 
             const lexPhrase = new LexicalPhrase(subarray.subarray);
-            const lexPhraseAndLocations= new LexPhraseAndLocations(lexPhrase);
+            const lexPhraseAndLocations= new LexPhraseAndLocations(lexPhrase,[],phraseIndex);
             for (const occurrence of subarray.occurrences){  //second loop: each column, of that phrase
                 const colIndex=occurrence.columnIndex;
                 const isSecondary =occurrence.textIndex>=this.parallelColumns[colIndex].textRefs.length;
@@ -561,11 +568,11 @@ export class ParallelColumnGroup {
                     }
 
                     words.forEach((w)=>{
-                        if (!w.phrases['lexical']){
-                            w.phrases['lexical']=new Set();
+                        if (!w.phrases.lexical){
+                            w.phrases.lexical=new Set();
 
                         }
-                        w.phrases['lexical'].add(lexPhrase);
+                        w.phrases.lexical.add({phrase:lexPhrase, index:phraseIndex});
                         
                     });
 
@@ -622,7 +629,9 @@ export class ParallelColumnGroup {
                         this.getWordsFromLocation(loc).forEach((w)=>{
                             w.specialCss.add('exact-phrase');
                             w.specialCss.add('exact-phrase-'+i);
-                        })
+                            w.phrases.exact.add({phrase: phrase, index:i});
+                            //w.phrases.exact.add(this.);
+                        });
 
                         
                     });
@@ -641,6 +650,7 @@ export class ParallelColumnGroup {
             //obj.css.add('underline').add('bold').add('bg-yellow-50');
         });
        
+        this.lexIdenticalPhrasePallete=ColorUtils.generateHslBgFontGradient(this.lexIdenticalPhrasesLocations.length,50,80,true);
         
         /*
         //mylog("========================================================",true)

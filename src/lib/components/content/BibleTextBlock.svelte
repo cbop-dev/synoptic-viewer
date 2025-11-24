@@ -1,5 +1,5 @@
 <script>
-    import {ParallelColumnGroup, ParallelColumn, Word, TextAndRef,VerseWords,stripWord} from './parallelTexts.svelte.js';
+    import {ParallelColumnGroup, ParallelColumn, Word, TextAndRef,VerseWords,stripWord,} from './parallelTexts.svelte.js';
     import { SynopsisOptions3 } from './SynopsisClasses.svelte.js';
     import { ColorUtils } from '$lib/utils/color-utils';
     import CopyText     from '../ui/CopyText.svelte';
@@ -9,6 +9,8 @@
     import Button from '../ui/Button.svelte';
     import { LexemeInfo } from '../datastructures/lexeme.js';
     import * as BibleUtils from "$lib/n1904/bibleRefUtils";
+    //import WordComp from "$lib/components/content/Word.svelte"
+	
     /**
      * 
      * @param {Word[]} words
@@ -33,10 +35,12 @@
 * cssCustomStringDict:  Object<string,string>
 * cssUniqueColor: string
 * showNotes:  boolean
+* selectedLexes:number[]
 * uniqueSet:  Set<number>
 * options:SynopsisOptions3
 * notesClick:  function
 * wordClick:  function,
+* selectedLexesPallete:{bg:string,font:string,border:string}[]
 * lexInfoDict:Object<number,LexemeInfo>
 * }} 
 */
@@ -53,7 +57,8 @@ let {
         // Thus {2:{3: ["text-blue-300"]}}} would mean that for the third verse, i.e., textRef[2], the fourth word, textRef[2].words[3], should have the class "text-blue-300".
         cssWordClassDict={},//{2:{3: ["text-blue-300"]}},
         cssLexClassDict={},
-
+        selectedLexes=[],
+        selectedLexesPallete=[],
         //based on strings: key:string, value:
         cssCustomStringDict={},
 //        cssUniqueColor="border-black",
@@ -81,9 +86,42 @@ let {
     return retVal;
 }
 //$inspect(`<BibleTextBlock>: textRef.ref=${textRef.reference}`)
+
+
+
+/**
+ * 
+ * @param {Word} word
+ * @param {number} index index in the current verse
+ * @returns {string} style to be applied in "style" attrbibute of <span> element
+ */
+function getWordStyle(word,index){
+    const selectedLexIndex=selectedLexes.indexOf(word.id);
+    let ret=''
+    if(selectedLexIndex >=0 && options.viewOptions.highlightOnClick){
+        ret = `--bgColor:${selectedLexesPallete[selectedLexIndex].bg}; --fontColor:${selectedLexesPallete[selectedLexIndex].font}`
+    } 
+    else if(word.phrases.lexical.size){
+        const phraseIndex = [...word.phrases.lexical][word.phrases.lexical.size-1].index;
+        const colorObj=parGroup.lexIdenticalPhrasePallete[phraseIndex];
+        if (options.viewOptions.similarPhrases) {
+            ret =ColorUtils.bgFontString(colorObj.bg,colorObj.font);
+        }
+        if (options.viewOptions.exactPhrases && word.phrases.exact.size){
+            ret+= (ret ? "; " : '') + `--borderColor:${colorObj.border}`;
+          //  mylog(`put bordercolor! output= '${ret}'`, true)
+        }
+    }
+
+    return ret;
+}
+//$inspect(`bibleTextBlock: selectedLexes: [${selectedLexes.join(",")}]`);
+$inspect(`bibleTextBlock: selectedLexesPallete: [${selectedLexesPallete.join(",")}]`);
+
 </script>
 
-<div class="bible-block {options.viewOptions.exactPhrases ? 'show-exact' : ''} {!options.viewOptions.similarPhrases ? 'hide-similar': ''}">
+<div class={['bible-block', options.viewOptions.exactPhrases ? 'show-exact' : '', options.viewOptions.identical ? 'show-identical' :'',
+    options.viewOptions.unique ? 'show-unique':'',!options.viewOptions.similarPhrases ? 'hide-similar': '']}>
 {#key parGroup &&  parGroup.updatedCounter && parGroup.lexIdenticalPhrasesMap.size && parGroup.lexIdenticalPhrasesMap}
 
 {#if textRef.text}
@@ -129,9 +167,39 @@ let {
                         {:else}
                         {verseWords.verse}
                     {/if}
-                    </span>
+                    </span> 
                     
                     {#each verseWords.words as word, index}
+<!--                    {@const selectedLexIndex=selectedLexes.indexOf(word.id)}-->
+                    {@const isIdentical=parGroup.matchingWords.includes(stripWord(word.word))}
+                        <span class={['word', word.phrases.lexical.size ? 'lexical':'', isIdentical ? 'identical':'',
+                        word.phrases.exact.size ? 'exact':'', isUnique(word.id,uniqueSet) ? 'unique' : ''
+                        ]}
+                        style={getWordStyle(word,index)} 
+                            onclick={()=>{wordClick(word.id,book)}}
+
+                        >{getText([word],options.viewOptions.hideApp)}{' '}</span>
+
+
+<!--                  <WordComp {word} wordIndex={index}
+                         {book} {options} {wordClick}
+                            {high}
+                            {cssLexClassDict} {customMatchedWords}
+                            {cssWordClassDict}
+                            {verseIndex}
+                            isUnique={isUnique(word.id,uniqueSet)}
+                            {cssCustomStringDict}
+                            highlightIndex={selectedLexes.indexOf(word.id)}
+                            
+                            
+                            isIdentical={parGroup.matchingWords.includes(stripWord(word.word))}
+                    
+                    />
+-->  
+                    <!--{[...word.phrases.lexical].map((phr)=>parGroup.lexIdenticalPhrasesLocations.findIndex((v)=>v.phrase==phr))}-->
+
+
+<!--                    
                          
                         {@const lexicalPhrases = word.phrases['lexical'] ? Array.from(word.phrases['lexical']).
                             map((p)=>parGroup.getCssClassesForPhrase(p)).flat()  : []}
@@ -145,20 +213,19 @@ let {
                         {@const customMatchSearchStrings=Object.entries(customMatchedWords).filter(([searchPhrase,array2d])=>array2d.flat().includes(index)).map(([s,a2d])=>s)}
                         {@const customClasses = customMatchSearchStrings.map((s)=>cssCustomStringDict[s])}
                         {@const wordClasses = (cssWordClassDict[verseIndex] && cssWordClassDict[verseIndex][index])? cssWordClassDict[verseIndex][index] : []}
-                        {#if false && word.specialCss.size}[[Special class={[...word.specialCss].join(",")}]]:{/if}
-                        <span role="none" 
-                        class={["m-0", "word", "lex-"+word.id, 
-                            options.viewOptions.unique && uniqueSet && isUnique(word.id,uniqueSet) && "lex-unique",
-                            customClasses?.length ? customClasses[0] : '', wordClasses,  lexicalPhrases,
-                            options.viewOptions.identical && lexCssClasses && parGroup.matchingWords.includes(stripWord(word.word)) && 'identical-word',
-                            lexCssClasses, ...word.specialCss]} 
-                        onclick={()=>{if (options.viewOptions.highlightOnClick || options.viewOptions.lexInfoClick) wordClick(word.id,book)}}>{getText([word],options.viewOptions.hideApp)}{'  '} 
-                        
-                    {#if word.phrases['lexical']}
-                        <!--Match!:phraseclasses={phraseClasses}-->
-                    {:else}
-                    {/if}
-            </span>
+                            {#if false && word.specialCss.size}[[Special class={[...word.specialCss].join(",")}]]:
+                            {/if}
+                        <span role="none"
+                            class={["m-0", "word", "lex-"+word.id, 
+                                options.viewOptions.unique && uniqueSet && isUnique(word.id,uniqueSet) && "lex-unique",
+                                customClasses?.length ? customClasses[0] : '', wordClasses,  lexicalPhrases,
+                                options.viewOptions.identical && lexCssClasses && parGroup.matchingWords.includes(stripWord(word.word)) && 'identical-word',
+                                lexCssClasses, ...word.specialCss]} 
+                            onclick={()=>{if (options.viewOptions.highlightOnClick || options.viewOptions.lexInfoClick) wordClick(word.id,book)}}>{getText([word],options.viewOptions.hideApp)}{'  '} 
+                            
+                      
+                        </span>
+-->           
                     {/each}
                 {/each}<!--<CopyText linkText="IDs!" getTextFunc={()=>textRef.getWordIdArray().join(',')} />-->
             {:else if textRef.text}
@@ -182,14 +249,14 @@ let {
         @apply bg-white/20 border-1 border-black/30 rounded p-1;
     }*/
 
-   .lex-unique{
-      /*  @apply outline-2 pl-0.5 mr-0.5 ;
-        outline-color: var(--cssUniqueColor,#000);*/
+   .show-unique .unique{
+        @apply outline-2 pl-0.5 mr-0.5 ;
+        outline-color: var(--cssUniqueColor,red);
         
     }
 
-    .identical-word{
-        @apply outline-1 outline-dashed;
+    .show-identical .word.identical{
+        @apply outline-1 outline-dashed outline-blue-700;
     }
 
     .hide-similar .lexical-phrase{
@@ -197,10 +264,10 @@ let {
     }
 
     .show-exact .exact-phrase {
-        @apply  border-t-2 border-b-2  font-bold underline ;
+        @apply  border-t-2 border-b-2  font-bold underline shadow-red-600;
     }
 
-    
+    /*
     
         .lexical-phrase {
 
@@ -250,7 +317,26 @@ let {
         .lexical-phrase-14 {
             @apply border-amber-300 bg-amber-300/20 decoration-amber-300;
         }
-    
+    */
+    .word{
+        background-color: var(--bgColor,transparent);
+        color: var(--fontColor,black);
+    }
+
+    .show-exact .word.exact{   
+ 
+          @apply border-t-2 border-b-3  font-bold;
+          border-color: var(--borderColor,black);
+          
+    }
+    :not(.hide-similar).show-exact .word.exact{
+        text-decoration-color:  var(--fontColor,black);
+        @apply underline;
+    }
+
+    .hide-similar.show-exact .word.exact{
+        @apply bg-white/80;
+    }
     
     
 </style>

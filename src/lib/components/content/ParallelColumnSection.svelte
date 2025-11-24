@@ -62,6 +62,7 @@
      * cssCustomDict:Object,
      * options:SynopsisOptions3,
      * showNotes:boolean,
+     * selectedLexesPallete:{bg:string,font:string,border:string}[],
      * showNotesFunction(heading:string,note:string):void
      * }}
      */
@@ -76,6 +77,7 @@
         //options.viewOptions.highlightOnClick=true,
         showNotes=true,
         //hideApp=false,
+        selectedLexesPallete=[],
         showNotesFunction=(heading,note)=>{alert(heading+"\n"+note)}
         
     } = $props();
@@ -104,7 +106,7 @@ function notesClick(heading,note){
 //$inspect("numCols", numCols, "colData:", colData)
 //$inspect("ParText, customClass", cssCustomDict);
 //$inspect(`options.unique: ${options.viewOptions.unique}`);
-
+$inspect(`ParalColSec.lexPalette:`, selectedLexesPallete);
 </script>
 
 
@@ -136,9 +138,15 @@ function notesClick(heading,note){
    
                     <BibleTextBlock {textRef}  parGroup={parTextGroup} {options} {numCols} copyButton={true} 
                     cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} 
-                    {showNotes} uniqueSet={unique} notesClick={showNotesFunction} 
+                    {showNotes} uniqueSet={unique} notesClick={showNotesFunction} {selectedLexesPallete}
                         {wordClick} 
                     />
+
+
+                            
+                           
+
+
                      <!--{@render showText(myOptions,cssClasses)}-->
                     </div>
                     <!--<hr class='border-accent-content'/> -->

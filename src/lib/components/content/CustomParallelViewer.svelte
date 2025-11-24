@@ -124,7 +124,9 @@ let texts= $state([]);
 * @type {number[]} selectedLexes
 */
 let selectedLexes=$state(myOptions.viewOptions.lexes);
-mylog("initialized selected lexes: " + selectedLexes.join(','));
+//mylog("initialized selected lexes: " + selectedLexes.join(','));
+
+let selectedLexesPallete=$derived(ColorUtils.generateHslBgFontGradient(selectedLexes.length,100,50,true));
 
 /**
 * @type {string[]} selectedGreekStrings
@@ -919,9 +921,13 @@ onMount(() => {
 
 
 {#if !(mounted && dataReady)}
+    {#if fetching && !dataReady}
+    <Loading title="Loading texts..." message={[]}/>
+    {:else}
     <span class="italic mt-3 pt-5"> Enter some valid NT references and click "Lookup!"</span>
+    {/if}
 {:else}
-    
+
     <hr/>
     <h2>Parallel NT Texts from {currentServer.name}:
         <CopyText icon={LinkSvg} 
@@ -941,6 +947,7 @@ onMount(() => {
                         options={myOptions}
                         showNotes={true} 
                         showNotesFunction={displayNote}
+                        {selectedLexesPallete}
                         />
     </div>
     {/each}

@@ -95,7 +95,7 @@ let maxLexesToShow=$state(30);
 * @type {number[]} selectedLexes
 */
 let selectedLexes=$state(myOptions.viewOptions.lexes);
-
+let selectedLexesPallete=$derived(ColorUtils.generateHslBgFontGradient(selectedLexes.length,100,50,true));
 /**
 * @type {string[]} myOptions.viewOptions.greekStrings
 */
@@ -305,13 +305,14 @@ let lexClasses= $derived.by(()=>{// id->css color (e.g., "#eee")
     const ret = {}
     if(dataReady && fetchedTextsResponse.lexemes) {
         //mylog("building lexClasses...",true)
-        for(const id of Object.values(fetchedTextsResponse.lexemes).map((o)=>o.id)) {
+        for(const [index,id] of Object.values(fetchedTextsResponse.lexemes).map((o)=>o.id).entries()) {
             
             let classes = "lex-"+id;
             if(selectedLexes.includes(id)){
-                classes += " " + getColorOfLex(id,true);
+               // classes += " " + getColorOfLex(id,true);
+               classes += ` selected-lex selected-lex-${index}`
             } 
-            //  mylog("setting lex " + id + " to: " + classes,true);
+            //mylog("setting lex " + id + " to: " + classes,true);
             ret[id] = classes;
         }
     }
@@ -927,15 +928,17 @@ onMount(() => {
 //$inspect("fetchedTextsResponse",fetchedTextsResponse);
 //$inspect("groupsRefsArray", groupsRefsArray);
 //$inspect('perGroups', perGroups);
-//$inspect("Exact phrases: '"+ (perGroups.length ? Object.keys(perGroups[0].exactlyIdenticalPhrases).join("'','")+"'" : ''));
+
 //$inspect("hotkeys.hotkeysEnabled:", hotkeys.hotkeysEnabled);
 //$inspect("myOptions.viewOptions.lexes:", myOptions.viewOptions.lexes)
 //$inspect("selectedLexes:", selectedLexes)
 
 
 //$inspect("myOptions.viewOptions.similarPhrases: ", myOptions.viewOptions.similarPhrases);
-$inspect("showLexModal",showLexModal)
-$inspect("chosenLexBookId:",chosenLexBookId);
+//$inspect("showLexModal",showLexModal)
+//$inspect("chosenLexBookId:",chosenLexBookId);
+$inspect("HELLO!")
+$inspect(`NYSyop.selectedLexesPallete:${selectedLexesPallete}`)
 </script>
 <style>
     @reference "tailwindcss";
@@ -1260,9 +1263,11 @@ $inspect("chosenLexBookId:",chosenLexBookId);
                     wordClick={wordClick}
                     {enableSecondary}
                     cssClassDict={lexClasses}
+                    {selectedLexes}
                     cssCustomDict={customGreekClasses}
                     showNotes={currentServer.showNotes}
                     showNotesFunction={displayNote}
+                    {selectedLexesPallete}
                     
                     />
                 </div>
