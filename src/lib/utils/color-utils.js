@@ -1,3 +1,7 @@
+import { colColors } from '$lib/components/content/theme';
+import chroma from 'chroma-js';
+import MathUtils from './math-utils';
+import { mylog } from '$lib/env/env';
 /**
  * Utility class for using tailwindcss CSS classes for color gradients 
  **/
@@ -93,6 +97,53 @@ class ColorUtils{
         return (brightest + 0.05) / (darkest + 0.05);
     }
 
+    /**
+     * //TODO: do this!
+     * @param {number} size
+     * @returns {{bg:string,font:string,border:string}[]} an array of css oklab color values 'bg','font',and optionally 'border': {bg:'oklab(0.3,0.5,0.6), font:'oklab(1,0,0), border: 'oklab(0.8,0.5,0.6'}
+     */
+    static generateCubeHelixOklchPalette(size){
+        const generator= chroma.cubehelix().scale().domain([0,size]).mode('lab').classes(size);
+        return MathUtils.range(size,0).map((i)=>{
+            let ret={bg:'',font:'',border:''};
+                const bgColor =generator(i);
+                //const [r,g,b]=bgColor.rgb()
+                const [h,s,l]=bgColor.hsl();
+                const [r,g,b] = bgColor.darken().desaturate().rgb();
+                ret.bg=`hsl(${Math.round(h)},${Math.round(s*100)}%,${Math.round(l*100)}%)`;
+                ret.font= l <0.5 ? 'white' : 'black';
+                ret.border=`rgb(${r},${g},${b})`;
+            return ret;
+        })
+        //return //chroma.scale(['yellow', 'navy', 'red']).mode('lab').classes(size);
+        
+    }
+
+       /**
+     * //TODO: do this!
+     * @param {number} size
+     * @param {number} sFactor 
+     * @returns {{bg:string,font:string,border:string}[]} an array of css oklab color values 'bg','font',and optionally 'border': {bg:'oklab(0.3,0.5,0.6), font:'oklab(1,0,0), border: 'oklab(0.8,0.5,0.6'}
+     */
+    static myColorPalette(size,sFactor=1){
+        const generator=  chroma.scale(['yellow', 'navy','green','orange']).mode('lch').domain([0,size]).classes(size)
+        return MathUtils.range(size,0).map((i)=>{
+            let ret={bg:'',font:'',border:''};
+            //mylog('=asdf;lkjasdf==========================',true);
+                const bgColor =generator(i);
+                //const [r,g,b]=bgColor.rgb()
+                const [h,s,l]=bgColor.hsl();
+                const [r,g,b] = bgColor.darken().desaturate().rgb();
+                ret.bg=`hsl(${Math.round(h)},${Math.round(sFactor*s*100)}%,${Math.round(l*100)}%)`;
+                ret.font= l <0.5 ? 'white' : 'black';
+                ret.border=`rgb(${r},${g},${b})`;
+              //  mylog(`got colors:${ret.bg},${ret.font},${ret.border}`, true);
+            return ret;
+        })
+        //return //chroma.scale(['yellow', 'navy', 'red']).mode('lab').classes(size);
+        
+    }
+
 
     /**
      * 
@@ -108,6 +159,37 @@ class ColorUtils{
     }
 
 
+
+    static generateDistinctColors(n) {
+        const colors = [];
+        const L = 0.70;   // brightness (0–1)
+        const C = 0.12;   // color intensity (0–~0.4 safe for displays)
+
+        for (let i = 0; i < n; i++) {
+            const h = (360 / n) * i; // evenly spaced hue
+            colors.push(`oklch(${L} ${C} ${h})`);
+        }
+        return colors;
+    }
+   
+    static generateDistinctColorsSetsPalette(n) {
+        const colors = [];
+        const L = 0.70;   // brightness (0–1)
+        const C = 0.12;   // color intensity (0–~0.4 safe for displays)
+
+        for (let i = 0; i < n; i++) {
+
+            const h = (360 / n) * i; // evenly spaced hue
+            
+            const bg = `oklch(${L} ${C} ${h})`;
+            const font=`oklch(${L<0.5? 1: 0} 0 0)`;
+            const border=`oklch(${L* 0.3} ${C*0.5} ${h})`;
+            colors.push({bg:bg,font:font,border:border});
+        }
+        return colors;
+    }
+
+   
     /**
      * 
      * @param {number} num 
@@ -115,12 +197,12 @@ class ColorUtils{
      * @param {number} light 
      * @returns {{bg:string,font:string}[]} array of CSS color values in the form of {bg:string,font: string} so that the bg and font colors contrast well.
      */
-    static generateHslBgFontGradient(num,sat=80,light=50,border=false){
+    static generateHslBgFontPalette(num,sat=80,light=50,border=false){
 
         
         return Array(num).fill(null).map((val,i)=> //like "hsl(56, 80%, 50%)");
             {
-                const h=Math.round(320 * i/(num));
+                const h=Math.round(340 * i/(num));
                 const thefont=ColorUtils.hslContrast(h,sat/100,light/100);
                 thefont.l=thefont.l*100;
                 thefont.s=thefont.s*100;
@@ -169,7 +251,7 @@ class ColorUtils{
         return colorClassString;
     }
 
-    static ColorPallete ={
+    static ColorPalette ={
         redGradient: [
         " bg-red-600 text-white",
         " bg-red-200 text-black",
@@ -437,13 +519,13 @@ class ColorUtils{
         " bg-stone-350 text-black"
         ],
     }
-    static ColorArrays= [ColorUtils.ColorPallete.redGradient, ColorUtils.ColorPallete.purpleGradient, ColorUtils.ColorPallete.emeraldGradient, ColorUtils.ColorPallete.stoneGradient, ColorUtils.ColorPallete.blueGradient, ColorUtils.ColorPallete.yellowGradient, ColorUtils.ColorPallete.limeGradient, ColorUtils.ColorPallete.cyanGradient, ColorUtils.ColorPallete.indigoGradient, ColorUtils.ColorPallete.amberGradient, ColorUtils.ColorPallete.greenGradient, ColorUtils.ColorPallete.orangeGradient, ColorUtils.ColorPallete.roseGradient, ColorUtils.ColorPallete.tealGradient, ColorUtils.ColorPallete.slateGradient, ColorUtils.ColorPallete.violetGradient, ColorUtils.ColorPallete.skyGradient, ColorUtils.ColorPallete.fuchsiaGradient, ColorUtils.ColorPallete.pinkGradient ];
+    static ColorArrays= [ColorUtils.ColorPalette.redGradient, ColorUtils.ColorPalette.purpleGradient, ColorUtils.ColorPalette.emeraldGradient, ColorUtils.ColorPalette.stoneGradient, ColorUtils.ColorPalette.blueGradient, ColorUtils.ColorPalette.yellowGradient, ColorUtils.ColorPalette.limeGradient, ColorUtils.ColorPalette.cyanGradient, ColorUtils.ColorPalette.indigoGradient, ColorUtils.ColorPalette.amberGradient, ColorUtils.ColorPalette.greenGradient, ColorUtils.ColorPalette.orangeGradient, ColorUtils.ColorPalette.roseGradient, ColorUtils.ColorPalette.tealGradient, ColorUtils.ColorPalette.slateGradient, ColorUtils.ColorPalette.violetGradient, ColorUtils.ColorPalette.skyGradient, ColorUtils.ColorPalette.fuchsiaGradient, ColorUtils.ColorPalette.pinkGradient ];
   
     /**
      * 
      * @param {string} bgcolor  css color value, eg., "hsl(100,50%,80%)"
      * @param {string} fontColor css color value, e.g., "hsl(100,50%,80%)"
-     * @returns {string}
+     * @returns {string} string with css vars bgColor, fontcolor, and borderColor, e.g.: "--bgColor: hsl(180,50%, 80%); --fontColor: hsl(0,0%, 0%); --borderColor: hsl(180,50%, 80%)"
      */
     static bgFontString(bgColor,fontColor,borderColor=''){
         return bgColor && fontColor ?

@@ -126,7 +126,7 @@ let texts= $state([]);
 let selectedLexes=$state(myOptions.viewOptions.lexes);
 //mylog("initialized selected lexes: " + selectedLexes.join(','));
 
-let selectedLexesPallete=$derived(ColorUtils.generateHslBgFontGradient(selectedLexes.length,100,50,true));
+let selectedGreekPalette=$derived(ColorUtils.generateHslBgFontPalette(selectedLexes.length+myOptions.viewOptions.greekStrings.length,100,50,true));
 
 /**
 * @type {string[]} selectedGreekStrings
@@ -947,7 +947,7 @@ onMount(() => {
                         options={myOptions}
                         showNotes={true} 
                         showNotesFunction={displayNote}
-                        {selectedLexesPallete}
+                        {selectedGreekPalette}
                         />
     </div>
     {/each}

@@ -23,7 +23,7 @@
      * cssCustomDict:Object,
      * showNotes:boolean,
      * selectedLexes:number[],
-     * selectedLexesPallete:{bg:string,font:string}[]
+     * selectedGreekPalette:{bg:string,font:string}[]
      * showNotesFunction(heading:string,note:string):void
      * }}
      */
@@ -42,7 +42,7 @@
         
         hideApp=false,*/
         showNotes=false,
-        selectedLexesPallete=[],
+        selectedGreekPalette=[],
         showNotesFunction=(heading,note)=>{alert(heading+"\n"+note)}
         
         
@@ -159,7 +159,7 @@ function isUnique(wordid, uniqueSet){
 //$inspect("ParTexts, focus:", focus)
 //$inspect("numCols", numCols, "colData:", colData)
 //$inspect("ParText, customClass", cssCustomDict);
-$inspect("ParaGoSection.parObj.lexPallet:", parGroup.lexIdenticalPhrasePallete.map((o)=>`bg:${o.bg}, font:${o.font}, border:${o.border}`).join(";"));
+$inspect("ParaGoSection.parObj.lexPallet:", parGroup.lexIdenticalPhrasePalette.map((o)=>`bg:${o.bg}, font:${o.font}, border:${o.border}`).join(";"));
 </script>
 <style>
     @reference "tailwindcss";
@@ -240,7 +240,7 @@ $inspect("ParaGoSection.parObj.lexPallet:", parGroup.lexIdenticalPhrasePallete.m
                             <div class="text-left">    
                                 <BibleTextBlock {textRef}  {parGroup} {options} {numCols} copyButton={true} 
                                     cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} {selectedLexes}
-                                    {showNotes} uniqueSet={unique} notesClick={showNotesFunction} {selectedLexesPallete}
+                                    {showNotes} uniqueSet={unique} notesClick={showNotesFunction} {selectedGreekPalette}
                                         {wordClick} 
                                 />
                             </div>
@@ -260,8 +260,8 @@ $inspect("ParaGoSection.parObj.lexPallet:", parGroup.lexIdenticalPhrasePallete.m
                         <div class="text-left">
                         
                         <BibleTextBlock textRef={secondaryTextRef}  {parGroup} {options} {numCols} copyButton={true} 
-                        cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} 
-                        {showNotes} uniqueSet={unique} notesClick={showNotesFunction} {selectedLexesPallete}
+                        cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} {selectedLexes}
+                        {showNotes} uniqueSet={unique} notesClick={showNotesFunction} {selectedGreekPalette}
                             {wordClick} 
                         />
                         </div>
@@ -285,7 +285,7 @@ $inspect("ParaGoSection.parObj.lexPallet:", parGroup.lexIdenticalPhrasePallete.m
 
                     <BibleTextBlock {textRef}  {parGroup} {options} {numCols} copyButton={true} 
                     cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} 
-                    {showNotes} notesClick={showNotesFunction} {selectedLexesPallete}
+                    {showNotes} notesClick={showNotesFunction} {selectedGreekPalette} {selectedLexes}
                         {wordClick} 
                     />
                 <!--{@render showText(myOptions)}-->
@@ -303,7 +303,7 @@ $inspect("ParaGoSection.parObj.lexPallet:", parGroup.lexIdenticalPhrasePallete.m
         <div class="rounded-box  inline-block p-2 m-1 {Object.values(gospels.abbreviations)[colData.focusIndex]} text-left">
                  <BibleTextBlock {textRef}  {parGroup} {options} {numCols} copyButton={true} 
                     cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} 
-                    {showNotes} uniqueSet={unique}  notesClick={showNotesFunction} {selectedLexesPallete}
+                    {showNotes} uniqueSet={unique}  notesClick={showNotesFunction} {selectedGreekPalette} {selectedLexes}
                         {wordClick} 
                     />
         </div>
@@ -319,7 +319,7 @@ $inspect("ParaGoSection.parObj.lexPallet:", parGroup.lexIdenticalPhrasePallete.m
             <div class="rounded-box  inline-block p-2 m-1 {Object.values(gospels.abbreviations)[colData.focusIndex]} text-left lg:flex-1">
                     <BibleTextBlock textRef={secondRef}  {parGroup} {options} {numCols} copyButton={true} 
                         cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} 
-                        {showNotes} uniqueSet={unique}  notesClick={showNotesFunction} {selectedLexesPallete}
+                        {showNotes} uniqueSet={unique}  notesClick={showNotesFunction} {selectedGreekPalette} {selectedLexes}
                             {wordClick} 
                         />
             <!--{@render showText(myOptions)}-->
@@ -342,7 +342,7 @@ $inspect("ParaGoSection.parObj.lexPallet:", parGroup.lexIdenticalPhrasePallete.m
                 <div >
                          <BibleTextBlock {textRef}  {parGroup} {options}  {numCols} copyButton={true} 
                     cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} 
-                    {showNotes} uniqueSet={col.unique} notesClick={showNotesFunction} {selectedLexesPallete}
+                    {showNotes} uniqueSet={col.unique} notesClick={showNotesFunction} {selectedGreekPalette} {selectedLexes}
                         {wordClick} 
                     />
                 <!--{@render showText(myOptions)}-->
@@ -360,7 +360,7 @@ $inspect("ParaGoSection.parObj.lexPallet:", parGroup.lexIdenticalPhrasePallete.m
                     <div >
                             <BibleTextBlock textRef={secRef}  {parGroup} {options}  {numCols} copyButton={true} 
                         cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} 
-                        {showNotes} uniqueSet={col.unique} notesClick={showNotesFunction} {selectedLexesPallete}
+                        {showNotes} uniqueSet={col.unique} notesClick={showNotesFunction} {selectedGreekPalette} {selectedLexes}
                             {wordClick} 
                         />
                     <!--{@render showText(myOptions)}-->
@@ -385,7 +385,7 @@ $inspect("ParaGoSection.parObj.lexPallet:", parGroup.lexIdenticalPhrasePallete.m
                  
                 <div class="rounded-box other bg-base-200 inline-block m-1  text-left">
                          <BibleTextBlock {textRef}  {parGroup} {options}  {numCols} copyButton={true} 
-                    cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} {selectedLexesPallete}
+                    cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} {selectedGreekPalette} {selectedLexes}
                     {showNotes}  notesClick={showNotesFunction} 
                         {wordClick}
                     />

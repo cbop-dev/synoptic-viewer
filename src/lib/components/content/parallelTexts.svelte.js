@@ -452,7 +452,7 @@ export class ParallelColumnGroup {
    /**
     * @type {{bg:string,font:string,border:string}[]}
     */
-   lexIdenticalPhrasePallete=[];
+   lexIdenticalPhrasePalette=[];
    /**
     * @description reverse lookup for finding phrases index by location: i.e., lexIdenticalPhrasesIndexDict[col][tR][v][w]=index of lexIdenticalPhrasesLocations and of lexIdenticalPhrasesCssClasses;
     * @type {Object<number,Object<number,Object<number,Object<number,number>>>>}
@@ -650,7 +650,7 @@ export class ParallelColumnGroup {
             //obj.css.add('underline').add('bold').add('bg-yellow-50');
         });
        
-        this.lexIdenticalPhrasePallete=ColorUtils.generateHslBgFontGradient(this.lexIdenticalPhrasesLocations.length,50,80,true);
+        this.lexIdenticalPhrasePalette=ColorUtils.generateHslBgFontPalette(this.lexIdenticalPhrasesLocations.length,60,70,true);
         
         /*
         //mylog("========================================================",true)

@@ -9,6 +9,7 @@
     import Button from '../ui/Button.svelte';
     import { LexemeInfo } from '../datastructures/lexeme.js';
     import * as BibleUtils from "$lib/n1904/bibleRefUtils";
+    
     //import WordComp from "$lib/components/content/Word.svelte"
 	
     /**
@@ -40,7 +41,7 @@
 * options:SynopsisOptions3
 * notesClick:  function
 * wordClick:  function,
-* selectedLexesPallete:{bg:string,font:string,border:string}[]
+* selectedGreekPalette:{bg:string,font:string,border:string}[]
 * lexInfoDict:Object<number,LexemeInfo>
 * }} 
 */
@@ -58,7 +59,7 @@ let {
         cssWordClassDict={},//{2:{3: ["text-blue-300"]}},
         cssLexClassDict={},
         selectedLexes=[],
-        selectedLexesPallete=[],
+        selectedGreekPalette=[],
         //based on strings: key:string, value:
         cssCustomStringDict={},
 //        cssUniqueColor="border-black",
@@ -88,22 +89,29 @@ let {
 //$inspect(`<BibleTextBlock>: textRef.ref=${textRef.reference}`)
 
 
-
+selectedLexes=options.viewOptions.lexes;
 /**
  * 
  * @param {Word} word
- * @param {number} index index in the current verse
+ * @param {number} customMatchIndex index in options.viewOptions.greekStrings that this word matches, if any. If not: -1
  * @returns {string} style to be applied in "style" attrbibute of <span> element
  */
-function getWordStyle(word,index){
+function getWordStyle(word,customMatchIndex){
     const selectedLexIndex=selectedLexes.indexOf(word.id);
     let ret=''
-    if(selectedLexIndex >=0 && options.viewOptions.highlightOnClick){
-        ret = `--bgColor:${selectedLexesPallete[selectedLexIndex].bg}; --fontColor:${selectedLexesPallete[selectedLexIndex].font}`
+    if(selectedLexIndex >=0 || customMatchIndex >=0){
+
+        if (selectedLexIndex >=0){
+            ret = `--bgColor:${selectedGreekPalette[selectedLexIndex].bg}; --fontColor:${selectedGreekPalette[selectedLexIndex].font}`
+        }
+        if (customMatchIndex >=0){
+            ret += (ret ? "; " : '') + 
+            ColorUtils.bgFontString(selectedGreekPalette[selectedLexes.length+customMatchIndex].bg,selectedGreekPalette[selectedLexes.length+customMatchIndex].font);
+        }
     } 
     else if(word.phrases.lexical.size){
         const phraseIndex = [...word.phrases.lexical][word.phrases.lexical.size-1].index;
-        const colorObj=parGroup.lexIdenticalPhrasePallete[phraseIndex];
+        const colorObj=parGroup.lexIdenticalPhrasePalette[phraseIndex];
         if (options.viewOptions.similarPhrases) {
             ret =ColorUtils.bgFontString(colorObj.bg,colorObj.font);
         }
@@ -116,7 +124,7 @@ function getWordStyle(word,index){
     return ret;
 }
 //$inspect(`bibleTextBlock: selectedLexes: [${selectedLexes.join(",")}]`);
-$inspect(`bibleTextBlock: selectedLexesPallete: [${selectedLexesPallete.join(",")}]`);
+$inspect(`bibleTextBlock: selectedGreekPalette: [${selectedGreekPalette.join(",")}]`);
 
 </script>
 
@@ -154,10 +162,10 @@ $inspect(`bibleTextBlock: selectedLexesPallete: [${selectedLexesPallete.join(","
 
                     {@const customMatchedWords=StringUtils.findPhrases(
                     verseWords.words.map((w)=>GreekUtils.onlyPlainGreek(w.word,true,true,true)),
-                        Object.keys(cssCustomStringDict).map((str)=>GreekUtils.onlyPlainGreek(str)))
+                        options.viewOptions.greekStrings.map((str)=>GreekUtils.onlyPlainGreek(str)))
                         // NB: first index is that of cssCustomDict; second is into textRef.vwords
                     }
-                    
+                    <!--{#if Object.values(customMatchedWords).length}Custom matched!: {Object.keys(customMatchedWords).join(",")}{/if}-->
                     <span class="bg-white/40 border-black/40 border-2 m-0 p-0 rounded-xl">
                     {#if copyButton}
                         <CopyText getTextFunc={()=>getText(verseWords.words,options.viewOptions.hideApp)}
@@ -172,10 +180,14 @@ $inspect(`bibleTextBlock: selectedLexesPallete: [${selectedLexesPallete.join(","
                     {#each verseWords.words as word, index}
 <!--                    {@const selectedLexIndex=selectedLexes.indexOf(word.id)}-->
                     {@const isIdentical=parGroup.matchingWords.includes(stripWord(word.word))}
-                        <span class={['word', word.phrases.lexical.size ? 'lexical':'', isIdentical ? 'identical':'',
+                    {@const customMatchSearchStrings=Object.entries(customMatchedWords).filter(([searchPhrase,array2d])=>array2d.flat().includes(index)).map(([s,a2d])=>s).sort((a,b)=>b.length - a.length )}
+                    <!--{#if customMatchSearchStrings.length}Got match search strings![{customMatchSearchStrings.join(",")}]{/if}-->
+                    {@const customMatchIndex=customMatchSearchStrings.length ? options.viewOptions.greekStrings.indexOf(customMatchSearchStrings[0]) : -1}
+                   <!-- {#if customMatchIndex > -1 }Got match index={customMatchIndex}{/if}-->
+                        <span class={['word', word.phrases.lexical.size ? 'lexical':'', isIdentical ? 'identical':'', 
                         word.phrases.exact.size ? 'exact':'', isUnique(word.id,uniqueSet) ? 'unique' : ''
                         ]}
-                        style={getWordStyle(word,index)} 
+                        style={getWordStyle(word,customMatchIndex)} 
                             onclick={()=>{wordClick(word.id,book)}}
 
                         >{getText([word],options.viewOptions.hideApp)}{' '}</span>
@@ -259,12 +271,21 @@ $inspect(`bibleTextBlock: selectedLexesPallete: [${selectedLexesPallete.join(","
         @apply outline-1 outline-dashed outline-blue-700;
     }
 
+    .word.lexical, .word.exact{
+        border-color: var(--borderColor,black);
+    }
+
+    
     .hide-similar .lexical-phrase{
         @apply bg-transparent;
     }
 
+    :not(.hide-similar) .lexical{
+        @apply border-t-2 border-b-2;
+    }
+
     .show-exact .exact-phrase {
-        @apply  border-t-2 border-b-2  font-bold underline shadow-red-600;
+        @apply    font-bold underline shadow-red-600;
     }
 
     /*
@@ -321,12 +342,13 @@ $inspect(`bibleTextBlock: selectedLexesPallete: [${selectedLexesPallete.join(","
     .word{
         background-color: var(--bgColor,transparent);
         color: var(--fontColor,black);
+        border-color: var(--borderColor,black);
     }
 
     .show-exact .word.exact{   
  
           @apply border-t-2 border-b-3  font-bold;
-          border-color: var(--borderColor,black);
+          /*border-color: var(--borderColor,black);*/
           
     }
     :not(.hide-similar).show-exact .word.exact{

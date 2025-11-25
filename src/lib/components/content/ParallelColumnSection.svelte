@@ -62,7 +62,7 @@
      * cssCustomDict:Object,
      * options:SynopsisOptions3,
      * showNotes:boolean,
-     * selectedLexesPallete:{bg:string,font:string,border:string}[],
+     * selectedGreekPalette:{bg:string,font:string,border:string}[],
      * showNotesFunction(heading:string,note:string):void
      * }}
      */
@@ -77,7 +77,7 @@
         //options.viewOptions.highlightOnClick=true,
         showNotes=true,
         //hideApp=false,
-        selectedLexesPallete=[],
+        selectedGreekPalette=[],
         showNotesFunction=(heading,note)=>{alert(heading+"\n"+note)}
         
     } = $props();
@@ -106,7 +106,7 @@ function notesClick(heading,note){
 //$inspect("numCols", numCols, "colData:", colData)
 //$inspect("ParText, customClass", cssCustomDict);
 //$inspect(`options.unique: ${options.viewOptions.unique}`);
-$inspect(`ParalColSec.lexPalette:`, selectedLexesPallete);
+$inspect(`ParalColSec.lexPalette:`, selectedGreekPalette);
 </script>
 
 
@@ -138,7 +138,7 @@ $inspect(`ParalColSec.lexPalette:`, selectedLexesPallete);
    
                     <BibleTextBlock {textRef}  parGroup={parTextGroup} {options} {numCols} copyButton={true} 
                     cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} 
-                    {showNotes} uniqueSet={unique} notesClick={showNotesFunction} {selectedLexesPallete}
+                    {showNotes} uniqueSet={unique} notesClick={showNotesFunction} {selectedGreekPalette}
                         {wordClick} 
                     />
 

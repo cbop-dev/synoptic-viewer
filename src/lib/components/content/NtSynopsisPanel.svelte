@@ -95,7 +95,14 @@ let maxLexesToShow=$state(30);
 * @type {number[]} selectedLexes
 */
 let selectedLexes=$state(myOptions.viewOptions.lexes);
-let selectedLexesPallete=$derived(ColorUtils.generateHslBgFontGradient(selectedLexes.length,100,50,true));
+let selectedGreekPalette=$derived.by(()=>{
+   const num = selectedLexes.length+myOptions.viewOptions.greekStrings.length;
+    //return //ColorUtils.generateHslBgFontPalette(selectedLexes.length+myOptions.viewOptions.greekStrings.length,100,50,true));
+    //ColorUtils.generateDistinctColorsSetsPalette(selectedLexes.length+myOptions.viewOptions.greekStrings.length));
+    //ColorUtils.generateCubeHelixOklchPalette(num);
+    return ColorUtils.myColorPalette(num);
+    
+});
 /**
 * @type {string[]} myOptions.viewOptions.greekStrings
 */
@@ -938,7 +945,7 @@ onMount(() => {
 //$inspect("showLexModal",showLexModal)
 //$inspect("chosenLexBookId:",chosenLexBookId);
 $inspect("HELLO!")
-$inspect(`NYSyop.selectedLexesPallete:${selectedLexesPallete}`)
+$inspect(`NYSyop.selectedGreekPalette:${selectedGreekPalette.map((o)=>`bg:${o.bg},font:${o.font},border:${o.border}`).join(";")}`);
 </script>
 <style>
     @reference "tailwindcss";
@@ -1267,7 +1274,7 @@ $inspect(`NYSyop.selectedLexesPallete:${selectedLexesPallete}`)
                     cssCustomDict={customGreekClasses}
                     showNotes={currentServer.showNotes}
                     showNotesFunction={displayNote}
-                    {selectedLexesPallete}
+                    {selectedGreekPalette}
                     
                     />
                 </div>
