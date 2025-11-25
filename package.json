@@ -46,7 +46,7 @@
 		"@cbop-dev/aland-gospel-synopsis": "^0.1.12",
 		"@vortechsolutions/gridjs-svelte": "^2.1.6",
 		"chart.js": "^4.5.1",
-		"colorjs.io": "^0.5.2",
+		"chroma-js": "^3.1.2",
 		"gridjs": "^6.2.0"
 	}
 }
