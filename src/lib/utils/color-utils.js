@@ -125,7 +125,7 @@ class ColorUtils{
      * @returns {{bg:string,font:string,border:string}[]} an array of css oklab color values 'bg','font',and optionally 'border': {bg:'oklab(0.3,0.5,0.6), font:'oklab(1,0,0), border: 'oklab(0.8,0.5,0.6'}
      */
     static myColorPalette(size,sFactor=1){
-        const generator=  chroma.scale(['yellow', 'navy','green','orange']).mode('lch').domain([0,size]).classes(size)
+        const generator=  chroma.scale(['navy','green','yellow','red','indigo']).mode('lch').domain([0,size]).classes(size)
         return MathUtils.range(size,0).map((i)=>{
             let ret={bg:'',font:'',border:''};
             //mylog('=asdf;lkjasdf==========================',true);
@@ -134,7 +134,8 @@ class ColorUtils{
                 const [h,s,l]=bgColor.hsl();
                 const [r,g,b] = bgColor.darken().desaturate().rgb();
                 ret.bg=`hsl(${Math.round(h)},${Math.round(sFactor*s*100)}%,${Math.round(l*100)}%)`;
-                ret.font= l <0.5 ? 'white' : 'black';
+                ret.font = chroma.contrast(bgColor,'white') > chroma.contrast(bgColor,'black') ? 'white' : 'black';
+                //ret.font= bgColor.luminance() <0.5 ? 'white' : 'black';
                 ret.border=`rgb(${r},${g},${b})`;
               //  mylog(`got colors:${ret.bg},${ret.font},${ret.border}`, true);
             return ret;
