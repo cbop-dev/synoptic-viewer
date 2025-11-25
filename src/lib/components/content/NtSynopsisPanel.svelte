@@ -1,10 +1,10 @@
 <script>
 import { onMount, untrack } from 'svelte';
 import Loading from '../ui/Loading.svelte';
-import Footer from './Footer.svelte';
+//import Footer from './Footer.svelte';
 import { SynopsisOptions3} from './SynopsisClasses.svelte.js';
-import Icon from '../ui/icons/Icon.svelte';
-import LinkIcon from '../ui/icons/link-icon.svelte';
+//import Icon from '../ui/icons/Icon.svelte';
+//import LinkIcon from '../ui/icons/link-icon.svelte';
 import LinkSvg from  '../ui/icons/link.svg';
 import {gospelParallels} from '@cbop-dev/aland-gospel-synopsis'
 import parallelColumnsSvelte, { ParallelColumn, GospelPericopeGroup,Word, TextAndRef,VerseWords } from "./parallelTexts.svelte";

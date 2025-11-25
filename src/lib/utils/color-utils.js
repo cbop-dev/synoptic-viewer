@@ -1,4 +1,3 @@
-import { colColors } from '$lib/components/content/theme';
 import chroma from 'chroma-js';
 import MathUtils from './math-utils';
 import { mylog } from '$lib/env/env';
