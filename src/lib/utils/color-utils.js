@@ -118,23 +118,109 @@ class ColorUtils{
         
     }
 
+    /**
+     * 
+     * @param {chroma.Color} bg 
+     * @param {chroma.Color|null} [font=chroma('black')] the font color to check against. Default is black
+     * @param {number} [threshold=5] 
+     * @returns {chroma.Color} returns a potentially modified version of bg, so that the contrast between bg and font is greater the original contrast (as returned by chroma.contrast()) is less than the threshold.
+     */
+    static increaseBgContrast(bg,font, threshold=5){
+        if (!font){
+            font=chroma('black');
+        }
+        let ret = bg;
+        const contrast = chroma.contrast(bg,font)
+        if ( contrast < threshold){
+            //gotta do something, but what? Lighten or darken?
+            const factor = threshold - contrast > 2 ? 2 : 1;
+            if (bg.luminance()>font.luminance()){
+                //bg needs to be lighter:
+                ret=bg.brighten(factor);
+
+            }
+            else{
+                ret=bg.darken(factor);
+            }
+
+        }
+        return ret;
+
+    }
+
+    static maximallyDifferentPalette(n) {
+        const L = 70;   // comfortable lightness for text
+        const C = 50;   // safe chroma (avoid clipping)
+        return Array.from({ length: n }, (_, i) =>
+            chroma.lch(L, C, (360 * i) / n).hex()
+        );
+    }
+
        /**
      * //TODO: do this!
      * @param {number} size
      * @param {number} sFactor 
+     * @param {number} lFactor 
+     * @param {number} [contrastThreshold=7] 
      * @returns {{bg:string,font:string,border:string}[]} an array of css oklab color values 'bg','font',and optionally 'border': {bg:'oklab(0.3,0.5,0.6), font:'oklab(1,0,0), border: 'oklab(0.8,0.5,0.6'}
      */
-    static myColorPalette(size,sFactor=1){
-        const generator=  chroma.scale(['navy','green','yellow','red','indigo']).mode('lch').domain([0,size]).classes(size)
+    static myColorPalette(size,sFactor=0,lFactor=0,contrastThreshold=7){
+        const theColorPoints= {
+            simple:['red','orange','yellow', 'green', 'blue','violet'],
+            10: ['navy','green','yellow','red'],
+            20: ['navy','coral','green','red','chartreuse','teal','hotpink','yellow'],
+
+
+        }
+
+        function getColorPoints(num){
+            
+        }
+        //.mode('lch')
+        //const generator=  chroma.scale(theColorPoints.simple).mode('lch').domain([0,size]).classes(size);
+        const rotations = -1.5 -(Math.floor(size /20));
+        const generator = chroma.cubehelix().lightness([0.1,0.7]).hue(4).rotations(rotations).scale().mode('lab').domain([0,size]).classes(size);
         return MathUtils.range(size,0).map((i)=>{
             let ret={bg:'',font:'',border:''};
             //mylog('=asdf;lkjasdf==========================',true);
-                const bgColor =generator(i);
+                let bgColor =generator(i);
+                if(lFactor){
+                    bgColor=bgColor.brighten(lFactor);
+                }
+                if(sFactor){
+                    bgColor=bgColor.saturate(sFactor);
+                }
                 //const [r,g,b]=bgColor.rgb()
+                
+                
+                
+                const contrasts = {white: chroma.contrast(bgColor,'white'), black: chroma.contrast(bgColor,'black')};
+               // const contrastThreshold=7;
+                if (contrasts.white < contrastThreshold && contrasts.black < contrastThreshold){
+                    //need to increase the contrast by changing the color.
+                    if (contrasts.white > contrasts.black){
+                        //we're sticking with white font, which means we need to darken the background color:
+                        bgColor=ColorUtils.increaseBgContrast(bgColor,chroma('white'),contrastThreshold)
+                        ret.font='white';
+                    }
+                    else{
+                        //using black font, thus we'll make the background lighter:
+                        bgColor=ColorUtils.increaseBgContrast(bgColor,chroma('black'),contrastThreshold)
+                        ret.font='black';
+                    }
+                }
+                else {
+                    if (contrasts.white > contrasts.black){
+                        ret.font='white';
+                    }
+                    else{
+                        ret.font='black;'
+                    }
+                }
                 const [h,s,l]=bgColor.hsl();
-                const [r,g,b] = bgColor.darken().desaturate().rgb();
-                ret.bg=`hsl(${Math.round(h)},${Math.round(sFactor*s*100)}%,${Math.round(l*100)}%)`;
-                ret.font = chroma.contrast(bgColor,'white') > chroma.contrast(bgColor,'black') ? 'white' : 'black';
+                ret.bg=`hsl(${Math.round(h ? h : 0)},${Math.round(s*100)}%,${Math.round(l*100)}%)`;
+                const [r,g,b] = bgColor.darken().saturate(2).rgb();
+
                 //ret.font= bgColor.luminance() <0.5 ? 'white' : 'black';
                 ret.border=`rgb(${r},${g},${b})`;
               //  mylog(`got colors:${ret.bg},${ret.font},${ret.border}`, true);
@@ -195,7 +281,7 @@ class ColorUtils{
      * @param {number} num 
      * @param {number} sat 
      * @param {number} light 
-     * @returns {{bg:string,font:string}[]} array of CSS color values in the form of {bg:string,font: string} so that the bg and font colors contrast well.
+     * @returns {{bg:string,font:string,border:string}[]} array of CSS color values in the form of {bg:string,font: string} so that the bg and font colors contrast well.
      */
     static generateHslBgFontPalette(num,sat=80,light=50,border=false){
 

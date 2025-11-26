@@ -126,7 +126,7 @@ let texts= $state([]);
 let selectedLexes=$state(myOptions.viewOptions.lexes);
 //mylog("initialized selected lexes: " + selectedLexes.join(','));
 
-let selectedGreekPalette=$derived(ColorUtils.generateHslBgFontPalette(selectedLexes.length+myOptions.viewOptions.greekStrings.length,100,50,true));
+let selectedGreekPalette=$derived(ColorUtils.myColorPalette(selectedLexes.length+myOptions.viewOptions.greekStrings.length));
 
 /**
 * @type {string[]} selectedGreekStrings
@@ -978,7 +978,9 @@ onMount(() => {
             <i>Click on a lexeme to remove it.</i>
             <br/>
             {#each selectedLexes as lex, index}
-                 <Button onclick={()=>toggleLex(lex)} buttonText={lemmasByID[lex]} buttonColors={getColorOfLex(lex)} buttonType=''/> 
+                 <Button onclick={()=>toggleLex(lex)} buttonText={lemmasByID[lex]} buttonColors={getColorOfLex(lex)} 
+                    bgFontObj={selectedGreekPalette[index]}
+                    buttonType=''/> 
                
              {/each}
                 
@@ -1071,8 +1073,10 @@ onMount(() => {
                 <h2>Selected Custom Greek Word Forms:</h2>
                 <i>Click on any word-form to remove it.</i>
                 <br/>
-                {#each selectedGreekStrings as gk}
-                <Button onclick={()=>toggleGreekString(gk)} buttonText={gk} buttonColors={getColorOfGreek(gk)} buttonType=''/> 
+                {#each selectedGreekStrings as gk,index}
+                <Button onclick={()=>toggleGreekString(gk)} buttonText={gk}  buttonType=''
+                    bgFontObj={selectedGreekPalette[index+selectedLexes.length]}
+                    /> 
                 {/each}<br/>
                 <Button onclick={emptySelectedCustomGreek}  buttonText="Clear All"/>
             {:else}<br/>

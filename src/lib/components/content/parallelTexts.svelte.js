@@ -539,7 +539,7 @@ export class ParallelColumnGroup {
         const theColumns =this.parallelColumns.map((col)=> 
             [...col.textRefs.map((tr)=>tr.getWordIdArray()), ...col.secondary.map((sec)=>sec.getWordIdArray())]);
 
-        const commonSubarrays2=findMaximalCommonSubarraysAcrossColumns(theColumns,3);
+        const commonSubarrays2=findMaximalCommonSubarraysAcrossColumns(theColumns,3).toSorted((a,b)=>a.subarray.length - b.subarray.length);
         
         this.lexIdenticalPhrasesLocations=[];
         for (const [phraseIndex,subarray] of commonSubarrays2.entries()){ 
@@ -650,7 +650,8 @@ export class ParallelColumnGroup {
             //obj.css.add('underline').add('bold').add('bg-yellow-50');
         });
        
-        this.lexIdenticalPhrasePalette=ColorUtils.generateHslBgFontPalette(this.lexIdenticalPhrasesLocations.length,60,70,true);
+        //this.lexIdenticalPhrasePalette=ColorUtils.generateHslBgFontPalette(this.lexIdenticalPhrasesLocations.length,60,70,true);
+        this.lexIdenticalPhrasePalette=ColorUtils.myColorPalette(this.lexIdenticalPhrasesLocations.length,0,2);
         
         /*
         //mylog("========================================================",true)

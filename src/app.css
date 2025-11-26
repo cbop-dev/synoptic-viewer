@@ -52,7 +52,7 @@ html {
     --borderColor: var(--color-red-900);
     --bgColor: var(--)
     */
-     @apply bg-red-200 border-red-900 ;
+     @apply bg-red-200/60 border-red-900 ;
 
     .lex-unique{
         @apply pl-0.5 mr-0.5  outline-red-700;
@@ -91,7 +91,7 @@ div.bible-block {
 }
 
 .column-1,  .column.Mark, .Mark{
-    @apply bg-lime-100 border-lime-900;
+    @apply bg-lime-100/60 border-lime-900;
     
     .lex-unique{
         @apply  pl-0.5 mr-0.5  outline-lime-700;
@@ -99,14 +99,14 @@ div.bible-block {
 }
 
 .column-2,  .column.Luke, .Luke {
-    @apply bg-sky-200 border-sky-900;
+    @apply bg-sky-200/40 border-sky-900;
         
     .lex-unique{
         @apply  pl-0.5 mr-0.5  outline-sky-800;
     }
 }
 .column-3,  .column.John, .John {
-    @apply bg-violet-200 border-violet-900;
+    @apply bg-violet-200/30 border-violet-900;
 
     
     .lex-unique{

@@ -1412,7 +1412,7 @@ $inspect(`NYSyop.selectedGreekPalette:${selectedGreekPalette.map((o)=>`bg:${o.bg
 </Modal2>
 
 
-<Modal2 bind:showModal={viewStates.views.words.state}>
+<Modal2 bind:showModal={viewStates.views.words.state} >
 
     
 
@@ -1437,7 +1437,8 @@ $inspect(`NYSyop.selectedGreekPalette:${selectedGreekPalette.map((o)=>`bg:${o.bg
             <i>Click on a lexeme to remove it.</i>
             <br/>
             {#each selectedLexes as lex, index}
-                 <Button onclick={()=>toggleLex(lex)} buttonText={lemmasByID[lex]} buttonColors={getColorOfLex(lex)} buttonType=''/> 
+                
+                 <Button onclick={()=>toggleLex(lex)} buttonText={lemmasByID[lex]} bgFontObj={selectedGreekPalette[index]} buttonType=''/> 
                
              {/each}
                 
@@ -1530,8 +1531,10 @@ $inspect(`NYSyop.selectedGreekPalette:${selectedGreekPalette.map((o)=>`bg:${o.bg
                 <h2>Selected Custom Greek Word Forms:</h2>
                 <i>Click on any word-form to remove it.</i>
                 <br/>
-                {#each myOptions.viewOptions.greekStrings as gk}
-                <Button onclick={()=>toggleGreekString(gk)} buttonText={gk} buttonColors={getColorOfGreek(gk)} buttonType=''/> 
+                {#each myOptions.viewOptions.greekStrings as gk,index}
+                <Button onclick={()=>toggleGreekString(gk)} buttonText={gk} bgFontObj={selectedGreekPalette[index+selectedLexes.length]}  
+                    
+                    buttonType=''/> 
                 {/each}<br/>
                 <Button onclick={emptySelectedCustomGreek}  buttonText="Clear All"/>
             {:else}<br/>

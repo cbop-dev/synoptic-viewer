@@ -93,11 +93,12 @@ selectedLexes=options.viewOptions.lexes;
 /**
  * 
  * @param {Word} word
+ * @param {number} selectedLexIndex
  * @param {number} customMatchIndex index in options.viewOptions.greekStrings that this word matches, if any. If not: -1
  * @returns {string} style to be applied in "style" attrbibute of <span> element
  */
-function getWordStyle(word,customMatchIndex){
-    const selectedLexIndex=selectedLexes.indexOf(word.id);
+function getWordStyle(word,selectedLexIndex,customMatchIndex){
+   // const selectedLexIndex=selectedLexes.indexOf(word.id);
     let ret=''
     if(selectedLexIndex >=0 || customMatchIndex >=0){
 
@@ -112,13 +113,13 @@ function getWordStyle(word,customMatchIndex){
     else if(word.phrases.lexical.size){
         const phraseIndex = [...word.phrases.lexical][word.phrases.lexical.size-1].index;
         const colorObj=parGroup.lexIdenticalPhrasePalette[phraseIndex];
-        if (options.viewOptions.similarPhrases) {
-            ret =ColorUtils.bgFontString(colorObj.bg,colorObj.font);
-        }
-        if (options.viewOptions.exactPhrases && word.phrases.exact.size){
+//        if (options.viewOptions.similarPhrases) {
+            ret =ColorUtils.bgFontString(colorObj.bg,colorObj.font,colorObj.border);
+  //      }
+        /*if (options.viewOptions.exactPhrases && word.phrases.exact.size){
             ret+= (ret ? "; " : '') + `--borderColor:${colorObj.border}`;
           //  mylog(`put bordercolor! output= '${ret}'`, true)
-        }
+        }*/
     }
 
     return ret;
@@ -179,15 +180,16 @@ $inspect(`bibleTextBlock: selectedGreekPalette: [${selectedGreekPalette.join(","
                     
                     {#each verseWords.words as word, index}
 <!--                    {@const selectedLexIndex=selectedLexes.indexOf(word.id)}-->
+                    {@const selectedLexIndex=selectedLexes.indexOf(word.id)}
                     {@const isIdentical=parGroup.matchingWords.includes(stripWord(word.word))}
                     {@const customMatchSearchStrings=Object.entries(customMatchedWords).filter(([searchPhrase,array2d])=>array2d.flat().includes(index)).map(([s,a2d])=>s).sort((a,b)=>b.length - a.length )}
                     <!--{#if customMatchSearchStrings.length}Got match search strings![{customMatchSearchStrings.join(",")}]{/if}-->
                     {@const customMatchIndex=customMatchSearchStrings.length ? options.viewOptions.greekStrings.indexOf(customMatchSearchStrings[0]) : -1}
                    <!-- {#if customMatchIndex > -1 }Got match index={customMatchIndex}{/if}-->
                         <span class={['word', word.phrases.lexical.size ? 'lexical':'', isIdentical ? 'identical':'', 
-                        word.phrases.exact.size ? 'exact':'', isUnique(word.id,uniqueSet) ? 'unique' : ''
+                        word.phrases.exact.size ? 'exact':'', isUnique(word.id,uniqueSet) ? 'unique' : '', selectedLexIndex >= 0 || customMatchIndex >= 0 ? 'selected-lex':''
                         ]}
-                        style={getWordStyle(word,customMatchIndex)} 
+                        style={getWordStyle(word,selectedLexIndex,customMatchIndex)} 
                             onclick={()=>{wordClick(word.id,book)}}
 
                         >{getText([word],options.viewOptions.hideApp)}{' '}</span>
@@ -276,17 +278,14 @@ $inspect(`bibleTextBlock: selectedGreekPalette: [${selectedGreekPalette.join(","
     }
 
     
-    .hide-similar .lexical-phrase{
+   /* .hide-similar .lexical{
         @apply bg-transparent;
-    }
+    }*/
 
     :not(.hide-similar) .lexical{
         @apply border-t-2 border-b-2;
     }
 
-    .show-exact .exact-phrase {
-        @apply    font-bold underline shadow-red-600;
-    }
 
     /*
     
@@ -339,26 +338,50 @@ $inspect(`bibleTextBlock: selectedGreekPalette: [${selectedGreekPalette.join(","
             @apply border-amber-300 bg-amber-300/20 decoration-amber-300;
         }
     */
-    .word{
+    
+    :not(.hide-similar) .word.lexical{
+        background-color: hsl(from var(--bgColor,black) h s l /40%);
+       /* color: black; /*hsl(var(--fontColor,black) h s 0.3 / 60%);*/
+       
+        border-color: var(--borderColor,white);
+        color: black;
+    }
+    
+    .show-exact .word.exact{
         background-color: var(--bgColor,transparent);
-        color: var(--fontColor,black);
+        color: var(--fontColor,default) !important;
         border-color: var(--borderColor,black);
+        border-color: black !important;  
+        @apply border-t-2 border-b-3  font-bold;
+        /*color: var(--fontColor,default);*/
     }
 
+
+    .word.selected-lex{
+        background-color: var(--bgColor,transparent);
+        color: var(--fontColor,default);
+    }
     .show-exact .word.exact{   
  
-          @apply border-t-2 border-b-3  font-bold;
+        
           /*border-color: var(--borderColor,black);*/
           
     }
+
+
+
+
     :not(.hide-similar).show-exact .word.exact{
-        text-decoration-color:  var(--fontColor,black);
-        @apply underline;
+        
+        text-decoration: underline var(--fontColor,black);
     }
 
-    .hide-similar.show-exact .word.exact{
-        @apply bg-white/80;
-    }
+    /*.hide-similar.show-exact :not(.selected-lex).word.exact{
+     
+        border-color: var(--borderColor,black) !important;
+        border-top-color: var(--bgColor,black) !important;
+        
+    }*/
     
-    
+       /*background-color: hsl(from var(--bgColor,white) h s l /30%);*/
 </style>

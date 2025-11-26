@@ -23,7 +23,7 @@
      * cssCustomDict:Object,
      * showNotes:boolean,
      * selectedLexes:number[],
-     * selectedGreekPalette:{bg:string,font:string}[]
+     * selectedGreekPalette:{bg:string,font:string,border:string}[]
      * showNotesFunction(heading:string,note:string):void
      * }}
      */

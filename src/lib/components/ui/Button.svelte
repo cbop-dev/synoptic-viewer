@@ -1,5 +1,6 @@
 <script>
-  /**
+import { ColorUtils } from "$lib/utils/color-utils";
+/**
    * @typedef {Object} Props
    * @property {string} [buttonText]
    * @property {string} [buttonStyle]
@@ -11,6 +12,7 @@
    * @property {string} [buttonColors]
    * @property {boolean} [tooltipbottom=false]
    * @property {function} [onclick]
+   * @property {{bg:string,font:string,border:string}} [bgFontObj]
    */
 
   /** @type {Props} */
@@ -24,7 +26,8 @@
     buttonColors=' focus:ring-blue-300 hover:bg-blue-700 ',
     tooltip='',
     tooltipbottom=false,
-    onclick=()=>{}
+    onclick=()=>{},
+    bgFontObj={bg:'',font:'',border:''}
   } = $props();
   </script>
   
@@ -46,9 +49,17 @@
     .lg {
       @apply text-lg;
     }
+
+    button.customVars{
+      background-color: var(--bgColor,default);
+      color: var(--fontColor,default);
+
+    }
   </style>
   
   <button  data-tip={tooltip} disabled={!ready} {onclick} 
-  class="{tooltip ? 'tooltip' : ''} {textSize} {buttonStyle} {buttonType} {buttonColors} shadow-xl {style}"  {tooltipbottom}>
-    {buttonText}
+  class="{tooltip ? 'tooltip' : ''} {textSize} {buttonStyle} {buttonType} shadow-xl {style} {bgFontObj.bg && bgFontObj.font ? 'customVars' : ''}"  {tooltipbottom}
+  style={ColorUtils.bgFontString(bgFontObj.bg,bgFontObj.font)}
+  >
+    {buttonText} 
   </button>
