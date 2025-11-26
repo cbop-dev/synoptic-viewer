@@ -532,10 +532,7 @@ export class ParallelColumnGroup {
                 return  tr.getWordIdArray();
             }
         },[])});
-
-
-        
-        
+  
         const theColumns =this.parallelColumns.map((col)=> 
             [...col.textRefs.map((tr)=>tr.getWordIdArray()), ...col.secondary.map((sec)=>sec.getWordIdArray())]);
 
@@ -570,10 +567,8 @@ export class ParallelColumnGroup {
                     words.forEach((w)=>{
                         if (!w.phrases.lexical){
                             w.phrases.lexical=new Set();
-
                         }
-                        w.phrases.lexical.add({phrase:lexPhrase, index:phraseIndex});
-                        
+                        w.phrases.lexical.add({phrase:lexPhrase, index:phraseIndex});       
                     });
 
                     /**
@@ -585,10 +580,7 @@ export class ParallelColumnGroup {
                         const trVpL = new TextRefVersePhraseLocation(textIndex,vWordIndices);
                         const phraseLocation = new ParallelPhraseLocation(colIndex,trVpL);
                         lexPhraseAndLocations.multiColumnLocations.push(phraseLocation);
-                    }
-                    
-
-                     
+                    }                     
                 }
             }
 
@@ -602,21 +594,17 @@ export class ParallelColumnGroup {
                         
                        // const vWordsIdx= loc.singleColumnLocation.vWordIndices;
                         //const tR= this.getTextRefByLocation(loc);
-                        const exactPhrase = GreekUtils.onlyPlainGreek(this.getTextFromLocation(loc,true).trim()); 
+                        const exactPhrase = GreekUtils.onlyPlainGreek(this.getTextFromLocation(loc,true).toLocaleLowerCase()).trim(); 
                             /*vWordsIdx.map((vw)=>tR.getWordByIndices(vw.verseIndex,vw.wordIndex)?.word)
                             .filter((w)=>w!=null && w!=undefined)
                             .join(" "); */
                         if(exactPhrase){
                             if (!Object.keys(this.exactlyIdenticalPhrases).includes(exactPhrase)){
                                 this.exactlyIdenticalPhrases[exactPhrase]=[];
-                            }
-                            
+                            } 
                             this.exactlyIdenticalPhrases[exactPhrase].push(loc);
-
                         }
-
-                    }
-                    
+                    }                  
                 }
 
                 let i = 1;
@@ -632,8 +620,6 @@ export class ParallelColumnGroup {
                             w.phrases.exact.add({phrase: phrase, index:i});
                             //w.phrases.exact.add(this.);
                         });
-
-                        
                     });
                     i++;
                 }

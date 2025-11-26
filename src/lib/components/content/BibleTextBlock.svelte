@@ -245,14 +245,14 @@ $inspect(`bibleTextBlock: selectedGreekPalette: [${selectedGreekPalette.join(","
                 {/each}<!--<CopyText linkText="IDs!" getTextFunc={()=>textRef.getWordIdArray().join(',')} />-->
             {:else if textRef.text}
                 
-                {textRef.text}
+                {options.viewOptions.hideApp ? GreekUtils.removeApparatusMarks(textRef.text) : textRef.text}
             {/if}
     {:else}
         <i class="text-sm">("{textRef.reference}" not found. Did you enter it correctly?)</i>
 
     {/if}
     {#if copyButton && textRef.text}
-        <CopyText copyText={textRef.text} tooltip='Copy pericope'/>
+        <CopyText getTextFunc={()=>options.viewOptions.hideApp ? GreekUtils.removeApparatusMarks(textRef.text) : textRef.text} tooltip='Copy pericope'/>
 {/if}
 {/key}
 </div>
