@@ -187,7 +187,8 @@ $inspect(`bibleTextBlock: selectedGreekPalette: [${selectedGreekPalette.join(","
                     {@const customMatchIndex=customMatchSearchStrings.length ? options.viewOptions.greekStrings.indexOf(customMatchSearchStrings[0]) : -1}
                    <!-- {#if customMatchIndex > -1 }Got match index={customMatchIndex}{/if}-->
                         <span class={['word', word.phrases.lexical.size ? 'lexical':'', isIdentical ? 'identical':'', 
-                        word.phrases.exact.size ? 'exact':'', isUnique(word.id,uniqueSet) ? 'unique' : '', selectedLexIndex >= 0 || customMatchIndex >= 0 ? 'selected-lex':''
+                        word.phrases.exact.size ? 'exact':'', isUnique(word.id,uniqueSet) ? 'unique' : '', selectedLexIndex >= 0  ? 'selected selected-lex':'',
+                        customMatchIndex >= 0 ? 'selected selected-custom' :''
                         ]}
                         style={getWordStyle(word,selectedLexIndex,customMatchIndex)} 
                             onclick={()=>{wordClick(word.id,book)}}
@@ -339,16 +340,17 @@ $inspect(`bibleTextBlock: selectedGreekPalette: [${selectedGreekPalette.join(","
         }
     */
     
-    :not(.hide-similar) .word.lexical{
-        background-color: hsl(from var(--bgColor,black) h s l /40%);
+    :not(.hide-similar) .word.lexical:not(.selected){
+        background-color: hsl(from var(--bgColor,black) h s l /60%);
        /* color: black; /*hsl(var(--fontColor,black) h s 0.3 / 60%);*/
        
         border-color: var(--borderColor,white);
-        color: black;
+        /*color: black;*/
+        color: var(--fontColor,white);
     }
     
     .show-exact .word.exact{
-        background-color: var(--bgColor,transparent);
+        background-color: var(--bgColor,transparent) !important;
         color: var(--fontColor,default) !important;
         border-color: var(--borderColor,black);
         border-color: black !important;  
@@ -357,7 +359,7 @@ $inspect(`bibleTextBlock: selectedGreekPalette: [${selectedGreekPalette.join(","
     }
 
 
-    .word.selected-lex{
+    .word.selected{
         background-color: var(--bgColor,transparent);
         color: var(--fontColor,default);
     }

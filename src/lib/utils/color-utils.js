@@ -133,7 +133,11 @@ class ColorUtils{
         const contrast = chroma.contrast(bg,font)
         if ( contrast < threshold){
             //gotta do something, but what? Lighten or darken?
-            const factor = threshold - contrast > 2 ? 2 : 1;
+            const factor = threshold - contrast > 2 ? 
+                threshold - contrast > 3 ?
+                    3
+                :
+                    2 : 1;
             if (bg.luminance()>font.luminance()){
                 //bg needs to be lighter:
                 ret=bg.brighten(factor);
@@ -165,21 +169,64 @@ class ColorUtils{
      * @returns {{bg:string,font:string,border:string}[]} an array of css oklab color values 'bg','font',and optionally 'border': {bg:'oklab(0.3,0.5,0.6), font:'oklab(1,0,0), border: 'oklab(0.8,0.5,0.6'}
      */
     static myColorPalette(size,sFactor=0,lFactor=0,contrastThreshold=7){
-        const theColorPoints= {
+        const theColorPoints2= {
             simple:['red','orange','yellow', 'green', 'blue','violet'],
             10: ['navy','green','yellow','red'],
             20: ['navy','coral','green','red','chartreuse','teal','hotpink','yellow'],
-
-
+            long:['#300','#040','#005','#800','#080','#008','#f00','#0f0','#00f','#f88','#8f8','#88f'],
+            short:['#f00','#0f0','#00f'],
+            first: ['red','yellow','green','blue'],
+            second: ['#700','#770','#070','#077','#007'],
+            third: ['#d36','#ea3','#4e7','#5dc','#84b'],
+            fourth: ['#e8a','#fe0','#af8','#3bf','#c0f'],
         }
+
+        const theColorPoints3= [['red','yellow','green','blue'],
+            ['#700','#770','#070','#077','#007'],
+            ['#d36','#ea3','#4e7','#5dc','#84b'],
+            ['#e8a','#fe0','#af8','#3bf','#c0f']];
+    
+        const theColorPoints= [
+            ['red','#ff0','green','#0ff','blue'], 
+            ['#603','#074','#007'],
+            ['#d36','#ea3','#4e7','#85d']
+
+
+            //['red','#ff0','green','#0ff','blue'],
+            //['#700','#770','#070','#077','#007'],
+            //['#d36','#ea3','#4e7','#5dc','#84b'],
+        //    ['#e8a','#fe0','#af8','#3bf','#c0f']
+           // ['#d36','#ea3','#4e7','#5dc','#85d']
+        ];
+    
+
+
 
         function getColorPoints(num){
             
         }
         //.mode('lch')
         //const generator=  chroma.scale(theColorPoints.simple).mode('lch').domain([0,size]).classes(size);
-        const rotations = -1.5 -(Math.floor(size /20));
-        const generator = chroma.cubehelix().lightness([0.1,0.7]).hue(4).rotations(rotations).scale().mode('lab').domain([0,size]).classes(size);
+        const batchSize = 8;
+        const numRowsToGet = size / batchSize > theColorPoints.length ?   theColorPoints.length : Math.floor(size / batchSize)+1;
+       
+       const colorArray = [...theColorPoints.entries().filter(([i,item])=>i<numRowsToGet).map(([i,item])=>item)].flat();
+       //mylog(`colorArray=${colorArray.join(',')}`,true)
+       
+        /* const colorArray = size > batchSize*3 ? 
+                            [...theColorPoints.first,...theColorPoints.second,...theColorPoints.third,...theColorPoints.fourth]
+                            :
+                            size > batchSize*2 ?
+                                [...theColorPoints.first,...theColorPoints.second,...theColorPoints.third]
+                                :
+                                size > batchSiztheColorPoints.first
+         */                   
+//        const generator=  chroma.scale(colorArray).mode('hsl').domain([0,size]);
+        //const generator=  chroma.scale(theColorPoints2.simple).mode('lch').domain([0,size]).classes(size);      
+        const generator=  chroma.scale(colorArray).mode('lch').domain([0,size]).classes(size);      
+        
+        //const rotations = -1.1 -(Math.floor(size /12));  
+        //const generator = chroma.cubehelix().lightness([0.1,0.8]).hue(4).rotations(rotations).scale().mode('lch').domain([0,size]).classes(size);
         return MathUtils.range(size,0).map((i)=>{
             let ret={bg:'',font:'',border:''};
             //mylog('=asdf;lkjasdf==========================',true);
