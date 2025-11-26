@@ -74,9 +74,9 @@
     
     let keyEvents=$state([null,null])
 
-    function onkeydown(event){
+    function onkeydown(event,ignoreCtrl=true){
         //mylog(`SynHome onkeydown=${event}`,true);
-        if(enableKeys) {
+        if((!event.ctrlKey || !ignoreCtrl) && enableKeys) {
                     const key=event.key;
             if(Object.keys(hotkeys).includes(key)){
                 hotkeys[key]();
