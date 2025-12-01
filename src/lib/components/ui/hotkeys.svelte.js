@@ -34,6 +34,8 @@ export class SynopsisHotkeys{
     hotkeys=$state(new Map());
     options=$state(new SynopsisOptions3());
     hotkeysTable=[
+        {key:'n', name:'Next Section',function: UiUtils.jumpToNextSection},
+        {key:'p',name:'Previous Section',function: UiUtils.jumpToPrevSection},
         {key:'>', name:'Next Section',function: UiUtils.jumpToNextSection},
         {key:'<',name:'Previous Section',function: UiUtils.jumpToPrevSection},
         {key:'t',name:'Top/First Section',function: UiUtils.jumpToTop},
@@ -113,6 +115,13 @@ export class SynopsisHotkeys{
         
         
         
+    }
+
+    addHotkey(key,name,func,showNav=false,optionName=''){
+        if (!this.hotkeys.has(key)){
+            const hk = new Hotkey(key,name,func,optionName ? optionName : name,showNav);
+            this.hotkeys.set(key,hk);
+        }
     }
     
     /**

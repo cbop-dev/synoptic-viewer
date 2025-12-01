@@ -1,6 +1,6 @@
 {
 	"name": "@cbop-dev/synoptic-viewer",
-	"version": "0.4.9.35",
+	"version": "0.4.9.36",
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
@@ -31,6 +31,9 @@
 		"eslint": "^9.18.0",
 		"eslint-config-prettier": "^10.0.1",
 		"eslint-plugin-svelte": "^3.0.0",
+		"flowbite": "^4.0.1",
+		"flowbite-svelte": "^1.28.3",
+		"flowbite-svelte-icons": "^3.0.0",
 		"globals": "^16.0.0",
 		"jsdom": "^26.0.0",
 		"prettier": "^3.4.2",
@@ -47,6 +50,7 @@
 		"@vortechsolutions/gridjs-svelte": "^2.1.6",
 		"chart.js": "^4.5.1",
 		"chroma-js": "^3.1.2",
-		"gridjs": "^6.2.0"
+		"gridjs": "^6.2.0",
+		"pagination-svelte": "^1.0.6"
 	}
 }

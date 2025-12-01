@@ -106,7 +106,7 @@ function notesClick(heading,note){
 //$inspect("numCols", numCols, "colData:", colData)
 //$inspect("ParText, customClass", cssCustomDict);
 //$inspect(`options.unique: ${options.viewOptions.unique}`);
-$inspect(`ParalColSec.lexPalette:`, selectedGreekPalette);
+//$inspect(`ParalColSec.lexPalette:`, selectedGreekPalette);
 </script>
 
 

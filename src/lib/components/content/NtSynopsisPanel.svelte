@@ -1,5 +1,5 @@
 <script>
-import { onMount, untrack } from 'svelte';
+import { onMount, untrack,tick } from 'svelte';
 import Loading from '../ui/Loading.svelte';
 //import Footer from './Footer.svelte';
 import { SynopsisOptions3} from './SynopsisClasses.svelte.js';
@@ -21,7 +21,7 @@ import ButtonSelect from '../ui/ButtonSelect.svelte';
 import {default as TfUtils} from './TfUtils.js';
 import Modal2 from '../ui/Modal2.svelte';
 import { TfServer } from './TfUtils.js';
-import ModalButton from '../ui/ModalButton.svelte';
+//import ModalButton from '../ui/ModalButton.svelte';
 import Button from '../ui/Button.svelte';
 // import { untrack } from 'svelte';
 import { ColorUtils } from '$lib/utils/color-utils';
@@ -37,6 +37,9 @@ import { findNextAnchor,findPrevAnchor, getAnchors} from '$lib/utils/ui-utils';
 import TitleNavbar from './title-navbar.svelte';
 import { Hotkey, SynopsisHotkeys } from '../ui/hotkeys.svelte';
 import LemmaInfo from './lemma/LemmaInfo.svelte';
+import { PaginationNav, Pagination, PaginationItem } from "flowbite-svelte";
+ import { ArrowLeftOutline, ArrowRightOutline } from "flowbite-svelte-icons";
+ import * as ArrayUtils from '$lib/utils/array-utils.js';
 //import { generateHslColorGradient } from '../ui/chartUtils';
    /**
      * @type {{options:SynopsisOptions3,
@@ -156,6 +159,7 @@ let perGroups = $state([]);
 let filteredPerGroups=$derived(perGroups.filter((g)=>filteredPericopes.includes(g.id)).toSorted(
     (a,b)=>filteredPericopes.indexOf(a.id)-filteredPericopes.indexOf(b.id)
 ));
+
 /**
  * @type {{matt:number[], mark:number[], luke:number[], john:number[], other:number[]}[]} perGroupsIndices
  */
@@ -220,6 +224,11 @@ function buildPericopeRefs(){
  */
 let alandPericopeNums = $state(myOptions.request.pericopes);
 
+let loadingPageSection=$state(false);
+/**
+ * @type {number[]} filteredPericopes
+ * @description an array of numbers, each of which is a pericope "group/section" number as assigned by Aland.
+ */
 let filteredPericopes=$derived.by(()=>{
     let alands= (alandPericopeNums ? [...alandPericopeNums] : []); //copy of alands for sorting/filtering...
     if (callSortFilter) {
@@ -236,10 +245,39 @@ let filteredPericopes=$derived.by(()=>{
         }
         
     }
-    //mylog("after filtering alands: ["+ alands.join(",")+"]")
+    //mylog("after filtering alands: ["+ alands.join(",")+"]");
     return alands;
 })
 
+async function gotoPageSection(pageNum=0,alandPerGroupId=0){
+    loadingPageSection=true;
+    if (myOptions.viewOptions.page != pageNum && pageNum >=0 && pageNum < paginatedFilteredPerGroups.length){
+        //already showing the right page data. just jump to the anchor
+        myOptions.viewOptions.page=pageNum;
+        paginatedFilteredPerGroups;
+        await tick();
+    }
+
+    if(alandPerGroupId) {
+       jumpToDiv('section-'+alandPerGroupId);
+    }
+    loadingPageSection=false;
+}
+
+function jumpToDiv(divId=''){
+    if(divId){
+            document.location=document.location.toString().split('#')[0]+'#'+divId;
+    }
+}
+
+const groupsPerPage=5;
+//let currentPage=$state(0);//index into paginatedFilteredPerGroups
+
+/**
+ * @type {GospelPericopeGroup[][]}
+ * @description a paginated/split version of 'filteredPerGroups'. Each array item is a subarray of of filteredPerGroups of size 'groupsPerPage' (if possible), and thus represents a page of data.
+ */
+let paginatedFilteredPerGroups=$derived(ArrayUtils.splitArray(filteredPerGroups,groupsPerPage));
 
 let lemmasByID=$derived.by(()=>{
     let dict={}
@@ -689,8 +727,21 @@ function displayNote(heading,note) {
     theNote.footer=currentServer.getNoteFooter();
     viewStates.views.notes.state = true;
 }
+function gotoNextPage(){
+    if (myOptions.viewOptions.page < paginatedFilteredPerGroups.length-1){
+        gotoPageSection(myOptions.viewOptions.page +1); 
+    }
+}
+
+function gotoPreviousPage(){
+    if (myOptions.viewOptions.page > 0){
+        gotoPageSection(myOptions.viewOptions.page -1); 
+    }
+}
 const hotkeys=new SynopsisHotkeys(myOptions);
-hotkeys.enableHotkeys('><tb2ax');
+hotkeys.enableHotkeys('nptb2ax');
+hotkeys.addHotkey('>','Next Page',gotoNextPage);
+hotkeys.addHotkey('<','Previous Page',gotoPreviousPage);
 //mylog(`enabled hotkeys: [${[...hotkeys.hotkeys.keys()].join(',')}]`);
 if(!hotkeys.getKeyObj(">")){
     //mylog("Could not find hotkey '>'!", true);
@@ -724,7 +775,8 @@ let viewStates=$state({
         words: {description:  "Lexeme/Word Options", hotkeys:['w'], state:false,modal:true},
       //  info: { description:  "Website and project information.", hotkeys:['i'], state:false,modal:true},
         help: { description:  "Show help menu", hotkeys:['h', '?'], state:false,modal:true},
-        notes:{description: "Notes on the text",state:false,modal:true}
+        notes:{description: "Notes on the text",state:false,modal:true},
+        
         
             
     },
@@ -944,8 +996,10 @@ onMount(() => {
 //$inspect("myOptions.viewOptions.similarPhrases: ", myOptions.viewOptions.similarPhrases);
 //$inspect("showLexModal",showLexModal)
 //$inspect("chosenLexBookId:",chosenLexBookId);
-$inspect("HELLO!")
-$inspect(`NYSyop.selectedGreekPalette:${selectedGreekPalette.map((o)=>`bg:${o.bg},font:${o.font},border:${o.border}`).join(";")}`);
+
+//$inspect(`NYSyop.selectedGreekPalette:${selectedGreekPalette.map((o)=>`bg:${o.bg},font:${o.font},border:${o.border}`).join(";")}`);
+//$inspect(`NTSynPan.alandPericopeNums:${alandPericopeNums.join(",")};`);
+//$inspect(`NTSynPan.filteredPericopes:${filteredPericopes.join(",")};`);
 </script>
 <style>
     @reference "tailwindcss";
@@ -1140,6 +1194,22 @@ $inspect(`NYSyop.selectedGreekPalette:${selectedGreekPalette.map((o)=>`bg:${o.bg
     {/if}
 
 {/snippet}
+{#snippet pageNav(hideSoloPage=true)}
+    {#if !hideSoloPage || paginatedFilteredPerGroups.length > 1}
+        <div class="flex flex-col items-center justify-center gap-3">
+  <PaginationNav visiblePages={7} currentPage={myOptions.viewOptions.page+1} totalPages={paginatedFilteredPerGroups.length} onPageChange={(pageNum)=>gotoPageSection(pageNum-1)}>
+  {#snippet prevContent()}
+    <span class="sr-only">Previous</span>
+    <ArrowLeftOutline class="h-5 w-5" />
+  {/snippet}
+  {#snippet nextContent()}
+    <span class="sr-only">Next</span>
+    <ArrowRightOutline class="h-5 w-5" />
+  {/snippet}
+</PaginationNav>
+</div>
+ {/if}
+{/snippet}
 <div id="top-fixed" class="self-center fixed text-center w-full top-8  bg-white z-40  ">
     <div id="header-nav-section" class="block self-center text-center   m-auto w-full" >
     <div class="navbar bg-base-100 text-center  min-h-12 shadow-sm ">
@@ -1238,48 +1308,51 @@ $inspect(`NYSyop.selectedGreekPalette:${selectedGreekPalette.map((o)=>`bg:${o.bg
             tooltip='Copy stuff'
             
             />{/key}</h1>
-        
-            {#if filteredPerGroups.length}
-                {#each filteredPerGroups as group, index }
+            
+            {#if paginatedFilteredPerGroups[myOptions.viewOptions.page].length}
+                {@render pageNav()}
+                {#each paginatedFilteredPerGroups[myOptions.viewOptions.page] as group, index }
                 <hr class="mb-2 !border-slate-200"/>
                 <div class='anchor text-center' id="section-{group.id}">
                     <h2 class="inline-block"><u><b>{group.title}:</b></u><br/> {group.getRefs()}<CopyText copyText={group.getRefs()} tooltip='Copy parallel group references'/></h2>
                     
-                <h3>            {#if group.lexIdenticalPhrasesLocations.length > 0}
+                <h3>            
+                    {#if group.lexIdenticalPhrasesLocations.length > 0}
                   <!-- (TODO: remove) Got some phrases: {group.lexIdenticalPhrasesLocations} -->
-            {:else}
-                    {/if}</h3>
-                </div>
-                <div class="float-right mr-2 break-after-all">
-                    <a href="" class="" title="Jump to section"
-                    onclick={()=>{viewStates.views.sections.state=true}}><BulletsIcons height={20} width={20}/></a>
-                    {#if index > 0}
-                    <a href="#section-{filteredPerGroups[index-1].id}"
-                    title="Previous"><ArrowUp height={20} width={20}/></a>{/if}
-                    {#if index < filteredPerGroups.length-1}
-                    <a href="#section-{filteredPerGroups[index+1].id}" 
-                    class="break-after-all" title="Next"><ArrowDown height={20} width={20}/></a>{/if}
-                    <a href="#"  class="inline" title="Top"><ArrowTop height={20} width={20}/></a>
-                </div>
+                    {:else}
+                            {/if}</h3>
+                        </div>
+                        <div class="float-right mr-2 break-after-all">
+                            <a href="" class="" title="Jump to section"
+                            onclick={()=>{viewStates.views.sections.state=true}}><BulletsIcons height={20} width={20}/></a>
+                            {#if index > 0}
+                            <a href="#section-{paginatedFilteredPerGroups[myOptions.viewOptions.page][index-1].id}"
+                            title="Previous"><ArrowUp height={20} width={20}/></a>{/if}
+                            {#if index < paginatedFilteredPerGroups[myOptions.viewOptions.page].length-1}
+                            <a href="#section-{paginatedFilteredPerGroups[myOptions.viewOptions.page][index+1].id}" 
+                            class="break-after-all" title="Next"><ArrowDown height={20} width={20}/></a>{/if}
+                            <a href="#"  class="inline" title="Top"><ArrowTop height={20} width={20}/></a>
+                        </div>
+                            
+                
                     
-        
-            
-                <br class="break-all"/>
-                <div >
-                    <ParallelGospelSection parGroup={group} options={myOptions} focus={focused}
-                    wordClick={wordClick}
-                    {enableSecondary}
-                    cssClassDict={lexClasses}
-                    {selectedLexes}
-                    cssCustomDict={customGreekClasses}
-                    showNotes={currentServer.showNotes}
-                    showNotesFunction={displayNote}
-                    {selectedGreekPalette}
-                    
-                    />
-                </div>
+                        <br class="break-all"/>
+                        <div >
+                            <ParallelGospelSection parGroup={group} options={myOptions} focus={focused}
+                            wordClick={wordClick}
+                            {enableSecondary}
+                            cssClassDict={lexClasses}
+                            {selectedLexes}
+                            cssCustomDict={customGreekClasses}
+                            showNotes={currentServer.showNotes}
+                            showNotesFunction={displayNote}
+                            {selectedGreekPalette}
+                            
+                            />
+                        </div>
                     
                 {/each}
+                {@render pageNav()}
             {:else}
                 (No results. Try <a href="" data-sveltekit-reload>another search</a>{#if myOptions.viewOptions.hideNonPrimary || myOptions.viewOptions.focusOn || myOptions.viewOptions.hideSolos }, 
                 or change the <a href="" onclick={()=>{viewStates.toggle('view')}}>View Options</a>{/if}.)
@@ -1306,14 +1379,23 @@ $inspect(`NYSyop.selectedGreekPalette:${selectedGreekPalette.map((o)=>`bg:${o.bg
 <Modal2 bind:showModal={viewStates.views.sections.state}>
             <div id="results-navigation"  class=" text-left">
             <h1>Search Results Navigation</h1>
+            {#if !loadingPageSection}
                     <ul>
-            {#each filteredPericopes as section, index}
-            {@const pericope=gospelParallels.alandSynopsis.lookupPericope(section)}
-            <li class="m-1 p-1 "><h3><a href="#section-{section}" 
-                onclick={()=>{viewStates.views.sections.state=false}}><b>{section}. {pericope.title}</b> 
-                <i>({gospelParallels.getAlandPericopeRefs(section).join("; ")})</i></a></h3></li>
+            
+            {#each paginatedFilteredPerGroups as page, pageIndex}
+                {#each page as perGroup, index}
+                    {@const section = perGroup.id}
+                    {@const isCurrent = myOptions.viewOptions.page==pageIndex}
+                    {@const pericope=gospelParallels.alandSynopsis.lookupPericope(section)}
+                    <li class={["m-1 p-1 dark", isCurrent ? 'bg-amber-200' :'']}><h3><a class="link"
+                        onclick={()=>{viewStates.views.sections.state=false; gotoPageSection(pageIndex,section);}}><b>{section}. {pericope.title}</b> 
+                        <i>({gospelParallels.getAlandPericopeRefs(section).join("; ")})</i></a></h3></li>
+                {/each}
             {/each}
                 </ul>           
+            {:else}
+                <Loading message=[] title='Formatting page...'/>
+            {/if}
             </div>
 </Modal2>
 {/if}

@@ -159,7 +159,6 @@ function isUnique(wordid, uniqueSet){
 //$inspect("ParTexts, focus:", focus)
 //$inspect("numCols", numCols, "colData:", colData)
 //$inspect("ParText, customClass", cssCustomDict);
-$inspect("ParaGoSection.parObj.lexPallet:", parGroup.lexIdenticalPhrasePalette.map((o)=>`bg:${o.bg}, font:${o.font}, border:${o.border}`).join(";"));
 </script>
 <style>
     @reference "tailwindcss";

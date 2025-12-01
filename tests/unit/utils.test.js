@@ -5,7 +5,7 @@ import * as mathUtils from '$lib/utils/math-utils.js';
 import { GreekUtils } from '$lib/utils/greek-utils';
 import * as bibleRefUtils from '$lib/n1904/bibleRefUtils.js';
 import * as StringUtils from '$lib/utils/string-utils.js';
-
+import * as ArrayUtils from  '$lib/utils/array-utils.js';
 test('dummy', async () => {
 	const tests=[
         {input: '', output: ''}
@@ -125,6 +125,29 @@ test('filter empty string items test', async () => {
     ];
     for (const t of tests){
         expect(StringUtils.filterEmptyStringItems(t.input)).toEqual(t.output);
+    }
+	expect(true).toBe(true);
+
+});
+
+
+test('array split test', async () => {
+	const tests=[
+        {input: [1,2,3,4,5], size: 2, output: [[1,2],[3,4],[5]], result: true},     
+        {input: [1], size: 2, output: [[1]], result: true},
+        {input: [1], size: 0, output: [[1]], result: true},
+        {input: [1,2,3,4,5], size: 3, output: [[1,2,3,4],[5]], result: false},     
+        {input: [1,2,3,4,5], size: 0, output: [[1],[2],[3],[4],[5]], result: true},     
+        {input: [1,2,3,4,5], size: 1, output: [[1],[2],[3],[4],[5]], result: true},     
+
+    ];
+    for (const t of tests){
+        const splitArr=ArrayUtils.splitArray(t.input,t.size);
+        expect(splitArr.length).toEqual(t.output.length)
+        for (const subA of splitArr){
+            //console.log('subA:',subA);
+            expect(t.output.find((item)=>subA.length==item.length && item.reduce((a,b)=>a && subA.includes(b),true)) != undefined).toBe(t.result);
+        }
     }
 	expect(true).toBe(true);
 

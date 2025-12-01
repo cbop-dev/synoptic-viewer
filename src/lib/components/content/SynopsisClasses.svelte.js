@@ -203,6 +203,7 @@ export class SynopsisOptions3{
         showLookup: {type:'boolean', default: false, category: 'view',noURL:true},
         hideSecondary: {type:'boolean', default: false, category: 'view',noURL:false},
         lexInfoClick:{ type: 'boolean', category: 'view',noURL:true},
+        page:{ type: 'int', category: 'view',noURL:false,default: 0},
     }
 
     /**

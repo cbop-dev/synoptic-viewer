@@ -5,8 +5,10 @@ import { GreekUtils } from "$lib/utils/greek-utils";
 import {combineRefs, formatBibRefs,expandRefs} from '$lib/n1904/bibleRefUtils.js';
 import * as BibleUtils from '$lib/n1904/bibleRefUtils.js'
 //import { findAllCommonSubarraysAmongHybrid } from "$lib/utils/sais-array2";
-import {findMaximalCommonSubarraysAcrossColumns} from  "$lib/utils/column-subarrays2.js";
+import {findMaximalCommonSubarraysAcrossColumns,findMaximalCommonTextPhrasesAcrossColumns} from  "$lib/utils/column-subarrays2.js";
 import mathUtils from "$lib/utils/math-utils";
+import * as ArrayUtils from "$lib/utils/array-utils";
+
 //import { form } from "$app/server";
 
 /**
@@ -35,8 +37,8 @@ export class Word{
      */
     specialCss=new Set();
     /**
-     * @description various types of phrase that this word instance is in. Useful, e.g., for assigning css classes for matching phrases.
-     * @type {{lexical:Set<{phrase:LexicalPhrase, index:number}>,exact:Set<{phrase: string,index:number}>}}
+     * @description various types of phrase that this word instance is in. Useful, e.g., for assigning css classes for matching phrases. not sure about the 'index': might refer to the index in the parent object's tracking of phrases.
+     * @type {{lexical:Set<{phrase:LexicalPhrase, index:number}>,exact:Set<string>}}
      */
     phrases={lexical:new Set(),exact: new Set()};
 }
@@ -381,7 +383,7 @@ export class ParallelPhraseLocation{
      */
     constructor(column=0,phraseLocation=new TextRefVersePhraseLocation(),secondary=false){
         this.column=column;
-        this.secondary=false;
+        this.secondary=secondary;
         this.singleColumnLocation=phraseLocation;
     }
 
@@ -412,7 +414,8 @@ export class LexPhraseAndLocations{
 
 /**
  * @class ParallelColumnGroup
- * @description a group of parallel texts, tracking common and unique lexemes, which can be displayed in parallel columns.
+ * @description a group of parallel texts, tracking common and unique lexemes, which can be displayed in parallel columns. Each column can contain several texts. 
+ * The common/exact phrases found are "pairwise common" *across* columns: i.e., common between a text of one column and that in a different column.
  */
 export class ParallelColumnGroup {
 
@@ -514,7 +517,7 @@ export class ParallelColumnGroup {
      * @description finds all the lexically identical phrases across columns! amazing!
      */
     buildLexIdenticalPhrases(minLenth=2,includeSecondary=false,markidenticalPhrases=false){
-        mylog(`ParColGroup.buildLexidentical()...`);
+        //mylog(`ParColGroup.buildLexidentical()...`,true);
         const combinedColumnIds=this.parallelColumns.map((col)=> {
             const theRefsList = includeSecondary && col.secondary && col.secondary.length  ?  [...col.textRefs, ...col.secondary ] : col.textRefs;
             return theRefsList.reduce(
@@ -536,10 +539,10 @@ export class ParallelColumnGroup {
         const theColumns =this.parallelColumns.map((col)=> 
             [...col.textRefs.map((tr)=>tr.getWordIdArray()), ...col.secondary.map((sec)=>sec.getWordIdArray())]);
 
-        const commonSubarrays2=findMaximalCommonSubarraysAcrossColumns(theColumns,3).toSorted((a,b)=>a.subarray.length - b.subarray.length);
+        const commonSubarrays=findMaximalCommonSubarraysAcrossColumns(theColumns,3).toSorted((a,b)=>a.subarray.length - b.subarray.length);
         
         this.lexIdenticalPhrasesLocations=[];
-        for (const [phraseIndex,subarray] of commonSubarrays2.entries()){ 
+        for (const [phraseIndex,subarray] of commonSubarrays.entries()){ 
             const lexPhrase = new LexicalPhrase(subarray.subarray);
             const lexPhraseAndLocations= new LexPhraseAndLocations(lexPhrase,[],phraseIndex);
             for (const occurrence of subarray.occurrences){  //second loop: each column, of that phrase
@@ -578,7 +581,7 @@ export class ParallelColumnGroup {
                     const vWordIndices=phraseRange.map((wIdx)=>tRef.getVerseWordIndices(wIdx)).filter((o)=>o!=null);
                     if (vWordIndices && vWordIndices.length) {
                         const trVpL = new TextRefVersePhraseLocation(textIndex,vWordIndices);
-                        const phraseLocation = new ParallelPhraseLocation(colIndex,trVpL);
+                        const phraseLocation = new ParallelPhraseLocation(colIndex,trVpL,isSecondary);
                         lexPhraseAndLocations.multiColumnLocations.push(phraseLocation);
                     }                     
                 }
@@ -586,47 +589,151 @@ export class ParallelColumnGroup {
 
             this.lexIdenticalPhrasesLocations.push(lexPhraseAndLocations);
 
-            if(markidenticalPhrases){
-                
-                this.exactlyIdenticalPhrases={}
-                for (const phraseAndLoc of this.lexIdenticalPhrasesLocations){
-                    for (const loc of phraseAndLoc.multiColumnLocations){
-                        
-                       // const vWordsIdx= loc.singleColumnLocation.vWordIndices;
-                        //const tR= this.getTextRefByLocation(loc);
-                        const exactPhrase = GreekUtils.onlyPlainGreek(this.getTextFromLocation(loc,true).toLocaleLowerCase()).trim(); 
-                            /*vWordsIdx.map((vw)=>tR.getWordByIndices(vw.verseIndex,vw.wordIndex)?.word)
-                            .filter((w)=>w!=null && w!=undefined)
-                            .join(" "); */
-                        if(exactPhrase){
-                            if (!Object.keys(this.exactlyIdenticalPhrases).includes(exactPhrase)){
-                                this.exactlyIdenticalPhrases[exactPhrase]=[];
-                            } 
-                            this.exactlyIdenticalPhrases[exactPhrase].push(loc);
-                        }
-                    }                  
-                }
 
-                let i = 1;
-                for (const [phrase,locs] of Object.entries(this.exactlyIdenticalPhrases)
-                                           .filter(([phrase,loc])=>loc.length > 1))
-                {//adding a css entry for each word:
-                    //mylog(`Got exact phrase: '${phrase}', ${locs.length} times`)
-                    locs.forEach((loc)=>{
-                        
-                        this.getWordsFromLocation(loc).forEach((w)=>{
-                            w.specialCss.add('exact-phrase');
-                            w.specialCss.add('exact-phrase-'+i);
-                            w.phrases.exact.add({phrase: phrase, index:i});
-                            //w.phrases.exact.add(this.);
-                        });
-                    });
-                    i++;
-                }
-            }
             this.updatedCounter++;
 
         }
+
+        if(markidenticalPhrases){
+            
+            /**
+             * @type {Object<string,ParallelPhraseLocation[]>[]} stringPhrasesAndLocs
+             * @description string phrases found in each column. Each array index corresponds with the group column. Each Array item is an object keyed by the string phrase and mapped to a LexPhraseAndLocations object.
+             */
+            const stringPhrasesAndLocs=Array.from(mathUtils.range(this.parallelColumns.length,0)).map(_=>{return {};});
+           
+            this.exactlyIdenticalPhrases={} ;
+            for (const phraseAndLoc of this.lexIdenticalPhrasesLocations){
+                for (const loc of phraseAndLoc.multiColumnLocations){
+                    if(loc.secondary){
+                        //mylog("got loc.secondary!",true);
+                    }
+                    // const vWordsIdx= loc.singleColumnLocation.vWordIndices;
+                    //const tR= this.getTextRefByLocation(loc);
+                    const exactPhrase = GreekUtils.onlyPlainGreek(this.getTextFromLocation(loc,true).toLocaleLowerCase()).trim(); 
+
+                    if(exactPhrase){
+                       // if (!Object.keys(this.exactlyIdenticalPhrases).includes(exactPhrase)){
+                          //  this.exactlyIdenticalPhrases[exactPhrase]=[];
+                        //} 
+                        //this.exactlyIdenticalPhrases[exactPhrase].push(loc);
+
+                        if(!stringPhrasesAndLocs[loc.column][exactPhrase]){
+                            stringPhrasesAndLocs[loc.column][exactPhrase]=[]
+
+                        }
+
+                        stringPhrasesAndLocs[loc.column][exactPhrase].push(loc);
+                    }
+                }                  
+            }
+            const commonSubphrases=findMaximalCommonTextPhrasesAcrossColumns(stringPhrasesAndLocs.map((o)=>Object.keys(o)),3);
+
+           // const stringPhrasesAndLocs=Array.from(mathUtils.range(this.parallelColumns.length,0)).map(_=>{return {};});
+            //contains exact matches, and where in the phrase strings, the matches are found. These are not yet mapped to our actual text object/locations.
+           
+            //mylog(`buildLexIdPhrases got exact matches:['${commonSubphrases.map((o)=>o.subarray).join("','")}']`,true);
+           // this.exactlyIdenticalPhrases={}
+            // ==============================================
+            //TODO in progress!
+            //TODO: need to draw a diagram to visualize the mapping between stringPhrasesAndLocs and commonsubphrases...*:
+            //go through found locations map to actual text...todo still. This is a very complicated mapping procedure!!!!
+
+
+            commonSubphrases.forEach((commonPhraseObject,subPhraseIndex)=>{
+                
+                const subphrase = commonPhraseObject.subarray;
+                
+                //this is an exactly matching (sub)phrase. need to map the 'column'/textindex/spans to the verse-word ranges in stringPhrasesAndLocs
+                commonPhraseObject.occurrences.forEach((occurrence)=>{
+                    //gotta find the word object...*:
+                    occurrence.textIndex
+                    const [exactPhrase,lexIdenticalLocations]=Object.entries(stringPhrasesAndLocs[occurrence.columnIndex])[occurrence.textIndex];
+
+                    //const stuff1= stringPhrasesAndLocs[occurrence.columnIndex]
+                   // const fred = stuff1['stinrg'];
+                    
+                    /**
+                    // * @type {ParallelPhraseLocation[]} lexIdenticalLocations
+                     */
+                   // const lexIdenticalLocations = stringPhrasesAndLocs[occurrence.columnIndex][exactPhrase];
+                    //locations in this.parallelColumns!
+                    
+                    
+                         lexIdenticalLocations.forEach((lexPhraseLoc)=>{
+                            //????const superphrase=stringPhrasesAndLocs[lexPhraseLoc.column]//?????
+
+                        // const tRefs = lexPhraseLoc.secondary ? this.parallelColumns[lexPhraseLoc.column].secondary : this.parallelColumns[lexPhraseLoc.column].textRefs;
+                            
+                            //lexPhraseLoc.singleColumnLocation.vWordIndices.forEach((vWordIndex)=>{
+
+                            //  lexPhraseLoc.singleColumnLocation.
+                            //const subphraseLoc = new ParallelPhraseLocation(lexPhraseLoc.column)
+                            //const aWord = tRefs[lexPhraseLoc.singleColumnLocation.trIndex].getWordByIndices(vWordIndex.verseIndex,vWordIndex.wordIndex);
+
+                            
+                            const superPhraseWords =  this.getWordsFromLocation(lexPhraseLoc);
+                            //constPhraseWords
+                            occurrence.spans.forEach((span)=>{
+                            
+                                const phraseWords = superPhraseWords.slice(span.start,span.end+1);
+                                    phraseWords.forEach((aWord)=>{
+                                        if (aWord){
+                                            aWord.phrases.exact.add(subphrase);
+                                            if (lexPhraseLoc.secondary){
+                                               // mylog("Got/marked secondary phrase!",true)
+                                            }
+                                            {
+                                                //mylog("Got/marked main phrase!",true)
+                                            }
+                                        }
+                                        else{
+                                            //mylog("buildLexIdPhrases.matchExact: for LexPhraseLoc, could get a ! secondary:"+lexPhraseLoc.secondary, true)
+                                        }
+
+                                    });
+
+                      //  });
+                        
+                            });
+
+                    });
+                    
+                   
+                })
+                
+               
+                
+               //TODO: finish...
+                
+            })
+
+            
+            //TODO above section in progress...
+            //=============================================
+
+/*
+            let i = 1;
+            for (const [phrase,locs] of Object.entries(this.exactlyIdenticalPhrases)
+                                        .filter(([phrase,loc])=>loc.length > 1))
+            {//adding a css entry for each word:
+                //mylog(`Got exact phrase: '${phrase}', ${locs.length} times`)
+                locs.forEach((loc)=>{
+                    
+                    this.getWordsFromLocation(loc).forEach((w)=>{
+                        w.specialCss.add('exact-phrase');
+                        w.specialCss.add('exact-phrase-'+i);
+                        
+                        w.phrases.exact.add({phrase: phrase, index:i});
+                        //w.phrases.exact.add(this.);
+                    });
+                });
+                i++;
+            }
+*/
+
+
+}
         
         let numPhrases = this.lexIdenticalPhrasesMap.size;
         
@@ -744,6 +851,9 @@ export class ParallelColumnGroup {
      * @returns {Word[]}
      */
     getWordsFromLocation(parLocation){
+        if(parLocation.secondary) {
+            //mylog("getting words from secondary location!", true);
+        }
         const vWordsIdx= parLocation.singleColumnLocation.vWordIndices;
         const tR = this.getTextRefByLocation(parLocation);
         
@@ -775,7 +885,9 @@ export class ParallelColumnGroup {
      * @param {ParallelPhraseLocation} parLocation 
      */
     getTextRefByLocation(parLocation){
-
+        if(parLocation.secondary) {
+           // mylog('getTextRefByLocation got secondary!',true);
+        }
         return parLocation.secondary ? 
             this.parallelColumns[parLocation.column].secondary[parLocation.singleColumnLocation.trIndex] 
             :

@@ -114,7 +114,9 @@ function getWordStyle(word,selectedLexIndex,customMatchIndex){
         const phraseIndex = [...word.phrases.lexical][word.phrases.lexical.size-1].index;
         const colorObj=parGroup.lexIdenticalPhrasePalette[phraseIndex];
 //        if (options.viewOptions.similarPhrases) {
+          if(colorObj){
             ret =ColorUtils.bgFontString(colorObj.bg,colorObj.font,colorObj.border);
+          }
   //      }
         /*if (options.viewOptions.exactPhrases && word.phrases.exact.size){
             ret+= (ret ? "; " : '') + `--borderColor:${colorObj.border}`;
@@ -125,7 +127,7 @@ function getWordStyle(word,selectedLexIndex,customMatchIndex){
     return ret;
 }
 //$inspect(`bibleTextBlock: selectedLexes: [${selectedLexes.join(",")}]`);
-$inspect(`bibleTextBlock: selectedGreekPalette: [${selectedGreekPalette.join(",")}]`);
+//$inspect(`bibleTextBlock: selectedGreekPalette: [${selectedGreekPalette.join(",")}]`);
 
 </script>
 

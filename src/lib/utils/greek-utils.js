@@ -159,7 +159,11 @@ class GreekUtils {
 	
 	}
 
-
+	/**
+	 * 
+	 * @param {string} greek 
+	 * @returns 
+	 */
 	static normalize(greek){
 		return greek.normalize("NFD");
 	}

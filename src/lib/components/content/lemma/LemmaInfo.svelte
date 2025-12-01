@@ -11,9 +11,11 @@ import Button from "$lib/components/ui/Button.svelte";
 import Loading from "$lib/components/ui/Loading.svelte";
 import Icon from "$lib/components/ui/icons/Icon.svelte";
 import BarsSvg from "$lib/components/ui/icons/colorful-bar-chart.svg";
-import BookSvg from "$lib/components/ui/icons/book-open.svg";
+import BookOpenSvg from "$lib/components/ui/icons/book-open.svg";
+import BookSvg from "$lib/components/ui/icons/book.svg";
 import CopyText from "$lib/components/ui/CopyText.svelte";
 import { LexemeInfo,LexStats,LemmaBookStats} from "$lib/components/datastructures/lexeme";
+import { TextAndRef } from "../parallelTexts.svelte";
 import * as BibleUtils from "$lib/n1904/bibleRefUtils";
 import ButtonSelect from "$lib/components/ui/ButtonSelect.svelte";
 //import LemmaRefs from "./LemmaRefs.svelte";
@@ -27,7 +29,8 @@ import Tabs from "$lib/components/ui/Tabs2.svelte";
 import { Grid } from "@vortechsolutions/gridjs-svelte";
 import { mylog } from "$lib/env/env";
 import MathUtils from "$lib/utils/math-utils";
-
+import Modal2 from "$lib/components/ui/Modal2.svelte";
+import ViewTexts from "../ViewTexts.svelte";
 
 /**
  * @type {{ lemmaInfo:LexemeInfo,
@@ -44,6 +47,10 @@ let {
 } = $props();
 
 
+//let textRefsToView=$state([]);
+
+/***/
+let enableTextView=$state(false);
 
 let makingRequest=$state(false);
 let responseReady=$state(false);
@@ -161,7 +168,7 @@ onMount(()=>{
 
 let chosenBookId=$state(bookID);
 let selectedTab=$state(0);
-$inspect(`bookid:${bookID}; bookname: ${theBookName}; bookAbbrev: ${theBookAbbrev}`);
+//$inspect(`bookid:${bookID}; bookname: ${theBookName}; bookAbbrev: ${theBookAbbrev}`);
 </script>
 <style>
         @reference "tailwindcss";
@@ -196,8 +203,9 @@ $inspect(`bookid:${bookID}; bookname: ${theBookName}; bookAbbrev: ${theBookAbbre
 
 <div class="block text-center m-0 p-0 mt-1 self-center">
 <ButtonSelect bind:selected={showReferences} ><Icon svg={BookSvg}/>See all {lemmaInfo.stats.count} reference(s)</ButtonSelect>
-
+<ButtonSelect bind:selected={enableTextView}><Icon svg={BookOpenSvg}/>View the Texts</ButtonSelect>
 <ButtonSelect buttonText="" bind:selected={showStats}><Icon svg={BarsSvg}/>Stats!</ButtonSelect>
+
 {#if false && bookID > 0}
     <ButtonSelect  buttonText="See {lemmaInfo.stats.bookStats[bookID].count} reference(s) in section." bind:selected={showSectionReferences} />
 {/if}
@@ -224,7 +232,8 @@ lexRefQuery={sectionRefsQuery}/>-->
 <hr/>
 
 <div class="rounded bg-slate-200 p-1 shadow">
-<h2 class="font-bold underline">All {lemmaInfo.stats.count} NT Occurrences of {lemmaInfo.lemma}</h2>
+<h2 class="font-bold"><span class="underline">All {lemmaInfo.stats.count} NT Occurrences of {lemmaInfo.lemma}</span>
+    <ButtonSelect buttonStyle="btn btn-xs m-1 p-1" buttonText='See Texts' bind:selected={enableTextView}/></h2>
  <div class="rounded-2xl bg-slate-100/80 p-2 shadow">{theRefs}
 <CopyText copyText={theRefs}/> </div>
 
@@ -466,6 +475,11 @@ See Stats for:
 </div>
 <!--/showStats-->
 
+<Modal2 bind:showModal={enableTextView} >
+
+    <ViewTexts refs={lemmaInfo.stats.references} {tfServer}/>
+
+</Modal2 >
 
 
 <!-- {sections.map((id)=>tfLxxBooksDict.getRef(id)).join('; ')} -->

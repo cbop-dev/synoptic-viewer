@@ -6,6 +6,7 @@
 			title='',
 			onclose=()=>{}, 
 			children,
+			enable=true
 
 	} = $props();
 	let max=$state(false);
@@ -16,7 +17,7 @@
 	}
 	$effect(() => {
 		if (showModal) show();
-        else {
+        else if (dialog && dialog.close){
 			dialog.close();
 		}
 			
@@ -32,11 +33,11 @@
 		
 	</style>
 
-
+	{#if enable}
 	<div class=" bg-gray-100"></div>
 	<dialog bind:this={dialog} class="modal max-w-full" 
 	class:modal-open={showModal}
-	onclose={() => {showModal = false}} 
+	onclose={() => {onclose(); showModal = false}} 
 	>
 
 	{#key max && showModal}	
@@ -75,3 +76,4 @@
 		  </form>
 	{/key}
 	</dialog>
+{/if}

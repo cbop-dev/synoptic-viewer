@@ -248,7 +248,7 @@ export function populateGroupsText(perGroups,response,perGroupsIndices,words=tru
             }
         }
         group.markUniqueAndIdenticalWords();
-        group.buildLexIdenticalPhrases(3);           
+        group.buildLexIdenticalPhrases(3,true,true);           
     }
     mylog("DONE! Populated the GroupTexts()!")
     mylog("^==================================^")

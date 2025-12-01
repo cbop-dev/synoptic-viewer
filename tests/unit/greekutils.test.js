@@ -1,6 +1,7 @@
 import { describe, it, expect,test} from 'vitest';
 import { mylog } from '$lib/env/env';
-import { GreekUtils as gu } from '$lib/utils/greek-utils';
+import { GreekUtils, GreekUtils as gu } from '$lib/utils/greek-utils';
+
 
 
 test('remove diacritics test',()=>{
@@ -23,6 +24,30 @@ test('remove apparatus test',()=>{
 
     for (const t of tests) {
         expect(gu.removeApparatusMarks(t.input)).toBe(t.output);
+    }
+        
+});
+
+
+ "Ὦ γενεὰ ἄπιστος";
+
+
+ test('plain Greek test',()=>{
+    const tests=[
+        {input: "Ὦ γενεὰ ἄπιστος,", output:"Ω γενεα απιστος"}
+
+    ]
+
+    const equivs=[
+        {one: "Ὦ γενεὰ ἄπιστος, ", two:"Ὦ γενεὰ ἄπιστος "}
+    ]
+
+    for (const t of tests){
+        expect(GreekUtils.onlyPlainGreek(t.input)).toEqual(t.output);
+
+    }
+    for (const e of equivs){
+        expect(GreekUtils.onlyPlainGreek(e.one)).toEqual(GreekUtils.onlyPlainGreek(e.two));
     }
         
 })
