@@ -160,6 +160,10 @@ let filteredPerGroups=$derived(perGroups.filter((g)=>filteredPericopes.includes(
     (a,b)=>filteredPericopes.indexOf(a.id)-filteredPericopes.indexOf(b.id)
 ));
 
+let filteredPerGroupsIndices=$derived(filteredPerGroups.map((g,index)=>perGroupsIndices[index]));
+
+
+
 /**
  * @type {{matt:number[], mark:number[], luke:number[], john:number[], other:number[]}[]} perGroupsIndices
  */
@@ -185,6 +189,9 @@ let groupsRefsArray=$derived.by(()=>{
 //let groupsRefsArray = $state([]);
 let currentServer=$state(tfServer);
 
+/**
+ * @type {Object|null}
+ */
 let fetchedTextsResponse = $state(null);
 let showLexOptionsInfo = $state(false);
 function parsePericopeNums(){
@@ -278,6 +285,9 @@ const groupsPerPage=5;
  * @description a paginated/split version of 'filteredPerGroups'. Each array item is a subarray of of filteredPerGroups of size 'groupsPerPage' (if possible), and thus represents a page of data.
  */
 let paginatedFilteredPerGroups=$derived(ArrayUtils.splitArray(filteredPerGroups,groupsPerPage));
+
+let paginatedFilteredPerGroupsIndices=$derived(ArrayUtils.splitArray(filteredPerGroupsIndices,groupsPerPage));
+
 
 let lemmasByID=$derived.by(()=>{
     let dict={}
@@ -404,16 +414,35 @@ async function buildAndFetchPericopes(reset=true){
     
     
     buildPericopeRefs();
+    await tick();
     fetching = true;
     //fetchTexts();
     
     fetchedTextsResponse = await currentServer.fetchPostTextsBatch(groupsRefsArray);
     //buildLexArrays();
-    populateGroupsText(true,enableSecondary);
+    await tick();
+    checkAndPopulatePage();
+    await tick();
+    gotoPageSection(myOptions.viewOptions.page)
+    await tick();
     dataReady= true;
 }
 //let lemmasByID={}
 
+function checkAndPopulatePage(){
+    mylog(`checkAndPopulatePage(page=${myOptions.viewOptions.page})...`,true)
+    dataReady=false;
+    const currentPage = paginatedFilteredPerGroups[myOptions.viewOptions.page];
+    const currentIndices=paginatedFilteredPerGroupsIndices[myOptions.viewOptions.page]
+    if (currentPage && currentPage.length && !currentPage.reduce((a,b)=>a&&b.populated,true)) {
+        TfUtils.populateGroupsText(currentPage,fetchedTextsResponse,currentIndices,true,enableSecondary);
+        //tick();
+    }
+    else{
+
+    }
+    dataReady=true;
+}
 
 function buildLexArrays(){
     //mylog("building LexArrays...", true)
@@ -430,7 +459,7 @@ function buildLexArrays(){
     
 }
 
-function populateGroupsText(words=false,includeSecondary=false){
+function populateGroupsText2(words=false,includeSecondary=false){
     //mylog("v==================================v", true);
     //mylog(`populateGroupTexts(includeSecondary:${includeSecondary})...`,true);
     
@@ -547,8 +576,15 @@ async function urlRequestShowNtParallels(){
     }
     if (pericopes.size){
         alandPericopeNums=[...pericopes];
+        await tick();
+        mylog("URLrequestShowNTParallels: about to call build/fetch...",true)
         await buildAndFetchPericopes(false);
+        mylog("URLrequestShowNTParallels: ...done!",true)
+        
 
+    }
+    else{
+        mylog("URLrequestShowNTParallels: Didn't build/fetch!",true)
     }
 
 
@@ -729,15 +765,32 @@ function displayNote(heading,note) {
 }
 function gotoNextPage(){
     if (myOptions.viewOptions.page < paginatedFilteredPerGroups.length-1){
-        gotoPageSection(myOptions.viewOptions.page +1); 
+        myOptions.viewOptions.page +=1;
+        //checkAndPopulatePage();
+        //gotoPageSection(myOptions.viewOptions.page); 
     }
 }
 
 function gotoPreviousPage(){
     if (myOptions.viewOptions.page > 0){
-        gotoPageSection(myOptions.viewOptions.page -1); 
+        myOptions.viewOptions.page -=1; 
     }
 }
+
+$effect(()=>{
+    if (myOptions.viewOptions.page >=0){
+        dataReady=false;
+        untrack(async ()=>{
+            
+            await gotoPageSection(myOptions.viewOptions.page);
+            checkAndPopulatePage();
+        
+        });
+        tick();
+        dataReady=true;
+    }   
+
+});
 const hotkeys=new SynopsisHotkeys(myOptions);
 hotkeys.enableHotkeys('nptb2ax');
 hotkeys.addHotkey('>','Next Page',gotoNextPage);
@@ -981,6 +1034,7 @@ onMount(() => {
     else{
         viewStates.reset();
     }
+    
     mounted = true;
 });
 
@@ -1301,7 +1355,9 @@ onMount(() => {
     {#if alandPericopeNums.length}
          
     <div id="results">
+       
         {#if dataReady && fetchedTextsResponse}
+        
             <h1 class="text-center">Results from {currentServer.name}:
             {#key myOptions.viewOptions}<CopyText icon={LinkSvg} 
             getTextFunc={makeURL} 
@@ -1309,7 +1365,7 @@ onMount(() => {
             
             />{/key}</h1>
             
-            {#if paginatedFilteredPerGroups[myOptions.viewOptions.page].length}
+            {#if paginatedFilteredPerGroups[myOptions.viewOptions.page].length && paginatedFilteredPerGroups[myOptions.viewOptions.page].reduce((a,b)=>a&& b.populated, true)}
                 {@render pageNav()}
                 {#each paginatedFilteredPerGroups[myOptions.viewOptions.page] as group, index }
                 <hr class="mb-2 !border-slate-200"/>
@@ -1353,14 +1409,16 @@ onMount(() => {
                     
                 {/each}
                 {@render pageNav()}
-            {:else}
+                {:else if !paginatedFilteredPerGroups[myOptions.viewOptions.page].reduce((a,b)=>a&& b.populated, true)}
+                    <Loading message={[]} title="Populating data..."/>
+                {:else}
                 (No results. Try <a href="" data-sveltekit-reload>another search</a>{#if myOptions.viewOptions.hideNonPrimary || myOptions.viewOptions.focusOn || myOptions.viewOptions.hideSolos }, 
                 or change the <a href="" onclick={()=>{viewStates.toggle('view')}}>View Options</a>{/if}.)
             {/if}
         {:else}
         <Loading title="Results loading..." message={[]}/>
         {/if}
-
+         
     </div>
     
     {:else}

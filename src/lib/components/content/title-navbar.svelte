@@ -42,17 +42,18 @@
             
         {/if}
     <svelte:element this={headingTag} class={[titleClasses]}>
-
+    
     {#if short && shorttitle}{shorttitle}
     {:else}
-        <span class={"sm:hidden inline text-nowrap"}>{ shorttitle ? shorttitle: mediumtitle ? mediumtitle : title}</span>
-        <span class={"sm:inline md:hidden text-nowrap hidden"}>{mediumtitle ? mediumtitle : shorttitle ? shorttitle : title}</span>
-        <span class={"md:inline hidden "}>{title}</span>
+        {@const extraTitleclasses=['text-shadow-sm/20']}
+        <span class={["sm:hidden inline text-nowrap",extraTitleclasses]}>{ shorttitle ? shorttitle: mediumtitle ? mediumtitle : title}</span>
+        <span class={["sm:inline md:hidden text-nowrap hidden",extraTitleclasses]}>{mediumtitle ? mediumtitle : shorttitle ? shorttitle : title}</span>
+        <span class={["md:inline hidden ",extraTitleclasses]}>{title}</span>
     
     
     {/if}</svelte:element> 
 
-        <ul class="bg-white menu menu-horizontal w-auto ">
+        <ul class="bg-white menu menu-horizontal w-auto">
             
         
         <li><ButtonSelect buttonText="?" buttonStyle="btn btn-xs btn-circle btn-ghost p-0 ml-0.5" 

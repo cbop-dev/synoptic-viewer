@@ -26,3 +26,7 @@ vite.config.ts.timestamp-*
 *.excised
 
 src/lib/utils/del/
+
+src/lib/utils/tmp/
+
+tests/unit/del/

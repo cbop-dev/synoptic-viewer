@@ -215,45 +215,83 @@ export function getParallelRefsArrays(parallelColumns){
 /**
  * 
  * @param {GospelPericopeGroup[]} perGroups
- * @param {Object} response 
+ * @param {Object<string,Object>} response 
  * @param {GospelPericopeGroupIndices[]} perGroupsIndices 
  * @param {boolean} words 
+ * @param {boolean} includeSecondary 
  */
-export function populateGroupsText(perGroups,response,perGroupsIndices,words=true){
+export function populateGroupsText(perGroups,response,perGroupsIndices,words=true,includeSecondary=false){
     // mylog("v==================================v", true);
     //mylog("populateGroupTexts()...",true);
     
     for (const [index,group] of perGroups.entries()){
         mylog("checking group # " + group.id +" , title: '"+ group.title + ", index: " + index);
-        for (const book of ['matt', 'mark', 'luke', 'john','other']){
+        if (!group.populated) {
+            populateGroupText(group,response && response['texts'] ? response['texts'] : null,perGroupsIndices[index],words,includeSecondary)        
+        }
+    }
+    mylog("DONE! Populated the GroupTexts()!")
+    mylog("^==================================^")
+}
+
+/**
+ * 
+ * @param {GospelPericopeGroup} group
+ * @param {Object|null} responseTexts 
+ * @param {GospelPericopeGroupIndices} perGroupIndices 
+ * @param {boolean} words 
+ * @param {boolean} includeSecondary 
+ */
+export function populateGroupText(group,responseTexts=null,perGroupIndices,words=true,includeSecondary=false){
+    for (const book of ['matt', 'mark', 'luke', 'john','other']){
             for (const [i,textRef] of group[book].textRefs.entries()){
                 mylog("checking ref: " + textRef.reference);
-                const queryIndex= perGroupsIndices[index][book].main[i];
-                if (response && response['texts'] && response['texts'][queryIndex]){
-                    textRef.text= response['texts'][queryIndex].text;
-                    if (response['texts'][queryIndex].notes){
-                        const notes = response['texts'][queryIndex].notes.filter((n)=>n.length).join("\n");
+                const queryIndex= perGroupIndices[book].main[i];
+                if (responseTexts && responseTexts && responseTexts[queryIndex]){
+                    textRef.text= responseTexts[queryIndex].text;
+                    if (responseTexts[queryIndex].notes){
+                        const notes = responseTexts[queryIndex].notes.filter((n)=>n.length).join("\n");
                         if (notes.length){
                             textRef.note=notes;
                         }
                     }
                     if (words){
                         
-                        textRef.vwords=VerseWords.buildFromObj(response['texts'][queryIndex].words);
+                        textRef.vwords=VerseWords.buildFromObj(responseTexts[queryIndex].words);
                     }
                     // mylog("populating fetched text for group index "+index + ", ref: '" + textRef.reference
                     // + "', queryIndex = " + queryIndex +", text='"+textRef.text +"'", true);
                 }
+                if (includeSecondary && group[book].secondary && group[book].secondary.length){
+                    for (const [i,textRef] of group[book].secondary.entries()){
+                        mylog("checking ref: " + textRef.reference);
+                        const queryIndex= perGroupIndices[book].secondary[i];
+                        if (responseTexts && responseTexts[queryIndex]){
+                            textRef.text= responseTexts[queryIndex].text;
+                            if (responseTexts[queryIndex].notes){
+                                const notes = responseTexts[queryIndex].notes.filter((n)=>n.length).join("\n");
+                                if (notes.length){
+                                    textRef.note=notes;
+                                }
+                            }
+                            if (words){
+                                
+                                textRef.vwords=VerseWords.buildFromObj(responseTexts[queryIndex].words);
+                            }
+                            // mylog("populating fetched text for group index "+index + ", ref: '" + textRef.reference
+                            // + "', queryIndex = " + queryIndex +", text='"+textRef.text +"'", true);
+                        }
 
+                    }
+
+
+                }
             }
         }
         group.markUniqueAndIdenticalWords();
-        group.buildLexIdenticalPhrases(3,true,true);           
-    }
-    mylog("DONE! Populated the GroupTexts()!")
-    mylog("^==================================^")
-}
-
+        group.buildLexIdenticalPhrases(3,true,true);  
+        group.populated=true; 
+}   
 /**
  * @param {ParallelColumnGroup} parallelColumnGroup 
  * @param {Object} response
@@ -283,7 +321,9 @@ export function populateTextGroup(parallelColumnGroup, response, parallelIndices
                 }
                 // mylog("populating fetched text for group index "+index + ", ref: '" + textRef.reference
                 // + "', queryIndex = " + queryIndex +", text='"+textRef.text +"'", true);
+                
             }
+            
             
         }
         
@@ -839,4 +879,4 @@ export class TfServer{
     
 }
 
-export default {getTextRefsArray,getGospelGroupRefsArrays,getGroupsArray,getParallelRefsArrays,populateTextGroup,TfServer,getParallelGroupsRefsArrays}
+export default {getTextRefsArray,getGospelGroupRefsArrays,getGroupsArray,getParallelRefsArrays,populateTextGroup,populateGroupsText,TfServer,getParallelGroupsRefsArrays}

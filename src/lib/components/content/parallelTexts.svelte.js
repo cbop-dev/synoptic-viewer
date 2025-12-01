@@ -954,7 +954,7 @@ export class LexicalPhrase{
 export class GospelPericopeGroup extends ParallelColumnGroup{
     title = $state('')
     id=$state(0);
-    
+    populated=$state(false);
     constructor(){
         
         const matt = new ParallelColumn();
