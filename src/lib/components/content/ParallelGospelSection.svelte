@@ -264,7 +264,7 @@ function isUnique(wordid, uniqueSet){
                         
                         <BibleTextBlock textRef={secondaryTextRef}  {parGroup} {options} {numCols} copyButton={true} 
                         cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} {selectedLexes}
-                        {showNotes} uniqueSet={unique} notesClick={showNotesFunction} {selectedGreekPalette}
+                        {showNotes} uniqueSet={unique} notesClick={showNotesFunction} {selectedGreekPalette} --cssUniqueColor={uniqueColors[index]} 
                             {wordClick} 
                         />
                         </div>
@@ -289,7 +289,7 @@ function isUnique(wordid, uniqueSet){
                     <BibleTextBlock {textRef}  {parGroup} {options} {numCols} copyButton={true} 
                     cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} 
                     {showNotes} notesClick={showNotesFunction} {selectedGreekPalette} {selectedLexes}
-                        {wordClick} 
+                        {wordClick} --cssUniqueColor={uniqueColors[uniqueColors.length-1]} 
                     />
                 <!--{@render showText(myOptions)}-->
             
@@ -323,7 +323,7 @@ function isUnique(wordid, uniqueSet){
                     <BibleTextBlock textRef={secondRef}  {parGroup} {options} {numCols} copyButton={true} 
                         cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} 
                         {showNotes} uniqueSet={unique}  notesClick={showNotesFunction} {selectedGreekPalette} {selectedLexes}
-                            {wordClick} 
+                            {wordClick} --cssUniqueColor={uniqueColors[colData.focusIndex]} 
                         />
             <!--{@render showText(myOptions)}-->
             </div>
@@ -346,7 +346,7 @@ function isUnique(wordid, uniqueSet){
                          <BibleTextBlock {textRef}  {parGroup} {options}  {numCols} copyButton={true} 
                     cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} 
                     {showNotes} uniqueSet={col.unique} notesClick={showNotesFunction} {selectedGreekPalette} {selectedLexes}
-                        {wordClick} 
+                        {wordClick} --cssUniqueColor={uniqueColors[index]} 
                     />
                 <!--{@render showText(myOptions)}-->
                 </div>
@@ -364,7 +364,7 @@ function isUnique(wordid, uniqueSet){
                             <BibleTextBlock textRef={secRef}  {parGroup} {options}  {numCols} copyButton={true} 
                         cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} 
                         {showNotes} uniqueSet={col.unique} notesClick={showNotesFunction} {selectedGreekPalette} {selectedLexes}
-                            {wordClick} 
+                            {wordClick} --cssUniqueColor={uniqueColors[index]} 
                         />
                     <!--{@render showText(myOptions)}-->
                     </div>
@@ -390,7 +390,7 @@ function isUnique(wordid, uniqueSet){
                          <BibleTextBlock {textRef}  {parGroup} {options}  {numCols} copyButton={true} 
                     cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} {selectedGreekPalette} {selectedLexes}
                     {showNotes}  notesClick={showNotesFunction} 
-                        {wordClick}
+                        {wordClick} --cssUniqueColor={uniqueColors[uniqueColors.length-1]} 
                     />
                     <!--{@render showText(myOptions)}-->
                 </div>
