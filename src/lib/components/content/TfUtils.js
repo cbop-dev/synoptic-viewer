@@ -220,7 +220,7 @@ export function getParallelRefsArrays(parallelColumns){
  * @param {boolean} words 
  * @param {boolean} includeSecondary 
  */
-export function populateGroupsText(perGroups,response,perGroupsIndices,words=true,includeSecondary=false){
+export function populateGroupsText(perGroups,response,perGroupsIndices,words=true,includeSecondary=true){
     // mylog("v==================================v", true);
     //mylog("populateGroupTexts()...",true);
     
@@ -242,12 +242,12 @@ export function populateGroupsText(perGroups,response,perGroupsIndices,words=tru
  * @param {boolean} words 
  * @param {boolean} includeSecondary 
  */
-export function populateGroupText(group,responseTexts=null,perGroupIndices,words=true,includeSecondary=false){
+export function populateGroupText(group,responseTexts=null,perGroupIndices,words=true,includeSecondary=true){
     for (const book of ['matt', 'mark', 'luke', 'john','other']){
             for (const [i,textRef] of group[book].textRefs.entries()){
                 mylog("checking ref: " + textRef.reference);
                 const queryIndex= perGroupIndices[book].main[i];
-                if (responseTexts && responseTexts && responseTexts[queryIndex]){
+                if (responseTexts && responseTexts[queryIndex]){
                     textRef.text= responseTexts[queryIndex].text;
                     if (responseTexts[queryIndex].notes){
                         const notes = responseTexts[queryIndex].notes.filter((n)=>n.length).join("\n");
@@ -262,28 +262,26 @@ export function populateGroupText(group,responseTexts=null,perGroupIndices,words
                     // mylog("populating fetched text for group index "+index + ", ref: '" + textRef.reference
                     // + "', queryIndex = " + queryIndex +", text='"+textRef.text +"'", true);
                 }
-                if (includeSecondary && group[book].secondary && group[book].secondary.length){
-                    for (const [i,textRef] of group[book].secondary.entries()){
-                        mylog("checking ref: " + textRef.reference);
-                        const queryIndex= perGroupIndices[book].secondary[i];
-                        if (responseTexts && responseTexts[queryIndex]){
-                            textRef.text= responseTexts[queryIndex].text;
-                            if (responseTexts[queryIndex].notes){
-                                const notes = responseTexts[queryIndex].notes.filter((n)=>n.length).join("\n");
-                                if (notes.length){
-                                    textRef.note=notes;
-                                }
+            }
+            if (includeSecondary && group[book].secondary && group[book].secondary.length){
+                for (const [i,textRef] of group[book].secondary.entries()){
+                    mylog("checking ref: " + textRef.reference);
+                    const queryIndex= perGroupIndices[book].secondary[i];
+                    if (responseTexts && responseTexts[queryIndex]){
+                        textRef.text= responseTexts[queryIndex].text;
+                        if (responseTexts[queryIndex].notes){
+                            const notes = responseTexts[queryIndex].notes.filter((n)=>n.length).join("\n");
+                            if (notes.length){
+                                textRef.note=notes;
                             }
-                            if (words){
-                                
-                                textRef.vwords=VerseWords.buildFromObj(responseTexts[queryIndex].words);
-                            }
-                            // mylog("populating fetched text for group index "+index + ", ref: '" + textRef.reference
-                            // + "', queryIndex = " + queryIndex +", text='"+textRef.text +"'", true);
                         }
-
+                        if (words){
+                            
+                            textRef.vwords=VerseWords.buildFromObj(responseTexts[queryIndex].words);
+                        }
+                        // mylog("populating fetched text for group index "+index + ", ref: '" + textRef.reference
+                        // + "', queryIndex = " + queryIndex +", text='"+textRef.text +"'", true);
                     }
-
 
                 }
             }

@@ -130,7 +130,10 @@
 
 
 
-    
+    const uniqueColors=[
+        'red','green','blue','purple','black'
+
+    ]
 
     //let colData =$derived.by([parGroup.matt, parGroup.mark, parGroup.luke, parGroup.john].filter((o)=>o.textRefs.length));
     let otherData= $derived(parGroup.other?.textRefs?.length ? parGroup.other : null);
@@ -208,7 +211,9 @@ function isUnique(wordid, uniqueSet){
        /* border-color: var(--borderColor,#eee)*/
     }
 
-
+    .gospel-column-1 .show-unique .unique{
+        outline-color: green !important;
+    }
     .column .secondary {
         @apply text-sm;
     }
@@ -239,8 +244,7 @@ function isUnique(wordid, uniqueSet){
                             <div class="text-left">    
                                 <BibleTextBlock {textRef}  {parGroup} {options} {numCols} copyButton={true} 
                                     cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} {selectedLexes}
-                                    {showNotes} uniqueSet={unique} notesClick={showNotesFunction} {selectedGreekPalette}
-                                        {wordClick} 
+                                    {showNotes} uniqueSet={unique} notesClick={showNotesFunction} {selectedGreekPalette} --cssUniqueColor={uniqueColors[index]}                                         {wordClick} 
                                 />
                             </div>
                             
@@ -303,7 +307,7 @@ function isUnique(wordid, uniqueSet){
                  <BibleTextBlock {textRef}  {parGroup} {options} {numCols} copyButton={true} 
                     cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} 
                     {showNotes} uniqueSet={unique}  notesClick={showNotesFunction} {selectedGreekPalette} {selectedLexes}
-                        {wordClick} 
+                        {wordClick} --cssUniqueColor={uniqueColors[colData.focusIndex]}
                     />
         </div>
         {/each}

@@ -171,7 +171,7 @@ let filteredPerGroupsIndices=$derived(filteredPerGroups.map((g,index)=>perGroups
 let perGroupsIndices=$derived.by(()=>{
     let retVal = [];
     if (perGroups && perGroups.length){
-        retVal = TfUtils.getGospelGroupRefsArrays(perGroups,enableSecondary).groupsIndices;
+        retVal = TfUtils.getGospelGroupRefsArrays(perGroups,true).groupsIndices;
     }
     return retVal;
 });
@@ -181,7 +181,7 @@ let perGroupsIndices=$derived.by(()=>{
 let groupsRefsArray=$derived.by(()=>{
     let retVal = [];
     if (perGroups && perGroups.length){
-        retVal = TfUtils.getGospelGroupRefsArrays(perGroups,enableSecondary).refsArray;
+        retVal = TfUtils.getGospelGroupRefsArrays(perGroups,true).refsArray;
     }
     return retVal;
 });
@@ -258,11 +258,20 @@ let filteredPericopes=$derived.by(()=>{
 
 async function gotoPageSection(pageNum=0,alandPerGroupId=0){
     loadingPageSection=true;
+    
     if (myOptions.viewOptions.page != pageNum && pageNum >=0 && pageNum < paginatedFilteredPerGroups.length){
         //already showing the right page data. just jump to the anchor
+        //dataReady=false;
         myOptions.viewOptions.page=pageNum;
         paginatedFilteredPerGroups;
         await tick();
+        //checkAndPopulatePage();
+        //await tick();
+       // dataReady=true;
+    }
+    else{
+        //pageNum=0;
+        
     }
 
     if(alandPerGroupId) {
@@ -288,6 +297,7 @@ let paginatedFilteredPerGroups=$derived(ArrayUtils.splitArray(filteredPerGroups,
 
 let paginatedFilteredPerGroupsIndices=$derived(ArrayUtils.splitArray(filteredPerGroupsIndices,groupsPerPage));
 
+//let myOptions.viewOptions.page=$derived(myOptions.viewOptions.page >= paginatedFilteredPerGroups.length ? 0 : myOptions.viewOptions.page);
 
 let lemmasByID=$derived.by(()=>{
     let dict={}
@@ -315,13 +325,16 @@ function setServer(){
 }
 
 let selectedSection = $state([1]);
-function selectSection(){
+async function selectSection(){
 
     landingPage=false;
     resetViewOptions();
     alandPericopeNums=[...selectedSection];
 
-    buildAndFetchPericopes();
+    await buildAndFetchPericopes();
+    await populateAll();
+    //checkAndPopulatePage();
+    gotoPageSection();
 } 
 
 /**
@@ -420,26 +433,38 @@ async function buildAndFetchPericopes(reset=true){
     
     fetchedTextsResponse = await currentServer.fetchPostTextsBatch(groupsRefsArray);
     //buildLexArrays();
-    await tick();
-    checkAndPopulatePage();
-    await tick();
-    gotoPageSection(myOptions.viewOptions.page)
-    await tick();
+    fetching=false;
+    //await tick();
+    //await checkAndPopulatePage();
+    //await tick();
+    //gotoPageSection(myOptions.viewOptions.page)
+    //await tick();
     dataReady= true;
 }
 //let lemmasByID={}
 
-function checkAndPopulatePage(){
-    mylog(`checkAndPopulatePage(page=${myOptions.viewOptions.page})...`,true)
+async function populateAll(){
     dataReady=false;
+    TfUtils.populateGroupsText(perGroups,fetchedTextsResponse,perGroupsIndices,true,true);
+    await tick();
+//    mylog(`populatedAll! are all populated?:${perGroups.map((g)=>g.populated).reduce((a,b)=>a&&b, true)}`, true)
+    dataReady=true;
+}
+
+function checkAndPopulatePage(){
+//    mylog(`checkAndPopulatePage(page=${myOptions.viewOptions.page})...`,true)
+    dataReady=false;
+    //TfUtils.populateGroupsText(perGroups,fetchedTextsResponse,perGroupsIndices,true,true);
+    //await tick();
     const currentPage = paginatedFilteredPerGroups[myOptions.viewOptions.page];
     const currentIndices=paginatedFilteredPerGroupsIndices[myOptions.viewOptions.page]
     if (currentPage && currentPage.length && !currentPage.reduce((a,b)=>a&&b.populated,true)) {
-        TfUtils.populateGroupsText(currentPage,fetchedTextsResponse,currentIndices,true,enableSecondary);
-        //tick();
+        //TfUtils.populateGroupsText(currentPage,fetchedTextsResponse,currentIndices,true,true);
+      //  await tick();
+       // mylog(`checkAndPopulatePage(): populatedGroupsText(${paginatedFilteredPerGroups[myOptions.viewOptions.page]})`,true);
     }
     else{
-
+       // mylog(`checkAndPopulatePage(). Current page #${myOptions.viewOptions.page}.length:${currentPage.length}; !currentPage.reduce((a,b)=>a&&b.populated,true):${!currentPage.reduce((a,b)=>a&&b.populated,true)}`,true);
     }
     dataReady=true;
 }
@@ -541,10 +566,12 @@ function resetViewOptions(lookup=false){
     
     //  focus=selectedGospel[selectedGospelIndex].value;
 }
-function lookupShowNtParallels(){
+async function lookupShowNtParallels(){
     resetViewOptions();
     parsePericopeNums();
-    buildAndFetchPericopes();
+    await buildAndFetchPericopes();
+    await populateAll();
+    gotoPageSection();
     //fetching = false;
     //ready = true;
     
@@ -577,14 +604,18 @@ async function urlRequestShowNtParallels(){
     if (pericopes.size){
         alandPericopeNums=[...pericopes];
         await tick();
-        mylog("URLrequestShowNTParallels: about to call build/fetch...",true)
+//        mylog("URLrequestShowNTParallels: about to call build/fetch...",true)
         await buildAndFetchPericopes(false);
-        mylog("URLrequestShowNTParallels: ...done!",true)
+        //await checkAndPopulatePage();
+        await populateAll();
+        await tick();
+        await gotoPageSection(myOptions.viewOptions.page); 
+//        mylog("URLrequestShowNTParallels: ...done!",true)
         
 
     }
     else{
-        mylog("URLrequestShowNTParallels: Didn't build/fetch!",true)
+//        mylog("URLrequestShowNTParallels: Didn't build/fetch!",true)
     }
 
 
@@ -763,31 +794,37 @@ function displayNote(heading,note) {
     theNote.footer=currentServer.getNoteFooter();
     viewStates.views.notes.state = true;
 }
-function gotoNextPage(){
+async function gotoNextPage(){
     if (myOptions.viewOptions.page < paginatedFilteredPerGroups.length-1){
         myOptions.viewOptions.page +=1;
-        //checkAndPopulatePage();
-        //gotoPageSection(myOptions.viewOptions.page); 
+        //await checkAndPopulatePage();
+        gotoPageSection(myOptions.viewOptions.page); 
     }
 }
 
-function gotoPreviousPage(){
+async function gotoPreviousPage(){
     if (myOptions.viewOptions.page > 0){
         myOptions.viewOptions.page -=1; 
+        await checkAndPopulatePage();
+        gotoPageSection(myOptions.viewOptions.page); 
     }
 }
 
+//todo: refactor to make this work without complicated async effect() logic! problem: "focus" and "sort" options do not work on paginated results.
 $effect(()=>{
-    if (myOptions.viewOptions.page >=0){
+
+   if (myOptions.viewOptions.page >= paginatedFilteredPerGroups.length ){
+
         dataReady=false;
-        untrack(async ()=>{
-            
-            await gotoPageSection(myOptions.viewOptions.page);
-            checkAndPopulatePage();
+        //untrack(async ()=>{
+        myOptions.viewOptions.page=0; 
+        //checkAndPopulatePage();
+        gotoPageSection(myOptions.viewOptions.page).then(()=>{dataReady=true});
+            //await ;
+        //dataReady=true;
+        //});
+        //tick().then(()=>{dataReady=true});
         
-        });
-        tick();
-        dataReady=true;
     }   
 
 });
@@ -1053,7 +1090,11 @@ onMount(() => {
 
 //$inspect(`NYSyop.selectedGreekPalette:${selectedGreekPalette.map((o)=>`bg:${o.bg},font:${o.font},border:${o.border}`).join(";")}`);
 //$inspect(`NTSynPan.alandPericopeNums:${alandPericopeNums.join(",")};`);
-//$inspect(`NTSynPan.filteredPericopes:${filteredPericopes.join(",")};`);
+$inspect(`NTSynPan.filteredPericopes:${filteredPericopes.join(",")};`);
+$inspect(`NTSynPan.paginatedFilteredPericopes:${paginatedFilteredPerGroups.flat().map((g)=>g.id).join(",")};`);
+$inspect(`myOptions.viewOptions.page:${myOptions.viewOptions.page}`);
+//$inspect(`paginatedFilteredPerGroups[myOptions.viewOptions.page]:${paginatedFilteredPerGroups[myOptions.viewOptions.page].flat().map((g)=>g.id)}`)
+$inspect(`myOptions.viewOptions.page:${myOptions.viewOptions.page}`)
 </script>
 <style>
     @reference "tailwindcss";
@@ -1364,8 +1405,8 @@ onMount(() => {
             tooltip='Copy stuff'
             
             />{/key}</h1>
-            
-            {#if paginatedFilteredPerGroups[myOptions.viewOptions.page].length && paginatedFilteredPerGroups[myOptions.viewOptions.page].reduce((a,b)=>a&& b.populated, true)}
+            {#key paginatedFilteredPerGroups && myOptions.viewOptions.page}
+            {#if paginatedFilteredPerGroups[myOptions.viewOptions.page] && paginatedFilteredPerGroups[myOptions.viewOptions.page].length && paginatedFilteredPerGroups[myOptions.viewOptions.page].reduce((a,b)=>a&& b.populated, true)}
                 {@render pageNav()}
                 {#each paginatedFilteredPerGroups[myOptions.viewOptions.page] as group, index }
                 <hr class="mb-2 !border-slate-200"/>
@@ -1384,7 +1425,7 @@ onMount(() => {
                             {#if index > 0}
                             <a href="#section-{paginatedFilteredPerGroups[myOptions.viewOptions.page][index-1].id}"
                             title="Previous"><ArrowUp height={20} width={20}/></a>{/if}
-                            {#if index < paginatedFilteredPerGroups[myOptions.viewOptions.page].length-1}
+                            {#if paginatedFilteredPerGroups[myOptions.viewOptions.page] && index < paginatedFilteredPerGroups[myOptions.viewOptions.page].length-1}
                             <a href="#section-{paginatedFilteredPerGroups[myOptions.viewOptions.page][index+1].id}" 
                             class="break-after-all" title="Next"><ArrowDown height={20} width={20}/></a>{/if}
                             <a href="#"  class="inline" title="Top"><ArrowTop height={20} width={20}/></a>
@@ -1409,12 +1450,13 @@ onMount(() => {
                     
                 {/each}
                 {@render pageNav()}
-                {:else if !paginatedFilteredPerGroups[myOptions.viewOptions.page].reduce((a,b)=>a&& b.populated, true)}
-                    <Loading message={[]} title="Populating data..."/>
+            {:else if paginatedFilteredPerGroups[myOptions.viewOptions.page] && !paginatedFilteredPerGroups[myOptions.viewOptions.page].reduce((a,b)=> a && b.populated, true)}
+                <Loading message={[]} title="Populating data..."/>
                 {:else}
                 (No results. Try <a href="" data-sveltekit-reload>another search</a>{#if myOptions.viewOptions.hideNonPrimary || myOptions.viewOptions.focusOn || myOptions.viewOptions.hideSolos }, 
                 or change the <a href="" onclick={()=>{viewStates.toggle('view')}}>View Options</a>{/if}.)
             {/if}
+            {/key}
         {:else}
         <Loading title="Results loading..." message={[]}/>
         {/if}

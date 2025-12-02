@@ -52,7 +52,10 @@
     import { SynopsisOptions3 } from './SynopsisClasses.svelte';
     
    
-    
+    const uniqueColors=[
+        'red','green','blue','purple','black'
+
+    ]
    
     
     /**
@@ -131,14 +134,14 @@ function notesClick(heading,note){
                 {#each col.textRefs as textRef, index2}
                 
                 {@const unique = (options.viewOptions.unique && numCols > 1)? col.unique : new Set()}
-                
+                 
                 
                     {#if index2 > 0}<br/>{/if}
                     <div class="text-left">
    
                     <BibleTextBlock {textRef}  parGroup={parTextGroup} {options} {numCols} copyButton={true} 
                     cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} 
-                    {showNotes} uniqueSet={unique} notesClick={showNotesFunction} {selectedGreekPalette}
+                    {showNotes} uniqueSet={unique} notesClick={showNotesFunction} {selectedGreekPalette} --cssUniqueColor={uniqueColors[index]}
                         {wordClick} 
                     />
 
