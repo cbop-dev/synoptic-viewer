@@ -1,6 +1,83 @@
 import { mylog,debug } from "$lib/env/env.js";
+import { FaceGrinStarsOutline } from "flowbite-svelte-icons";
 import { URLParam } from "./urlParams.js";
 
+export class GospelFilter{
+    hide=$state([false,false,false,false]); //each index corresponds with a gospel: 0=Matt, 1=Mark, 2=Luke, 3=John
+    
+    filter=$derived(GospelFilter.calcFilterValue(this.hide[0],this.hide[1],this.hide[2], this.hide[3]));
+    
+    static gospels = [
+        {name:"Matthew",flag:1},
+        {name:"Mark",flag:2},
+        {name:"Luke",flag:4},
+        {name:"John", flag:8}
+    ];
+
+    static calcFilterValue(hideMatt=false,hideMark=false,hideLuke=false,hideJohn=false){
+        return [hideMatt,hideMark,hideLuke,hideJohn].reduce((sum,val,index)=>sum+(val ? GospelFilter.gospels[index].flag:0 ),0);
+
+    }
+
+    /**
+     * 
+     * @param {number} filterVal 
+     * @returns {boolean[]}
+     */
+    static createValues(filterVal){
+
+        const theFilter = new GospelFilter();
+       // theFilter.set(filterVal);
+        theFilter.set(filterVal);
+        return theFilter.hide;
+
+    }
+
+    /**
+     * 
+     * @param {number} filterVal 
+     * @returns {GospelFilter}
+     */
+    static fromFilterVal(filterVal){
+        const newFilter=new GospelFilter();
+        newFilter.set(filterVal);
+        return newFilter;
+    }
+    constructor(hideMatt=false,hideMark=false,hideLuke=false,hideJohn=false){
+        this.hide=[hideMatt,hideMark,hideLuke,hideJohn];
+        //this.filter=$state(GospelFilter.calcFilterValue(hideMatt,hideMark,hideLuke,hideJohn));
+    }
+
+    /**
+     * 
+     * @param {number} gospelIndex An index where 0 = Matt, 1 = Mark, 2 = Luke, 3 = John
+     * @returns {boolean} returns true if the given gospel is set to be hidden, false otherwise.
+     */
+    isHidden(gospelIndex){
+        return (gospelIndex >=0 && gospelIndex < GospelFilter.gospels.length) ? 
+                (GospelFilter.gospels[gospelIndex].flag & this.filter) > 0
+                : false;
+    }
+
+    /**
+     * 
+     * @param {number} filterVal 
+     */
+    set(filterVal){
+        //this.filter=filterVal;
+        //this.filterVal=$state(filterVal);
+        this.hide.forEach((h,i)=>{
+            this.hide[i]=((GospelFilter.gospels[i].flag & filterVal) > 0)
+        });
+        //this.hide=GospelFilter.createValues(filterVal);
+    }
+
+    update(hideMatt=false,hideMark=false,hideLuke=false,hideJohn=false){
+        this.hide=[hideMatt,hideMark,hideLuke,hideJohn];
+        
+    }
+
+}
 
 export class SynopsisOptions3{
 
@@ -159,7 +236,7 @@ export class SynopsisOptions3{
                 const paramDetails=SynopsisOptions3.SynopsisUrlParamsMap[param.name];
                 if(paramDetails.category=='view'){
                     options.viewOptions[param.name]=param.value;
-                    if (!options.request.fromURL){
+                    if (false && !options.request.fromURL){
                         options.request.fromURL=true;
                     }
                 }
@@ -204,6 +281,20 @@ export class SynopsisOptions3{
         hideSecondary: {type:'boolean', default: false, category: 'view',noURL:false},
         lexInfoClick:{ type: 'boolean', category: 'view',noURL:true},
         page:{ type: 'int', category: 'view',noURL:false,default: 0},
+        showEverything:{ type: 'boolean', category: 'view',noURL:true,default: false},
+        
+        // 4-bit integer, each bit represents a gospel, where 0 = show; 1 = hide; little endian: lowest-> hightest : Matthew -> John
+        // thus:
+        // 0: 0 0 0 0 = show all
+        // 1: 0 0 0 1 = hide Matt
+        // 2: 0 0 1 0 = hide Mark
+        // 3: 0 0 1 1 = hide Matt + Mark
+        // 4: 0 1 0 0 = hide Luke
+        // 5: 0 1 0 1 = hide Luke + Matt
+        // 6: 0 1 1 0 = hide Luke + mark
+        // 7: 0 1 1 1 = hide all but john
+        // ... etc.
+        gospelFilter:{ type: 'number', category: 'view',noURL:false,default: 0}, 
     }
 
     /**
@@ -279,126 +370,6 @@ function copyObject(obj){
 
     });
     return copy;
-}
-
-
-
-export class SynopsisOptions{
-
-    //viewOptions=new SynopsisViewOptions();
-        unique= $state(false);
-    identical= $state(false);
-    highlightOnClick= $state(false);
-    hideNonPrimary= $state(false);
-    hideSolos= $state(false);
-    focusOn= $state(false);
-    hideNonPrimarySolos= $state(false);
-    sort= $state(false);
-    selectedGospelIndex= $state(0);
-     /**
-     * @type {string[]} greekStrings
-     */
-    greekStrings= $state([]);
-    hideApp= $state(false);
-    mode= $state(0);
-    tab= $state(0);
-    nt=$state("sblgnt");
-    /**
-     * @type {number[]} pericopes
-     */
-    pericopes=[];
-    /**
-     * @type {number[]} pericopes
-     */
-    sections=[];
- 
-  
-    /**
-     * @type {string[]} columns
-     */
-    columns=[];
-    
-    /**
-     * @type {string[]} batch
-     */
-    batch=[];
-    /**
-     * @type {number[]} lexes
-    */
-    lexes=[];
-
-    
- //request,text,view
-
-    /**
-     * 
-     * @param {boolean} unique 
-     * @param {boolean} identical 
-     * @param {boolean} highlightOnClick 
-     * @param {number[]} lexes 
-     */
-    static propTypes= {
-        booleanParams: [
-            {name: "hideSolos", type: ''},
-            {name: "hideNonPrimary", type: ''},
-            {name: "focusOn", type: ''},
-            {name: "hideNonPrimarySolos", type: ''},
-            {name: "unique", type: ''},
-            {name: "identical", type: ''},
-            {name: "sort", type: ''},
-            {name: "hideApp", type: ''},
-        ],
-
-        numericParams : [
-            "selectedGospelIndex",
-            "tab",
-            "mode"
-            
-        ],
-
-        intArrayParams: [
-            {name: "pericopes", split: ","},
-            {name: "sections", split: ","},
-            {name: "lexes", split: ","},
-        ],
-
-        stringArrayParams: [
-            {name: "columns", split: "|"},
-            {name: "greekStrings", split: "|"},
-            {name:"batch", split:"^"}
-        ],
-        stringParams: [
-            "nt"
-        ]
-
-    };
-
-    constructor(unique=false,identical=false,highlightOnClick=false,lexes=[],){
-        this.unique=unique; 
-        
-        this.identical=identical;
-        
-        this.highlightOnClick=highlightOnClick;
-        
-        this.lexes=lexes;
-        
-        
-    }
-
-    /**
-     * 
-     * @param {Object} obj 
-     * @returns {SynopsisOptions}
-     */
-    static makeFrom(obj){
-        let sop = new SynopsisOptions();
-        for (const [prop,val] of Object.entries(obj)){
-            sop[prop]=val;
-        }
-
-        return sop;
-    }
-  
 }
 
 /**

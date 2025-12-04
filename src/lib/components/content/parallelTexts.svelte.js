@@ -424,6 +424,11 @@ export class ParallelColumnGroup {
      */
     parallelColumns= $state([]);
 
+    /** 
+    * @type {number[]}
+    * @description used when finding matching phrases (lex identical and perfect), such that if the column index is in this array, that columns texts are ignore for the column matching!
+    */
+    colPhraseHideFilter=$state([]);
     /**
      * 
      * @param {ParallelColumn[]} parTexts 
@@ -518,23 +523,32 @@ export class ParallelColumnGroup {
      */
     buildLexIdenticalPhrases(minLenth=2,includeSecondary=false,markidenticalPhrases=false){
         //mylog(`ParColGroup.buildLexidentical()...`,true);
-        const combinedColumnIds=this.parallelColumns.map((col)=> {
-            const theRefsList = includeSecondary && col.secondary && col.secondary.length  ?  [...col.textRefs, ...col.secondary ] : col.textRefs;
-            return theRefsList.reduce(
-            /**
-             * 
-             * @param {number[]} array 
-             * @param {TextAndRef} tr 
-             * @returns {number[]}
-             */
-            (array,tr)=>{
-            if (array.length){
-                return [...array,-1,...tr.getWordIdArray()]
+        const combinedColumnIds=this.parallelColumns.map((col,index)=> {
+
+            if (this.colPhraseHideFilter.includes(index)){
+                mylog("buildLexIds: filtering out column #" +index,true);
+                return [];
             }
-            else{
-                return  tr.getWordIdArray();
+            else {
+                const theRefsList = includeSecondary && col.secondary && col.secondary.length  ?  [...col.textRefs, ...col.secondary ] : col.textRefs;
+                return theRefsList.reduce(
+                /**
+                 * 
+                 * @param {number[]} array 
+                 * @param {TextAndRef} tr 
+                 * @returns {number[]}
+                 */
+                (array,tr)=>{
+                    if (array.length){
+                        return [...array,-1,...tr.getWordIdArray()]
+                    }
+                    else{
+                        return  tr.getWordIdArray();
+                    }
+                }
+                ,[]);
             }
-        },[])});
+        });
   
         const theColumns =this.parallelColumns.map((col)=> 
             [...col.textRefs.map((tr)=>tr.getWordIdArray()), ...col.secondary.map((sec)=>sec.getWordIdArray())]);

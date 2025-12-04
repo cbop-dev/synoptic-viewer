@@ -38,25 +38,41 @@ test('options get/reset props test!', async () => {
             
             
         }
-        /*
-        else if (row.type=='int'){
-            const opts= new SynClasses.SynopsisOptions3();
-            if (row.category=='view'){
-                expect(opts.viewOptions[propname]).toEqual(0);
-                const propVal = opts.getPropVal(propname);
-                console.log(`Got propval(${propname}): `,propVal)
-                expect(propVal).toEqual(0);
-                opts.viewOptions[propname]=1;
-                expect(opts.getPropVal(propname)).toEqual(1);
-                opts.resetProp(propname);
-                expect(opts.getPropVal(propname)).toEqual(0);
-                opts.viewOptions[propname]=1;
-                expect(opts.getPropVal(propname)).toEqual(1);
-                opts.reset();
-                expect(opts.getPropVal(propname)).toEqual(0);
-            }
-        }*/
+ 
 
     }
 });
 
+test('GospelFilter test!', async () => {
+    const tests =[
+        {flag: 1, hidden:[0], notHidden:[1,2,3]},
+        {flag: 8, hidden:[3], notHidden:[0,1,2]},
+        {flag: 6, hidden:[1,2], notHidden:[0,3]},
+    ];
+
+
+    for (const t of tests){
+        const filter = new SynClasses.GospelFilter();
+        filter.filter=t.flag;
+        t.hidden.forEach((i)=>{
+            expect(filter.isHidden(i)).toBe(true);
+        })
+
+        t.notHidden.forEach((i)=>{
+            expect(filter.isHidden(i)).toBe(false);
+        })
+        
+        const [matt,mark,luke,john]=SynClasses.GospelFilter.gospels.map((g,index)=>t.hidden.includes(index));
+        const filter2=new SynClasses.GospelFilter(matt,mark,luke,john);
+
+         t.hidden.forEach((i)=>{
+            expect(filter2.isHidden(i)).toBe(true);
+        })
+
+        t.notHidden.forEach((i)=>{
+            expect(filter2.isHidden(i)).toBe(false);
+        })
+    }
+    
+    
+});

@@ -6,9 +6,11 @@
     import CopyText     from '../ui/CopyText.svelte';
     import { GreekUtils } from '$lib/utils/greek-utils';
 	import Button from '../ui/Button.svelte';
-    import { SynopsisOptions3 } from './SynopsisClasses.svelte.js';
+    import { SynopsisOptions3,GospelFilter } from './SynopsisClasses.svelte.js';
     import BibleTextBlock from './BibleTextBlock.svelte';
+	import { untrack } from 'svelte';
     const gospels = gospelParallels.gospels;
+
     
     //let showSecondary=$state(true);
     //mylog("loading ParTextSecion Component");
@@ -48,6 +50,7 @@
         
     } = $props();
 
+    let gospelFilter=$derived(GospelFilter.fromFilterVal(options.viewOptions.gospelFilter));
 
     /**
      * key: bible ref (string) that matches a textAndRef.reference value.
@@ -94,7 +97,7 @@
         /**
          * @type {ParallelColumn[]} cols
          */
-        let cols = [parGroup.matt, parGroup.mark,parGroup.luke,parGroup.john];
+        let cols = [parGroup.matt, parGroup.mark,parGroup.luke,parGroup.john]; //.filter((g,index)=>(options.viewOptions.gospelFilter&Math.pow(2,index))==0);
         if (focus==gospels.names.MATTHEW){
             if (parGroup.matt.textRefs.length || parGroup.matt.secondary?.length){
                 focusIndex = 0;
@@ -162,6 +165,36 @@ function isUnique(wordid, uniqueSet){
 //$inspect("ParTexts, focus:", focus)
 //$inspect("numCols", numCols, "colData:", colData)
 //$inspect("ParText, customClass", cssCustomDict);
+
+$effect(()=>{
+    if(gospelFilter.filter>=0){
+        untrack(()=>{
+            //mylog(`ParGospSection.svelte.effect(),gospelfilter.hide:[${gospelFilter.hide.join(",")}]`,true)
+            const hiddenGospelIndices = gospelFilter.hide.map((h,i)=>h ? i: -1).filter((i)=> i>=0);
+            //mylog(`ParGospSection.svelte.effect(), hiddenGospelIndices:[${hiddenGospelIndices.join(',')}]`,true)
+            gospelFilter.hide.map((h,i)=>h? i: -1).filter((i)=> i>=0);
+            parGroup.colPhraseHideFilter.length = 0;
+            hiddenGospelIndices.forEach((i)=>{
+                parGroup.colPhraseHideFilter.push(i);
+            });
+            //untrack(()=>mylog(`recalculating exact matches with hidden as: [${parGroup.colPhraseHideFilter.join(',')}]`, true));
+            parGroup.buildLexIdenticalPhrases(3,enableSecondary,true);
+
+        });
+        parGroup.colPhraseHideFilter=parGroup.colPhraseHideFilter;
+        //parGroup.buildLexIdenticalPhrases(3,enableSecondary,true);
+        parGroup.exactlyIdenticalPhrases=parGroup.exactlyIdenticalPhrases;
+        parGroup.lexIdenticalPhrasesLocations=parGroup.lexIdenticalPhrasesLocations;
+        parGroup=parGroup;
+        //parGroup.
+        
+        
+        //filter((h)=>h))
+    }
+
+})
+//$inspect("ParGspSec: gospelFilter.filter=",gospelFilter.filter);
+$inspect("ParGspSec: options...gospelFilter=",options.viewOptions.gospelFilter);
 </script>
 <style>
     @reference "tailwindcss";
@@ -221,6 +254,7 @@ function isUnique(wordid, uniqueSet){
 
 
 </style>
+{#key parGroup && parGroup.colPhraseHideFilter && parGroup.exactlyIdenticalPhrases && parGroup.lexIdenticalPhrasesLocations}
 {#if !focus}
     <div 
     class="grid  
@@ -231,9 +265,9 @@ function isUnique(wordid, uniqueSet){
         numCols ==5 ? "lg:grid-cols-5 gap-1" :
         ""
     } grid-cols-1 text-2xl">
-    
+        {#key gospelFilter.filter}
         {#each colData.cols as col, index}
-            {#if (col.textRefs && col.textRefs.length) || (enableSecondary && col.secondary && col.secondary.length)}
+            {#if !gospelFilter.isHidden(index) && ((col.textRefs && col.textRefs.length) || (enableSecondary && col.secondary && col.secondary.length))}
             <div class="rounded-box  {Object.values(gospels.abbreviations)[index]} m-1 p-2 gospel-column gospel column gospel-column-{index} column-{index}">
                 {#if col.textRefs && col.textRefs.length}
                     {#if col.textRefs.length}
@@ -277,6 +311,7 @@ function isUnique(wordid, uniqueSet){
             </div>
             {/if}
         {/each}
+        {/key}
 
 
     </div>
@@ -403,3 +438,4 @@ function isUnique(wordid, uniqueSet){
 {:else}
 <!--Nothing!-->  
 {/if}
+{/key}

@@ -2,7 +2,7 @@
 import { onMount, untrack,tick } from 'svelte';
 import Loading from '../ui/Loading.svelte';
 //import Footer from './Footer.svelte';
-import { SynopsisOptions3} from './SynopsisClasses.svelte.js';
+import { SynopsisOptions3, GospelFilter} from './SynopsisClasses.svelte.js';
 //import Icon from '../ui/icons/Icon.svelte';
 //import LinkIcon from '../ui/icons/link-icon.svelte';
 import LinkSvg from  '../ui/icons/link.svg';
@@ -40,16 +40,17 @@ import LemmaInfo from './lemma/LemmaInfo.svelte';
 import { PaginationNav, Pagination, PaginationItem } from "flowbite-svelte";
  import { ArrowLeftOutline, ArrowRightOutline } from "flowbite-svelte-icons";
  import * as ArrayUtils from '$lib/utils/array-utils.js';
+ import GospelFilterComp from './GospelFilter.svelte';
+ 
 //import { generateHslColorGradient } from '../ui/chartUtils';
    /**
      * @type {{options:SynopsisOptions3,
-     * allowEverything:boolean,
      * keyevent:event|null,
      * live:boolean,
      * tfServer:TfServer}}
      */
 let {
-    allowEverything=false,
+    //allowEverything=false,
     /**
      * @type {event}
     */
@@ -90,6 +91,7 @@ let showLookupPanel = $state(true);
 let landingPage = $state(!myOptions.request.fromURL);
 let requestProcessed = $state(false);
 let enableSecondary=$derived(!myOptions.viewOptions.hideSecondary);
+//let gospelFilterVal=$derived(myOptions.viewOptions.gospelFilter);
 
 let showInfoModal=$state(false);
 let maxLexesToShow=$state(30);
@@ -330,7 +332,7 @@ async function selectSection(){
     landingPage=false;
     resetViewOptions();
     alandPericopeNums=[...selectedSection];
-
+    mylog(`selectSection, alandPericopes.length=${alandPericopeNums.length}; alandPericopeNums:[${alandPericopeNums.join(',')}]`,true);
     await buildAndFetchPericopes();
     await populateAll();
     //checkAndPopulatePage();
@@ -832,6 +834,7 @@ const hotkeys=new SynopsisHotkeys(myOptions);
 hotkeys.enableHotkeys('nptb2ax');
 hotkeys.addHotkey('>','Next Page',gotoNextPage);
 hotkeys.addHotkey('<','Previous Page',gotoPreviousPage);
+hotkeys.addHotkey('g','Show/Hide Individual Gospels',()=>{showGospelFilterModal=!showGospelFilterModal});
 //mylog(`enabled hotkeys: [${[...hotkeys.hotkeys.keys()].join(',')}]`);
 if(!hotkeys.getKeyObj(">")){
     //mylog("Could not find hotkey '>'!", true);
@@ -1074,7 +1077,7 @@ onMount(() => {
     
     mounted = true;
 });
-
+let showGospelFilterModal=$state(false);
 //$inspect("fetchedTextsResponse",fetchedTextsResponse);
 //$inspect("groupsRefsArray", groupsRefsArray);
 //$inspect('perGroups', perGroups);
@@ -1090,11 +1093,13 @@ onMount(() => {
 
 //$inspect(`NYSyop.selectedGreekPalette:${selectedGreekPalette.map((o)=>`bg:${o.bg},font:${o.font},border:${o.border}`).join(";")}`);
 //$inspect(`NTSynPan.alandPericopeNums:${alandPericopeNums.join(",")};`);
-$inspect(`NTSynPan.filteredPericopes:${filteredPericopes.join(",")};`);
-$inspect(`NTSynPan.paginatedFilteredPericopes:${paginatedFilteredPerGroups.flat().map((g)=>g.id).join(",")};`);
-$inspect(`myOptions.viewOptions.page:${myOptions.viewOptions.page}`);
+//$inspect(`NTSynPan.filteredPericopes:${filteredPericopes.join(",")};`);
+//$inspect(`NTSynPan.paginatedFilteredPericopes:${paginatedFilteredPerGroups.flat().map((g)=>g.id).join(",")};`);
+//$inspect(`myOptions.viewOptions.page:${myOptions.viewOptions.page}`);
 //$inspect(`paginatedFilteredPerGroups[myOptions.viewOptions.page]:${paginatedFilteredPerGroups[myOptions.viewOptions.page].flat().map((g)=>g.id)}`)
-$inspect(`myOptions.viewOptions.page:${myOptions.viewOptions.page}`)
+//$inspect(`myOptions.viewOptions.page:${myOptions.viewOptions.page}`)
+//$inspect("NTSynPanel, myOptions.viewOptions.gospelFilter:", myOptions.viewOptions.gospelFilter);
+
 </script>
 <style>
     @reference "tailwindcss";
@@ -1193,15 +1198,21 @@ $inspect(`myOptions.viewOptions.page:${myOptions.viewOptions.page}`)
                 /></svelte:element>      
             <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={viewStates.views.view.state} tooltipbottom tooltip="Show other viewing options (sort, etc.)"  buttonText="☰ View"/></svelte:element>
                 
-                <svelte:element this={theTag} class={classes}><ButtonSelect 
+            <svelte:element this={theTag} class={classes}><ButtonSelect 
                 bind:selected={viewStates.views.words.state} 
                 buttonText="☰ Words" tooltipbottom tooltip="Show lexeme options"
-                    /></svelte:element>
-                <svelte:element this={theTag} class={classes}><ButtonSelect buttonText='Similar' bind:selected={myOptions.viewOptions.similarPhrases} tooltipbottom tooltip="Show lexically identical phrases"/></svelte:element>
-                <svelte:element this={theTag} class={classes}><ButtonSelect buttonText="Exact" bind:selected={myOptions.viewOptions.exactPhrases} tooltipbottom tooltip="Show exactly matching phrases"/></svelte:element>
-                 <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={myOptions.viewOptions.unique} buttonText="Unique" tooltipbottom  tooltip="Outline all lexemes unique to each column."/></svelte:element>
+                />
+                </svelte:element>
+            <svelte:element this={theTag} class={classes}>
+                <ButtonSelect buttonText='☰ Gospels' bind:selected={showGospelFilterModal} tooltipbottom tooltip="Show/Hide Gospels"/>
+            </svelte:element>
+            <svelte:element this={theTag} class={classes}><ButtonSelect buttonText='Similar' bind:selected={myOptions.viewOptions.similarPhrases} tooltipbottom tooltip="Show lexically identical phrases"/></svelte:element>
+            <svelte:element this={theTag} class={classes}><ButtonSelect buttonText="Exact" bind:selected={myOptions.viewOptions.exactPhrases} tooltipbottom tooltip="Show exactly matching phrases"/></svelte:element>
+            <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={myOptions.viewOptions.unique} buttonText="Unique" tooltipbottom  tooltip="Outline all lexemes unique to each column."/></svelte:element>
             <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={myOptions.viewOptions.identical} tooltipbottom tooltip="Bold/underline all morphologically identical words. (This generates many 'false positives.')" 
-                    buttonText="Identical"/></svelte:element>
+                    buttonText="Identical"/>
+            </svelte:element>
+
                 
                <!-- <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={myOptions.viewOptions.highlightOnClick} buttonText="Auto Highlight" 
                     tooltipbottom={true}
@@ -1230,6 +1241,12 @@ $inspect(`myOptions.viewOptions.page:${myOptions.viewOptions.page}`)
                  for="hide-secondary-check{short? '-short':''}">
                     <input  class="toggle" id="hide-secondary-check{short? '-short':''}" type="checkbox" bind:checked={myOptions.viewOptions.hideSecondary}/>Hide {#if short}2nd{:else}secondary parallels{/if}</label>
                     </svelte:element>
+
+
+
+
+
+
                 {#if currentServer.abbrev==SblGntServer.abbrev}   
                     <svelte:element this={theTag} class={[classes, 'menu']}><label class="label tooltip"   data-tip="Show/hide apparatus marks." for="hide-app-check{short? '-short':''}">
                     <input  class="toggle" id="hide-app-check{short? '-short':''}" type="checkbox" bind:checked={myOptions.viewOptions.hideApp}/>Hide appar{#if !short}aratus marks{:else}.{/if}</label>
@@ -1278,9 +1295,9 @@ $inspect(`myOptions.viewOptions.page:${myOptions.viewOptions.page}`)
                     {/if}
                     {/each}
                     
-                    {#if allowEverything}
+                    {#if myOptions.viewOptions.showEverything}
                     <hr/>
-                    <option value={gospelParallels.alandSynopsis.pericopes.map((p)=>p.pericope)}>Everything!!</option>
+                    <option value={gospelParallels.alandSynopsis.pericopes.map((p)=>parseInt(p.pericope))}>Everything!!</option>
                     {/if}
                 </select>
                 <button onclick={selectSection} class="align-top btn btn-primary inline-block m-1">Go!</button>
@@ -1746,4 +1763,8 @@ $inspect(`myOptions.viewOptions.page:${myOptions.viewOptions.page}`)
     
     {/if}
 
+</Modal2>
+<Modal2 bind:showModal={showGospelFilterModal} title="Show/Hide Gospels">
+<GospelFilterComp bind:gospelFilterVal={myOptions.viewOptions.gospelFilter}/>
+ 
 </Modal2>

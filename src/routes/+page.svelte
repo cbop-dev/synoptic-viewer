@@ -25,7 +25,7 @@
   /**
    * @type {SynopsisOptions3}
    */
-  let options = $state(data.options ? data.options : new SynopsisOptions3());//$state(new SynopsisOptions2());
+  let options = $state(data.options ? data.options : new SynopsisOptions3());
 
    if (!options) {
 //    mylog("Got no options!")
