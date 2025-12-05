@@ -250,7 +250,7 @@ function getWordStyle(word,selectedLexIndex,customMatchIndex){
                 {options.viewOptions.hideApp ? GreekUtils.removeApparatusMarks(textRef.text) : textRef.text}
             {/if}
     {:else}
-        <i class="text-sm">("{textRef.reference}" not found. Did you enter it correctly?)</i>
+        <i class="text-sm">("{textRef.reference}" not found in the selected NT version.)</i>
 
     {/if}
     {#if copyButton && textRef.text}

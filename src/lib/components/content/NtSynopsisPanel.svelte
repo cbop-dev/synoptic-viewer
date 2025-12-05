@@ -791,6 +791,22 @@ hotkeys.enableHotkeys('nptb2ax');
 hotkeys.addHotkey('>','Next Page',gotoNextPage);
 hotkeys.addHotkey('<','Previous Page',gotoPreviousPage);
 hotkeys.addHotkey('g','Show/Hide Individual Gospels',()=>{showGospelFilterModal=!showGospelFilterModal});
+hotkeys.addHotkey('!','Show/Hide Matthew! ([shift]-1)',()=>{toggleGospelHide(0)});
+hotkeys.addHotkey('@','Show/Hide Mark! ([shift]-2)',()=>{toggleGospelHide(1)});
+hotkeys.addHotkey('#','Show/Hide Luke! ([shift]-3)',()=>{toggleGospelHide(2)});
+hotkeys.addHotkey('$','Show/Hide John! ([shift]-4)',()=>{toggleGospelHide(3)});
+
+/**
+ * 
+ * @param {number} index
+ */
+function toggleGospelHide(index){
+    mylog(`toggleGospelHide(${index})`,true);
+    const gFilter=GospelFilter.fromFilterVal(myOptions.viewOptions.gospelFilter);
+    gFilter.toggleGospel(index);
+    myOptions.viewOptions.gospelFilter=gFilter.filter;
+
+}
 //mylog(`enabled hotkeys: [${[...hotkeys.hotkeys.keys()].join(',')}]`);
 if(!hotkeys.getKeyObj(">")){
     //mylog("Could not find hotkey '>'!", true);
@@ -993,6 +1009,7 @@ let selectedWordTabIndex=$state(0);
 let customGreekInputText = $state('');
 
 $effect(()=>{
+    myOptions.viewOptions.gospelFilter;
     if(myOptions.viewOptions.gospelFilter>=0){
 
         findMatchingPhrases();
