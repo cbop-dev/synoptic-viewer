@@ -2,6 +2,7 @@ import { mylog,debug } from "$lib/env/env.js";
 import { FaceGrinStarsOutline } from "flowbite-svelte-icons";
 import { URLParam } from "./urlParams.js";
 
+
 export class GospelFilter{
     hide=$state([false,false,false,false]); //each index corresponds with a gospel: 0=Matt, 1=Mark, 2=Luke, 3=John
     
@@ -77,6 +78,24 @@ export class GospelFilter{
         
     }
 
+    /**
+     * 
+     * @param {number} index 
+     * @param {boolean} value 
+     */
+    setGospel(index,value){
+        if (index < this.hide.length && index >= 0){
+            this.hide[index]=value;
+        }
+    }
+
+    /**
+     * 
+     * @param {number} index 
+     */
+    toggleGospel(index){
+        this.setGospel(index,!this.hide[index]);
+    }
 }
 
 export class SynopsisOptions3{
