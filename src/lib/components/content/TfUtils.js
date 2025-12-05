@@ -6,6 +6,7 @@ import { mylog } from "$lib/env/env";
 import * as BibleUtils from '$lib/n1904/bibleRefUtils.js'
 import * as MathUtils from '$lib/utils/math-utils.js';
 import { LexemeInfo,LexStats } from "../datastructures/lexeme.js";
+import { GospelFilter } from "./SynopsisClasses.svelte.js";
 
 
 
@@ -219,15 +220,16 @@ export function getParallelRefsArrays(parallelColumns){
  * @param {GospelPericopeGroupIndices[]} perGroupsIndices 
  * @param {boolean} words 
  * @param {boolean} includeSecondary 
+ * @param {number[]} [excludeCols=[]] indices of columns to exclude from phrase-matching. Will still populate them!
  */
-export function populateGroupsText(perGroups,response,perGroupsIndices,words=true,includeSecondary=true){
+export function populateGroupsText(perGroups,response,perGroupsIndices,words=true,includeSecondary=true,excludeCols=[]){
     // mylog("v==================================v", true);
     //mylog("populateGroupTexts()...",true);
     
     for (const [index,group] of perGroups.entries()){
         mylog("checking group # " + group.id +" , title: '"+ group.title + ", index: " + index);
         if (!group.populated) {
-            populateGroupText(group,response && response['texts'] ? response['texts'] : null,perGroupsIndices[index],words,includeSecondary)        
+            populateGroupText(group,response && response['texts'] ? response['texts'] : null,perGroupsIndices[index],words,includeSecondary,excludeCols)        
         }
     }
     mylog("DONE! Populated the GroupTexts()!")
@@ -235,14 +237,15 @@ export function populateGroupsText(perGroups,response,perGroupsIndices,words=tru
 }
 
 /**
- * 
+ * @description Populates a group (one set/row of parallel columns) of aligned Gospel texts, based on the http/json response already given by a tf-fast service ('/texts/') request.
  * @param {GospelPericopeGroup} group
  * @param {Object|null} responseTexts 
  * @param {GospelPericopeGroupIndices} perGroupIndices 
  * @param {boolean} words 
  * @param {boolean} includeSecondary 
+ * @param {number[]} [excludeCols=[]] indices of columns to exclude from phrase-matching. Will still populate them!
  */
-export function populateGroupText(group,responseTexts=null,perGroupIndices,words=true,includeSecondary=true){
+export function populateGroupText(group,responseTexts=null,perGroupIndices,words=true,includeSecondary=true,excludeCols=[]){
     for (const book of ['matt', 'mark', 'luke', 'john','other']){
             for (const [i,textRef] of group[book].textRefs.entries()){
                 mylog("checking ref: " + textRef.reference);
@@ -286,17 +289,22 @@ export function populateGroupText(group,responseTexts=null,perGroupIndices,words
                 }
             }
         }
-        group.markUniqueAndIdenticalWords();
-        group.buildLexIdenticalPhrases(3,true,true);  
+        //const excludeCols=GospelFilter.createValues(gospelFilter.filter).map((g,i)=>g? i : -1).filter((i)=> i>=0);
+        group.markUniqueAndIdenticalWords(includeSecondary,excludeCols);
+        group.buildLexIdenticalPhrases(3,true,true,excludeCols);  
         group.populated=true; 
 }   
+
+
 /**
- * @param {ParallelColumnGroup} parallelColumnGroup 
- * @param {Object} response
- * @param {number[][]} parallelIndices - first index corresponding to that of parallelColumnGroup, then containing indices into response.text
- * @param {boolean} [words=true] 
- */
-export function populateTextGroup(parallelColumnGroup, response, parallelIndices, words=true){
+* @description Populates on group of parallel columns of texts based on the http/json response already given by a tf-fast service ('/texts/') request.
+* @param {ParallelColumnGroup} parallelColumnGroup 
+* @param {Object} response
+* @param {number[][]} parallelIndices - first index corresponding to that of parallelColumnGroup, then containing indices into response.text
+* @param {boolean} [words=true]
+* @param {number[]} [excludeCols=[]] 
+*/
+export function populateTextGroup(parallelColumnGroup, response, parallelIndices, words=true,excludeCols=[]){
 
 
     for (const [index,par] of parallelColumnGroup.parallelColumns.entries()){
@@ -325,8 +333,8 @@ export function populateTextGroup(parallelColumnGroup, response, parallelIndices
             
         }
         
-        parallelColumnGroup.markUniqueAndIdenticalWords();
-        parallelColumnGroup.buildLexIdenticalPhrases(3,true,true);   
+        parallelColumnGroup.markUniqueAndIdenticalWords(true,excludeCols);
+        parallelColumnGroup.buildLexIdenticalPhrases(3,true,true,excludeCols);   
     }
  
 

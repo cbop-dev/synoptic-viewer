@@ -128,7 +128,7 @@ div.bible-block {
 .column-2,  .column.Luke, .Luke {
     @apply bg-sky-200/80 border-sky-900;
         
-    .lex-unique{
+    .lex-unique, .unique {
         @apply  pl-0.5 mr-0.5  outline-sky-800;
     }
 }

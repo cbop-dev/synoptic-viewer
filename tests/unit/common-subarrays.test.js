@@ -104,9 +104,9 @@ test('findMaximalCommonTextPhrasesAcrossColumns test', async () => {
       const result = findMaximalCommonTextPhrasesAcrossColumns(
         [t.input.col1.map((s)=>GreekUtils.plainGreek(s.toLocaleLowerCase()).replaceAll(/[^a-z α-ω]/g,'')),
          t.input.col2.map((s)=>GreekUtils.plainGreek(s.toLocaleLowerCase()).replaceAll(/[^a-z α-ω]/g,''))],3);
-      console.log("findMaximalCommonTextPhrasesAcrossColumns results:");
+//      console.log("findMaximalCommonTextPhrasesAcrossColumns results:");
       result.forEach((row)=>{
-        console.log(`subarray: "${row.subarray}"; occurences: ${row.occurrences.map((o)=>'col '+o.columnIndex+'['+o.spans.map((i)=>i.start + "/"+i.end).join(',')+']').join(';')}`);
+//        console.log(`subarray: "${row.subarray}"; occurences: ${row.occurrences.map((o)=>'col '+o.columnIndex+'['+o.spans.map((i)=>i.start + "/"+i.end).join(',')+']').join(';')}`);
       });
       //expect(result).toEqual(t.output);
     }

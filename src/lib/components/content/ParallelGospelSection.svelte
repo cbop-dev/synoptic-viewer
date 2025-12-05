@@ -97,7 +97,7 @@
         /**
          * @type {ParallelColumn[]} cols
          */
-        let cols = [parGroup.matt, parGroup.mark,parGroup.luke,parGroup.john]; //.filter((g,index)=>(options.viewOptions.gospelFilter&Math.pow(2,index))==0);
+        let cols = [parGroup.matt, parGroup.mark,parGroup.luke,parGroup.john].map((g,i)=>gospelFilter.isHidden(i) ? new ParallelColumn() : g); //.filter((g,index)=>(options.viewOptions.gospelFilter&Math.pow(2,index))==0);
         if (focus==gospels.names.MATTHEW){
             if (parGroup.matt.textRefs.length || parGroup.matt.secondary?.length){
                 focusIndex = 0;
@@ -167,25 +167,35 @@ function isUnique(wordid, uniqueSet){
 //$inspect("ParText, customClass", cssCustomDict);
 
 $effect(()=>{
-    if(gospelFilter.filter>=0){
+    if(false && gospelFilter.filter>=0){
+        
+        
         untrack(()=>{
+            parGroup.exactlyIdenticalPhrases={};
+            parGroup.lexIdenticalPhrasesLocations.length = 0;
+            //parGroup.resetAllPhrases();
+
             //mylog(`ParGospSection.svelte.effect(),gospelfilter.hide:[${gospelFilter.hide.join(",")}]`,true)
             const hiddenGospelIndices = gospelFilter.hide.map((h,i)=>h ? i: -1).filter((i)=> i>=0);
             //mylog(`ParGospSection.svelte.effect(), hiddenGospelIndices:[${hiddenGospelIndices.join(',')}]`,true)
             gospelFilter.hide.map((h,i)=>h? i: -1).filter((i)=> i>=0);
             parGroup.colPhraseHideFilter.length = 0;
+            
+        
+        //untrack(()=>{
             hiddenGospelIndices.forEach((i)=>{
                 parGroup.colPhraseHideFilter.push(i);
             });
             //untrack(()=>mylog(`recalculating exact matches with hidden as: [${parGroup.colPhraseHideFilter.join(',')}]`, true));
+        
             parGroup.buildLexIdenticalPhrases(3,enableSecondary,true);
 
         });
-        parGroup.colPhraseHideFilter=parGroup.colPhraseHideFilter;
+        //parGroup.colPhraseHideFilter=parGroup.colPhraseHideFilter;
         //parGroup.buildLexIdenticalPhrases(3,enableSecondary,true);
-        parGroup.exactlyIdenticalPhrases=parGroup.exactlyIdenticalPhrases;
-        parGroup.lexIdenticalPhrasesLocations=parGroup.lexIdenticalPhrasesLocations;
-        parGroup=parGroup;
+        //=parGroup.exactlyIdenticalPhrases;
+        
+        parGroup.updatedCounter+=1;
         //parGroup.
         
         
@@ -193,8 +203,11 @@ $effect(()=>{
     }
 
 })
+
+//function countMatchingPhrases
 //$inspect("ParGspSec: gospelFilter.filter=",gospelFilter.filter);
-$inspect("ParGspSec: options...gospelFilter=",options.viewOptions.gospelFilter);
+//$inspect("ParGspSec: options...gospelFilter=",options.viewOptions.gospelFilter);
+//$inspect("ParGosSectio: words with matching phrases:",parGroup.parallelColumns.filter((col)=>col.textRefs.filter((tf)=>tf.vwords.filter((vw)=>vw.words.filter((w)=>w.phrases.lexical.size || w.phrases.exact.size).length).length).length).length);
 </script>
 <style>
     @reference "tailwindcss";
@@ -254,7 +267,7 @@ $inspect("ParGspSec: options...gospelFilter=",options.viewOptions.gospelFilter);
 
 
 </style>
-{#key parGroup && parGroup.colPhraseHideFilter && parGroup.exactlyIdenticalPhrases && parGroup.lexIdenticalPhrasesLocations}
+{#key gospelFilter && parGroup.updatedCounter}
 {#if !focus}
     <div 
     class="grid  
@@ -267,7 +280,7 @@ $inspect("ParGspSec: options...gospelFilter=",options.viewOptions.gospelFilter);
     } grid-cols-1 text-2xl">
         {#key gospelFilter.filter}
         {#each colData.cols as col, index}
-            {#if !gospelFilter.isHidden(index) && ((col.textRefs && col.textRefs.length) || (enableSecondary && col.secondary && col.secondary.length))}
+            {#if ((col.textRefs && col.textRefs.length) || (enableSecondary && col.secondary && col.secondary.length))}
             <div class="rounded-box  {Object.values(gospels.abbreviations)[index]} m-1 p-2 gospel-column gospel column gospel-column-{index} column-{index}">
                 {#if col.textRefs && col.textRefs.length}
                     {#if col.textRefs.length}
@@ -333,6 +346,7 @@ $inspect("ParGspSec: options...gospelFilter=",options.viewOptions.gospelFilter);
     </div>
     {/if}
 {:else if colData.focused}<!--focusing on one gospel:-->
+
 <div class="grid {numCols > 1 ? 'sm:!grid-cols-2' :''} gap-1 grid-cols-1">
      <div class="rounded-box   text-3xl  column gospel gospel-column  gospel-column-0 column-{colData.focusIndex}">        
         {#each colData.cols[colData.focusIndex].textRefs as textRef, index}

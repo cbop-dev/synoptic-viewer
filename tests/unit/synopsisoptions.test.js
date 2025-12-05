@@ -21,10 +21,10 @@ test('options get/reset props test!', async () => {
         if (row.type=='boolean'){
             const opts= new SynClasses.SynopsisOptions3();
             if (row.category=='view'){
-                console.log(`testing propname '${propname}'`)
+                //console.log(`testing propname '${propname}'`)
                 expect(opts.viewOptions[propname]).toEqual(row.default ? row.default : false);
                 const propVal = opts.getPropVal(propname);
-                console.log(`Got propval(${propname}): `,propVal)
+                //console.log(`Got propval(${propname}): `,propVal)
                 expect(propVal).toEqual(false);
                 opts.viewOptions[propname]=true;
                 expect(opts.getPropVal(propname)).toBe(true);

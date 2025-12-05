@@ -1,5 +1,6 @@
 import { mylog } from "$lib/env/env.js";
 import { ColorUtils } from "$lib/utils/color-utils";
+import { untrack } from "svelte";
 
 import { GreekUtils } from "$lib/utils/greek-utils";
 import {combineRefs, formatBibRefs,expandRefs} from '$lib/n1904/bibleRefUtils.js';
@@ -8,6 +9,7 @@ import * as BibleUtils from '$lib/n1904/bibleRefUtils.js'
 import {findMaximalCommonSubarraysAcrossColumns,findMaximalCommonTextPhrasesAcrossColumns} from  "$lib/utils/column-subarrays2.js";
 import mathUtils from "$lib/utils/math-utils";
 import * as ArrayUtils from "$lib/utils/array-utils";
+import { GospelFilter } from "./SynopsisClasses.svelte.js";
 
 //import { form } from "$app/server";
 
@@ -517,45 +519,43 @@ export class ParallelColumnGroup {
        
     //}
 
+    resetAllPhrases(){
+        //mylog("ParallelColumnsGroup.resetAllPhrases()!",true);
+        this.parallelColumns.forEach((col)=>{
+            const tRefs = col.secondary.length ? [...col.secondary,...col.textRefs ] : col.textRefs;
+            tRefs.forEach((tr)=>{
+                tr.vwords.forEach((vw)=>{
+                    vw.words.forEach((w)=>{
+                        w.phrases.exact.clear();
+                        w.phrases.lexical.clear();
+                        //mylog("cleared phrase!",true);
+                    })
+                })
+            })
+        })
+    }
     /** 
-     *
+     * @param {number} [minLength=2] 
+     * @param {boolean} [includeSecondary=false] 
+     * @param {boolean} [markidenticalPhrases=false] 
+     * @param {number[]} [excludeCols=[]] indices of columns to ignore from comparison. NOT USED YET.
      * @description finds all the lexically identical phrases across columns! amazing!
      */
-    buildLexIdenticalPhrases(minLenth=2,includeSecondary=false,markidenticalPhrases=false){
-        //mylog(`ParColGroup.buildLexidentical()...`,true);
-        const combinedColumnIds=this.parallelColumns.map((col,index)=> {
-
-            if (this.colPhraseHideFilter.includes(index)){
-                mylog("buildLexIds: filtering out column #" +index,true);
-                return [];
-            }
-            else {
-                const theRefsList = includeSecondary && col.secondary && col.secondary.length  ?  [...col.textRefs, ...col.secondary ] : col.textRefs;
-                return theRefsList.reduce(
-                /**
-                 * 
-                 * @param {number[]} array 
-                 * @param {TextAndRef} tr 
-                 * @returns {number[]}
-                 */
-                (array,tr)=>{
-                    if (array.length){
-                        return [...array,-1,...tr.getWordIdArray()]
-                    }
-                    else{
-                        return  tr.getWordIdArray();
-                    }
-                }
-                ,[]);
-            }
-        });
-  
-        const theColumns =this.parallelColumns.map((col)=> 
-            [...col.textRefs.map((tr)=>tr.getWordIdArray()), ...col.secondary.map((sec)=>sec.getWordIdArray())]);
-
-        const commonSubarrays=findMaximalCommonSubarraysAcrossColumns(theColumns,3).toSorted((a,b)=>a.subarray.length - b.subarray.length);
+    buildLexIdenticalPhrases(minLength=2,includeSecondary=false,markidenticalPhrases=false,excludeCols=[]){
+//        mylog(`ParColGroup.buildLexidentical(excludeCols=[${excludeCols.join(',')}]`,true);
+        //untrack(()=>this.resetAllPhrases());
+        this.resetAllPhrases();
         
+        
+        const theColumns =this.parallelColumns.map((col,index)=> excludeCols.includes(index) ? [] :(
+            [...col.textRefs.map((tr)=>tr.getWordIdArray()), ...col.secondary.map((sec)=>sec.getWordIdArray())]));
+       // mylog(`buildLexIdPhrase.thecolumns:[${theColumns.map((c,i)=> c.length ? i : -1).filter((i)=>i>=0).join(',')}]`,true);
+//        mylog(`buildLexIdPhrase.thecolumns[0].length:${theColumns[0].length}`,true);
+       const commonSubarrays=findMaximalCommonSubarraysAcrossColumns(theColumns,minLength).toSorted((a,b)=>a.subarray.length - b.subarray.length);
+        //console.log(`buildLexIdenticalPhrases commonSubarrays:`,commonSubarrays)
         this.lexIdenticalPhrasesLocations=[];
+        this.lexIdenticalPhrasesMap.clear();
+
         for (const [phraseIndex,subarray] of commonSubarrays.entries()){ 
             const lexPhrase = new LexicalPhrase(subarray.subarray);
             const lexPhraseAndLocations= new LexPhraseAndLocations(lexPhrase,[],phraseIndex);
@@ -564,41 +564,45 @@ export class ParallelColumnGroup {
                 const isSecondary =occurrence.textIndex>=this.parallelColumns[colIndex].textRefs.length;
                 const textIndex = isSecondary? occurrence.textIndex-this.parallelColumns[colIndex].textRefs.length : occurrence.textIndex;
                 const tRef = isSecondary ? this.parallelColumns[colIndex].secondary[textIndex] : this.parallelColumns[colIndex].textRefs[textIndex];
-                for (const {start:start,end:end} of occurrence.spans){ 
+                if (!excludeCols.includes(colIndex)){
+                    for (const {start:start,end:end} of occurrence.spans){ 
                      
-                    const phraseRange=mathUtils.range(end-start+1,start);
-                    /**
-                    * @type {Word[]}
-                    */
-                    const words = phraseRange.map((trIdx)=>tRef.getWordByIndex(trIdx)).filter((w)=>w!=null);
+                        const phraseRange=mathUtils.range(end-start+1,start);
+                        /**
+                        * @type {Word[]}
+                        */
+                        const words = phraseRange.map((trIdx)=>tRef.getWordByIndex(trIdx)).filter((w)=>w!=null);
 
-                    //const vWIndices = tRef.getVerseWordIndices(start)
-                    
-                    if (!this.lexIdenticalPhrasesMap.has(lexPhrase)){
-                        this.lexIdenticalPhrasesMap.set(lexPhrase,{words:words, css:new Set(['lexical-phrase'])})
-                    }
-                    else{
-                        this.lexIdenticalPhrasesMap.get(lexPhrase)?.words?.push(...words);
-                    }
-
-                    words.forEach((w)=>{
-                        if (!w.phrases.lexical){
-                            w.phrases.lexical=new Set();
+                        //const vWIndices = tRef.getVerseWordIndices(start)
+                        
+                        if (!this.lexIdenticalPhrasesMap.has(lexPhrase)){
+                            this.lexIdenticalPhrasesMap.set(lexPhrase,{words:words, css:new Set(['lexical-phrase'])})
                         }
-                        w.phrases.lexical.add({phrase:lexPhrase, index:phraseIndex});       
-                    });
+                        else{
+                            this.lexIdenticalPhrasesMap.get(lexPhrase)?.words?.push(...words);
+                        }
 
-                    /**
-                     * @type {VerseWordIndex[]}
-                     */
-                    //const phraseLocation=new ParallelPhraseLocation(colIndex,new TextRefVersePhraseLocation(textIndex));
-                    const vWordIndices=phraseRange.map((wIdx)=>tRef.getVerseWordIndices(wIdx)).filter((o)=>o!=null);
-                    if (vWordIndices && vWordIndices.length) {
-                        const trVpL = new TextRefVersePhraseLocation(textIndex,vWordIndices);
-                        const phraseLocation = new ParallelPhraseLocation(colIndex,trVpL,isSecondary);
-                        lexPhraseAndLocations.multiColumnLocations.push(phraseLocation);
-                    }                     
+                        words.forEach((w)=>{
+                            if (!w.phrases.lexical){
+                                w.phrases.lexical=new Set();
+                            }
+                            w.phrases.lexical.add({phrase:lexPhrase, index:phraseIndex});       
+                        });
+
+                        /**
+                         * @type {VerseWordIndex[]}
+                         */
+                        //const phraseLocation=new ParallelPhraseLocation(colIndex,new TextRefVersePhraseLocation(textIndex));
+                        const vWordIndices=phraseRange.map((wIdx)=>tRef.getVerseWordIndices(wIdx)).filter((o)=>o!=null);
+                        if (vWordIndices && vWordIndices.length) {
+                            const trVpL = new TextRefVersePhraseLocation(textIndex,vWordIndices);
+                            const phraseLocation = new ParallelPhraseLocation(colIndex,trVpL,isSecondary);
+                            lexPhraseAndLocations.multiColumnLocations.push(phraseLocation);
+                        }                     
+                    }
+
                 }
+               
             }
 
             this.lexIdenticalPhrasesLocations.push(lexPhraseAndLocations);
@@ -769,8 +773,12 @@ export class ParallelColumnGroup {
         
     }
 
-
-    markUniqueAndIdenticalWords(includeSecondary=false){
+/**
+ * 
+ * @param {boolean} includeSecondary 
+ * @param {number[]} [excludeCols=[]] indices of columns to exclude from consideration
+ */
+    markUniqueAndIdenticalWords(includeSecondary=false,excludeCols=[]){
         /**
          * @type {Object<string,Set<number>>} wordsBooks
          */
@@ -784,7 +792,9 @@ export class ParallelColumnGroup {
          */
 
         //this.wordIds=new Set()
-        for (const [index,par] of this.parallelColumns.entries()){
+        const booksToLoop = this.parallelColumns.entries().filter(([i,p])=>!excludeCols.includes(i));
+//        mylog(`ParColGroup.markUnique(), booksToLoop.length:${[...booksToLoop].length}`,true);
+        for (const [index,par] of booksToLoop){
             const theRefsList = includeSecondary && par.secondary && par.secondary.length  ?  [...par.textRefs, ...par.secondary ] : par.textRefs;
             for (const tR of theRefsList){
                 for (const vW of tR.vwords){
@@ -828,6 +838,7 @@ export class ParallelColumnGroup {
         
         this.matchingWords=Object.entries(wordsByPar).filter(([word,parIndexSet])=>parIndexSet.size>1)
             .map(([word,parIndexSet])=>word);
+        this.updatedCounter++;
     }
 
 
@@ -1005,7 +1016,12 @@ export class GospelPericopeGroup extends ParallelColumnGroup{
      */
     similarPhrases=[];
 
-    markUniqueAndIdenticalWords(){
+    /**
+     * @description finds and marks unique and identical words
+     * @param {boolean} [includeSecondary=false] 
+     * @param {number[]} [excludeCols=[]] indices of columns to exclude from consideration
+     */
+    markUniqueAndIdenticalWords(includeSecondary=false,excludeCols=[]){
         /**
          * @type {Object<string,Set<number>>} wordsBooks
          */
@@ -1019,7 +1035,9 @@ export class GospelPericopeGroup extends ParallelColumnGroup{
          */
 
         //this.wordIds=new Set()
-        for (const [index,book] of [this.gospelCols.matt,this.gospelCols.mark,this.gospelCols.luke,this.gospelCols.john].entries()){
+        const booksToLoop = [this.gospelCols.matt,this.gospelCols.mark,this.gospelCols.luke,this.gospelCols.john].entries().filter(([i,b])=>!excludeCols.includes(i));
+//        mylog(`markUniqueAndIdenticalWords bookstoloop.length::${[...booksToLoop].length}]`,true);
+        for (const [index,book] of booksToLoop){
             for (const tR of book.textRefs){
                 for (const vW of tR.vwords){
                     for (const word of vW.words){

@@ -92,7 +92,7 @@ let landingPage = $state(!myOptions.request.fromURL);
 let requestProcessed = $state(false);
 let enableSecondary=$derived(!myOptions.viewOptions.hideSecondary);
 //let gospelFilterVal=$derived(myOptions.viewOptions.gospelFilter);
-
+let gospelsExcluded=$derived(GospelFilter.createValues(myOptions.viewOptions.gospelFilter).map((g,i)=>g? i: -1).filter((i)=> i >=0));
 let showInfoModal=$state(false);
 let maxLexesToShow=$state(30);
 
@@ -332,7 +332,7 @@ async function selectSection(){
     landingPage=false;
     resetViewOptions();
     alandPericopeNums=[...selectedSection];
-    mylog(`selectSection, alandPericopes.length=${alandPericopeNums.length}; alandPericopeNums:[${alandPericopeNums.join(',')}]`,true);
+//    mylog(`selectSection, alandPericopes.length=${alandPericopeNums.length}; alandPericopeNums:[${alandPericopeNums.join(',')}]`,true);
     await buildAndFetchPericopes();
     await populateAll();
     //checkAndPopulatePage();
@@ -447,7 +447,7 @@ async function buildAndFetchPericopes(reset=true){
 
 async function populateAll(){
     dataReady=false;
-    TfUtils.populateGroupsText(perGroups,fetchedTextsResponse,perGroupsIndices,true,true);
+    TfUtils.populateGroupsText(perGroups,fetchedTextsResponse,perGroupsIndices,true,true,gospelsExcluded);
     await tick();
 //    mylog(`populatedAll! are all populated?:${perGroups.map((g)=>g.populated).reduce((a,b)=>a&&b, true)}`, true)
     dataReady=true;
@@ -471,6 +471,22 @@ function checkAndPopulatePage(){
     dataReady=true;
 }
 
+async function findMatchingPhrases(){
+    dataReady=false;
+    await tick();
+//    mylog(`findMatchingPhrases called! excluded=[${gospelsExcluded.join(",")}]`,true);
+    perGroups.forEach(async (g)=>{
+        g.resetAllPhrases();
+        await tick();
+        g.buildLexIdenticalPhrases(3,!myOptions.viewOptions.hideSecondary,true,gospelsExcluded);
+        await tick();//g.updatedCounter+=1;
+
+    });
+
+    //perGroups=perGroups;
+    dataReady=true;
+}
+
 function buildLexArrays(){
     //mylog("building LexArrays...", true)
     lemmasByID ={};
@@ -486,66 +502,6 @@ function buildLexArrays(){
     
 }
 
-function populateGroupsText2(words=false,includeSecondary=false){
-    //mylog("v==================================v", true);
-    //mylog(`populateGroupTexts(includeSecondary:${includeSecondary})...`,true);
-    
-    for (const [index,group] of perGroups.entries()){
-        mylog("checking group # " + group.id +" , title: '"+ group.title + ", index: " + index);
-        for (const book of ['matt', 'mark', 'luke', 'john','other']){
-            for (const [i,textRef] of group[book].textRefs.entries()){
-                mylog("checking ref: " + textRef.reference);
-                const queryIndex= perGroupsIndices[index][book].main[i];
-                if (fetchedTextsResponse && fetchedTextsResponse['texts'] && fetchedTextsResponse['texts'][queryIndex]){
-                    textRef.text= fetchedTextsResponse['texts'][queryIndex].text;
-                    if (fetchedTextsResponse['texts'][queryIndex].notes){
-                        const notes = fetchedTextsResponse['texts'][queryIndex].notes.filter((n)=>n.length).join("\n");
-                        if (notes.length){
-                            textRef.note=notes;
-                        }
-                    }
-                    if (words){
-                        
-                        textRef.vwords=VerseWords.buildFromObj(fetchedTextsResponse['texts'][queryIndex].words);
-                    }
-                    // mylog("populating fetched text for group index "+index + ", ref: '" + textRef.reference
-                    // + "', queryIndex = " + queryIndex +", text='"+textRef.text +"'", true);
-                }
-
-            }
-
-            if (includeSecondary && group[book].secondary && group[book].secondary.length){
-                for (const [i,textRef] of group[book].secondary.entries()){
-                    mylog("checking ref: " + textRef.reference);
-                    const queryIndex= perGroupsIndices[index][book].secondary[i];
-                    if (fetchedTextsResponse && fetchedTextsResponse['texts'] && fetchedTextsResponse['texts'][queryIndex]){
-                        textRef.text= fetchedTextsResponse['texts'][queryIndex].text;
-                        if (fetchedTextsResponse['texts'][queryIndex].notes){
-                            const notes = fetchedTextsResponse['texts'][queryIndex].notes.filter((n)=>n.length).join("\n");
-                            if (notes.length){
-                                textRef.note=notes;
-                            }
-                        }
-                        if (words){
-                            
-                            textRef.vwords=VerseWords.buildFromObj(fetchedTextsResponse['texts'][queryIndex].words);
-                        }
-                        // mylog("populating fetched text for group index "+index + ", ref: '" + textRef.reference
-                        // + "', queryIndex = " + queryIndex +", text='"+textRef.text +"'", true);
-                    }
-
-                }
-
-
-            }
-
-        }
-        group.markUniqueAndIdenticalWords();    
-        group.buildLexIdenticalPhrases(3,true,true);    
-    }
-    //mylog("DONE! Populated the GroupTexts()!")
-    //mylog("^==================================^")
-}
 
 
 function resetViewOptions(lookup=false){
@@ -1037,6 +993,13 @@ let selectedWordTabIndex=$state(0);
 let customGreekInputText = $state('');
 
 $effect(()=>{
+    if(myOptions.viewOptions.gospelFilter>=0){
+
+        findMatchingPhrases();
+    }
+});
+
+$effect(()=>{
     if (keyevent){
 
         untrack(()=> onkeydown(keyevent));
@@ -1099,7 +1062,7 @@ let showGospelFilterModal=$state(false);
 //$inspect(`paginatedFilteredPerGroups[myOptions.viewOptions.page]:${paginatedFilteredPerGroups[myOptions.viewOptions.page].flat().map((g)=>g.id)}`)
 //$inspect(`myOptions.viewOptions.page:${myOptions.viewOptions.page}`)
 //$inspect("NTSynPanel, myOptions.viewOptions.gospelFilter:", myOptions.viewOptions.gospelFilter);
-
+//$inspect("NTSymPan: gospelsExcluded:",gospelsExcluded);
 </script>
 <style>
     @reference "tailwindcss";
@@ -1364,7 +1327,7 @@ let showGospelFilterModal=$state(false);
 </div>
  
 
-  {#if landingPage}
+{#if landingPage}
      <div id="landing-lookup" class="bg-white block top-0 overflow-auto">
         <div id='landing'>
 
@@ -1765,6 +1728,6 @@ let showGospelFilterModal=$state(false);
 
 </Modal2>
 <Modal2 bind:showModal={showGospelFilterModal} title="Show/Hide Gospels">
-<GospelFilterComp bind:gospelFilterVal={myOptions.viewOptions.gospelFilter}/>
+<GospelFilterComp bind:gospelFilterVal={myOptions.viewOptions.gospelFilter} />
  
 </Modal2>

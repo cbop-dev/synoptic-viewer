@@ -4,14 +4,15 @@ import { onMount, tick, untrack } from "svelte";
 import { GospelFilter } from "./SynopsisClasses.svelte";
 
 /**
- * @type {{gospelFilterVal:number}}
+ * @type {{gospelFilterVal:number,onchange:function}}
  */
 let {
-    gospelFilterVal=$bindable(0)
+    gospelFilterVal=$bindable(0),
+    onchange=()=>{}
 } = $props();
 
 
-let gospelFilter=new GospelFilter();
+let gospelFilter=$derived(GospelFilter.fromFilterVal(gospelFilterVal));
 
 /*const gospels = $state([
     {name:"Matthew",hide:false,flag:1},
@@ -44,16 +45,16 @@ async function update(){
         mylog(`Gospfilter.update(${gospel.name})->${gospelVal}`);
         return sum + gospelVal;
     },0);
-    mylog("GospelFilter.update resulted in : "+gospelFilter,true);
+//    mylog("GospelFilter.update resulted in : "+gospelFilter,true);
     */
 }
 
 onMount(()=>{
-    gospelFilter.set(gospelFilterVal);
+    //gospelFilter.set(gospelFilterVal);
     /*mylog(`gospelFilter.onMount: start filter value=${gospelFilter}`)
     gospels.forEach((gospel,index)=>{
         const theflagresult=gospel.flag&gospelFilter;
-        mylog(`GospelFilter.onMount(${gospel.name}.flagresult=${theflagresult})`, true);
+//        mylog(`GospelFilter.onMount(${gospel.name}.flagresult=${theflagresult})`, true);
         if((theflagresult) > 0){
             
             gospel.hide=true;
@@ -62,11 +63,20 @@ onMount(()=>{
 });
 
 $effect(()=>{
-    if(gospelFilter.filter >=0){
+    changed();
+    if(gospelFilter.filter >=0 && gospelFilter.filter != gospelFilterVal){
         gospelFilterVal=gospelFilter.filter;
+        
+      
         
     }
 });
+let disabled=$state(false);
+async function changed(){
+    disabled=true;
+    await tick();
+    disabled=false;
+}
 //$inspect("HELLO");
 //$inspect(`gospelFilter:${gospelFilter}`);
 //$inspect(`gospels flags:${gospels.map((g)=>g.name+':'+g.hide).join('; ')}`);
@@ -87,7 +97,7 @@ $effect(()=>{
     <td class="p-1 m-2"> <label class="tooltip table-auto" 
         data-tip="Show Lexeme Info on Click"    
             for="lexeme-info-click">{gospel.name}</label></td>
-        <td class="p-1 m-2"><input  class="toggle" id="gospel-filter-{index}" type="checkbox" bind:checked={gospelFilter.hide[index]}/></td>
+        <td class="p-1 m-2"><input  {disabled} class="toggle" id="gospel-filter-{index}" type="checkbox" onclick={changed} bind:checked={gospelFilter.hide[index]}/></td>
 
 </tr>
 
