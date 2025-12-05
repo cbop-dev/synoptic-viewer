@@ -245,12 +245,19 @@ let otherMatchedLexes=$state([]);
  * @returns {ParallelColumnGroup[]}
  */
 function parseGroupsBatch(theInput){
+    
     const lines = theInput.trim().replaceAll(/\n+/g,"\n").split("\n").filter((s)=>s.length);
     const parGroups=[]
 
-    for (const line of lines){
+    for (let line of lines){
         const group = new ParallelColumnGroup();
+        const regex = new RegExp(/^\[([^\]\[]+)\]/);
+        const titleMatch = line.match(regex);
+        group.title=  titleMatch && titleMatch.length > 1 ? 
+            titleMatch[1] : '';
+        line = line.replace(regex,'');
         group.parallelColumns=parseSingleGroup(line.split("|").filter((l)=>l.trim().length));
+        
         parGroups.push(group);
     }
     return parGroups;
@@ -940,7 +947,7 @@ onMount(() => {
     {#each texts as textGroup,i}
     <hr class=" m-1 p-1"/>
     <div class="anchor" id="group-{i+1}">
-    {#if texts.length > 1}<h3 class="font-bold underline">Group #{i+1}</h3>{/if}
+    {#if texts.length > 1}<h3 class="font-bold underline">Group #{i+1}{#if textGroup.title}: {textGroup.title}{/if}</h3>{/if}
     <ParallelColumnSection parTextGroup={textGroup}  wordClick={wordClick} 
                         cssClassDict={lexClasses}
                         cssCustomDict={customGreekClasses}

@@ -421,6 +421,7 @@ export class LexPhraseAndLocations{
  */
 export class ParallelColumnGroup {
 
+    title='';
     /**
      * @type {ParallelColumn[]} parallelColumns
      */
