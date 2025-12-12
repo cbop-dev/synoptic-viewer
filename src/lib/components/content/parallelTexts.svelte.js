@@ -546,7 +546,7 @@ export class ParallelColumnGroup {
      * @description finds all the lexically identical phrases across columns! amazing!
      */
     buildLexIdenticalPhrases(minLength=2,includeSecondary=false,markidenticalPhrases=false,excludeCols=[]){
-//        mylog(`ParColGroup.buildLexidentical(excludeCols=[${excludeCols.join(',')}]`,true);
+        //mylog(`ParColGroup.buildLexidentical(excludeCols=[${excludeCols.join(',')}]`,true);
         //untrack(()=>this.resetAllPhrases());
         this.resetAllPhrases();
         
@@ -555,7 +555,7 @@ export class ParallelColumnGroup {
             [...col.textRefs.map((tr)=>tr.getWordIdArray()), ...col.secondary.map((sec)=>sec.getWordIdArray())]));
        // mylog(`buildLexIdPhrase.thecolumns:[${theColumns.map((c,i)=> c.length ? i : -1).filter((i)=>i>=0).join(',')}]`,true);
 //        mylog(`buildLexIdPhrase.thecolumns[0].length:${theColumns[0].length}`,true);
-       const commonSubarrays=findMaximalCommonSubarraysAcrossColumns2(theColumns,minLength,ignoreWords).toSorted((a,b)=>a.subarray.length - b.subarray.length);
+        const commonSubarrays=findMaximalCommonSubarraysAcrossColumns2(theColumns,minLength,ignoreWords).toSorted((a,b)=>a.subarray.length - b.subarray.length);
         //console.log(`buildLexIdenticalPhrases commonSubarrays:`,commonSubarrays)
         this.lexIdenticalPhrasesLocations=[];
         this.lexIdenticalPhrasesMap.clear();

@@ -56,7 +56,7 @@ let currentServer=$state(tfServer);
 /**
  * @type {SynopsisOptions3} myOptions
  */
-let myOptions=options;
+let myOptions=$state(options);
 function setServer(){
     currentServer=tfServer;
 }
@@ -272,7 +272,7 @@ async function buildAndFetchPericopes(reset=true){
     //viewStates.views.lookup.state=false;
     //const parRefsOb
     dataReady=false;
-   landingPage=false;
+    landingPage=false;
     if (reset) {
           
     // mylog("disabling sortFilter and focus...");
@@ -737,6 +737,7 @@ onMount(() => {
 });
 //$inspect(myOptions.hideApp)
 //$inspect(`refarea.0:'${refAreaInputs[0]}`);
+//$inspect('batchInput:',batchInput);
 </script>
 {#snippet titleButtons(hideLookup=false,hideHelp=false)}
         <ul class="bg-white menu menu-horizontal w-auto ">

@@ -306,7 +306,6 @@ export function populateGroupText(group,responseTexts=null,perGroupIndices,words
 */
 export function populateTextGroup(parallelColumnGroup, response, parallelIndices, words=true,excludeCols=[]){
 
-
     for (const [index,par] of parallelColumnGroup.parallelColumns.entries()){
     
         for (const [i,textRef] of par.textRefs.entries()){
