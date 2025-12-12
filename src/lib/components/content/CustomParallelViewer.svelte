@@ -255,6 +255,9 @@ function parseGroupsBatch(theInput){
         const titleMatch = line.match(regex);
         group.title=  titleMatch && titleMatch.length > 1 ? 
             titleMatch[1] : '';
+        if(group.title){
+            mylog(`Got Batch row.title:'${group.title}'`);
+        }
         line = line.replace(regex,'');
         group.parallelColumns=parseSingleGroup(line.split("|").filter((l)=>l.trim().length));
         
@@ -947,7 +950,7 @@ onMount(() => {
     {#each texts as textGroup,i}
     <hr class=" m-1 p-1"/>
     <div class="anchor" id="group-{i+1}">
-    {#if texts.length > 1}<h3 class="font-bold underline">Group #{i+1}{#if textGroup.title}: {textGroup.title}{/if}</h3>{/if}
+    {#if texts.length > 1 ||textGroup.title }<h3 class="font-bold underline">{#if texts.length > 1}Group #{i+1}:&nbsp;{/if}{#if textGroup.title} {textGroup.title}{/if}</h3>{/if}
     <ParallelColumnSection parTextGroup={textGroup}  wordClick={wordClick} 
                         cssClassDict={lexClasses}
                         cssCustomDict={customGreekClasses}

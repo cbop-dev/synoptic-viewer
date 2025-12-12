@@ -1,7 +1,7 @@
 import { describe, it, expect,test} from 'vitest';
 import { mylog } from '$lib/env/env';
 
-import { findMaximalCommonSubarraysAcrossColumns, findMaximalCommonTextPhrasesAcrossColumns  } from '$lib/utils/column-subarrays2';
+import { findMaximalCommonSubarraysAcrossColumns, findMaximalCommonTextPhrasesAcrossColumns, findMaximalCommonSubarraysAcrossColumns2} from '$lib/utils/column-subarrays2';
 import { GreekUtils } from '$lib/utils/greek-utils';
 
 test('suffix dummy', async () => {
@@ -116,6 +116,53 @@ test('findMaximalCommonTextPhrasesAcrossColumns test', async () => {
 
 
 
+
+test('findMaximalCommonSubarraysAcrossColumns2 tests', async () => {
+	const tests=[
+        {columns: [[[1,2,3]],[[1,2,3]]],minLen: 2,output:[{subarray:[1,2,3],occurrences:[{columnIndex:0,textIndex:0,spans:[{start:0,end:2}]},{columnIndex:1,textIndex:0,spans:[{start:0,end:2}]}]}]},
+        {columns: [[[1,99,2,99,3]],[[1,2,3]]],minLen: 2,ignore:[99],output:[{subarray:[1,2,3],occurrences:[{columnIndex:0,textIndex:0,spans:[{start:0,end:4}]},{columnIndex:1,textIndex:0,spans:[{start:0,end:2}]}]}]},
+        {columns: [[[99,1,99,2,98,3,99]],[[1,2,97,3]]],minLen: 2,ignore:[98,99,97],output:[{subarray:[1,2,3],occurrences:[{columnIndex:0,textIndex:0,spans:[{start:1,end:5}]},{columnIndex:1,textIndex:0,spans:[{start:0,end:3}]}]}]},
+        {columns: [[[99,1,99,2,98,3,99]],[[1,2,97]]],minLen: 3,ignore:[98,99,97],output:[]},
+        {columns: 
+            [
+            [ [1,2,3], [2,3,4], [1,2,3,4] ], // column 0
+            [ [1,2], [3,4,5], [10,3,1,2] ]   // column 1
+            ],
+         minLen: 2, output: [{subarray:[1,2],occurrences:[{columnIndex:0,textIndex:0,spans:[{start:0,end:1}]},{columnIndex:1,textIndex:0,spans:[{start:0,end:1}]},{columnIndex:1,textIndex:2,spans:[{start:2,end:3}]},{columnIndex:0,textIndex:2,spans:[{start:0,end:1}]}]},{subarray:[3,4],occurrences:[{columnIndex:0,textIndex:1,spans:[{start:1,end:2}]},{columnIndex:1,textIndex:1,spans:[{start:0,end:1}]},{columnIndex:0,textIndex:2,spans:[{start:2,end:3}]}]}]
+        },
+        {columns:[[[1,2,3,4,5]],[[3,4,5]],[[3,2,3,4,5,2,3]],[[2,3]]],
+            output:[
+                {subarray:[3,4,5],occurrences:[{columnIndex:0,textIndex:0,spans:[{start:2,end:4}]},{columnIndex:1,textIndex:0,spans:[{start:0,end:2}]},{columnIndex:2,textIndex:0,spans:[{start:2,end:4}]}]},
+                {subarray:[2,3,4,5],occurrences:[{columnIndex:0,textIndex:0,spans:[{start:1,end:4}]},{columnIndex:2,textIndex:0,spans:[{start:1,end:4}]}]},
+                {subarray:[2,3],occurrences:[{columnIndex:0,textIndex:0,spans:[{start:1,end:2}]},{columnIndex:2,textIndex:0,spans:[{start:1,end:2},{start:5,end:6}]},{columnIndex:3,textIndex:0,spans:[{start:0,end:1}]}]},
+                
+                
+            ]},
+        
+    ];
+
+    const methods = [
+        {name:'findMaximalCommonSubarraysAcrossColumns2', func:findMaximalCommonSubarraysAcrossColumns2},
+       // {name:'findMaximalCommonSubarraysAcrossColumnsSA', func:findMaximalCommonSubarraysAcrossColumnsSA} //NB: does not work. And ChatGPT informs me that it will be complex and require more bookkeeping to make it work.
+    ];
+
+
+    for (const method of methods){
+     //   console.log("\n--------------------------------");
+     //   console.log(`Method: ${method.name}`);
+        for (const [i,t] of tests.entries()){
+            const result = method.func(t.columns, t.minLen, t.ignore? t.ignore : []);
+           // console.log("-------------")
+          //  console.log(`${method.name} #${i}: `, JSON.stringify(result));//,null,2));
+            expect(result.length).toEqual(t.output.length);
+            expect(result).toEqual(t.output);
+        }
+        
+    }
+   
+	expect(true).toBe(true);
+
+});
 
 
 //const result = findMaximalCommonSubarraysAcrossColumns(columns, minLen);

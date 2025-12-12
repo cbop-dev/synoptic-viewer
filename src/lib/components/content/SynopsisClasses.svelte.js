@@ -2,7 +2,7 @@ import { mylog,debug } from "$lib/env/env.js";
 import { FaceGrinStarsOutline } from "flowbite-svelte-icons";
 import { URLParam } from "./urlParams.js";
 
-
+export const ignoreWords = [1156,1058,3635];
 export class GospelFilter{
     hide=$state([false,false,false,false]); //each index corresponds with a gospel: 0=Matt, 1=Mark, 2=Luke, 3=John
     
@@ -301,6 +301,7 @@ export class SynopsisOptions3{
         lexInfoClick:{ type: 'boolean', category: 'view',noURL:true},
         page:{ type: 'int', category: 'view',noURL:false,default: 0},
         showEverything:{ type: 'boolean', category: 'view',noURL:true,default: false},
+        ignoreWords:{ type: 'intArray', category: 'view',noURL:false,default: ignoreWords},
         
         // 4-bit integer, each bit represents a gospel, where 0 = show; 1 = hide; little endian: lowest-> hightest : Matthew -> John
         // thus:

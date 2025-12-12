@@ -2,7 +2,7 @@
 import { mylog } from "$lib/env/env";
 import { onMount, tick, untrack } from "svelte";
 import { GospelFilter } from "./SynopsisClasses.svelte";
-
+import Button from "../ui/Button.svelte";
 /**
  * @type {{gospelFilterVal:number,onchange:function}}
  */
@@ -62,6 +62,10 @@ onMount(()=>{
     })*/
 });
 
+function reset(){
+    gospelFilter.set(0);
+}
+
 $effect(()=>{
     changed();
     if(gospelFilter.filter >=0 && gospelFilter.filter != gospelFilterVal){
@@ -103,6 +107,7 @@ async function changed(){
 
    
 {/each}
+<Button buttonText="Reset" onclick={reset}/>
 </tbody>
 </table>
 </div>
