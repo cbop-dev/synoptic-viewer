@@ -9,10 +9,10 @@ import * as BibleUtils from '$lib/n1904/bibleRefUtils.js'
 import {findMaximalCommonSubarraysAcrossColumns2,findMaximalCommonTextPhrasesAcrossColumns} from  "$lib/utils/column-subarrays2.js";
 import mathUtils from "$lib/utils/math-utils";
 import * as ArrayUtils from "$lib/utils/array-utils";
-import { GospelFilter } from "./SynopsisClasses.svelte.js";
+import { ignoreWords as ignoreWordsImported, GospelFilter } from "./SynopsisClasses.svelte.js";
 
 
-export const ignoreWords =[1156,1058,3635];
+export const ignoreWords =ignoreWordsImported;//[1156,1058,3635];
 
 //import { form } from "$app/server";
 

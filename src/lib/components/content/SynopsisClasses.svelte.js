@@ -2,7 +2,7 @@ import { mylog,debug } from "$lib/env/env.js";
 import { FaceGrinStarsOutline } from "flowbite-svelte-icons";
 import { URLParam } from "./urlParams.js";
 
-export const ignoreWords = [1156,1058,3635];
+export const ignoreWords = [1156,1058,3635,1060,4889,3180,675,676,3182,3184,4958,3634,2514,234]; //[δε,γαρ,ουν,γε,τε,μεν,ἄρα,ἆρα,μενοῦν,μέντοι,τοίνυν,οὐκοῦν,και,ἀλλά] (I think this is the order...)
 export class GospelFilter{
     hide=$state([false,false,false,false]); //each index corresponds with a gospel: 0=Matt, 1=Mark, 2=Luke, 3=John
     
