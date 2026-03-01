@@ -420,6 +420,8 @@ export class LexPhraseAndLocations {
      */
     calcMatchTypeIndex(numColumns) {
         const phraseColumnFlags = ArrayUtils.newArray(numColumns, false);
+
+        //NB: each item in this.multiColumnLocations has a column (number) property, corresponding to the column index, from left to right.
         this.multiColumnLocations.forEach((colLocs)=>{
             if (colLocs.column < phraseColumnFlags.length) phraseColumnFlags[colLocs.column] = true;
         });
@@ -452,6 +454,52 @@ export class LexPhraseAndLocations {
 
         return bitValue - 1 - singleBitOffsets;
     }
+
+
+    /**
+     * Decodes a matchTypeIndex back into its original column flags.
+     * @param {number} index - The index to reverse.
+     * @param {number} numColumns - The n-value used for the original calculation.
+     * @returns {boolean[] | null} - The original flag array or null if out of bounds.
+     */
+    static reverseCalcColumnMatchesFromMatchTypeIndex(index, numColumns) {
+        if (index < 0) return null;
+
+        let validMatchCounter = 0;
+        const maxBitValue = 1 << numColumns;
+
+        // Iterate through all bit combinations from 0 to 2^n - 1
+        for (let bitValue = 0; bitValue < maxBitValue; bitValue++) {
+            
+            // Use your existing math utility to skip r=0 and r=1 cases
+            if (mathUtils.calcBinaryOnes(bitValue, numColumns) >= 2) {
+                
+                // If this is the "n-th" valid combination, we found our match
+                if (validMatchCounter === index) {
+                    return LexPhraseAndLocations.convertBitValueToFlags(bitValue, numColumns);
+                }
+                
+                validMatchCounter++;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @description Helper to expand an integer into a boolean array based on bit positions.
+     * @param {number} bitValue 
+     * @param {number} numColumns 
+     * @returns {boolean[]} 
+     */
+    static convertBitValueToFlags(bitValue, numColumns) {
+        const flags = new Array(numColumns);
+        for (let i = 0; i < numColumns; i++) {
+            // Check if the i-th bit is set
+            flags[i] = (bitValue & (1 << i)) !== 0;
+        }
+        return flags;
+    }
 }
 
 
@@ -478,8 +526,9 @@ export class ParallelColumnGroup {
      * 
      * @param {ParallelColumn[]} parTexts 
      */
-    constructor(parTexts = []) {
+    constructor(parTexts = [],paletteMatchCols=parTexts.length) {
         this.parallelColumns = parTexts;
+        this.paletteMatchCols=paletteMatchCols;
     }
 
     lexemes = $state(new Set());
@@ -767,9 +816,10 @@ export class ParallelColumnGroup {
         // we can figure this out as: (sum of r=n...0 for n choose r) - (sum of r=1...1 for n choose r) - (sum of r=1...0 for n choose r)  
         // this comes to: 2^n - n - 1. 
         // thus:  2^numCols - numCols - 1.
-        const numMatchTypes = 2**this.parallelColumns.length - this.parallelColumns.length - 1;
-        mylog(`buildLexIdenticalPhrases(): numCols = ${this.parallelColumns.length}; numMatchTypes=${numMatchTypes}`,true);
-        this.lexIdenticalPhrasePalette = ColorUtils.myColorPalette(numMatchTypes, 0, 2);
+        const numMatchTypes = 2**this.paletteMatchCols - this.paletteMatchCols - 1;
+        mylog(`buildLexIdenticalPhrases(): numCols = ${this.paletteMatchCols}; numMatchTypes=${numMatchTypes}`,true);
+        this.lexIdenticalPhrasePalette = ColorUtils.myColorPalette(numMatchTypes, 0, 1,7);
+        
         //TODO: figure out how to use this index!!
     }
 
@@ -987,7 +1037,7 @@ export class GospelPericopeGroup extends ParallelColumnGroup {
         const luke = new ParallelColumn();
         const john = new ParallelColumn();
         const other = new ParallelColumn();
-        super([matt, mark, luke, john, other]);
+        super([matt, mark, luke, john, other],4);
         this.gospelCols = {
             matt: matt,
             mark: mark,

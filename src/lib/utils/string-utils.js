@@ -110,3 +110,12 @@ export function splitAndFilterStrings(string,delimiter){
 export function filterEmptyItems(array){
     return array.filter((o)=>o);
 }
+
+/**
+ * 
+ * @param {string} s 
+ * @returns {string}
+ */
+export function capitalize(s){
+    return s.charAt(0).toUpperCase() + s.slice(1);
+}
