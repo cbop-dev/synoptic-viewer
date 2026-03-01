@@ -67,11 +67,52 @@ export function createNumArrayFromStringListRange(numString){
     return nums.sort((a,b)=>a-b);
 }
 
+/**
+ * 
+ * @param {number[]} arr a list of numbers
+ * @returns {number} the sum!
+ */
+export function sum(arr){
+    return arr.reduce((a,b)=>a+b,0);
+}
+
 export function range(size, startAt = 0) {
     return [...Array(size).keys()].map(i => i + startAt);
 }
 
+/**
+ * Calculates the number of set bits (1s) in an integer.
+ * @param {number} number - The integer to check.
+ * @param {number} nbits - The number of bits (provided for context, though not strictly needed for the sum).
+ * @returns {number} - The count of 1s.
+ */
+export function calcBinaryOnes(number, nbits) {
+    let count = 0;
+    let temp = number;
 
+    // Brian Kernighan’s Algorithm: 
+    // Efficiently clears the least significant set bit.
+    while (temp > 0) {
+        temp &= (temp - 1);
+        count++;
+    }
+
+    return count;
+}
+
+/**
+ * 
+ * @param {any[]} arr - an array of any values (anything that returns 'true' will be treated as a binary 1 bit!).
+ * @returns {number} a binary number where each bit is set based on the corresponding value in the input array.
+ */
+export function makeBinaryNumberFromArray(arr){
+    return arr.reduce((a, b) => ((a ? 1 : 0) << 1) | (b ? 1 : 0), 0);
+}
+
+// Examples:
+console.log(calcBinaryOnes(2, 4));  // 0010 -> 1
+console.log(calcBinaryOnes(7, 4));  // 0111 -> 3
+console.log(calcBinaryOnes(63, 6)); // 111111 -> 6
 export default {
 
-floatRound,romanize,createNumArrayFromStringListRange,range}
+floatRound,romanize,createNumArrayFromStringListRange,range,sum,calcBinaryOnes,makeBinaryNumberFromArray}

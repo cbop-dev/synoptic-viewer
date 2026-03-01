@@ -20,3 +20,13 @@ export function splitArray(array,size=5){
     }
     return ret;
 }
+
+/**
+ * 
+ * @param {number} size 
+ * @param {any} [fillValue=null]
+ * @returns {any[]}
+ */
+export function newArray(size,fillValue=null){
+    return Array.from({length:size},()=>fillValue);
+}

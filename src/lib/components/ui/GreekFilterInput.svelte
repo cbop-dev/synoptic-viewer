@@ -1,6 +1,7 @@
 <script>
     import FilterInput from "./FilterInput.svelte";
     import { GreekUtils } from "$lib/utils/greek-utils.js";
+    import { onMount } from "svelte";
     //import { Utils } from "$lib/utils/utils";
     let {
         /**
@@ -10,6 +11,7 @@
         max=100,
         labelText="Type some Greek letters in betacode:",
         casesensitive=$bindable(false),
+        
 
         /**
          * @param {string} input
@@ -29,9 +31,13 @@
         filterInput.clear();
         //console.debug("called FilterInput.clear()");
     }
+    onMount(()=>{
+
+    });
 </script>
 
 <FilterInput transform={(input)=>{return GreekUtils.beta2Greek(input.trim())}}
+   
     searchTerms={(input)=>{
         let ret = [input];
         if (input.includes('ς')) {   

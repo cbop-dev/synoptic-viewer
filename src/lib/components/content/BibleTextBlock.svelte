@@ -2,6 +2,7 @@
 	import {
 		ParallelColumnGroup,
 		ParallelColumn,
+		LexPhraseAndLocations,
 		Word,
 		TextAndRef,
 		VerseWords,
@@ -16,6 +17,8 @@
 	import Button from '../ui/Button.svelte';
 	import { LexemeInfo } from '../datastructures/lexeme.js';
 	import * as BibleUtils from '$lib/n1904/bibleRefUtils';
+	
+	import mathUtils from '$lib/utils/math-utils.js';
 
 	//import WordComp from "$lib/components/content/Word.svelte"
 
@@ -62,7 +65,7 @@
 		//key is index of textRef.vwords, value is array of arrays of css classes (strings) to apply to it. Each array corresponds with a verse/item in textRef.vwords[key]
 		// Thus {2:{3: ["text-blue-300"]}}} would mean that for the third verse, i.e., textRef[2], the fourth word, textRef[2].words[3], should have the class "text-blue-300".
 		cssWordClassDict = {}, //{2:{3: ["text-blue-300"]}},
-		cssLexClassDict = {},
+		cssLexClassDict = {},//not used anymore!
 		selectedLexes = [],
 		selectedGreekPalette = [],
 		//based on strings: key:string, value:
@@ -114,24 +117,30 @@
 						selectedGreekPalette[selectedLexes.length + customMatchIndex].font
 					);
 			}
-		} else if (word.phrases.lexical.size) {
-			const phraseIndex = [...word.phrases.lexical][word.phrases.lexical.size - 1].index;
-			const colorObj = parGroup.lexIdenticalPhrasePalette[phraseIndex];
+		} else if (word.phrases.lexical.length) {
+			//wizardry with binary numbers!! :-) 
+			const lexPhrasesLocMostMatches=word.phrases.lexical.reduce((mostColumnsMatch,next)=>{
+				const bestColsMatchBinFlag = mathUtils.makeBinaryNumberFromArray(
+					Array.from(new Set(mostColumnsMatch.multiColumnLocations.map((mc)=>mc.column))).sort());
+				const nextColsBinFlag = mathUtils.makeBinaryNumberFromArray(
+					Array.from(new Set(next.multiColumnLocations.map((mc)=>mc.column))).sort());
+				const numBestMatches = mathUtils.calcBinaryOnes(bestColsMatchBinFlag,parGroup.parallelColumns.length);
+				const numNextMatches = mathUtils.calcBinaryOnes(nextColsBinFlag,parGroup.parallelColumns.length);
+				return numNextMatches > numBestMatches  ? next : mostColumnsMatch;
+			});
+			
+			
+			const colorObj = parGroup.lexIdenticalPhrasePalette[lexPhrasesLocMostMatches.calcMatchTypeIndex(parGroup.parallelColumns.length)] 
 			//        if (options.viewOptions.similarPhrases) {
 			if (colorObj) {
 				ret = ColorUtils.bgFontString(colorObj.bg, colorObj.font, colorObj.border);
 			}
-			//      }
-			/*if (options.viewOptions.exactPhrases && word.phrases.exact.size){
-            ret+= (ret ? "; " : '') + `--borderColor:${colorObj.border}`;
-          //  mylog(`put bordercolor! output= '${ret}'`, true)
-        }*/
+
 		}
 
 		return ret;
 	}
-	//$inspect(`bibleTextBlock: selectedLexes: [${selectedLexes.join(",")}]`);
-	//$inspect(`bibleTextBlock: selectedGreekPalette: [${selectedGreekPalette.join(",")}]`);
+//$inspect('parGroup.lexIdenticalPhrasePalette',parGroup.lexIdenticalPhrasePalette);
 </script>
 
 <div
@@ -208,9 +217,9 @@
 						<span
 							class={[
 								'word',
-								word.phrases.lexical.size ? 'lexical' : '',
+								word.phrases.lexical.length ? 'lexical' : '',
 								isIdentical ? 'identical' : '',
-								word.phrases.exact.size ? 'exact' : '',
+								word.phrases.exact.length ? 'exact' : '',
 								isUnique(word.id, uniqueSet) ? 'unique' : '',
 								selectedLexIndex >= 0 ? 'selected selected-lex' : '',
 								customMatchIndex >= 0 ? 'selected selected-custom' : ''
@@ -388,9 +397,7 @@
 		background-color: var(--bgColor, transparent);
 		color: var(--fontColor, default);
 	}
-	.show-exact .word.exact {
-		/*border-color: var(--borderColor,black);*/
-	}
+
 
 	:not(.hide-similar).show-exact .word.exact {
 		text-decoration: underline var(--fontColor, black);

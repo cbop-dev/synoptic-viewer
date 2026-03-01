@@ -113,7 +113,10 @@ function notesClick(heading,note){
 </script>
 
 
-
+  <h3>Color Key: {#each parTextGroup.lexIdenticalPhrasePalette as color,index}
+            <div class="w-3 h-3 inline block" style="background-color:{color};">{index}</div>
+            {/each}
+        </h3> 
     <div 
     class="grid  
     {numCols >=2 ? "sm:grid-cols-2" : ''}
@@ -123,7 +126,7 @@ function notesClick(heading,note){
         numCols ==5 ? "lg:grid-cols-5 gap-1" :
         ""
     } grid-cols-1 text-2xl">
-           
+       
         {#each parTextGroup.parallelColumns as col, index}
             
         {#if col.textRefs && col.textRefs.length}

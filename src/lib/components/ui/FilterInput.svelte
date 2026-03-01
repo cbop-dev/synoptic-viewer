@@ -1,6 +1,7 @@
 <script>
 import Button from "./Button.svelte";
 import ModalButton from "./ModalButton.svelte";
+import { onMount } from "svelte";
 
 let {
         /**
@@ -10,6 +11,7 @@ let {
         max=10,
         labelText="",
         casesensitive=$bindable(false),
+        focus=$bindable(false),
 
         transform=(input)=>{return input.trim()},
         /**
@@ -114,16 +116,50 @@ let {
         inputText=''; 
        //console.debug("cleared text input...")
     }
+    //let theInput;
+    function focusInput(){
+        if(focus && theInput){
+            // theInput.focus();
+            // activeElement=theInput;
+           // console.log("FilterInput.focused!");
+            
+        }
+        else{
+            //console.log("FilterInput: Not focused!")
+        }
 
-
+    }
+    $effect(()=>{
+       // console.log("FilterInputt effect(): checking if we should focus...")
+        //focusInput();
+    });
+    onMount(()=>{
+   // console.log("filterinput.mount(): checking if we should focus...")
+       //focusInput();
+        
+    });
+   
+    //let activeElement=$state(null);
+    // $inspect("textfilter.focus:", focus, 'TextInput.ActiveElement:', activeElement);
+   // $inspect("textfilter.focus:", focus, "doc.activeElement:", activeElement)
 </script>
+
 <div class=''>
     {#if labelText}
 <label for="inputfilter">{labelText}</label>
 {/if}
 
 <br/>
-<input  type="search" size="15" bind:value={inputText} placeholder="Type here" class="input input-bordered w-full max-w-xs" />
+{#if focus}
+<input   type="search" size="15" 
+autofocus
+bind:value={inputText} placeholder="Type here" class="input input-bordered w-full max-w-xs" />
+{:else}
+<input   type="search" size="15" 
+
+bind:value={inputText} placeholder="Type here" class="input input-bordered w-full max-w-xs" />
+{/if}
+
 <ModalButton title="Text Filter Help" buttonText="(?)" 
 buttonStyle='p-0 m-0 pb-1 btn btn-sm btn-ghost '> 
     <div class="block text-left">

@@ -33,7 +33,7 @@
         parGroup = new GospelPericopeGroup(),
         options=new SynopsisOptions3(),
         enableSecondary=false,
-       focus = '',
+        focus = '',
        /* showUnique=false,
         showIdentical=true,*/
         wordClick=(id)=>{},
@@ -171,7 +171,7 @@ $effect(()=>{
         
         
         untrack(()=>{
-            parGroup.exactlyIdenticalPhrases={};
+          //  parGroup.exactlyIdenticalPhrases={};
             parGroup.lexIdenticalPhrasesLocations.length = 0;
             //parGroup.resetAllPhrases();
 
@@ -204,57 +204,13 @@ $effect(()=>{
 
 })
 
-//function countMatchingPhrases
-//$inspect("ParGspSec: gospelFilter.filter=",gospelFilter.filter);
-//$inspect("ParGspSec: options...gospelFilter=",options.viewOptions.gospelFilter);
-//$inspect("ParGosSectio: words with matching phrases:",parGroup.parallelColumns.filter((col)=>col.textRefs.filter((tf)=>tf.vwords.filter((vw)=>vw.words.filter((w)=>w.phrases.lexical.size || w.phrases.exact.size).length).length).length).length);
+
 </script>
 <style>
     @reference "tailwindcss";
-    /*
-    .Matts {
-        @apply bg-red-50 border-red-900 border-4;
-    }
 
-    .Mark {
-        @apply bg-lime-50 border-lime-900 border-4;
-    }
-
-    .Luke{
-        @apply bg-sky-50 border-sky-900 border-4;
-    }
-
-    .John{
-        @apply bg-violet-50 border-violet-900 border-4;
-    }
-    
-    .other{
-        @apply bg-base-200;
-    }
-    .lex-unique{
-        @apply outline-4 pl-0.5 mr-0.5 ;
-    }
-    .gospel-column-0 span.lex-unique
-   {
-            @apply outline-red-600   ;
-        
-    }
-    .gospel-column-1 span.lex-unique {
-            @apply outline-green-600   ;
-        
-    }
-    .gospel-column-2 span.lex-unique
-    {
-            @apply outline-blue-600   ;
-        
-    }
-    .gospel-column-3 span.lex-unique, span.lex-unique {
-            @apply outline-fuchsia-600   ;
-        
-    }*/
     .column {
-      /*  @apply border-4;*/
-       /* border-color: var(--borderColor,#eee)*/
+
     }
 
     .gospel-column-1 .show-unique .unique{
@@ -268,6 +224,10 @@ $effect(()=>{
 
 </style>
 {#key gospelFilter && parGroup.updatedCounter}
+<h3>Color Key: {#each parGroup.lexIdenticalPhrasePalette as color,index}
+            <div class="w-3 h-3 inline block" style="background-color:{color.bg};">{index}</div>
+            {/each}
+        </h3> 
 {#if !focus}
     <div 
     class="grid  

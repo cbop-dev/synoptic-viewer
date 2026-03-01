@@ -43,9 +43,9 @@ export class Word {
     specialCss = new Set();
     /**
      * @description various types of phrase that this word instance is in. Useful, e.g., for assigning css classes for matching phrases. not sure about the 'index': might refer to the index in the parent object's tracking of phrases.
-     * @type {{lexical:Set<{phrase:LexicalPhrase, index:number}>,exact:Set<string>}}
+     * @type {{lexical:LexPhraseAndLocations[],exact:LexPhraseAndLocations[]}}
      */
-    phrases = { lexical: new Set(), exact: new Set() };
+    phrases = { lexical: [], exact: [] };
 }
 export class VerseWords {
     verse = 0;
@@ -410,7 +410,48 @@ export class LexPhraseAndLocations {
         this.phraseIndex = phraseIndex
     }
 
+    /**
+     * @description Computes the "index" of a match type, where the match type is determined by the combination of columns in which the phrase is found when this includes at least 2 columns.
+     * The total number of possible match combination is 2^n - n - 1, where n is the number of columns in the ParallelColumn groups.
+     * The index is computed by treating the columns ALMOST like bits in a binary number, where the least significant bit is the first column, and the most significant bit is the last column. 
+     * BUT, any "binary number" with only 1 bit set is skipped, since that would mean the phrase is only found in one column.
+     * @param {number} numColumns 
+     * @returns {number} the index of the type of match Returns -1 if fewer than 2 flags are active.
+     */
+    calcMatchTypeIndex(numColumns) {
+        const phraseColumnFlags = ArrayUtils.newArray(numColumns, false);
+        this.multiColumnLocations.forEach((colLocs)=>{
+            if (colLocs.column < phraseColumnFlags.length) phraseColumnFlags[colLocs.column] = true;
+        });
 
+        let bitValue = 0;
+        let activeCount = 0;
+
+        for (let i = 0; i < phraseColumnFlags.length; i++) {
+            if (phraseColumnFlags[i]) {
+                bitValue |= (1 << i);
+                activeCount++;
+            }
+        }
+
+        // Requirement: only combinations of 2 or more columns
+        if (activeCount < 2) return -1;
+
+        /**
+         * Subtracting invalid indices:
+         * 1. The 0 case (no flags): always subtract 1.
+         * 2. The single-flag cases: we count how many single bits 
+         * exist that are numerically less than our current bitValue.
+         */
+        let singleBitOffsets = 0;
+        for (let i = 0; i < phraseColumnFlags.length; i++) {
+            if ((1 << i) < bitValue) {
+                singleBitOffsets++;
+            }
+        }
+
+        return bitValue - 1 - singleBitOffsets;
+    }
 }
 
 
@@ -463,8 +504,9 @@ export class ParallelColumnGroup {
 
     /**
      * @type {{bg:string,font:string,border:string}[]}
+     * @description palette for the matching phrases.
      */
-    lexIdenticalPhrasePalette = [];
+    lexIdenticalPhrasePalette = []; //rethinking...perhaps have this by indexed by the column match type!
     /**
      * @description reverse lookup for finding phrases index by location: i.e., lexIdenticalPhrasesIndexDict[col][tR][v][w]=index of lexIdenticalPhrasesLocations and of lexIdenticalPhrasesCssClasses;
      * @type {Object<number,Object<number,Object<number,Object<number,number>>>>}
@@ -481,7 +523,8 @@ export class ParallelColumnGroup {
      * @description phrases that are perfect matches--same lexemes, same form (exact string match).
      * @type {Object<string,ParallelPhraseLocation[]>}
      */
-    exactlyIdenticalPhrases = {}
+    //not used?
+    //exactlyIdenticalPhrases = {}
 
 
     /**
@@ -528,14 +571,29 @@ export class ParallelColumnGroup {
             tRefs.forEach((tr) => {
                 tr.vwords.forEach((vw) => {
                     vw.words.forEach((w) => {
-                        w.phrases.exact.clear();
-                        w.phrases.lexical.clear();
+                        w.phrases.exact.length = 0;
+                        w.phrases.lexical.length = 0;
                         //mylog("cleared phrase!",true);
                     })
                 })
             })
         })
     }
+
+
+    /**
+     * @type {{bg:string,font:string}[]}
+     * @description colors for matching columns, with matching 5 types of matches:
+     * 0. Matt + Mk
+     * 1. Matt + Mk + Lk
+     * 2. Matt + Lk
+     * 3. Mk + Lk
+     * 4. Any solo synoptic + Jn
+     * 
+     * NB: John only factors in the last category. Otherwise, whether John has matching phrase does not matter for #'s 0-3.
+     */
+
+    //static matchingColumnsColors = ColorUtils.myColorPalette(5);
     /** 
      * @param {number} [minLength=2] 
      * @param {boolean} [includeSecondary=false] 
@@ -561,6 +619,10 @@ export class ParallelColumnGroup {
         for (const [phraseIndex, subarray] of commonSubarrays.entries()) {
             const lexPhrase = new LexicalPhrase(subarray.subarray);
             const lexPhraseAndLocations = new LexPhraseAndLocations(lexPhrase, [], phraseIndex);
+
+            //TODO: use or remove this next variable!
+            //innovation: determine and use the type of match (e.g., which combination of columns this matches? Let another component figure out how to style, since ti will depend upon how many columns we have, etc.) so far it is not used 
+            const parallelMatchTypeFlag = mathUtils.sum(Array.from(new Set(subarray.occurrences.map((oc)=>oc.columnIndex))));
             for (const occurrence of subarray.occurrences) {  //second loop: each column, of that phrase
                 const colIndex = occurrence.columnIndex;
                 const isSecondary = occurrence.textIndex >= this.parallelColumns[colIndex].textRefs.length;
@@ -585,10 +647,7 @@ export class ParallelColumnGroup {
                         }
 
                         words.forEach((w) => {
-                            if (!w.phrases.lexical) {
-                                w.phrases.lexical = new Set();
-                            }
-                            w.phrases.lexical.add({ phrase: lexPhrase, index: phraseIndex });
+                            w.phrases.lexical.push(lexPhraseAndLocations);
                         });
 
                         /**
@@ -602,16 +661,11 @@ export class ParallelColumnGroup {
                             lexPhraseAndLocations.multiColumnLocations.push(phraseLocation);
                         }
                     }
-
                 }
-
             }
 
             this.lexIdenticalPhrasesLocations.push(lexPhraseAndLocations);
-
-
             this.updatedCounter++;
-
         }
 
         if (markidenticalPhrases) {
@@ -622,21 +676,15 @@ export class ParallelColumnGroup {
              */
             const stringPhrasesAndLocs = Array.from(mathUtils.range(this.parallelColumns.length, 0)).map(_ => { return {}; });
 
-            this.exactlyIdenticalPhrases = {};
+           // this.exactlyIdenticalPhrases = {};
             for (const phraseAndLoc of this.lexIdenticalPhrasesLocations) {
                 for (const loc of phraseAndLoc.multiColumnLocations) {
                     if (loc.secondary) {
                         //mylog("got loc.secondary!",true);
                     }
-                    // const vWordsIdx= loc.singleColumnLocation.vWordIndices;
-                    //const tR= this.getTextRefByLocation(loc);
                     const exactPhrase = GreekUtils.onlyPlainGreek(this.getTextFromLocation(loc, true).toLocaleLowerCase()).trim();
 
                     if (exactPhrase) {
-                        // if (!Object.keys(this.exactlyIdenticalPhrases).includes(exactPhrase)){
-                        //  this.exactlyIdenticalPhrases[exactPhrase]=[];
-                        //} 
-                        //this.exactlyIdenticalPhrases[exactPhrase].push(loc);
 
                         if (!stringPhrasesAndLocs[loc.column][exactPhrase]) {
                             stringPhrasesAndLocs[loc.column][exactPhrase] = []
@@ -649,16 +697,6 @@ export class ParallelColumnGroup {
             }
             const commonSubphrases = findMaximalCommonTextPhrasesAcrossColumns(stringPhrasesAndLocs.map((o) => Object.keys(o)), 3);
 
-            // const stringPhrasesAndLocs=Array.from(mathUtils.range(this.parallelColumns.length,0)).map(_=>{return {};});
-            //contains exact matches, and where in the phrase strings, the matches are found. These are not yet mapped to our actual text object/locations.
-
-            //mylog(`buildLexIdPhrases got exact matches:['${commonSubphrases.map((o)=>o.subarray).join("','")}']`,true);
-            // this.exactlyIdenticalPhrases={}
-            // ==============================================
-            //TODO in progress!
-            //TODO: need to draw a diagram to visualize the mapping between stringPhrasesAndLocs and commonsubphrases...*:
-            //go through found locations map to actual text...todo still. This is a very complicated mapping procedure!!!!
-
 
             commonSubphrases.forEach((commonPhraseObject, subPhraseIndex) => {
 
@@ -669,29 +707,14 @@ export class ParallelColumnGroup {
                     //gotta find the word object...*:
                     occurrence.textIndex
                     const [exactPhrase, lexIdenticalLocations] = Object.entries(stringPhrasesAndLocs[occurrence.columnIndex])[occurrence.textIndex];
-
+                    const exactPhraseAndLocations = new LexPhraseAndLocations(new LexicalPhrase(), lexIdenticalLocations, subPhraseIndex);
                     //const stuff1= stringPhrasesAndLocs[occurrence.columnIndex]
                     // const fred = stuff1['stinrg'];
 
                     /**
                     // * @type {ParallelPhraseLocation[]} lexIdenticalLocations
                      */
-                    // const lexIdenticalLocations = stringPhrasesAndLocs[occurrence.columnIndex][exactPhrase];
-                    //locations in this.parallelColumns!
-
-
                     lexIdenticalLocations.forEach((lexPhraseLoc) => {
-                        //????const superphrase=stringPhrasesAndLocs[lexPhraseLoc.column]//?????
-
-                        // const tRefs = lexPhraseLoc.secondary ? this.parallelColumns[lexPhraseLoc.column].secondary : this.parallelColumns[lexPhraseLoc.column].textRefs;
-
-                        //lexPhraseLoc.singleColumnLocation.vWordIndices.forEach((vWordIndex)=>{
-
-                        //  lexPhraseLoc.singleColumnLocation.
-                        //const subphraseLoc = new ParallelPhraseLocation(lexPhraseLoc.column)
-                        //const aWord = tRefs[lexPhraseLoc.singleColumnLocation.trIndex].getWordByIndices(vWordIndex.verseIndex,vWordIndex.wordIndex);
-
-
                         const superPhraseWords = this.getWordsFromLocation(lexPhraseLoc);
                         //constPhraseWords
                         occurrence.spans.forEach((span) => {
@@ -699,7 +722,7 @@ export class ParallelColumnGroup {
                             const phraseWords = superPhraseWords.slice(span.start, span.end + 1);
                             phraseWords.forEach((aWord) => {
                                 if (aWord) {
-                                    aWord.phrases.exact.add(subphrase);
+                                    aWord.phrases.exact.push(exactPhraseAndLocations);
                                     if (lexPhraseLoc.secondary) {
                                         // mylog("Got/marked secondary phrase!",true)
                                     }
@@ -723,36 +746,7 @@ export class ParallelColumnGroup {
                 })
 
 
-
-                //TODO: finish...
-
             })
-
-
-            //TODO above section in progress...
-            //=============================================
-
-            /*
-                        let i = 1;
-                        for (const [phrase,locs] of Object.entries(this.exactlyIdenticalPhrases)
-                                                    .filter(([phrase,loc])=>loc.length > 1))
-                        {//adding a css entry for each word:
-                            //mylog(`Got exact phrase: '${phrase}', ${locs.length} times`)
-                            locs.forEach((loc)=>{
-                                
-                                this.getWordsFromLocation(loc).forEach((w)=>{
-                                    w.specialCss.add('exact-phrase');
-                                    w.specialCss.add('exact-phrase-'+i);
-                                    
-                                    w.phrases.exact.add({phrase: phrase, index:i});
-                                    //w.phrases.exact.add(this.);
-                                });
-                            });
-                            i++;
-                        }
-            */
-
-
         }
 
         let numPhrases = this.lexIdenticalPhrasesMap.size;
@@ -764,15 +758,19 @@ export class ParallelColumnGroup {
         });
 
         //this.lexIdenticalPhrasePalette=ColorUtils.generateHslBgFontPalette(this.lexIdenticalPhrasesLocations.length,60,70,true);
-        this.lexIdenticalPhrasePalette = ColorUtils.myColorPalette(this.lexIdenticalPhrasesLocations.length, 0, 2);
+        
+        //previous: by number of matchesphrases
+        //this.lexIdenticalPhrasePalette = ColorUtils.myColorPalette(this.lexIdenticalPhrasesLocations.length, 0, 2);
 
-        /*
-        //mylog("========================================================",true)
-        //mylog("Build the lexIdenPhrasesIndexDict. Here it is:", true)
-        //mylog(this.lexIdenticalPhrasesIndexDict, true)
-        //mylog("========================================================",true)
-        */
-
+        //new: by columns matche-types: that is, by which combination of the columns match. 
+        // this formula as follows: the sum of all r=n...2 for n choose r, where n is the number of columns, and r is the number of columns that match.
+        // we can figure this out as: (sum of r=n...0 for n choose r) - (sum of r=1...1 for n choose r) - (sum of r=1...0 for n choose r)  
+        // this comes to: 2^n - n - 1. 
+        // thus:  2^numCols - numCols - 1.
+        const numMatchTypes = 2**this.parallelColumns.length - this.parallelColumns.length - 1;
+        mylog(`buildLexIdenticalPhrases(): numCols = ${this.parallelColumns.length}; numMatchTypes=${numMatchTypes}`,true);
+        this.lexIdenticalPhrasePalette = ColorUtils.myColorPalette(numMatchTypes, 0, 2);
+        //TODO: figure out how to use this index!!
     }
 
     /**
