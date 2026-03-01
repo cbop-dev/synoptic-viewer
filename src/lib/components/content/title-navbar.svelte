@@ -2,7 +2,12 @@
     import ButtonSelect from '../ui/ButtonSelect.svelte';
     import { Hotkey,SynopsisHotkeys } from '../ui/hotkeys.svelte';
     import { SynopsisOptions3 } from './SynopsisClasses.svelte';
-    
+    import ModalButton from '../ui/ModalButton.svelte';
+    import {gospelParallels} from '@cbop-dev/aland-gospel-synopsis';
+    import { LexPhraseAndLocations, ParallelColumnGroup } from './parallelTexts.svelte';
+	import Modal from '../ui/Modal.svelte';
+    import Modal2 from '../ui/Modal2.svelte';
+import MatchColorsKey from './MatchColorsKey.svelte';    
      /**
      * @type {{hotkeys:SynopsisHotkeys,
      * title:string,
@@ -28,9 +33,11 @@
         headingTag="h1",
         short=false,
         //shortBoundary='sm',
-        titleClasses=['inline-block']
+        titleClasses=['inline-block'],
+        useGospels=true
     }=$props();
 
+    let showColorsModal=$state(false);
     
 </script>
     
@@ -77,7 +84,22 @@
                 </li>
         
             {/each}
+            {#if useGospels && (options.viewOptions.similarPhrases || options.viewOptions.exactPhrases)}
+            
+            <li class={[showResultsButtons? 'sm:list-item': '', 'hidden' ]}>
+                <ButtonSelect buttonText="Colors" buttonStyle="btn btn-xs  btn-ghost p-0 ml-0.5 text-md "
+            bind:selected={showColorsModal} tooltipbottom tooltip="Show Matching Colors Key"/>
+            
+            </li>
+
+        {/if}
         {:else}
         {/if}
         
+         
     </ul>
+
+
+    <Modal2 bind:showModal={showColorsModal} title="Matching Colors Key">
+       <MatchColorsKey {useGospels}/>
+    </Modal2>

@@ -226,37 +226,7 @@ $effect(()=>{
 
 </style>
 {#key gospelFilter && parGroup.updatedCounter}
-{#if options.viewOptions.similarPhrases || options.viewOptions.exactPhrases}
-<ModalButton buttonText="Phrases Color Key" title="Matching Phrases Color Key"
-buttonStyle="btn btn-sm btn-ghost" >
-<table class="table table-compact self-center">
-    <thead>
-        <tr>
-        {#each Object.values(gospels.abbreviations) as gospName }
-        <th class="p-2 font-bold font-black">{gospName}</th>
-        {/each}
-            
-            
-        </tr>
-    </thead>
-    <tbody>
-{#each parGroup.lexIdenticalPhrasePalette as color,index}
-    {@const indexFlags=LexPhraseAndLocations.reverseCalcColumnMatchesFromMatchTypeIndex(index,parGroup.paletteMatchCols)}
-   <!-- index: {index}; flags: [{indexFlags?.join(',')}]-->
-    {@const includedGospels=indexFlags ? Object.values(gospels.abbreviations).filter((name,i)=>indexFlags[i]) : []}
-    
-    <tr>
-    {#each Object.values(gospels.abbreviations) as gospName,i}
-            <td class="table-cell w-5 h-5 border-t-1" style="background-color:{indexFlags && indexFlags[i] ? color.bg: 'transparent'}; color: {indexFlags && indexFlags[i] ? color.font: 'transparent'}">
-            </td>
-    {/each}
-    </tr>
-{/each}
-</tbody>
-</table>
-        
-        </ModalButton>
-{/if}
+
 {#if !focus}
     <div 
     class="grid  

@@ -3,17 +3,20 @@
     import CustomParallelViewer from './CustomParallelViewer.svelte';
 	import { SynopsisOptions3 } from './SynopsisClasses.svelte.js';
 	import { mylog } from '$lib/env/env';
+    import Button from '$lib/components/ui/Button.svelte';
     import {getServer, sbl as sblServer, n1904 as n1904Server} from '$lib/tf/tfServer.js'
     import { N1904Server } from '$lib/n1904/tfN1904';
     import { SblGntServer } from '$lib/sblgnt/sblgnt';
-    
-    import Button from '../ui/Button.svelte';
+    import {gospelParallels} from '@cbop-dev/aland-gospel-synopsis';
+    import { LexPhraseAndLocations, ParallelColumnGroup } from './parallelTexts.svelte';
+//    import {Button} from '../ui/Button.svelte';
     import { TfServer } from './TfUtils';
 	import ButtonSelect from '../ui/ButtonSelect.svelte';
     import Modal2 from '../ui/Modal2.svelte';
     import Footer from './Footer.svelte';
     import ArrowTop from '../ui/icons/arrow-top-icon.svelte';
     import ArrowDown from '../ui/icons/arrow-down.svelte';
+    import ModalButton from '../ui/ModalButton.svelte';
     let showInfoModal = $state(false);
     let y = $state();
     let windowHeight=$state();
@@ -144,7 +147,8 @@
             {/each}
         </div>
         <div class="inline-block mr-1 mt-1">
-        
+            
+				
             
             <ButtonSelect buttonText="i" 
        buttonStyle="btn btn-xs  btn-circle btn-ghost  p-0" bind:selected={showInfoModal} tooltip="Show site info" tooltipbottom={true}/> 

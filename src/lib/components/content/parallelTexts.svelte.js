@@ -816,13 +816,24 @@ export class ParallelColumnGroup {
         // we can figure this out as: (sum of r=n...0 for n choose r) - (sum of r=1...1 for n choose r) - (sum of r=1...0 for n choose r)  
         // this comes to: 2^n - n - 1. 
         // thus:  2^numCols - numCols - 1.
-        const numMatchTypes = 2**this.paletteMatchCols - this.paletteMatchCols - 1;
-        mylog(`buildLexIdenticalPhrases(): numCols = ${this.paletteMatchCols}; numMatchTypes=${numMatchTypes}`,true);
-        this.lexIdenticalPhrasePalette = ColorUtils.myColorPalette(numMatchTypes, 0, 1,7);
+        //const numMatchTypes = 2**this.paletteMatchCols - this.paletteMatchCols - 1;
+        //mylog(`buildLexIdenticalPhrases(): numCols = ${this.paletteMatchCols}; numMatchTypes=${numMatchTypes}`,true);
+        //this.lexIdenticalPhrasePalette = ColorUtils.myColorPalette(numMatchTypes, 0, 1,7);
+
+        this.lexIdenticalPhrasePalette=ParallelColumnGroup.getLexIdenticalPhrasePalette(this.paletteMatchCols);
         
         //TODO: figure out how to use this index!!
     }
 
+    /**
+     * 
+     * @param {number} cols 
+     */
+    static getLexIdenticalPhrasePalette(cols){
+        const numMatchTypes = 2**cols - cols - 1;
+        //mylog(`buildLexIdenticalPhrases(): numCols = ${this.paletteMatchCols}; numMatchTypes=${numMatchTypes}`,true);
+        return ColorUtils.myColorPalette(numMatchTypes, 0, 1,7);
+    }
     /**
      * 
      * @param {boolean} includeSecondary 

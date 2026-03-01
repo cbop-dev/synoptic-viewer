@@ -35,7 +35,7 @@
 
 	{#if enable}
 	<div class=" bg-gray-100"></div>
-	<dialog bind:this={dialog} class="modal max-w-full" 
+	<dialog bind:this={dialog} class="modal max-w-full w-auto m-auto" 
 	class:modal-open={showModal}
 	onclose={() => {onclose(); showModal = false}} 
 	>

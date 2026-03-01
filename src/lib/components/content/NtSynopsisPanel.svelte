@@ -12,6 +12,7 @@
 		GospelPericopeGroup,
 		Word,
 		TextAndRef,
+		LexPhraseAndLocations,
 		VerseWords
 	} from './parallelTexts.svelte';
 	import { N1904Server, lexemes } from '$lib/n1904/tfN1904';
@@ -47,6 +48,7 @@
 	import { ArrowLeftOutline, ArrowRightOutline } from 'flowbite-svelte-icons';
 	import * as ArrayUtils from '$lib/utils/array-utils.js';
 	import GospelFilterComp from './GospelFilter.svelte';
+	import ModalButton from '../ui/ModalButton.svelte';
 
 	//import { generateHslColorGradient } from '../ui/chartUtils';
 	/**
@@ -1419,9 +1421,10 @@
 					{#key myOptions.viewOptions}<CopyText
 							icon={LinkSvg}
 							getTextFunc={makeURL}
-							tooltip="Copy stuff"
-						/>{/key}
-				</h1>
+							tooltip="Copy Link to share these results"
+						/>{/key} 
+						</h1>
+					
 				{#key paginatedFilteredPerGroups && myOptions.viewOptions.page}
 					{#if paginatedFilteredPerGroups[myOptions.viewOptions.page] && paginatedFilteredPerGroups[myOptions.viewOptions.page].length && paginatedFilteredPerGroups[myOptions.viewOptions.page].reduce((a, b) => a && b.populated, true)}
 						{@render pageNav()}

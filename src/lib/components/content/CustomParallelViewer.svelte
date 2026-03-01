@@ -980,6 +980,8 @@
 						bind:options={myOptions}
 						showResultsButtons={dataReady}
 						hideLookup={!dataReady || landingPage}
+						useGospels={false}
+						
 					/>
 				</div>
 
