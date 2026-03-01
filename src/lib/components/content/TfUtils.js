@@ -398,18 +398,13 @@ export function getGospelGroupRefsArrays(groupsArray, includeSecondary = false) 
 /**
  * 
  * @param {GospelPericopeGroup} group 
-
  */
-
 
 /**
  * 
  * @param {string[]} refs
  * @returns {{book:string,chapter:number|null,verses:number[]}[]}
  */
-
-
-
 
 export class TfServer {
     static abbrev = 'Dummy Server!';
@@ -742,7 +737,6 @@ export class TfServer {
      */
     async fetchLexRefsCounts(lexID, calculate = true) {//},theSections=null){//},lexObj=null) { //not doing this yet.
 
-
         /*if (lexObj){
             lemmaInfo.copyFrom(lexObj);
         }*/
@@ -753,7 +747,6 @@ export class TfServer {
         // let theSections=[];
 
         const url = this.getApiUri() + "/getrefs/" + lexID;
-
 
         // console.debug("Fetching " + url);
         const theJsonObj = await this.jsonFetch(url);
@@ -810,7 +803,6 @@ export class TfServer {
         //lexStats.calculateFrequencies(calculate);
 
         return lexStats;
-
     }
 
 

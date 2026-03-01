@@ -362,7 +362,7 @@
 	}
 
 	/**
-	 * @type {Object<string,string>} lexClasses
+	 * @type {Object<string,string>} customGreekClasses
 	 */
 	let customGreekClasses = $derived.by(() => {
 		// id->css color (e.g., "#eee")
@@ -372,7 +372,7 @@
 		 */
 		const ret = {};
 		if (selectedLexes && myOptions.viewOptions.greekStrings.length) {
-			//mylog("building lexClasses...",true)
+			//mylog("building customGreekClasses...",true)
 			for (const [relIndex, gk] of myOptions.viewOptions.greekStrings.entries()) {
 				const color = getColorOfGreek(gk);
 				if (color) {

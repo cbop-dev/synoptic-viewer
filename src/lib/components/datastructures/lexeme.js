@@ -88,8 +88,6 @@ export class LexemeInfo {
 // toString=false,decimals=4){ .toFixed(decimals)
 
 export class LexStats {
-
-
     /**
      * @type {string[]} references
      */
