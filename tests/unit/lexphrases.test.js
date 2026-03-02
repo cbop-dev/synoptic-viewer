@@ -64,7 +64,7 @@ test('calcMathTypes and reverse tests!', async () => {
         t.colsIndices.map((col)=>new ParallelPhraseLocation(col)));
         const matchIndex = lexPhraseAndLocations.calcMatchTypeIndex(t.numCols);
         expect(matchIndex).toEqual(t.matchTypeIndex);
-        expect(LexPhraseAndLocations.reverseCalcColumnMatchesFromMacthTypeIndex(matchIndex,t.numCols)?.map((b,i)=>[b,i])
+        expect(LexPhraseAndLocations.reverseCalcColumnMatchesFromMatchTypeIndex(matchIndex,t.numCols)?.map((b,i)=>[b,i])
         .filter(([b,i])=>b).map(([b,i])=>i)).toEqual(t.colsIndices);
         //expect(true).toBe(false);
     }
