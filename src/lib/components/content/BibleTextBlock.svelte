@@ -276,8 +276,8 @@
 -->
 					{/each}
 				{/each}<!--<CopyText linkText="IDs!" getTextFunc={()=>textRef.getWordIdArray().join(',')} />-->
-			{:else if textRef.text}
-				{options.viewOptions.hideApp ? GreekUtils.removeApparatusMarks(textRef.text) : textRef.text}
+			{:else if textRef.text }
+				{options.viewOptions.hideApp && parGroup.lang=='greek'? GreekUtils.removeApparatusMarks(textRef.text) : textRef.text}
 			{/if}
 		{:else}
 			<i class="text-sm">("{textRef.reference}" not found in the selected NT version.)</i>
@@ -285,7 +285,7 @@
 		{#if copyButton && textRef.text}
 			<CopyText
 				getTextFunc={() =>
-					options.viewOptions.hideApp
+					parGroup.lang=='greek' && options.viewOptions.hideApp 
 						? GreekUtils.removeApparatusMarks(textRef.text)
 						: textRef.text}
 				tooltip="Copy pericope"

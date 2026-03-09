@@ -265,6 +265,7 @@
 
 		for (let line of lines) {
 			const group = new ParallelColumnGroup();
+			group.lang=currentServer.lang;
 			const regex = new RegExp(/^\[([^\]\[]+)\]/);
 			const titleMatch = line.match(regex);
 			group.title = titleMatch && titleMatch.length > 1 ? titleMatch[1] : '';
@@ -392,6 +393,7 @@
 	}
 
 	function wordClick(id, bookName = '') {
+		if (!currentServer.hasLexicalInfo) return;
 		const bookid = bookName ? tfServer.getBookID(bookName) : 0;
 		//mylog(`wordclick(${id},${bookName}[id:${bookid}])`)
 		if (options.viewOptions.highlightOnClick) {
@@ -806,6 +808,7 @@
 	{@const theTag = tag ? tag : 'span'}
 	{#if mounted && dataReady}
 		<!-- <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={viewStates.views.lookup.state} buttonText="Again!" tooltip="Toggle lookup panel." /></svelte:element>-->
+		{#if currentServer.hasLexicalInfo}
 		<svelte:element this={theTag} class={classes}
 			><ButtonSelect
 				buttonText="☰ Words"
@@ -814,6 +817,8 @@
 				tooltip="View Lexeme and custom Greek options."
 			/></svelte:element
 		>
+		{/if}
+		{#if currentServer.hasPhraseComparison}
 		<svelte:element this={theTag} class={classes}
 			><ButtonSelect
 				buttonText="Similar"
@@ -830,6 +835,8 @@
 				tooltip="Show exactly matching phrases (same lexemes, same order, some forms). This pairs well with the 'Similar' option."
 			/></svelte:element
 		>
+		{/if}
+		{#if currentServer.hasLexicalInfo}
 		<svelte:element this={theTag} class={classes}
 			><ButtonSelect
 				bind:selected={myOptions.viewOptions.unique}
@@ -869,7 +876,8 @@
 				/>Stats{#if short}{:else}{/if}
 			</label>
 		</svelte:element>
-		{#if currentServer.abbrev == SblGntServer.abbrev}
+		{/if}
+		{#if currentServer.hasApparatus}
 			<svelte:element
 				this={theTag}
 				class={[classes, ['tooltip', 'tooltip-bottom', 'menu']]}

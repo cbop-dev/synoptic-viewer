@@ -30,6 +30,7 @@ export class SblGntServer extends N1904Server{
     abbrev=SblGntServer.abbrev;
     server=env.tfserverurl;
     param=this.abbrev;
+    hasApparatus=true;
     
     /**
      * @type {Object<string,{id:number,count:number, beta:string}>} 

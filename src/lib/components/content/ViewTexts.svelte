@@ -73,9 +73,9 @@
 
 <Modal2 bind:showModal={showModal}>
 {#if ref2Show && !fetching}
-{@const plainText=GreekUtils.removeApparatusMarks(texts[ref2Show])}
-{@const theText=hideApparatus ? plainText: texts[ref2Show] }
-<h2 class="text-2xl bold">{ref2Show} {#if texts[ref2Show] != plainText}<ButtonSelect bind:selected={hideApparatus} buttonText="Apparatus marks" buttonStyle='btn btn-xs'/>{/if}</h2>
+{@const plainText=tfServer.lang=='greek' && tfServer.hasApparatus ? GreekUtils.removeApparatusMarks(texts[ref2Show]): texts[ref2Show]}
+{@const theText=hideApparatus  && tfServer.hasApparatus ? plainText: texts[ref2Show] }
+<h2 class="text-2xl bold">{ref2Show} {#if tfServer.hasApparatus && texts[ref2Show] != plainText}<ButtonSelect bind:selected={hideApparatus} buttonText="Apparatus marks" buttonStyle='btn btn-xs'/>{/if}</h2>
 
 <div class="text-3xl bg-slate-200 shadow-2xl">
     {theText}

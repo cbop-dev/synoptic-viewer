@@ -204,10 +204,13 @@
 		}
 		return retVal;
 	});
-
+	
 	//let groupsRefsArray = $state([]);
 	let currentServer = $state(tfServer);
 
+	function setServer() {
+		currentServer = tfServer;
+	}
 	/**
 	 * @type {Object|null}
 	 */
@@ -235,9 +238,9 @@
 
 		//  mylog("sorting pericopes. Sorted state = " + alandPericopeNums.join(","));
 
-		perGroups = TfUtils.getGroupsArray(filteredPericopes, true);
+		perGroups = TfUtils.getGroupsArray(filteredPericopes, true,currentServer.lang);
 
-		// mylog("ran geRefsArrays!")
+		 
 	}
 
 	/**
@@ -347,9 +350,6 @@
 	//$derived(alandPericopeNums.filter((p)=>!hideNonPrimary ||
 	//      (gospelParallels.alandSynopsis.isPrimaryPericope(p,selectedGospel[selectedGospelIndex].value))))
 
-	function setServer() {
-		currentServer = tfServer;
-	}
 
 	let selectedSection = $state([1]);
 	async function selectSection() {
@@ -661,11 +661,11 @@
 			showLexModal = true;
 			if (!fetchedLexInfo[id]) {
 				lexInfoFetching = true;
-				const lexInfo = await tfServer.fetchLexInfo(id);
+				const lexInfo = await currentServer.fetchLexInfo(id);
 
 				if (lexInfo) {
 					//showLexModal=true;
-					lexInfo.stats = await tfServer.fetchLexRefsCounts(id, true);
+					lexInfo.stats = await currentServer.fetchLexRefsCounts(id, true);
 					fetchedLexInfo[id] = lexInfo;
 
 					//mylog(`fetched lemma info for '${lexInfo.lemma}'`)
@@ -683,7 +683,8 @@
 		}
 	}
 	function wordClick(id, bookName = '') {
-		const bookid = bookName ? tfServer.getBookID(bookName) : 0;
+		if (!currentServer.hasLexicalInfo) return;
+		const bookid = bookName ? currentServer.getBookID(bookName) : 0;
 		//mylog(`wordclick(${id},${bookName}[id:${bookid}])`)
 		if (myOptions.viewOptions.highlightOnClick) {
 			toggleLex(id);
@@ -704,7 +705,7 @@
 		//makingRequest=true;
 		//responseReady = false;
 
-		const stats = await tfServer.fetchLexRefsCounts(lemmaId, true);
+		const stats = await currentServer.fetchLexRefsCounts(lemmaId, true);
 		return stats;
 	}
 
@@ -784,7 +785,7 @@
 		}
 	});
 	const hotkeys = new SynopsisHotkeys(myOptions);
-	hotkeys.enableHotkeys('nptb2ax');
+	
 	hotkeys.addHotkey('>', 'Next Page', gotoNextPage);
 	hotkeys.addHotkey('<', 'Previous Page', gotoPreviousPage);
 	hotkeys.addHotkey('g', 'Show/Hide Individual Gospels', () => {
@@ -802,7 +803,13 @@
 	hotkeys.addHotkey('$', 'Show/Hide John! ([shift]-4)', () => {
 		toggleGospelHide(3);
 	});
+	let hotkeysToUse=$state('');
+	$effect(()=>{
+		hotkeys.enableHotkeys(hotkeysToUse);
+	});
+	hotkeysToUse='nptb2aesx';
 
+	
 	/**
 	 *
 	 * @param {number} index
@@ -1074,6 +1081,8 @@
 		mounted = true;
 	});
 	let showGospelFilterModal = $state(false);
+	//$inspect('groupsRefsArray:',groupsRefsArray);
+	
 	//$inspect("fetchedTextsResponse",fetchedTextsResponse);
 	//$inspect("groupsRefsArray", groupsRefsArray);
 	//$inspect('perGroups', perGroups);
@@ -1157,6 +1166,7 @@
 				/></svelte:element
 			>
 
+			{#if currentServer.hasLexicalInfo}
 			<svelte:element this={theTag} class={classes}
 				><ButtonSelect
 					bind:selected={viewStates.views.words.state}
@@ -1165,6 +1175,7 @@
 					tooltip="Show lexeme options"
 				/>
 			</svelte:element>
+			{/if}
 			<svelte:element this={theTag} class={classes}>
 				<ButtonSelect
 					buttonText="☰ Gospels"
@@ -1173,6 +1184,7 @@
 					tooltip="Show/Hide Gospels"
 				/>
 			</svelte:element>
+			{#if currentServer.hasPhraseComparison}
 			<svelte:element this={theTag} class={classes}
 				><ButtonSelect
 					buttonText="Similar"
@@ -1189,6 +1201,8 @@
 					tooltip="Show exactly matching phrases"
 				/></svelte:element
 			>
+			{/if}
+			{#if currentServer.hasLexicalInfo}
 			<svelte:element this={theTag} class={classes}
 				><ButtonSelect
 					bind:selected={myOptions.viewOptions.unique}
@@ -1231,6 +1245,7 @@
 					/>Stats{#if short}{:else}{/if}
 				</label>
 			</svelte:element>
+			{/if}
 
 			<svelte:element this={theTag} class={[classes, 'menu']}
 				><label
@@ -1247,7 +1262,7 @@
 				>
 			</svelte:element>
 
-			{#if currentServer.abbrev == SblGntServer.abbrev}
+			{#if currentServer.hasApparatus}
 				<svelte:element this={theTag} class={[classes, 'menu']}
 					><label
 						class="label tooltip"
@@ -1367,6 +1382,7 @@
 							bind:options={myOptions}
 							showResultsButtons={dataReady}
 							hideLookup={!dataReady || landingPage}
+							conditions={{hasLexicalInfo: currentServer.hasLexicalInfo,hasApparatus:currentServer.hasApparatus}}
 						/>
 					</div>
 

@@ -34,7 +34,8 @@ import MatchColorsKey from './MatchColorsKey.svelte';
         short=false,
         //shortBoundary='sm',
         titleClasses=['inline-block'],
-        useGospels=true
+        useGospels=true,
+        conditions={hasApparatus:true,hasLexicalInfo:true}
     }=$props();
 
     let showColorsModal=$state(false);
@@ -76,13 +77,13 @@ import MatchColorsKey from './MatchColorsKey.svelte';
         </li>
          {#if showResultsButtons && !options.viewOptions.menuOpen}   
               {#each hotkeys.getNavButtonKeys() as hk}
-              
+               {#if !hk.condition?.property || (Object.keys(conditions).includes(hk.condition.property) && conditions[hk.condition.property] == hk.condition.value)}
                 <li class={[showResultsButtons? 'sm:list-item': '', 'hidden' ]}>
                     <ButtonSelect buttonText={hk.key} buttonStyle={"btn btn-xs btn-circle btn-ghost p-0 ml-0.5 text-md " +( hk.navKeyClasses ? hk.navKeyClasses  : '')}  
                     bind:selected={options.viewOptions[hk.optionName]} tooltipbottom tooltip={hk.description ? hk.description : hk.name}
                     />
                 </li>
-        
+                {/if}
             {/each}
             {#if useGospels && (options.viewOptions.similarPhrases || options.viewOptions.exactPhrases)}
             

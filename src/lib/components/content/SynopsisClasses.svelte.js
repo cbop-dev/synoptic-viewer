@@ -270,7 +270,7 @@ export class SynopsisOptions3{
 
         return options;
     }
-
+    
     static SynopsisUrlParamsMap ={
 
         hideSolos: {type: 'boolean', category: 'view'},

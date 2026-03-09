@@ -22,16 +22,18 @@ export const ignoreWords = ignoreWordsImported;//[1156,1058,3635];
 export class Word {
     id = 0;
     word = '';
-    clean = ''
+    clean = '';
+    lang='greek';
     /**
      * 
      * @param {number} id 
      * @param {string} word 
      */
-    constructor(id = 0, word = '') {
+    constructor(id = 0, word = '',lang='greek') {
         this.id = id;
         this.word = word.trim();
-        this.clean = word ? GreekUtils.removeApparatusMarks(this.word).trim() : '';
+        this.lang=lang;
+        this.clean = this.word ? (lang=='greek'  ? GreekUtils.removeApparatusMarks(this.word).trim() : this.word) : '';
         //if (this.word!=this.clean){
         //mylog(`Word(${this.word}) cleaned of apparatus marks='${this.clean}'`)
         //}
@@ -273,7 +275,8 @@ export class ParallelColumn {
     /**
      * @type {TextAndRef[]}
      */
-    secondary = $state([])
+    secondary = $state([]);
+    lang='greek';
 
 
 
@@ -291,9 +294,10 @@ export class ParallelColumn {
      * @param {TextAndRef[]} [textRefs=[]]
      * @param {TextAndRef[]} [secondary=[]] 
      */
-    constructor(textRefs = [], secondary = []) {
+    constructor(textRefs = [], secondary = [],lang='greek') {
         this.textRefs = textRefs;
         this.secondary = secondary;
+        this.lang=lang;
 
     }
 }
@@ -512,6 +516,7 @@ export class LexPhraseAndLocations {
 export class ParallelColumnGroup {
 
     title = '';
+    lang='greek';
     /**
      * @type {ParallelColumn[]} parallelColumns
      */
@@ -526,9 +531,10 @@ export class ParallelColumnGroup {
      * 
      * @param {ParallelColumn[]} parTexts 
      */
-    constructor(parTexts = [],paletteMatchCols=parTexts.length) {
+    constructor(parTexts = [],paletteMatchCols=parTexts.length,lang="greek") {
         this.parallelColumns = parTexts;
         this.paletteMatchCols=paletteMatchCols;
+        this.lang=lang;
     }
 
     lexemes = $state(new Set());
@@ -731,7 +737,8 @@ export class ParallelColumnGroup {
                     if (loc.secondary) {
                         //mylog("got loc.secondary!",true);
                     }
-                    const exactPhrase = GreekUtils.onlyPlainGreek(this.getTextFromLocation(loc, true).toLocaleLowerCase()).trim();
+                    const rawPhrase = this.getTextFromLocation(loc, true).toLocaleLowerCase();
+                    const exactPhrase = this.lang == 'greek' ? GreekUtils.onlyPlainGreek(rawPhrase).trim() : rawPhrase.replace(/[^\p{L}\s]/gu, '').trim(); ;
 
                     if (exactPhrase) {
 
@@ -1041,14 +1048,15 @@ export class GospelPericopeGroup extends ParallelColumnGroup {
     title = $state('')
     id = $state(0);
     populated = $state(false);
-    constructor() {
-
+    constructor(lang='greek') {
+        
+        
         const matt = new ParallelColumn();
         const mark = new ParallelColumn();
         const luke = new ParallelColumn();
         const john = new ParallelColumn();
         const other = new ParallelColumn();
-        super([matt, mark, luke, john, other],4);
+        super([matt, mark, luke, john, other],4,lang);
         this.gospelCols = {
             matt: matt,
             mark: mark,

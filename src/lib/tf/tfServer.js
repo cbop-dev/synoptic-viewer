@@ -6,11 +6,13 @@ import TfUtils from '$lib/components/content/TfUtils';
 import { ParallelColumn, TextAndRef,VerseWords,Word } from '$lib/components/content/parallelTexts.svelte';
 import { N1904Server } from '$lib/n1904/tfN1904';
 import { SblGntServer } from '$lib/sblgnt/sblgnt';
+import { VulgateServer } from '$lib/tf/tfVulgate';
+import { WebcServer } from '$lib/tf/tfWebc';
 
-
-
-const n1904 = new N1904Server()
-const sbl= new SblGntServer()
+const n1904 = new N1904Server();
+const sbl = new SblGntServer();
+const vulgate = new VulgateServer();
+const web = new WebcServer();
 
 export function getServer(){
     if (useSbl){
@@ -19,9 +21,7 @@ export function getServer(){
     else
         return n1904;
 }
-//export {sbl as tfServer}
-export {sbl, n1904, sbl as tfServer}
 
-//export {n1904 as tfServer}
+export {sbl, n1904, vulgate, web, sbl as tfServer}
 
 

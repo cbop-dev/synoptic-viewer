@@ -4,7 +4,7 @@
 	import { SynopsisOptions3 } from './SynopsisClasses.svelte.js';
 	import { mylog } from '$lib/env/env';
     import Button from '$lib/components/ui/Button.svelte';
-    import {getServer, sbl as sblServer, n1904 as n1904Server} from '$lib/tf/tfServer.js'
+    import {getServer, sbl as sblServer, n1904 as n1904Server, vulgate as vulgateServer, web as webcServer} from '$lib/tf/tfServer.js'
     import { N1904Server } from '$lib/n1904/tfN1904';
     import { SblGntServer } from '$lib/sblgnt/sblgnt';
     import {gospelParallels} from '@cbop-dev/aland-gospel-synopsis';
@@ -37,6 +37,8 @@
         list: [
             {abbrev: 'sblgnt', name: "SBL Greek NT", server: sblServer},
             {abbrev: 'n1904', name: "Nestle's 1904 GNT", server: n1904Server},
+            {abbrev: 'vulgate', name: "Latin Vulgate", server: vulgateServer},
+            {abbrev: 'web', name: "World English Bible (Catholic)", server: webcServer},
         ],
         
         /**

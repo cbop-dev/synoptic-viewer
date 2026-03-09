@@ -63,10 +63,11 @@ export function getTextRefsArray(bookAbbrev, ref) {
  * @param {number[]} pericopeNums
  * @returns  {GospelPericopeGroup[]}
  */
-export function getGroupsArray(pericopeNums, includeSecondary = false) {
+export function getGroupsArray(pericopeNums, includeSecondary = false,lang='greek') {
     return pericopeNums.map((pericope) => {
         const row = gospelParallels.alandSynopsis.lookupPericope(pericope);
         const perGroup = new GospelPericopeGroup();
+        perGroup.lang=lang;
         perGroup.id = row.pericope;
         perGroup.title = row.pericope + ": " + row.title;
         if (row.Matt.ref) {
@@ -408,7 +409,7 @@ export function getGospelGroupRefsArrays(groupsArray, includeSecondary = false) 
 
 export class TfServer {
     static abbrev = 'Dummy Server!';
-
+    lang='greek';
     ready = false;
     name = "TF Empty DB";
     longname = '';
@@ -416,6 +417,12 @@ export class TfServer {
     abbrev = '';
     param = 'nt';
     showNotes = false;
+    hasApparatus=false;
+
+    // Capability Flags for Graceful Degradation in UI
+    hasLexicalInfo = true;
+    hasPhraseComparison = true;
+    hasMorphology = true;
 
     /**
      * @type {Object<string,{id:number,count:number, beta:string}>} 
