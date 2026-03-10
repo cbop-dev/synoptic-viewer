@@ -168,43 +168,7 @@ function isUnique(wordid, uniqueSet){
 //$inspect("numCols", numCols, "colData:", colData)
 //$inspect("ParText, customClass", cssCustomDict);
 
-$effect(()=>{
-    if(false && gospelFilter.filter>=0){
-        
-        
-        untrack(()=>{
-          //  parGroup.exactlyIdenticalPhrases={};
-            parGroup.lexIdenticalPhrasesLocations.length = 0;
-            //parGroup.resetAllPhrases();
 
-            //mylog(`ParGospSection.svelte.effect(),gospelfilter.hide:[${gospelFilter.hide.join(",")}]`,true)
-            const hiddenGospelIndices = gospelFilter.hide.map((h,i)=>h ? i: -1).filter((i)=> i>=0);
-            //mylog(`ParGospSection.svelte.effect(), hiddenGospelIndices:[${hiddenGospelIndices.join(',')}]`,true)
-            gospelFilter.hide.map((h,i)=>h? i: -1).filter((i)=> i>=0);
-            parGroup.colPhraseHideFilter.length = 0;
-            
-        
-        //untrack(()=>{
-            hiddenGospelIndices.forEach((i)=>{
-                parGroup.colPhraseHideFilter.push(i);
-            });
-            //untrack(()=>mylog(`recalculating exact matches with hidden as: [${parGroup.colPhraseHideFilter.join(',')}]`, true));
-        
-            parGroup.buildLexIdenticalPhrases(3,enableSecondary,true);
-
-        });
-        //parGroup.colPhraseHideFilter=parGroup.colPhraseHideFilter;
-        //parGroup.buildLexIdenticalPhrases(3,enableSecondary,true);
-        //=parGroup.exactlyIdenticalPhrases;
-        
-        parGroup.updatedCounter+=1;
-        //parGroup.
-        
-        
-        //filter((h)=>h))
-    }
-
-})
 
 
 </script>

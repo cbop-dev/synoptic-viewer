@@ -425,6 +425,10 @@ export class TfServer {
     hasMorphology = true;
 
     /**
+     * @type {number[]} ignoreWordIds
+     */
+    ignoreWordIds=[];
+    /**
      * @type {Object<string,{id:number,count:number, beta:string}>} 
      */
     lexemes = {};

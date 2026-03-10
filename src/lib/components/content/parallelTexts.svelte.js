@@ -9,12 +9,7 @@ import * as BibleUtils from '$lib/n1904/bibleRefUtils.js'
 import { findMaximalCommonSubarraysAcrossColumns2, findMaximalCommonTextPhrasesAcrossColumns } from "$lib/utils/column-subarrays2.js";
 import mathUtils from "$lib/utils/math-utils";
 import * as ArrayUtils from "$lib/utils/array-utils";
-import { ignoreWords as ignoreWordsImported, GospelFilter } from "./SynopsisClasses.svelte.js";
 
-
-export const ignoreWords = ignoreWordsImported;//[1156,1058,3635];
-
-//import { form } from "$app/server";
 
 /**
  * @class
@@ -654,9 +649,10 @@ export class ParallelColumnGroup {
      * @param {boolean} [includeSecondary=false] 
      * @param {boolean} [markidenticalPhrases=false] 
      * @param {number[]} [excludeCols=[]] indices of columns to ignore from comparison. NOT USED YET.
+     * @param {any[]} [ignoreWordIDs=[]] 
      * @description finds all the lexically identical phrases across columns! amazing!
      */
-    buildLexIdenticalPhrases(minLength = 2, includeSecondary = false, markidenticalPhrases = false, excludeCols = []) {
+    buildLexIdenticalPhrases(minLength = 2, includeSecondary = false, markidenticalPhrases = false, excludeCols = [],ignoreWordIDs=[]) {
         //mylog(`ParColGroup.buildLexidentical(excludeCols=[${excludeCols.join(',')}]`,true);
         //untrack(()=>this.resetAllPhrases());
         this.resetAllPhrases();
@@ -666,7 +662,7 @@ export class ParallelColumnGroup {
             [...col.textRefs.map((tr) => tr.getWordIdArray()), ...col.secondary.map((sec) => sec.getWordIdArray())]));
         // mylog(`buildLexIdPhrase.thecolumns:[${theColumns.map((c,i)=> c.length ? i : -1).filter((i)=>i>=0).join(',')}]`,true);
         //        mylog(`buildLexIdPhrase.thecolumns[0].length:${theColumns[0].length}`,true);
-        const commonSubarrays = findMaximalCommonSubarraysAcrossColumns2(theColumns, minLength, ignoreWords).toSorted((a, b) => a.subarray.length - b.subarray.length);
+        const commonSubarrays = findMaximalCommonSubarraysAcrossColumns2(theColumns, minLength, ignoreWordIDs).toSorted((a, b) => a.subarray.length - b.subarray.length);
         //console.log(`buildLexIdenticalPhrases commonSubarrays:`,commonSubarrays)
         this.lexIdenticalPhrasesLocations = [];
         this.lexIdenticalPhrasesMap.clear();

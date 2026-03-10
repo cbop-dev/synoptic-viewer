@@ -7,6 +7,7 @@ export class VulgateServer extends TfServer {
     dbURI = '/vul';
     numLexemes=13816;
     totalWords=596440;
+    
     constructor() {
         super();
         this.name = "Latin Vulgate";

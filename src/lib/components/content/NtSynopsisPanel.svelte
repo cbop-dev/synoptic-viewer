@@ -513,7 +513,7 @@
 		perGroups.forEach(async (g) => {
 			g.resetAllPhrases();
 			await tick();
-			g.buildLexIdenticalPhrases(3, !myOptions.viewOptions.hideSecondary, true, gospelsExcluded);
+			g.buildLexIdenticalPhrases(3, !myOptions.viewOptions.hideSecondary, true, gospelsExcluded,currentServer.ignoreWordIds);
 			await tick(); //g.updatedCounter+=1;
 		});
 
