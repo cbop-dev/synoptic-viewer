@@ -36,6 +36,26 @@ let defaultLevel = 0;
 //$: defaultLevel = debugLevel.value;
 //debugLevel.set(levels.DEBUG);
 
+export const myLog={
+    levels:levels,
+    debug:debug,
+    debugLevel:defaultLevel,
+    /**
+     * 
+     * @param {string} msg 
+     * @param {boolean} debugOn 
+     * @param {number} thelevel 
+     */
+    log(msg,debugOn=myLog.debug, thelevel=myLog.levels.INFO){
+       // console.log(`myLog.log(${msg},${debugOn},${thelevel})`);
+        if (debugOn && thelevel >= defaultLevel ) {
+        //   mylog("mylog level at " + defaultLevel)
+            console.log(msg);
+        }
+    }
+
+    
+}
 export function mylog(msg, debugOn=get(debug),thelevel=levels.INFO) {
     //mylog("mylog with debug val = " + get(debug))
     if (debugOn && thelevel >= defaultLevel ) {

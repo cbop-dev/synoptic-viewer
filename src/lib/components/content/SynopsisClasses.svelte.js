@@ -350,7 +350,7 @@ export class SynopsisOptions3{
                 //mylog(`Got url param: '${name}'='${valStr}'`);
             }
             else {
-                //mylog(`Couldn't add url param for name:'${name}', strVal: '${valStr}'`);
+              //  mylog(`Couldn't add url param for name:'${name}', strVal: '${valStr}'`, true);
             
 
             }

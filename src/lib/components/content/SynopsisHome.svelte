@@ -198,17 +198,7 @@
         
     </div>
     {/each}
-    <!--
 
-    <div class={panes[selectedPane]=='Gospels' ? 'block' : 'hidden'}>
-    <NtSynopsisPanel/>
-    </div>
-
-    <div class={panes[selectedPane]=='Custom' ? 'block' : 'hidden'}>
-    <CustomParallelViewer/>
-    </div>
-
-    -->
     </div>
     
 

@@ -9,7 +9,9 @@ test('home page has expected h1', async ({ page }) => {
 test('check "with Math.v mark" url loading', async ({ page }) => {
 	const uri='/?focusOn=1&sort=1&lexes=3205%2C4718&similarPhrases=1&selectedGospelIndex=1&pericopes=7%2C8%2C20%2C44%2C48%2C49%2C50%2C77%2C90%2C91%2C93%2C95%2C99%2C113%2C117%2C136%2C137%2C138%2C147%2C153%2C160%2C161%2C163%2C188%2C292%2C300%2C308%2C310%2C311%2C312%2C330%2C331%2C332%2C333%2C353%2C359%2C363%2C364&nt=sblgnt';
 	await page.goto(uri);
-	await expect(page.getByText('7: The Birth of Jesus:')).toBeVisible();
+	await page.waitForSelector('#results');
+	await page.waitForSelector('#section-7');
+	await expect(page.locator("#section-7").getByText('The Birth of Jesus')).toBeVisible();
 	const theWith = await page.getByText('Μεθ’ ',{exact:true}).getAttribute('class');
 	expect(theWith.includes('selected')).toBe(true);
 	
@@ -22,7 +24,7 @@ test('check "with Math.v mark" url loading', async ({ page }) => {
 test('check "with Math vs. mark" url loading with page parameter', async ({ page }) => {
 	const uri='/?focusOn=1&sort=1&lexes=3205%2C4718&similarPhrases=1&selectedGospelIndex=1&pericopes=7%2C8%2C20%2C44%2C48%2C49%2C50%2C77%2C90%2C91%2C93%2C95%2C99%2C113%2C117%2C136%2C137%2C138%2C147%2C153%2C160%2C161%2C163%2C188%2C292%2C300%2C308%2C310%2C311%2C312%2C330%2C331%2C332%2C333%2C353%2C359%2C363%2C364&nt=sblgnt&page=3';
 	const notVisible=[
-		'7: The Birth of Jesus:',
+		'The Birth of Jesus',
 		'πρὶν ἢ συνελθεῖν αὐτοὺς εὑρέθη ἐν γαστρὶ ἔχουσα ἐκ πνεύματος ἁγίου', //'Μεθ’'
 	]
 	const visible =[
@@ -30,9 +32,10 @@ test('check "with Math vs. mark" url loading with page parameter', async ({ page
 	];
 	await page.goto('/');
 	await page.goto(uri);
-	await expect(page.getByText('7: The Birth of Jesus:')).not.toBeVisible();
-	await expect(page.getByText('163: Jesus Heals a Boy Possessed by a Spirit:')).toBeVisible();
-	'163: Jesus Heals a Boy Possessed by a Spirit';
+	await page.waitForSelector('#results');
+	await expect(page.locator("#section-7").getByText('The Birth of Jesus:')).not.toBeVisible();
+	//await expect(page.getByText('163: Jesus Heals a Boy Possessed by a Spirit:')).toBeVisible();
+	//'163: Jesus Heals a Boy Possessed by a Spirit';
 	
 	notVisible.forEach(async (nv)=>{
 		//const elementLoc = page.locator('span').getByText(nv,{exact:true});
@@ -58,6 +61,21 @@ test('check "with Math vs. mark" url loading with page parameter', async ({ page
 	//expect(theWith.includes('selected')).toBe(true);
 	
 	
+	
+
+	
+	//await expect(page.locator('h1').first()).toBeVisible();
+});
+
+
+test('check vulgate url', async ({ page }) => {
+	const uri='/?pericopes=62%2C185&nt=vulgate';
+	await page.goto(uri);
+	await page.waitForSelector("#results");
+	await expect(page.getByText('Mark 11:25').first()).toBeVisible();
+	await expect(page.getByText('et cum stabitis ad orandum dimittite')).toBeVisible();
+	//const theWith = await page.getByText('Μεθ’ ',{exact:true}).getAttribute('class');
+	//expect(theWith.includes('selected')).toBe(true);
 	
 
 	

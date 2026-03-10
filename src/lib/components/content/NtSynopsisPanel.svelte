@@ -1,10 +1,9 @@
 <script>
 	import { onMount, untrack, tick } from 'svelte';
 	import Loading from '../ui/Loading.svelte';
-	//import Footer from './Footer.svelte';
+	
 	import { SynopsisOptions3, GospelFilter } from './SynopsisClasses.svelte.js';
-	//import Icon from '../ui/icons/Icon.svelte';
-	//import LinkIcon from '../ui/icons/link-icon.svelte';
+	
 	import LinkSvg from '../ui/icons/link.svg';
 	import { gospelParallels } from '@cbop-dev/aland-gospel-synopsis';
 	import parallelColumnsSvelte, {
@@ -20,7 +19,7 @@
 	import { LexemeInfo } from '../datastructures/lexeme';
 	//import {tfServer,lexemes} from '$lib/sblgnt/sblgnt.js'
 	import ParallelGospelSection from './ParallelGospelSection.svelte';
-	import { mylog } from '$lib/env/env';
+	import { mylog,myLog } from '$lib/env/env';
 	import * as bibleUtils from '$lib/n1904/bibleRefUtils.js';
 	import * as mathUtils from '$lib/utils/math-utils.js';
 	//import Button from '../ui/Button.svelte';
@@ -74,10 +73,11 @@
 		 */
 		tfServer
 	} = $props();
-	//mylog("NTSynPanel: about to copy options")
-	mylog(`typeof options: ${typeof options}`);
+	//myLog.log("NTSynPanel: about to copy options")
+	//myLog.log(`typeof options: ${typeof options}`);
 	let myOptions = $state(options);
-
+	console.log('yes')
+	myLog.log("starting to load: myOptions.viewOptions.page = " + myOptions.viewOptions.page);
 	let fetching = $state(false);
 	let expecting = $state(0);
 	let numReady = $state(0);
@@ -210,6 +210,7 @@
 
 	function setServer() {
 		currentServer = tfServer;
+		myOptions.request.nt=currentServer.abbrev
 	}
 	/**
 	 * @type {Object|null}
@@ -234,9 +235,9 @@
 	}
 
 	function buildPericopeRefs() {
-		// mylog("sorting pericopes. Initial state = " + alandPericopeNums.join(","));
+		// myLog.log("sorting pericopes. Initial state = " + alandPericopeNums.join(","));
 
-		//  mylog("sorting pericopes. Sorted state = " + alandPericopeNums.join(","));
+		//  myLog.log("sorting pericopes. Sorted state = " + alandPericopeNums.join(","));
 
 		perGroups = TfUtils.getGroupsArray(filteredPericopes, true,currentServer.lang);
 
@@ -258,9 +259,9 @@
 		if (callSortFilter) {
 			if (myOptions.viewOptions.sort && gospelParallels.gospels.isValid(selectedGospel)) {
 				//sort!
-				// mylog("before sorting Alands for "+ selectedGospel +": ["+alands.join(',')+"]",true);
+				// myLog.log("before sorting Alands for "+ selectedGospel +": ["+alands.join(',')+"]",true);
 				gospelParallels.sortAlandPericopes(alands, selectedGospel);
-				// mylog("after sorting Alands: ["+alands.join(',')+"]",true);
+				// myLog.log("after sorting Alands: ["+alands.join(',')+"]",true);
 			}
 			if (
 				myOptions.viewOptions.hideSolos ||
@@ -278,7 +279,7 @@
 				);
 			}
 		}
-		//mylog("after filtering alands: ["+ alands.join(",")+"]");
+		//myLog.log("after filtering alands: ["+ alands.join(",")+"]");
 		return alands;
 	});
 
@@ -329,7 +330,7 @@
 		ArrayUtils.splitArray(filteredPerGroupsIndices, groupsPerPage)
 	);
 
-	//let myOptions.viewOptions.page=$derived(myOptions.viewOptions.page >= paginatedFilteredPerGroups.length ? 0 : myOptions.viewOptions.page);
+	
 
 	let lemmasByID = $derived.by(() => {
 		let dict = {};
@@ -356,7 +357,7 @@
 		landingPage = false;
 		resetViewOptions();
 		alandPericopeNums = [...selectedSection];
-		//    mylog(`selectSection, alandPericopes.length=${alandPericopeNums.length}; alandPericopeNums:[${alandPericopeNums.join(',')}]`,true);
+		//    myLog.log(`selectSection, alandPericopes.length=${alandPericopeNums.length}; alandPericopeNums:[${alandPericopeNums.join(',')}]`,true);
 		await buildAndFetchPericopes();
 		await populateAll();
 		//checkAndPopulatePage();
@@ -374,7 +375,7 @@
 		 */
 		const ret = {};
 		if (selectedLexes && myOptions.viewOptions.greekStrings.length) {
-			//mylog("building customGreekClasses...",true)
+			//myLog.log("building customGreekClasses...",true)
 			for (const [relIndex, gk] of myOptions.viewOptions.greekStrings.entries()) {
 				const color = getColorOfGreek(gk);
 				if (color) {
@@ -399,7 +400,7 @@
 		 */
 		const ret = {};
 		if (dataReady && fetchedTextsResponse.lexemes) {
-			//mylog("building lexClasses...",true)
+			//myLog.log("building lexClasses...",true)
 			for (const [index, id] of Object.values(fetchedTextsResponse.lexemes)
 				.map((o) => o.id)
 				.entries()) {
@@ -408,7 +409,7 @@
 					// classes += " " + getColorOfLex(id,true);
 					classes += ` selected-lex selected-lex-${index}`;
 				}
-				//mylog("setting lex " + id + " to: " + classes,true);
+				//myLog.log("setting lex " + id + " to: " + classes,true);
 				ret[id] = classes;
 			}
 		}
@@ -447,7 +448,7 @@
 		dataReady = false;
 		landingPage = false;
 		if (reset) {
-			// mylog("disabling sortFilter and focus...");
+			// myLog.log("disabling sortFilter and focus...");
 			resetViewOptions();
 			emptySelectedLexemes();
 			emptySelectedCustomGreek();
@@ -481,12 +482,12 @@
 			gospelsExcluded
 		);
 		await tick();
-		//    mylog(`populatedAll! are all populated?:${perGroups.map((g)=>g.populated).reduce((a,b)=>a&&b, true)}`, true)
+		//    myLog.log(`populatedAll! are all populated?:${perGroups.map((g)=>g.populated).reduce((a,b)=>a&&b, true)}`, true)
 		dataReady = true;
 	}
 
 	function checkAndPopulatePage() {
-		//    mylog(`checkAndPopulatePage(page=${myOptions.viewOptions.page})...`,true)
+		//    myLog.log(`checkAndPopulatePage(page=${myOptions.viewOptions.page})...`,true)
 		dataReady = false;
 		//TfUtils.populateGroupsText(perGroups,fetchedTextsResponse,perGroupsIndices,true,true);
 		//await tick();
@@ -499,9 +500,9 @@
 		) {
 			//TfUtils.populateGroupsText(currentPage,fetchedTextsResponse,currentIndices,true,true);
 			//  await tick();
-			// mylog(`checkAndPopulatePage(): populatedGroupsText(${paginatedFilteredPerGroups[myOptions.viewOptions.page]})`,true);
+			// myLog.log(`checkAndPopulatePage(): populatedGroupsText(${paginatedFilteredPerGroups[myOptions.viewOptions.page]})`,true);
 		} else {
-			// mylog(`checkAndPopulatePage(). Current page #${myOptions.viewOptions.page}.length:${currentPage.length}; !currentPage.reduce((a,b)=>a&&b.populated,true):${!currentPage.reduce((a,b)=>a&&b.populated,true)}`,true);
+			// myLog.log(`checkAndPopulatePage(). Current page #${myOptions.viewOptions.page}.length:${currentPage.length}; !currentPage.reduce((a,b)=>a&&b.populated,true):${!currentPage.reduce((a,b)=>a&&b.populated,true)}`,true);
 		}
 		dataReady = true;
 	}
@@ -509,7 +510,7 @@
 	async function findMatchingPhrases() {
 		dataReady = false;
 		await tick();
-		//    mylog(`findMatchingPhrases called! excluded=[${gospelsExcluded.join(",")}]`,true);
+		//    myLog.log(`findMatchingPhrases called! excluded=[${gospelsExcluded.join(",")}]`,true);
 		perGroups.forEach(async (g) => {
 			g.resetAllPhrases();
 			await tick();
@@ -522,14 +523,14 @@
 	}
 
 	function buildLexArrays() {
-		//mylog("building LexArrays...", true)
+		//myLog.log("building LexArrays...", true)
 		lemmasByID = {};
 		if (fetchedTextsResponse) {
 			for (const [lemma, lex] of Object.entries(fetchedTextsResponse.lexemes)) {
 				lemmasByID[lex.id] = lemma;
 			}
 		} else {
-			//mylog("Cannot build LexArrays!")
+			//myLog.log("Cannot build LexArrays!")
 		}
 	}
 
@@ -565,6 +566,7 @@
 
 	async function urlRequestShowNtParallels() {
 		//resetViewOptions();
+		const page = myOptions.viewOptions.page;
 		viewStates.reset(false, ['view', 'lookup', 'words']);
 		//viewStates.views.highlightOnClick.state =false;
 		let pericopes = new Set([]);
@@ -578,22 +580,24 @@
 				const secs = mathUtils.createNumArrayFromStringListRange(
 					gospelParallels.alandSynopsis.lookupSection(s).pericopes
 				);
-				mylog('urlRequestShowNtParallels: got secs: ' + secs?.join(','));
+				myLog.log('urlRequestShowNtParallels: got secs: ' + secs?.join(','));
 				pericopes = pericopes.union(new Set(secs));
 			});
 		}
 		if (pericopes.size) {
 			alandPericopeNums = [...pericopes];
 			await tick();
-			//        mylog("URLrequestShowNTParallels: about to call build/fetch...",true)
+			//        myLog.log("URLrequestShowNTParallels: about to call build/fetch...",true)
 			await buildAndFetchPericopes(false);
 			//await checkAndPopulatePage();
 			await populateAll();
 			await tick();
+			myOptions.viewOptions.page=page;
+			myLog.log("setting and jumping to page: "+page);
 			await gotoPageSection(myOptions.viewOptions.page);
-			//        mylog("URLrequestShowNTParallels: ...done!",true)
+			//        myLog.log("URLrequestShowNTParallels: ...done!",true)
 		} else {
-			//        mylog("URLrequestShowNTParallels: Didn't build/fetch!",true)
+			//        myLog.log("URLrequestShowNTParallels: Didn't build/fetch!",true)
 		}
 	}
 
@@ -636,7 +640,7 @@
     let highlight=highlightLexeme(id)
     return classString + (highlight ? " " + highlight : '');
     */
-		//mylog("getting Lex class for " + id, true);
+		//myLog.log("getting Lex class for " + id, true);
 		return lexClasses[id];
 	}
 
@@ -668,11 +672,11 @@
 					lexInfo.stats = await currentServer.fetchLexRefsCounts(id, true);
 					fetchedLexInfo[id] = lexInfo;
 
-					//mylog(`fetched lemma info for '${lexInfo.lemma}'`)
+					//myLog.log(`fetched lemma info for '${lexInfo.lemma}'`)
 
 					//fetchedLexInfo[chosenLexIdToShow]=lexInfo;
 				} else {
-					//mylog(`Tried to get lex ${chosenLexIdToShow} but failed.`)
+					//myLog.log(`Tried to get lex ${chosenLexIdToShow} but failed.`)
 				}
 				lexInfoFetching = false;
 			}
@@ -685,12 +689,12 @@
 	function wordClick(id, bookName = '') {
 		if (!currentServer.hasLexicalInfo) return;
 		const bookid = bookName ? currentServer.getBookID(bookName) : 0;
-		//mylog(`wordclick(${id},${bookName}[id:${bookid}])`)
+		//myLog.log(`wordclick(${id},${bookName}[id:${bookid}])`)
 		if (myOptions.viewOptions.highlightOnClick) {
 			toggleLex(id);
 		}
 		if (myOptions.viewOptions.lexInfoClick) {
-			//mylog(`about to call showlexinfo(${id})`)
+			//myLog.log(`about to call showlexinfo(${id})`)
 			showLexInfo(id, bookid);
 		}
 	}
@@ -710,7 +714,7 @@
 	}
 
 	function toggleLex(id) {
-		//    mylog("toggleLex("+id+")");
+		//    myLog.log("toggleLex("+id+")");
 		if (selectedLexes.includes(id)) {
 			selectedLexes.splice(selectedLexes.indexOf(id), 1);
 		} else {
@@ -770,7 +774,7 @@
 
 	//todo: refactor to make this work without complicated async effect() logic! problem: "focus" and "sort" options do not work on paginated results.
 	$effect(() => {
-		if (myOptions.viewOptions.page >= paginatedFilteredPerGroups.length) {
+		if (requestProcessed && myOptions.viewOptions.page >= paginatedFilteredPerGroups.length) {
 			dataReady = false;
 			//untrack(async ()=>{
 			myOptions.viewOptions.page = 0;
@@ -815,14 +819,14 @@
 	 * @param {number} index
 	 */
 	function toggleGospelHide(index) {
-		mylog(`toggleGospelHide(${index})`, true);
+		myLog.log(`toggleGospelHide(${index})`);
 		const gFilter = GospelFilter.fromFilterVal(myOptions.viewOptions.gospelFilter);
 		gFilter.toggleGospel(index);
 		myOptions.viewOptions.gospelFilter = gFilter.filter;
 	}
-	//mylog(`enabled hotkeys: [${[...hotkeys.hotkeys.keys()].join(',')}]`);
+	//myLog.log(`enabled hotkeys: [${[...hotkeys.hotkeys.keys()].join(',')}]`);
 	if (!hotkeys.getKeyObj('>')) {
-		//mylog("Could not find hotkey '>'!", true);
+		//myLog.log("Could not find hotkey '>'!", true);
 	}
 	const hotkeys2 = [
 		{ key: '>', name: 'Next Section', function: jumpToNextSection },
@@ -966,7 +970,7 @@
 
 	function makeURL() {
 		myOptions.request.pericopes = alandPericopeNums;
-		//    mylog("MakeURL: about to call generateURL()!")
+		//    myLog.log("MakeURL: about to call generateURL()!")
 		const baseurl = window.location.protocol + '//' + window.location.host + '/';
 		return baseurl + myOptions.generateURI();
 	}
@@ -1001,8 +1005,8 @@
 	}
 
 	function onkeydown(event) {
-		//mylog(`NTSyPanel.onkeydown! event: ${event}`);
-		mylog(event);
+		//myLog.log(`NTSyPanel.onkeydown! event: ${event}`);
+		myLog.log(event);
 		if (live && !textAreaFocused) {
 			const matchedView = viewStates.getViewNameFromKey(event.key);
 			const modalVisibles = viewStates.getVisible().filter((name) => viewStates.views[name].modal);
@@ -1014,10 +1018,10 @@
 				}
 			} else if (!modalVisibles.length) {
 				hotkeys.keypress(event.key);
-				//mylog(`hotkey toggled for '${event.key}'`,true);
+				//myLog.log(`hotkey toggled for '${event.key}'`,true);
 			}
 		} else {
-			//        mylog("onkey: text area focused. Doing nothing!")
+			//        myLog.log("onkey: text area focused. Doing nothing!")
 		}
 	}
 
@@ -1061,19 +1065,22 @@
 	//$inspect(customGreekClasses);
 
 	function loadRequestOptions() {
-		//mylog("loadRequestOptions...")
+		//myLog.log("loadRequestOptions...")
+		
 	}
+
 	let mounted = $state(false);
 	onMount(() => {
+		myLog.log("onMount: page = " + myOptions.viewOptions.page);
 		if (myOptions.request.fromURL) {
-			//        mylog("NTSynPanel got url params. Let's make a request!")
+			//        myLog.log("NTSynPanel got url params. Let's make a request!")
 			landingPage = false;
 			viewStates.views.lookup.state = false;
 			loadRequestOptions();
 			viewStates.views.lookup.state = false;
 			urlRequestShowNtParallels().then(() => {
 				requestProcessed = true;
-			});
+			}).then(()=>{if (myOptions.viewOptions.page) gotoPageSection(myOptions.viewOptions.page)});
 		} else {
 			viewStates.reset();
 		}
@@ -1081,6 +1088,7 @@
 		mounted = true;
 	});
 	let showGospelFilterModal = $state(false);
+	$inspect('page:',myOptions.viewOptions.page);
 	//$inspect('groupsRefsArray:',groupsRefsArray);
 	
 	//$inspect("fetchedTextsResponse",fetchedTextsResponse);
