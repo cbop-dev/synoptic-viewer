@@ -604,9 +604,9 @@ export class TfServer {
             }
 
             url += bookname + "&chapter=" + chap + "&verse=" + v;
-            mylog(`trying to fetch url: ${url}`, true);
+//            mylog(`trying to fetch url: ${url}`, true);
             const resp = await this.jsonFetch(url);
-            mylog(`fetchVerseTextByRef(${book},${chap},${v}) returned: ${resp && resp.text ? resp.text.trim() : ''}`, true);
+//            mylog(`fetchVerseTextByRef(${book},${chap},${v}) returned: ${resp && resp.text ? resp.text.trim() : ''}`, true);
             return resp && resp.text ? resp.text.trim() : '';
         }
         return ''

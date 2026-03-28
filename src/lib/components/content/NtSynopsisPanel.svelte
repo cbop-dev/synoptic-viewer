@@ -1,9 +1,9 @@
 <script>
 	import { onMount, untrack, tick } from 'svelte';
 	import Loading from '../ui/Loading.svelte';
-	
+	import ScribesImage from '$lib/images/scribes5.1.jpg';
 	import { SynopsisOptions3, GospelFilter } from './SynopsisClasses.svelte.js';
-	
+	import SiteInfo from './SiteInfo.svelte';
 	import LinkSvg from '../ui/icons/link.svg';
 	import { gospelParallels } from '@cbop-dev/aland-gospel-synopsis';
 	import parallelColumnsSvelte, {
@@ -76,7 +76,7 @@
 	//myLog.log("NTSynPanel: about to copy options")
 	//myLog.log(`typeof options: ${typeof options}`);
 	let myOptions = $state(options);
-	console.log('yes')
+	myLog.debug=false;
 	myLog.log("starting to load: myOptions.viewOptions.page = " + myOptions.viewOptions.page);
 	let fetching = $state(false);
 	let expecting = $state(0);
@@ -292,13 +292,11 @@
 			pageNum < paginatedFilteredPerGroups.length
 		) {
 			//already showing the right page data. just jump to the anchor
-			//dataReady=false;
+			
 			myOptions.viewOptions.page = pageNum;
 			paginatedFilteredPerGroups;
 			await tick();
-			//checkAndPopulatePage();
-			//await tick();
-			// dataReady=true;
+			
 		} else {
 			//pageNum=0;
 		}
@@ -457,16 +455,12 @@
 		buildPericopeRefs();
 		await tick();
 		fetching = true;
-		//fetchTexts();
+		
 
 		fetchedTextsResponse = await currentServer.fetchPostTextsBatch(groupsRefsArray);
-		//buildLexArrays();
+		
 		fetching = false;
-		//await tick();
-		//await checkAndPopulatePage();
-		//await tick();
-		//gotoPageSection(myOptions.viewOptions.page)
-		//await tick();
+//		mylog("buildAndFetch setting dataready!",true);
 		dataReady = true;
 	}
 	//let lemmasByID={}
@@ -483,6 +477,7 @@
 		);
 		await tick();
 		//    myLog.log(`populatedAll! are all populated?:${perGroups.map((g)=>g.populated).reduce((a,b)=>a&&b, true)}`, true)
+//		mylog("popAll() setting dataready!",true)
 		dataReady = true;
 	}
 
@@ -519,6 +514,7 @@
 		});
 
 		//perGroups=perGroups;
+//		mylog("finMatchingPhrases setting dataready!",true)
 		dataReady = true;
 	}
 
@@ -780,12 +776,10 @@
 			myOptions.viewOptions.page = 0;
 			//checkAndPopulatePage();
 			gotoPageSection(myOptions.viewOptions.page).then(() => {
+//				mylog("effect() setting dataready!",true)
 				dataReady = true;
 			});
-			//await ;
-			//dataReady=true;
-			//});
-			//tick().then(()=>{dataReady=true});
+			
 		}
 	});
 	const hotkeys = new SynopsisHotkeys(myOptions);
@@ -1041,7 +1035,8 @@
 
 	$effect(() => {
 		myOptions.viewOptions.gospelFilter;
-		if (myOptions.viewOptions.gospelFilter >= 0) {
+		if (myOptions.viewOptions.gospelFilter >= 0 && untrack(()=>dataReady)) {
+			
 			findMatchingPhrases();
 		}
 	});
@@ -1112,6 +1107,7 @@
 	//$inspect(`myOptions.viewOptions.page:${myOptions.viewOptions.page}`)
 	//$inspect("NTSynPanel, myOptions.viewOptions.gospelFilter:", myOptions.viewOptions.gospelFilter);
 	//$inspect("NTSymPan: gospelsExcluded:",gospelsExcluded);
+	$inspect('dataReady',dataReady);
 </script>
 
 {#snippet appTitle(headingTag = 'h1', classes = ['text-center', 'inline'])}
@@ -1138,9 +1134,8 @@
 		<hr />
 	{/if}
 
-	Based on Kurt Aland's <i>Synopsis Quattuor Evangeliorum</i>, using
-	<a href="https://www.sblgnt.com">The SBL Greek New Testament (2010)</a>
-	or, optionally, Nestle's 1904 edition of the <i>Greek New Testament.</i><br />
+	<SiteInfo/>
+	<br />
 	Enter NT reference to view parallel texts and click "Look up!", or select a section and press "Go!"
 {/snippet}
 {#snippet resultsButtons(short = false, theTag = 'li', classes = ['ml-0 mr-0 pl-0 pr-0'])}
@@ -1429,6 +1424,16 @@
 <!--end fixed section-->
 
 <div id="main-content-div" class="self-center relative text-center bg-white mt-45 z-20">
+	<!--<div style="background-image: url('{ScribesImage}');" class="w-full h-full bg-black" ></div>-->
+	
+	<!--<div style="background-image: url('{ScribesImage}');" class="w-full h-full bg-black"></div>-->
+			<!--<Loading title="Results loading..." 
+				loadingBackground={ScribesImage}
+				message={['Please wait while our digital experts gather the texts...']}
+				minHeight={'400px'}
+				
+				width={'100%'}
+				 />-->
 	{#if !landingPage}
 		{#if myOptions.request.fromURL && !requestProcessed}
 			<h3><i>Processing Request...</i></h3>
@@ -1437,8 +1442,16 @@
 	{/if}
 </div>
 <div class="text-center mt-10">
+
+			<!--<Loading title="Results loading..." 
+				loadingBackground={ScribesImage}
+				minHeight='800px'
+				height='1000px'
+				width='200px'
+				message={[]} />-->
 	{#if alandPericopeNums.length}
-		<div id="results">
+		<div id="results" class="min-h-screen" style="min-height:400px;max-height:90vh;">
+	
 			{#if dataReady && fetchedTextsResponse}
 				<h1 class="text-center">
 					Results from {currentServer.name}:
@@ -1528,11 +1541,18 @@
 					{/if}
 				{/key}
 			{:else}
-				<Loading title="Results loading..." message={[]} />
+			<!--<div style="background-image: url('{ScribesImage}');" class="w-full h-full bg-black"></div>-->
+				<Loading title="Results loading..." 
+				loadingBackground={ScribesImage}
+				message={['Please wait while our digital scribes gather the texts...']}
+				minHeight={'400px'}
+				
+				width={'100%'}
+				 />
 			{/if}
 		</div>
 	{:else}
-		<div class="text-center">
+		<div class="text-center bg-white" >
 			<i class="m-auto"
 				>Results will show up here.
 				{#if !viewStates.views.lookup.state && !landingPage}<a
@@ -1910,6 +1930,9 @@
 </Modal2>
 
 <style>
+	#results {
+		@apply bg-white;
+	}
 	@reference "tailwindcss";
 
 	hr {

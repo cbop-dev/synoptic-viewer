@@ -2,6 +2,7 @@
 	import NtSynopsisPanel from './NtSynopsisPanel.svelte';
     import CustomParallelViewer from './CustomParallelViewer.svelte';
 	import { SynopsisOptions3 } from './SynopsisClasses.svelte.js';
+    import CodexAmatt1Wide from '$lib/images/codex-B-matt1-2-trans.png';
 	import { mylog } from '$lib/env/env';
     import Button from '$lib/components/ui/Button.svelte';
     import {getServer, sbl as sblServer, n1904 as n1904Server, vulgate as vulgateServer, web as webcServer} from '$lib/tf/tfServer.js'
@@ -16,6 +17,7 @@
     import Footer from './Footer.svelte';
     import ArrowTop from '../ui/icons/arrow-top-icon.svelte';
     import ArrowDown from '../ui/icons/arrow-down.svelte';
+    import SiteInfo from './SiteInfo.svelte';
     import ModalButton from '../ui/ModalButton.svelte';
     let showInfoModal = $state(false);
     let y = $state();
@@ -123,9 +125,26 @@
         height: auto;
         
     }
+    #main-content{
+        position:  relative;
+    }
+    #main-wrap{
+        overflow:hidden;
+        position:relative;
+
+
+    }
+    #main-bg {
+        opacity: 0.1;
+        position: absolute;
+        left: 0; 
+        right: 0;
+        width: 100%;
+        height: auto;
+    }
 </style>
 {#snippet appTitle(headingTag="h1")}
-    <svelte:element this={headingTag}>NT Gospel Synopsis Viewer</svelte:element> 
+    <svelte:element this={headingTag}><a href="/">NT Gospel Synopsis Viewer</a></svelte:element> 
 {/snippet}
 {#snippet appSummary(heading=true,headingTag="h1")}
 
@@ -134,11 +153,14 @@
         <hr/>
     {/if}
     
-    Based on Kurt Aland's <i>Synopsis Quattuor Evangeliorum</i>, using <a href="https://www.sblgnt.com">The SBL Greek New Testament (2010)</a> or, optionally, Nestle's 1904 edition of the <i>Greek New Testament.</i>
+    <SiteInfo/>
 {/snippet}
 <svelte:window bind:scrollY={y} bind:innerHeight={windowHeight} onkeydown={onkeydown}/>
+<div id="main-wrap">
+<img id="main-bg" src='{CodexAmatt1Wide}' alt='Codex Vaticanus: Matt 1'/>
+<div id="main-content" class="relative" bind:clientHeight={contentHeight} >
 
-<div class="relative" bind:clientHeight={contentHeight}>
+
     <div class="block top-1 z-100 bg-white/80  w-full text-right fixed" bind:clientHeight={headerHeight}>
         
         
@@ -202,6 +224,7 @@
     </div>
     
 
+</div>
 </div>
 <div class="fixed bottom-0 right-0 z-100 mr-1 mb-1"><!--up//downarros-->
 

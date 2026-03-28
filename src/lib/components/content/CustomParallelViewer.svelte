@@ -3,6 +3,7 @@
 	import Loading from '../ui/Loading.svelte';
 	import LemmaInfo from './lemma/LemmaInfo.svelte';
 	import LinkSvg from '../ui/icons/link.svg';
+	import SiteInfo from './SiteInfo.svelte';
 	import { SynopsisOptions3 } from './SynopsisClasses.svelte.js';
 	import {
 		ParallelColumn,
@@ -799,9 +800,7 @@
 		<hr />
 	{/if}
 
-	Based on Kurt Aland's <i>Synopsis Quattuor Evangeliorum</i>, using
-	<a href="https://www.sblgnt.com">The SBL Greek New Testament (2010)</a>
-	or, optionally, Nestle's 1904 edition of the <i>Greek New Testament.</i><br />
+	<SiteInfo/><br />
 	Enter some NT references in the columns, or select "batch" mode to trying something more fancy.
 {/snippet}
 {#snippet resultsNav(short = false, tag = 'li', classes = [])}

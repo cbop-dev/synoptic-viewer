@@ -51,7 +51,7 @@ import MatchColorsKey from './MatchColorsKey.svelte';
         {/if}
     <svelte:element this={headingTag} class={[titleClasses]}>
     
-    {#if short && shorttitle}{shorttitle}
+    <a data-sveltekit-reload href="/">{#if short && shorttitle}{shorttitle}
     {:else}
         {@const extraTitleclasses=['text-shadow-sm/20']}
         <span class={["sm:hidden inline text-nowrap",extraTitleclasses]}>{ shorttitle ? shorttitle: mediumtitle ? mediumtitle : title}</span>
@@ -59,7 +59,7 @@ import MatchColorsKey from './MatchColorsKey.svelte';
         <span class={["md:inline hidden ",extraTitleclasses]}>{title}</span>
     
     
-    {/if}</svelte:element> 
+    {/if}</a></svelte:element> 
 
         <ul class="bg-white menu menu-horizontal w-auto">
             
@@ -67,6 +67,7 @@ import MatchColorsKey from './MatchColorsKey.svelte';
         <li><ButtonSelect buttonText="?" buttonStyle="btn btn-xs btn-circle btn-ghost p-0 ml-0.5" 
             bind:selected={viewStates.views.help.state} tooltipbottom tooltip="Show help."/>
             </li>
+        {#if showResultsButtons}
         <li >
             <ButtonSelect bind:selected={viewStates.views.lookup.state} buttonText="" tooltipbottom
             buttonStyle="btn btn-xs btn-circle btn-ghost p-0 ml-0.5" >
@@ -75,6 +76,7 @@ import MatchColorsKey from './MatchColorsKey.svelte';
             </svg>
             </ButtonSelect>
         </li>
+        {/if}
          {#if showResultsButtons && !options.viewOptions.menuOpen}   
               {#each hotkeys.getNavButtonKeys() as hk}
                {#if !hk.condition?.property || (Object.keys(conditions).includes(hk.condition.property) && conditions[hk.condition.property] == hk.condition.value)}
