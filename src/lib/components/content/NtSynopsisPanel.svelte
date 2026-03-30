@@ -1450,7 +1450,7 @@
 				width='200px'
 				message={[]} />-->
 	{#if alandPericopeNums.length}
-		<div id="results" class="min-h-screen" style="min-height:400px;max-height:90vh;">
+		<div id="results" class="min-h-screen" style="min-height:400px;">
 	
 			{#if dataReady && fetchedTextsResponse}
 				<h1 class="text-center">
