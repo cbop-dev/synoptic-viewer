@@ -265,7 +265,7 @@ div.bible-block{
 
 .bible-block::before{
     content:"";
-    --grainTexture: url('src/lib/images/black-linen.png');
+    --grainTexture: url('$lib/images/black-linen.png');
     position: absolute;
     z-index:-1;
     inset: 0;
