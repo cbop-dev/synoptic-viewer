@@ -136,7 +136,7 @@
 				ret = ColorUtils.bgFontString(colorObj.bg, colorObj.font, colorObj.border);
 			}
 			if(!ret){
-				mylog(`BibleBlock.getWorStyle(${word.word}) got no color! Color obj.bg=${colorObj?.bg}`,true);
+				//mylog(`BibleBlock.getWorStyle(${word.word}) got no color! Color obj.bg=${colorObj?.bg}`,true);
 			}
 
 		}

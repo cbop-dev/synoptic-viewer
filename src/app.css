@@ -354,3 +354,6 @@ div.bible-block{
 .bg-content-clip{
     background-clip: content-box;
 }
+body{
+    @apply absolute left-0 top-0 md:static md:left-auto md:top-auto;
+}

@@ -1302,10 +1302,10 @@
 			<Loading title="Please wait while the page is loading..." />
 		</div>
 	{:else}
-		<div class="text-center overflow-auto scroll-auto">
-			Choose One:
+		<div class="text-center">
+			<span class="underline font-bold italic">Choose One:</span>
 			<h2 class="cursor-default">Enter References</h2>
-			<div class="inline-block mb-1">
+			<div class="inline mb-2">
 				<textarea
 					id="refarea"
 					class="inline-block align-middle"
@@ -1313,15 +1313,16 @@
 					bind:value={refAreaText}
 					onfocus={textAreaFocus}
 					onblur={textAreaBlur}
-				></textarea>
-				<button onclick={lookupShowNtParallels} class="btn btn-primary inline-block"
+				></textarea> 
+				<button onclick={lookupShowNtParallels} class="btn btn-primary inline"
 					>Look up!</button
 				>
 			</div>
 
-			<br /> OR:
+			<p class="m-3 italic"> OR:</p>
 			<h2 class="cursor-default">Select a section:</h2>
-			<select bind:value={selectedSection} class="max-w-1/2!">
+			<select id="select-section" bind:value={selectedSection}>
+			
 				{#each gospelParallels.alandSynopsis.sections as section}
 					<option value={mathUtils.createNumArrayFromStringListRange(section.pericopes)}
 						>{mathUtils.romanize(section.section)}: {section.title}</option
@@ -1330,7 +1331,7 @@
 				{/each}
 				{#each gospelParallels.alandSynopsis.pericopes as per}
 					{#if per.pericope == 1}
-						<option value={[per.pericope]} selected="selected">{per.pericope}: {per.title}</option>
+						<option value={[per.pericope]} selected={true}>{per.pericope}: {per.title}</option>
 					{:else}
 						<option value={[per.pericope]}>{per.pericope}: {per.title}</option>
 					{/if}
@@ -1407,7 +1408,7 @@
 </div>
 
 {#if landingPage}
-	<div id="landing-lookup" class="block m-auto top-0 overflow-auto text-center">
+	<div id="landing-lookup" class="block m-auto top-0  text-center">
 		<div id="landing" class="center-block">
 			<div id="landing-panel text-center">
 				<div class="text-center m-auto">
@@ -1417,7 +1418,7 @@
 			</div>
 		</div>
 
-		<div id="landinglookup" class={['overflow-auto', 'scroll-auto','center-block', ]}>
+		<div id="landinglookup" class={['center-block', ]}>
 			{@render lookup()}
 		</div>
 	</div>
@@ -1983,12 +1984,12 @@
 	}
 
 	select {
-		@apply max-w-5/6  wrap-normal overflow-clip;
+		/*@apply max-w-5/6 ; /*wrap-normal overflow-clip;*/
 		/* overflow: hidden  !important;*/
 	}
 
 	option {
-		@apply max-w-11/12 wrap-normal overflow-clip;
+		@apply max-w-11/12; /* wrap-normal overflow-clip;*/
 		/*overflow: hidden  !important;*/
 	}
 
@@ -2009,7 +2010,7 @@
 		text-align: center;
 	}
 	.center-block{
-		@apply  m-auto block break-all self-center rounded-xl shadow-2xl;
+		@apply  m-auto block self-center rounded-xl shadow-2xl;
 		background-color: var(--bg-content);
 		color: var(--text-color);
 
@@ -2060,5 +2061,9 @@
 .section-heading{
 	
 	border-radius: 5rem 5rem 0 0;
+}
+
+#select-section{
+	max-width: 200px;
 }
 </style>

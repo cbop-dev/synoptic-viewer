@@ -975,7 +975,7 @@
 	class="self-center text-center fixed z-40 left-0 top-8 m-auto w-full"
 >
 	<div class="navbar  ">
-		<div class="text-left sm:navbar-center sm:self-center sm:w-full sm:m-auto">
+		<div class="text-left sm:navbar-center sm:self-center w-full m-auto">
 			<div class="text-left sm:text-center sm:self-center w-full border-0">
 				<div id="title-panel">
 					<TitleNavbar
