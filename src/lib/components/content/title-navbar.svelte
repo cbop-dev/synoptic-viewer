@@ -61,7 +61,7 @@ import MatchColorsKey from './MatchColorsKey.svelte';
     
     {/if}</a></svelte:element> 
 
-        <ul class="bg-white menu menu-horizontal w-auto">
+        <ul class="menu menu-horizontal w-auto">
             
         
         <li><ButtonSelect buttonText="?" buttonStyle="btn btn-xs btn-circle btn-ghost p-0 ml-0.5" 

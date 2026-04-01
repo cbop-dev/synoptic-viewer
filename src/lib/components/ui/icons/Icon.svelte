@@ -3,7 +3,8 @@
         height=24,
         width=24,
         scale=1.0,
-        svg
+        svg,
+        style=''
     } = $props();
 
     let theHeight=$derived(height*scale);
@@ -16,4 +17,4 @@
 
     }
 </style>
-<img width={theWidth} height={theHeight} src={svg}/>
+<img width={theWidth} height={theHeight} src={svg} {style} alt="icon"/>

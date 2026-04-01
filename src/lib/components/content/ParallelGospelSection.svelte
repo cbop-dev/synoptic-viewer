@@ -174,6 +174,7 @@ function isUnique(wordid, uniqueSet){
 </script>
 <style>
     @reference "tailwindcss";
+    
 
     .column {
 
@@ -255,7 +256,7 @@ function isUnique(wordid, uniqueSet){
     <div class="mt-2 p-2 flex flex-wrap">
         {#each otherData.textRefs as textRef, index}
                
-                <div class="rounded-box bg-base-200 other inline-block m-1 p-1 text-left lg:flex-1">
+                <div class="rounded-box  other inline-block m-1 p-1 text-left lg:flex-1">
 
                     <BibleTextBlock {textRef}  {parGroup} {options} {numCols} copyButton={true} 
                     cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} 

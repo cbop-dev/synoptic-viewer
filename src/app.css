@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
-
+@reference 'tailwindcss';
 /*@plugin 'flowbite/plugin';*/
 
 @custom-variant dark (&:where(.dark, .dark *));
@@ -47,6 +47,48 @@
 }
 
 
+:root {
+    min-height: 100vh;
+    background-color: var(--bg-app);
+    background-image: var(--codex-img);
+    background-size: 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    padding: 2rem;
+    font-family: 'SBL BibLit', 'Gentium Plus', 'Times New Roman', serif;
+    transition: background-color 0.4s ease;
+    background-blend-mode:soft-light;
+    --bg-app: #DCCFB0; 
+    --secondary-bg:#b1bedd;
+    /* A deeper, more "toothy" parchment color */
+    --bg-page: #E6D5B8; 
+    --text-ink: #1B1811;
+    /*--text-ink: 2C2416;*/
+    --text-rubric: #5f0101;
+    --grain-opacity: 0.6; /* High visibility */
+     --filter-contrast:100%;
+     --filter-brightness:160%;
+     --blend-mode:overlay;
+     --bgInset: inset 0 0 120px rgba(0,0,0,0.3);
+    /*--grainTexture: url('https://www.transparenttextures.com/patterns/black-linen.png');*/
+     --filter-saturate:70%;
+     --mask-right: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 1000' preserveAspectRatio='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0 L0 1000 L85 990 C 80 950, 100 920, 90 880 C 95 840, 75 810, 85 770 C 80 730, 100 700, 90 660 C 95 620, 75 590, 85 550 C 80 510, 100 480, 90 440 C 95 400, 75 370, 85 330 C 80 290, 100 260, 90 220 C 95 180, 75 150, 85 110 C 80 70, 100 40, 90 0 Z' fill='black'/%3E%3C/svg%3E");
+    --mask-left: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 1000' preserveAspectRatio='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M100 0 L100 1000 L15 990 C 20 950, 0 920, 10 880 C 5 840, 25 810, 15 770 C 20 730, 0 700, 10 660 C 5 620, 25 590, 15 550 C 20 510, 0 480, 10 440 C 5 400, 25 370, 15 330 C 20 290, 0 260, 10 220 C 5 180, 25 150, 15 110 C 20 70, 0 40, 10 0 Z' fill='black'/%3E%3C/svg%3E");
+    }
+
+  :global([data-theme='dark']) {
+    --bg-app: #0A0A08;
+    --bg-page: #1A1A17; 
+    --text-ink: #E0D7C2;
+    --text-rubric: #eb8c8c;
+    --grain-opacity: 0.5;
+    --filter-contrast:155%;
+     --filter-brightness:65%;
+     /*--blend-mode:multiply;*/
+     /*--bgInset: inset 0 0 120px rgba(255,255,255,1.05);*/
+    /*--grainTexture: url('https://www.transparenttextures.com/patterns/white-linen.png');*/
+  }
+
 h1 {
     font-size: 150% !important;
     text-decoration: underline;
@@ -77,9 +119,10 @@ html {
     font-family: "SBL BibLit", "Gentium";
 }
 
+/*
 .column, .gospel {
     @apply border-4 rounded-lg;
-}
+}*/
 
 .column .lex-unique {
     @apply outline-3;
@@ -97,18 +140,18 @@ html {
     --borderColor: var(--color-red-900);
     --bgColor: var(--)
     bg-red-200/90
-    */
-     @apply bg-red-200/50 border-red-900 ;
+   
+     @apply bg-red-200/50 border-red-900 ;*/
 
 
 }
 
 
 div.bible-block {
-    @apply bg-white/80;
-    @apply border-slate-800/50 border-2 p-0.5 m-0 rounded-sm;
+  /*  @apply bg-white/80;*/
+   /* @apply border-slate-800/50 border-2 p-0.5 m-0 rounded-sm;*/
 }
-
+/*
 .column.other .other{
     @apply bg-base-200;
 }
@@ -149,6 +192,8 @@ div.bible-block {
     }
 
 }
+*/
+
 
 .bible-text-block .bible-ref {
     @apply text-lg;
@@ -156,4 +201,156 @@ div.bible-block {
 
 .secondary .bible-text-block .bible-ref {
     @apply text-sm;
+}
+
+
+:root {
+    --bg-app:#DCCFB0;
+    --bg-content: #f4f0e6;
+    --bg-content-trans: 0.4;
+}
+
+/* TO USE: */
+/**
+:root {
+  --color-1: #dccfb0;
+  --color-2: #f4f0e6;
+  --color-3: #b1bedd;
+  --color-4: #e6eaf4;
+  --color-5: #bcc3d2;
+}
+**/
+
+.gospel-column, .other{
+    /*@apply  sm:w-full  md:w-1/2;*/
+    /* Apply drop-shadow to the wrapper so the mask doesn't clip it */
+    filter: drop-shadow(0 15px 15px rgba(0, 0, 0, 0.5));
+}
+
+div.bible-block{
+      max-width: 850px;
+    margin: 0 auto;
+    padding: 1rem;
+    margin: 0.1rem;
+    position: relative;
+    /* Base opaque backing so the wrapper's drop-shadow doesn't bleed through the semi-transparent texture */
+    background-color: var(--bg-app);
+    
+    /* DUAL LAYER ENGINE */
+    /* Layer 1: The PNG Texture */
+    /* Layer 2: A subtle radial gradient to mimic aged center */
+    /* Layer 3: The solid parchment color */
+   
+    
+    color: var(--text-ink);
+    transition: all 0.4s ease;
+
+    
+
+   mask-image: 
+        var(--mask-left),           /* Your original Left */
+        linear-gradient(black, black), /* The Center */
+        var(--mask-right);          /* The Inverted Right */
+
+    /* The 'Secret Sauce' for alignment: */
+    mask-size: 40px 100%, calc(100% - 80px) 100%, 40px 100%;
+    mask-position: left, center, right;
+    mask-repeat: no-repeat;
+   
+  
+    mask-image: var(--mask-left), linear-gradient(black, black), var(--mask-right);
+    /* Flip the right-side mask so the wave faces inward */
+    -webkit-mask-box-image: none;
+}
+
+.bible-block::before{
+    content:"";
+    --grainTexture: url('src/lib/images/black-linen.png');
+    position: absolute;
+    z-index:-1;
+    inset: 0;
+    pointer-events:none;
+    opacity: var(--grain-opacity);
+    background: 
+      /*linear-gradient(rgba(0,0,0, var(--grain-opacity)), rgba(0,0,0, var(--grain-opacity))),*/
+      var(--grainTexture),
+      var(--bg-page);
+    /*background: var(--grainTexture);*/
+    box-shadow: var(--bgInset);
+    background-blend-mode:  destination-over, var(--blend-mode);
+    
+    /* This forces the browser to render the grain with higher "bite" */
+    filter: contrast(var(--filter-contrast)) brightness(var(--filter-brightness)) saturate(var(--filter-saturate));
+}
+
+.Matt, .column-0 {
+    --bg-page: #fc886ad5;
+    --text-rubric: #4d0000;
+}
+
+.Mark, .column-1 {
+       --bg-page: #5fd85a;
+    --filter-saturate: 80%;
+    --filter-contrast:60%;
+    --filter-brightness:150%;  
+    --text-rubric: #033803; 
+    
+}
+.Luke, .column-2{
+        --bg-page: #5ab0d8;
+    --text-rubric: #061d5c;
+}
+.John, .column-3{
+      --bg-page: #c36fd8c2;
+  --text-rubric: #240252;
+
+}
+
+.section-heading{
+    --section-bg: var(--secondary-bg);
+   /* background: linear-gradient(to bottom, var(--section-bg, transparent), transparent);*/
+    background: color-mix(in srgb, var(--section-bg, transparent) 60%, transparent 40%);
+    background-clip: content-box;
+    /*@apply rounded-2xl;*/
+    /*border-radius: 2em 2em 0 0;*/
+
+    h2 {
+        @apply text-xl font-bold;
+       /* text-shadow: 1px 1px 3px black;*/
+
+    }
+    
+    border-radius: 2em 2em 0 0;
+}
+
+.section-heading:not(.first){
+    margin-top: 20px; 
+}
+
+.section-heading.first{
+    margin-top: 0px; 
+}
+
+
+
+.section-content, .group{
+    background-color: color-mix(in srgb, var(--bg-content) 60%, transparent 40%);
+    
+}
+
+.navbar{
+    @apply: shadow-sm bg-black;
+       
+}
+
+#title-panel{
+    background-color: var(--bg-content,white);
+}
+
+.bg-content-60{
+    background-color: color-mix(in srgb, var(--bg-content) 60%, transparent 40%);
+}
+
+.bg-content-clip{
+    background-clip: content-box;
 }

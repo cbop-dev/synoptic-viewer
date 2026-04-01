@@ -797,7 +797,7 @@
 {#snippet appSummary(heading = true, headingTag = 'h1')}
 	{#if heading}
 		{@render appTitle(headingTag)}
-		<hr />
+		
 	{/if}
 
 	<SiteInfo/><br />
@@ -972,9 +972,9 @@
 {/snippet}
 <div
 	id="header-nav-section"
-	class="self-center text-center fixed bg-white z-40 top-8 m-auto w-full"
+	class="self-center text-center fixed z-40 left-0 top-8 m-auto w-full"
 >
-	<div class="navbar bg-base-100 text-left sm:text-center shadow-sm pb-0 mb-0 sm:mb-1 sm:pb-1">
+	<div class="navbar  ">
 		<div class="text-left sm:navbar-center sm:self-center sm:w-full sm:m-auto">
 			<div class="text-left sm:text-center sm:self-center w-full border-0">
 				<div id="title-panel">
@@ -1012,7 +1012,7 @@
 		<div class="navbar-end hidden"></div>
 	</div>
 </div>
-<div id="main-content-div" class="self-center relative text-center bg-white z-20 mt-10">
+<div id="main-content-div" class="self-center relative text-centerz-20 mt-10">
 	{#if landingPage}
 		<div id="landing-lookup">
 			{@render lookupPanel()}
@@ -1020,27 +1020,32 @@
 	{/if}
 
 	<div id="texts1" class="block">
-		<hr />
+
 
 		{#if !(mounted && dataReady)}
 			{#if fetching && !dataReady}
 				<Loading title="Loading texts..." message={[]} />
 			{:else}
-				<span class="italic mt-3 pt-5"> Enter some valid NT references and click "Lookup!"</span>
-			{/if}
+				<div class="text-center mt-3">
+					<span class="self-center bg-content-60 m-3 p-1 rounded">
+					Enter some valid NT references and click "Lookup!"</span>
+					</div>
+					{/if}
 		{:else}
-			<hr />
+
+			<div id="results-heading">
 			<h2>
 				Parallel NT Texts from {currentServer.name}:
 				<CopyText icon={LinkSvg} getTextFunc={makeURL} tooltip="Copy URL" />
 			</h2>
+			</div>
 			{#each texts as textGroup, i}
-				<hr class=" m-1 p-1" />
-				<div class="anchor" id="group-{i + 1}">
-					{#if texts.length > 1 || textGroup.title}<h3 class="font-bold underline">
+				{#if texts.length > 1 || textGroup.title}<h3 class="font-bold underline section-heading">
 							{#if texts.length > 1}Group #{i + 1}:&nbsp;{/if}{#if textGroup.title}
 								{textGroup.title}{/if}
 						</h3>{/if}
+				<div class="anchor group" id="group-{i + 1}">
+					
 					<ParallelColumnSection
 						parTextGroup={textGroup}
 						{wordClick}
@@ -1344,3 +1349,34 @@
 		</div>
 	{/if}
 </Modal2>
+<style>
+@reference 'tailwindcss';
+
+#header-nav-section{
+	/*background: var(--bg-content, rgba(255,255,255,0.7));*/
+}
+.navbar{
+	@apply  shadow-sm text-center min-h-12 text-left sm:text-center shadow-sm pb-0 mb-0 sm:mb-1 sm:pb-1;
+}
+
+#landing-lookup{
+	background-color: color-mix(var(--bg-content,white 50%) 70%, transparent);
+	padding: 15px;
+	box-shadow: 10px 10px 5px rgba(0, 0, 0, 0.4);
+	
+}
+#results-heading{
+	background-color: color-mix(var(--bg-content,white 50%) 70%, transparent);
+	
+	@apply text-center mb-5;
+	h2{
+		@apply text-xl font-bold;
+	}
+}
+.group{
+	/*@apply mt-3;*/
+}
+.section-heading{
+	@apply text-center;
+}
+</style>

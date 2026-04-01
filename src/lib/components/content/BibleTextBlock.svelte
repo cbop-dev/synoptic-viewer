@@ -135,12 +135,16 @@
 			if (colorObj) {
 				ret = ColorUtils.bgFontString(colorObj.bg, colorObj.font, colorObj.border);
 			}
+			if(!ret){
+				mylog(`BibleBlock.getWorStyle(${word.word}) got no color! Color obj.bg=${colorObj?.bg}`,true);
+			}
 
 		}
 
 		return ret;
 	}
 //$inspect('parGroup.lexIdenticalPhrasePalette',parGroup.lexIdenticalPhrasePalette);
+
 </script>
 
 <div
@@ -156,21 +160,25 @@
 		{#if textRef.text}
 			{@const book = BibleUtils.getBookChapVerseFromRef(textRef.reference)?.book}
 			<span
-				class="font-bold bg-white/50 rounded-sm border-2 border-black/60 mr-1 ml-0 bible-text-block"
+				class="font-bold bg-white/20 rounded-sm mr-1 ml-0 bible-text-block"
 			>
 				{#if copyButton}
 					<CopyText
 						copyText={textRef.reference}
 						linkText={textRef.reference}
-						btnCssClass="m-0 p-0 hover:link bible-ref"
+						btnCssClass="m-0 p-0 hover:link bible-ref  underline text-shadow-[2px_2px_2px_rgba(0,0,0,0.3)]"
 						tooltip="Copy reference to clipboard."
+						tooltipBottom={true}
 						showButton={false}
+						svgStyle="filter: opacity(0.6);"
+						
 					/>
 					{#if !showNotes}{:else if textRef.note}
 						<Button
 							buttonText={'\u{1F5C8}'}
 							buttonStyle="btn btn-xs btn-ghost"
 							tooltip={'See Notes'}
+							tooltipbottom={true}
 							onclick={() => {
 								notesClick(textRef.reference, textRef.note);
 							}}
@@ -188,13 +196,15 @@
 					)}
 					<!-- NB: first index is that of cssCustomDict; second is into textRef.vwords-->
 					<!--{#if Object.values(customMatchedWords).length}Custom matched!: {Object.keys(customMatchedWords).join(",")}{/if}-->
-					<span class="bg-white/40 border-black/40 border-2 m-0 p-0 rounded-xl">
+					<span class="bg-white/30 border-black/40 border-0 m-0 p-0 rounded-xl ">
 						{#if copyButton}
 							<CopyText
 								getTextFunc={() => getText(verseWords.words, options.viewOptions.hideApp)}
 								linkText={String(verseWords.verse)}
 								showButton={false}
 								tooltip={'Copy verse ' + verseWords.verse}
+								btnSizeCssClass="btn-xs"
+								btnCssClass="btn-circle"
 							/>
 						{:else}
 							{verseWords.verse}
@@ -289,6 +299,7 @@
 						? GreekUtils.removeApparatusMarks(textRef.text)
 						: textRef.text}
 				tooltip="Copy pericope"
+				svgStyle="filter: opacity(0.6);"
 			/>
 		{/if}
 	{/key}
@@ -296,6 +307,13 @@
 
 <style>
 	@reference "tailwindcss";
+	@function makeRgb($hexcolor){
+		$red:red($hexcolor);
+		$green:green($hexcolor);
+		$blue:blue($hexcolor);
+		$alpha:alpha($hexcolor);
+		@return unquote("rgb(#{$red},#{$green},#{$blue})");
+	}
 
 	/*.bible-block {
         @apply bg-white/20 border-1 border-black/30 rounded p-1;
@@ -323,78 +341,34 @@
 		@apply border-t-2 border-b-2;
 	}
 
-	/*
-    
-        .lexical-phrase {
-
-            
-        }
-       	 .lexical-phrase-1 {
-            @apply  border-red-600 bg-red-600/20 decoration-red-600;
-        }
-        
-        .lexical-phrase-2 {
-            @apply border-blue-700 bg-blue-700/20 decoration-blue-700;
-        }
-        .lexical-phrase-3 {
-            @apply border-green-500 bg-green-500/20 decoration-green-500;
-        }
-        .lexical-phrase-4 {
-            @apply border-fuchsia-700 bg-fuchsia-700/20 decoration-fuchsia-700;
-        }
-        .lexical-phrase-5 {
-            @apply border-black bg-slate-400/30 decoration-black;
-        }
-        .lexical-phrase-6 {
-            @apply border-amber-600 bg-amber-600/20 decoration-amber-600;
-        }
-        .lexical-phrase-7 {
-            @apply border-amber-300 bg-amber-300/40 decoration-amber-300;
-        }
-        .lexical-phrase-8 {
-            @apply border-rose-600 bg-rose-600/20 decoration-rose-600;
-        }
-        
-        .lexical-phrase-9 {
-            @apply border-teal-700 bg-teal-700/20 decoration-teal-700;
-        }
-        .lexical-phrase-10 {
-            @apply border-purple-800 bg-purple-800/20 decoration-purple-800;
-        }
-        .lexical-phrase-11 {
-            @apply border-yellow-950 bg-yellow-950/20 decoration-yellow-950;
-        }
-        .lexical-phrase-12 {
-            @apply border-cyan-700 bg-cyan-700/20 decoration-cyan-700;
-        }
-        .lexical-phrase-13 {
-            @apply  border-orange-900 bg-orange-900/20 decoration-orange-900;
-        }
-        .lexical-phrase-14 {
-            @apply border-amber-300 bg-amber-300/20 decoration-amber-300;
-        }
-    */
+	
 
 	:not(.hide-similar) .word.lexical:not(.selected) {
-		background-color: hsl(from var(--bgColor, black) h s l / 60%);
+		background-color: hsl(from var(--bgColor, black) h s l / 40%);
+		/*background-color: hsl(from var(--bgColor, black) h s l / 40%);*/
 		/* color: black; /*hsl(var(--fontColor,black) h s 0.3 / 60%);*/
-
+	text-shadow: 2px 2px 2px rgba(0,0,0,0.3);
 		border-color: var(--borderColor, white);
 		/*color: black;*/
 		color: var(--fontColor, white);
 	}
 
 	.show-exact .word.exact {
-		background-color: var(--bgColor, transparent) !important;
+		/*background-color: color-mix(var(--bgColor, white 50%) 50%,transparent 50%) !important;*/
+		/*background-color: var(--bgColor, transparent) !important;*/
+		background-color: hsl(from var(--bgColor, white) h 70 l / 60%) !important;
 		color: var(--fontColor, default) !important;
-		border-color: var(--borderColor, black);
-		border-color: black !important;
+		
+		/*border-color: color-mix(var(--borderColor, black),transparent);*/
+		border-color: black 90% !important;
+		text-shadow: 2px 2px 2px rgba(0,0,0,0.3);
 		@apply border-t-2 border-b-3  font-bold;
 		/*color: var(--fontColor,default);*/
 	}
 
 	.word.selected {
-		background-color: var(--bgColor, transparent);
+		background-color: color-mix(var(--bgColor, transparent) 60%, transparent);
+		text-shadow: 1px 1px 1px hsl(from var(--fontColor) h s l / 50%);
 		color: var(--fontColor, default);
 	}
 

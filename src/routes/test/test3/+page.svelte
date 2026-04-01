@@ -34,9 +34,7 @@
 style="--grainTexture: url('{grainTexture}')">
   <main class="manuscript-wrapper matthew ">
     <article class="manuscript-page">
-     <div class="manuscript-background"
-         >
-    </div>
+     <div class="manuscript-background"></div>
       <header>
         <h1 class="rubric">ΚΑΤΑ ΜΑΘΘΑΙΟΝ</h1>
       </header>

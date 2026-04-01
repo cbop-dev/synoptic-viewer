@@ -3,13 +3,14 @@
     import CustomParallelViewer from './CustomParallelViewer.svelte';
 	import { SynopsisOptions3 } from './SynopsisClasses.svelte.js';
     import CodexAmatt1Wide from '$lib/images/codex-B-matt1-2-trans.png';
+    import LinenPng from '$lib/images/black-linen.png';
 	import { mylog } from '$lib/env/env';
     import Button from '$lib/components/ui/Button.svelte';
     import {getServer, sbl as sblServer, n1904 as n1904Server, vulgate as vulgateServer, web as webcServer} from '$lib/tf/tfServer.js'
     import { N1904Server } from '$lib/n1904/tfN1904';
     import { SblGntServer } from '$lib/sblgnt/sblgnt';
-    import {gospelParallels} from '@cbop-dev/aland-gospel-synopsis';
-    import { LexPhraseAndLocations, ParallelColumnGroup } from './parallelTexts.svelte';
+    //import {gospelParallels} from '@cbop-dev/aland-gospel-synopsis';
+    //import { LexPhraseAndLocations, ParallelColumnGroup } from './parallelTexts.svelte';
 //    import {Button} from '../ui/Button.svelte';
     import { TfServer } from './TfUtils';
 	import ButtonSelect from '../ui/ButtonSelect.svelte';
@@ -18,11 +19,16 @@
     import ArrowTop from '../ui/icons/arrow-top-icon.svelte';
     import ArrowDown from '../ui/icons/arrow-down.svelte';
     import SiteInfo from './SiteInfo.svelte';
-    import ModalButton from '../ui/ModalButton.svelte';
+    //import ModalButton from '../ui/ModalButton.svelte';
+    //import grainTexture from '$lib/images/black-linen.png';
+    
+
     let showInfoModal = $state(false);
     let y = $state();
     let windowHeight=$state();
     let contentHeight = $state();
+    const bgApp="#DCCFB0";
+    const bgContent="#f4f0e6";
 
     /**
      * @type {{options:SynopsisOptions3}}
@@ -110,39 +116,7 @@
     }*/
    //$inspect(`options: viewOptions.similarPhrases=${options.viewOptions.similarPhrases}`)
 </script>
-<style>
-     @reference "tailwindcss";
-/*     @reference "../../../app.css"*/
-     
 
-    .tabs .tab-active {
-        @apply bg-blue-300;
-        
-        font-weight: bold;
-    }
-
-    .tab {
-        height: auto;
-        
-    }
-    #main-content{
-        position:  relative;
-    }
-    #main-wrap{
-        overflow:hidden;
-        position:relative;
-
-
-    }
-    #main-bg {
-        opacity: 0.1;
-        position: absolute;
-        left: 0; 
-        right: 0;
-        width: 100%;
-        height: auto;
-    }
-</style>
 {#snippet appTitle(headingTag="h1")}
     <svelte:element this={headingTag}><a href="/">NT Gospel Synopsis Viewer</a></svelte:element> 
 {/snippet}
@@ -156,15 +130,17 @@
     <SiteInfo/>
 {/snippet}
 <svelte:window bind:scrollY={y} bind:innerHeight={windowHeight} onkeydown={onkeydown}/>
-<div id="main-wrap">
-<img id="main-bg" src='{CodexAmatt1Wide}' alt='Codex Vaticanus: Matt 1'/>
+<div id="app-container" style="--codex-img: url('{CodexAmatt1Wide}'); --bg-app: {bgApp}; --bg-content: {bgContent};">
+<div id="main-wrap" style="--bgCodex: url('{CodexAmatt1Wide}'); --bgLinen: url('{LinenPng}');">
+<!--<img id="main-bg" src='{CodexAmatt1Wide}' alt='Codex Vaticanus: Matt 1'/>-->
+<div id="main-bg"></div>
 <div id="main-content" class="relative" bind:clientHeight={contentHeight} >
 
 
-    <div class="block top-1 z-100 bg-white/80  w-full text-right fixed" bind:clientHeight={headerHeight}>
+    <div id="top-tab-bar" class="block top-1 left-0 z-100 w-full text-right fixed" bind:clientHeight={headerHeight}>
         
         
-        <div role="tablist" class="inline-block fixed  top-0 left-1 tabs tabs-lifted">
+        <div id="tabs" role="tablist" class="inline-block float-left top-0 tabs tabs-lifted">
             {#each panes as pane, index}
             <a role="tab" class="tab {selectedPane==index ? 'tab-active' : ''} " tabindex={index} onclick={()=>{selectedPane=index}} >
                 <span class="sm:inline hidden">{pane.name}</span><span class="inline sm:hidden">{pane.short}</span></a>
@@ -184,7 +160,7 @@
         </div>
 
         {#if showNTselect}
-        <div class="block items-center absolute right-0 m-2 p-5 bg-white/90 rounded-2xl outline-2">
+        <div id="version-select-panel" class="blockitems-center absolute right-0 m-2 p-5  rounded-2xl outline-2">
             
 
             <label for="ntversion" class="hidden md:inline m-0 p-0 text-sm">NT version:</label>
@@ -212,9 +188,9 @@
     <div id="pane-{pane.name}" class={index==selectedPane ? 'block' : 'hidden'}>
             
             {#if options.request.tab==index}
-            <pane.comp options={options.copy()} live={index==selectedPane} tfServer={tfServer} keyevent={keyEvents[index]}/>
+            <pane.comp options={options.copy()} live={index==selectedPane} tfServer={tfServer} keyevent={keyEvents[index]} --bg-app={bgApp} --bg-content={bgContent}/>
             {:else}
-            <pane.comp live={index==selectedPane} tfServer={tfServer} keyevent={keyEvents[index]}/>
+            <pane.comp live={index==selectedPane} tfServer={tfServer} keyevent={keyEvents[index]} --bg-app={bgApp} --bg-content={bgContent}/>
             {/if}
             
         
@@ -254,3 +230,82 @@
 </Modal2>
 
 <div id="bottom-div"></div>
+</div>
+<style>
+    #app-container{
+        /*--bg-app: #e2decb;*/
+        --bg-content: var(--bg-content,#dfbc6b);
+        --bg-app: var(--bg-app,#DCCFB0);
+        --bg-opacity: 0.2;
+        --bg-saturation: 1.3;
+        --bg-brightness: 160%;
+        --bg-contrast: 0.4;
+        min-height: 100vh;
+        background-color: var(--bg-app);
+        background-image: var(--codex-img);
+        background-size: 100%;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-attachment: fixed;
+        padding: 2rem;
+        font-family: 'SBL BibLit', 'Gentium Plus', 'Times New Roman', serif;
+        transition: background-color 0.4s ease;
+        background-blend-mode:soft-light;
+        
+    }
+     @reference "tailwindcss";
+/*     @reference "../../../app.css"*/
+     
+
+    .tabs .tab-active {
+        @apply bg-blue-300;
+        
+        font-weight: bold;
+    }
+
+    .tab {
+        height: auto;
+        
+    }
+    #main-content{
+        position:  relative;
+    }
+    #main-wrap{
+        overflow:hidden;
+        position:relative;
+        
+        /*background-color: var(--bg-app);
+        background-image: var(--bgCodex), var(--bgLinen);
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        background-blend-mode:multiply;*/
+
+
+    }
+    #maiddn-bg {
+        background-color: var(--bg-app);
+        background-image: var(--bgCodex), var(--bgLinen);
+        background-size: cover;
+        background-position: center;
+        content:"";
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        background-blend-mode:multiply;
+        position: absolute;
+        left: 0; 
+        right: 0;
+        width: 100%;
+        height: 100%;
+        filter: opacity(var(--bg-opacity)) saturate(var(--bg-saturation)) brightness(var(--bg-brightness));
+    }
+
+#top-tab-bar{
+    background-color: white;
+}
+#version-select-panel{
+    background-color: color-mix(in srgb, var(--secondary-bg) 60%, transparent 40%);
+}
+
+</style>

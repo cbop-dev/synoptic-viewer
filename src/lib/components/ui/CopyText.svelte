@@ -11,8 +11,10 @@
         showButton=true,
         btnSizeCssClass='btn-sm',
         btnCssClass='',
+        tooltipBottom=false,
         width=0,
-        height=0
+        height=0,
+        svgStyle=''
     } = $props();
 
     function copyToClipboard(){
@@ -24,15 +26,20 @@
         navigator.clipboard.writeText(theText);
     }
 </script>
-<button title={tooltip} onclick={copyToClipboard} class={["btn btn-ghost p-0.5",btnSizeCssClass, btnCssClass]}>
+<button title={tooltip} onclick={copyToClipboard} 
+class={["btn btn-ghost p-0.5",btnSizeCssClass, btnCssClass,
+ tooltip? "tooltip":'',
+ tooltipBottom ? 'tooltip-bottom' : '']}
+data-tip={tooltip} >
     {#if linkText}
     {linkText}
     {/if}
     {#if showButton}
         {#if width && height}
-            <Icon svg={icon} {width} {height}/>
+            <Icon svg={icon} {width} {height} style={svgStyle}/>
         {:else}
-        <Icon svg={icon} />
+        <Icon svg={icon} style={svgStyle}/>
         {/if}
     {/if}
 </button>
+

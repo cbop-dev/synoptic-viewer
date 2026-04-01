@@ -1050,9 +1050,7 @@
 		if (customGreekInputText) {
 			untrack(() => {
 				customGreekInputText = GreekUtils.removeDiacritics(
-					GreekUtils.beta2Greek(customGreekInputText),
-					true,
-					true
+					GreekUtils.beta2Greek(customGreekInputText)
 				).replaceAll('σ ', 'ς ');
 			});
 		}
@@ -1108,6 +1106,7 @@
 	//$inspect("NTSynPanel, myOptions.viewOptions.gospelFilter:", myOptions.viewOptions.gospelFilter);
 	//$inspect("NTSymPan: gospelsExcluded:",gospelsExcluded);
 	$inspect('dataReady',dataReady);
+	$inspect('selectedLexes',selectedLexes);
 </script>
 
 {#snippet appTitle(headingTag = 'h1', classes = ['text-center', 'inline'])}
@@ -1157,6 +1156,7 @@
 					buttonText="☰ Jump to ↓"
 					bind:selected={viewStates.views.sections.state}
 					tooltipbottom
+					
 					tooltip="Jump to a section"
 				/></svelte:element
 			>
@@ -1370,9 +1370,10 @@
 		</div>
 	{/if}
 {/snippet}
-<div id="top-fixed" class="self-center fixed text-center w-full top-8 bg-white z-40">
+<div id="nt-synopsis-panel">
+<div id="top-fixed" class="self-center fixed left-0 text-center w-full top-8  z-40">
 	<div id="header-nav-section" class="block self-center text-center m-auto w-full">
-		<div class="navbar bg-base-100 text-center min-h-12 shadow-sm">
+		<div class="navbar ">
 			<div class="navbar-start text-left sm:navbar-center sm:self-center w-full m-auto">
 				<div class="text-center self-center w-full border-0">
 					<div id="title-panel">
@@ -1390,9 +1391,9 @@
 					</div>
 
 					{#if myOptions.viewOptions.menuOpen}
-						<div class="m-auto dropdown text-left">
+						<div class="options-dropdown m-auto dropdown text-left">
 							<ul
-								class="menu menu-horizontal bg-base-100 rounded-box z-1 mt-3 w-auto p-2 shadow text-left"
+								class="menu menu-horizontal  rounded-box z-1 mt-3 w-auto p-2 shadow text-left"
 							>
 								{@render resultsButtons(true, 'li')}
 							</ul>
@@ -1406,8 +1407,8 @@
 </div>
 
 {#if landingPage}
-	<div id="landing-lookup" class="bg-white block top-0 overflow-auto">
-		<div id="landing">
+	<div id="landing-lookup" class="block m-auto top-0 overflow-auto text-center">
+		<div id="landing" class="center-block">
 			<div id="landing-panel text-center">
 				<div class="text-center m-auto">
 					{@render appSummary(false)}
@@ -1416,14 +1417,14 @@
 			</div>
 		</div>
 
-		<div id="landinglookup" class={['bg-white', 'overflow-auto', 'scroll-auto']}>
+		<div id="landinglookup" class={['overflow-auto', 'scroll-auto','center-block', ]}>
 			{@render lookup()}
 		</div>
 	</div>
 {/if}
 <!--end fixed section-->
 
-<div id="main-content-div" class="self-center relative text-center bg-white mt-45 z-20">
+<div id="main-content-div" class="self-center relative text-center  mt-15 z-20 shadow-2xl">
 	<!--<div style="background-image: url('{ScribesImage}');" class="w-full h-full bg-black" ></div>-->
 	
 	<!--<div style="background-image: url('{ScribesImage}');" class="w-full h-full bg-black"></div>-->
@@ -1441,7 +1442,7 @@
 		{/if}
 	{/if}
 </div>
-<div class="text-center mt-10">
+<div id="results-container" class="text-center mt-10">
 
 			<!--<Loading title="Results loading..." 
 				loadingBackground={ScribesImage}
@@ -1459,6 +1460,7 @@
 							icon={LinkSvg}
 							getTextFunc={makeURL}
 							tooltip="Copy Link to share these results"
+							svgStyle="filter: opacity(0.6);"
 						/>{/key} 
 						</h1>
 					
@@ -1466,13 +1468,14 @@
 					{#if paginatedFilteredPerGroups[myOptions.viewOptions.page] && paginatedFilteredPerGroups[myOptions.viewOptions.page].length && paginatedFilteredPerGroups[myOptions.viewOptions.page].reduce((a, b) => a && b.populated, true)}
 						{@render pageNav()}
 						{#each paginatedFilteredPerGroups[myOptions.viewOptions.page] as group, index}
-							<hr class="mb-2 !border-slate-200" />
-							<div class="anchor text-center" id="section-{group.id}">
+							<!--<hr class="mb-2 !border-slate-200" />-->
+							<div class="anchor text-center section-heading {index == 0 ? 'first': ''}" id="section-{group.id}">
 								<h2 class="inline-block">
 									<u><b>{group.title}:</b></u><br />
 									{group.getRefs()}<CopyText
 										copyText={group.getRefs()}
 										tooltip="Copy parallel group references"
+										svgStyle="filter: opacity(0.7);"
 									/>
 								</h2>
 
@@ -1509,8 +1512,8 @@
 								<a href="#" class="inline" title="Top"><ArrowTop height={20} width={20} /></a>
 							</div>
 
-							<br class="break-all" />
-							<div>
+							
+							<div class="section-content">
 								<ParallelGospelSection
 									parGroup={group}
 									options={myOptions}
@@ -1542,17 +1545,20 @@
 				{/key}
 			{:else}
 			<!--<div style="background-image: url('{ScribesImage}');" class="w-full h-full bg-black"></div>-->
+			<div id="scribes-loading-container" style="--scribes-image: url('{ScribesImage}');" >
+				<div id="scribes-loading-element">
 				<Loading title="Results loading..." 
-				loadingBackground={ScribesImage}
-				message={['Please wait while our digital scribes gather the texts...']}
-				minHeight={'400px'}
 				
-				width={'100%'}
+				message={['Please wait while our digital scribes gather the texts...']}
+				
+				
 				 />
+				 </div>
+			</div>
 			{/if}
 		</div>
 	{:else}
-		<div class="text-center bg-white" >
+		<div id="no-results-message" class="text-center" >
 			<i class="m-auto"
 				>Results will show up here.
 				{#if !viewStates.views.lookup.state && !landingPage}<a
@@ -1568,6 +1574,7 @@
 			</i>
 		</div>
 	{/if}
+</div>
 </div>
 {#if dataReady}
 	<Modal2 bind:showModal={viewStates.views.sections.state}>
@@ -1618,6 +1625,7 @@
 			bind:selected={myOptions.viewOptions.sort}
 			disable={!gospelParallels.gospels.isValid(selectedGospel)}
 			buttonText="Sort"
+			
 			tooltip="Sort according to the selected gospel's order."
 		/>
 		<ButtonSelect
@@ -1930,10 +1938,31 @@
 </Modal2>
 
 <style>
-	#results {
-		@apply bg-white;
-	}
 	@reference "tailwindcss";
+	#nt-synopsis-panel{
+		--mybg-content: var(--bg-content,rgb(247, 245, 255));
+		
+		--text-color: #080700;
+
+	}
+
+	div {
+		/*color: var(--text-color);*/
+	}
+	#results {
+		/*@apply bg-white;*/
+
+	}
+
+	#results-container{
+		/*background-color: rgba(255,255,255,0.4);*/
+		/*background-color: var(--mybg-content), transparency(0.4);*/
+		@apply shadow-amber-300;
+		/*background-color: color-mix(in srgb, var(--mybg-content) 70%, transparent 30%);*/
+		
+
+	}
+	
 
 	hr {
 		@apply border-slate-400 m-2;
@@ -1945,8 +1974,12 @@
 		text-decoration: underline;
 	}
 
-	.anchor {
-		@apply md:-mt-40 md:pt-40 -mt-30 pt-30;
+	.anchor:not(.first) {
+		@apply md:-mt-30 md:pt-40 -mt-20 pt-30;
+	}
+
+	.anchor.first{
+		@apply -mt-5 pt-20 ;
 	}
 
 	select {
@@ -1975,4 +2008,57 @@
 		background-color: darkgrey;
 		text-align: center;
 	}
+	.center-block{
+		@apply  m-auto block break-all self-center rounded-xl shadow-2xl;
+		background-color: var(--bg-content);
+		color: var(--text-color);
+
+	}
+	#title-panel{
+		background-color: var(--bg-content,white);
+	}
+	#results h1{
+		background-color: color-mix(in srgb, var(--bg-content) 80%, transparent );
+	}
+	.options-dropdown{
+		/*background-color: color-mix(in srgb, var(--secondary-bg) 90%, transparent 10%);*/
+		background-color: var(--bg-content);
+	}
+
+	#scribes-loading::before{
+		content:"HERE WE ARE!";
+	}
+#scribes-loading-container{
+	/*background-color: var(--bg-content);*/
+	display: block;
+	position:absolute;
+	background-image: var(--scribes-image);
+	background-size:cover; 
+	@apply absolute left-0 top-0 w-full h-full;
+	background-repeat: no-repeat; 
+	background-position: center; 
+	/*
+	'background-size:cover; background-repeat: no-repeat; background-position: center; background-image: url(' + loadingBackground + ');' : '')
++ (width ? 'width: ' + width  : '') + ";" 
++ (height? 'height: ' + height : '') + ";" 
++ (minHeight? 'min-height: ' + minHeight : '') + ";" 
++ (!height && minHeight ? 'height: ' + minHeight:'')*/
+}
+
+#scribes-loading-element{
+	@apply inline-block m-auto self-center text-center items-center;
+	/*background-color: var(--bg-content);	*/
+}
+.navbar{
+	@apply  shadow-sm text-center min-h-12;
+}
+#no-results-message{
+	background-color: color-mix(var(--bg-content) 70%, transparent 30%);
+
+	@apply rounded-xl shadow-2xl inline-block p-2;
+}
+.section-heading{
+	
+	border-radius: 5rem 5rem 0 0;
+}
 </style>

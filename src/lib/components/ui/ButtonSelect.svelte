@@ -4,6 +4,8 @@
    * @typedef {Object} Props
    * @property {string} [buttonText]
    * @property {string} [buttonStyle]
+   * @property {string} [buttonSize]
+   * @property {string} [buttonColors]
    * @property {string} [textSize]
    * @property {string} [tooltip]
    * @property {boolean} [tooltipbottom]
@@ -15,7 +17,9 @@
   /** @type {Props} */
   let {
     buttonText = "",
-    buttonStyle = " btn btn-outline btn-primary m-1 font-bold hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 ",
+    buttonSize="btn",
+    buttonColors="btn-primary  hover:bg-blue-700 focus:ring-blue-300 ",
+    buttonStyle = "btn-outline  m-1 font-bold focus:outline-none focus:ring-4 ",
     textSize = "base",
     tooltip='',
     tooltipbottom=false,
@@ -71,8 +75,10 @@
     }
   </style>
   
+  
   <button  data-tip={tooltip} onclick={()=>{if(!disable){toggle()}}} bind:this={theButton} 
-  class=" {tooltip ? 'tooltip' : ''}  {tooltipbottom ? 'tooltip-bottom' : ''} {selectStyle()} {disable ? 'btn-disabled' : ''} {buttonStyle}">
+  class=" {tooltip ? 'tooltip' : ''}  {tooltipbottom ? 'tooltip-bottom' : ''} 
+  {selectStyle()} {disable ? 'btn-disabled' : ''} {buttonSize} {buttonColors} {buttonStyle}">
     {buttonText}
     {#if children}{@render children?.()}<hr />
 		{/if}
