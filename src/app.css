@@ -72,9 +72,11 @@
      --bgInset: inset 0 0 120px rgba(0,0,0,0.3);
     /*--grainTexture: url('https://www.transparenttextures.com/patterns/black-linen.png');*/
      --filter-saturate:70%;
-     --mask-right: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 1000' preserveAspectRatio='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0 L0 1000 L85 990 C 80 950, 100 920, 90 880 C 95 840, 75 810, 85 770 C 80 730, 100 700, 90 660 C 95 620, 75 590, 85 550 C 80 510, 100 480, 90 440 C 95 400, 75 370, 85 330 C 80 290, 100 260, 90 220 C 95 180, 75 150, 85 110 C 80 70, 100 40, 90 0 Z' fill='black'/%3E%3C/svg%3E");
-    --mask-left: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 1000' preserveAspectRatio='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M100 0 L100 1000 L15 990 C 20 950, 0 920, 10 880 C 5 840, 25 810, 15 770 C 20 730, 0 700, 10 660 C 5 620, 25 590, 15 550 C 20 510, 0 480, 10 440 C 5 400, 25 370, 15 330 C 20 290, 0 260, 10 220 C 5 180, 25 150, 15 110 C 20 70, 0 40, 10 0 Z' fill='black'/%3E%3C/svg%3E");
-    }
+     --mask-right: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 1000' preserveAspectRatio='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0 L0 1000 L90 1000 C 80 960, 100 920, 90 880 C 95 840, 75 810, 85 770 C 80 730, 100 700, 90 660 C 95 620, 75 590, 85 550 C 80 510, 100 480, 90 440 C 95 400, 75 370, 85 330 C 80 290, 100 260, 90 220 C 95 180, 75 150, 85 110 C 80 70, 100 40, 90 0 Z' fill='black'/%3E%3C/svg%3E");
+    --mask-left: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 1000' preserveAspectRatio='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M100 0 L100 1000 L10 1000 C 20 960, 0 920, 10 880 C 5 840, 25 810, 15 770 C 20 730, 0 700, 10 660 C 5 620, 25 590, 15 550 C 20 510, 0 480, 10 440 C 5 400, 25 370, 15 330 C 20 290, 0 260, 10 220 C 5 180, 25 150, 15 110 C 20 70, 0 40, 10 0 Z' fill='black'/%3E%3C/svg%3E");
+    /* Full width mask, perfectly opaque except for seventeen jagged, highly organic holes distributed across edge, restricted to 2.5% max width depth*/
+    --tears: url("data:image/svg+xml,%3Csvg viewBox='0 0 1000 1000' preserveAspectRatio='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' d='M0 0 L1000 0 L1000 1000 L0 1000 Z M0 30 C 10 32, 18 38, 20 45 L 22 50 L 15 55 C 10 58, 5 62, 0 65 Z M0 120 L 5 125 L 8 122 L 15 130 C 20 135, 25 145, 15 150 L 5 155 L 8 158 L 0 160 Z M0 210 C 5 212, 12 215, 15 220 C 12 225, 5 228, 0 230 Z M0 350 L 12 360 C 18 365, 24 370, 22 378 L 14 385 C 8 390, 5 392, 0 395 Z M0 480 C 10 482, 15 488, 18 490 L 25 495 L 18 500 C 10 505, 5 508, 0 510 Z M0 570 L 5 575 L 2 578 C 8 584, 15 590, 19 595 L 11 602 C 5 606, 2 608, 0 610 Z M0 690 L 10 695 C 15 698, 20 705, 22 710 C 15 715, 10 720, 0 725 Z M0 820 C 8 822, 15 825, 20 835 L 25 845 L 8 850 C 5 852, 2 858, 0 860 Z M0 940 L 5 945 L 15 950 L 10 965 C 5 968, 2 969, 0 970 Z M1000 80 C 990 82, 985 85, 980 95 C 980 105, 990 110, 1000 115 Z M1000 170 L 995 174 L 998 178 C 985 185, 975 190, 975 195 L 985 200 C 990 205, 995 208, 1000 210 Z M1000 280 L 988 290 L 978 300 C 975 305, 980 310, 985 312 L 1000 315 Z M1000 410 C 990 412, 985 418, 976 425 C 980 435, 990 440, 1000 450 Z M1000 530 L 990 535 C 980 540, 975 545, 975 550 C 985 555, 990 560, 1000 565 Z M1000 650 L 995 655 L 991 662 C 985 668, 979 670, 981 678 L 989 685 C 995 688, 998 689, 1000 690 Z M1000 760 C 990 765, 985 775, 975 780 C 980 785, 990 790, 1000 795 Z M1000 880 L 990 885 L 985 892 L 977 905 L 992 915 L 995 918 L 1000 920 Z' fill='black'/%3E%3C/svg%3E");
+}
 
   :global([data-theme='dark']) {
     --bg-app: #0A0A08;
@@ -229,9 +231,9 @@ div.bible-block {
 }
 
 div.bible-block{
-      max-width: 850px;
+    max-width: 850px;
     margin: 0 auto;
-    padding: 1rem;
+    padding: 1.5rem;
     margin: 0.1rem;
     position: relative;
     /* Base opaque backing so the wrapper's drop-shadow doesn't bleed through the semi-transparent texture */
@@ -249,18 +251,25 @@ div.bible-block{
     
 
    mask-image: 
-        var(--mask-left),           /* Your original Left */
-        linear-gradient(black, black), /* The Center */
-        var(--mask-right);          /* The Inverted Right */
+        var(--tears),
+        var(--mask-left),           
+        linear-gradient(black, black), 
+        var(--mask-right); 
 
-    /* The 'Secret Sauce' for alignment: */
-    mask-size: 40px 100%, calc(100% - 80px) 100%, 40px 100%;
-    mask-position: left, center, right;
-    mask-repeat: no-repeat;
-   
-  
-    mask-image: var(--mask-left), linear-gradient(black, black), var(--mask-right);
-    /* Flip the right-side mask so the wave faces inward */
+    mask-size: 
+        100% 733px,  /* Tears */
+        40px 400px,  /* Wave Left */
+        calc(100% - 80px) 100%, /* Center */
+        40px 400px;  /* Wave Right */
+        
+    mask-position: center var(--tear-offset, 0px), left top, center top, right top;
+    mask-repeat: repeat-y, repeat-y, no-repeat, repeat-y;
+
+    /* Base page layers merge together (add), then the top tears layer intersects.
+       Because the tears mask is 100% opaque except for the torn holes, 
+       this preserves the page everywhere while punching out the holes! */
+    mask-composite: intersect, add, add;   
+    -webkit-mask-composite: source-in, source-over, source-over; 
     -webkit-mask-box-image: none;
 }
 

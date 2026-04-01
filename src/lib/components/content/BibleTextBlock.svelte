@@ -95,6 +95,14 @@
 	//$inspect(`<BibleTextBlock>: textRef.ref=${textRef.reference}`)
 
 	selectedLexes = options.viewOptions.lexes;
+
+	const tearOffset = $derived.by(() => {
+		if (!textRef?.reference) return 0;
+		// Create a consistent pseudo-random offset (0-733) based on the reference string
+		const hash = textRef.reference.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+		
+		return (hash * 47) % 733;
+	});
 	/**
 	 *
 	 * @param {Word} word
@@ -155,6 +163,7 @@
 		options.viewOptions.unique ? 'show-unique' : '',
 		!options.viewOptions.similarPhrases ? 'hide-similar' : ''
 	]}
+	style="--tear-offset: {tearOffset}px;"
 >
 	{#key parGroup && parGroup.updatedCounter && parGroup.lexIdenticalPhrasesMap.size && parGroup.lexIdenticalPhrasesMap}
 		{#if textRef.text}
