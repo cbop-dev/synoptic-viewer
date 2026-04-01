@@ -993,16 +993,16 @@
 				</div>
 
 				{#if myOptions.viewOptions.menuOpen}
-					<div class="absolute left-0 m-auto dropdown sm:hidden text-left overflow-auto">
+					<div class="options-dropdown absolute left-0 m-auto dropdown sm:hidden text-left overflow-auto">
 						<ul
-							class="menu menu-horizontal bg-base-100 rounded-box z-1 mt-3 w-auto p-2 shadow text-left"
+							class=" menu menu-horizontal rounded-box z-1 mt-3 w-auto p-2 shadow text-left"
 						>
 							{@render resultsNav(true, 'li')}
 						</ul>
 					</div>
 
 					<div
-						class="bg-white text-left sm:text-center m-auto hidden menu-horizontal flex-wrap sm:block lex-wrap w-full"
+						class="options-dropdown text-left sm:text-center m-auto hidden menu-horizontal flex-wrap sm:block lex-wrap w-full"
 					>
 						{@render resultsNav(false, 'div', ['inline-block'])}
 					</div>
@@ -1036,7 +1036,10 @@
 			<div id="results-heading">
 			<h2>
 				Parallel NT Texts from {currentServer.name}:
-				<CopyText icon={LinkSvg} getTextFunc={makeURL} tooltip="Copy URL" />
+				<CopyText icon={LinkSvg} getTextFunc={makeURL}
+				 tooltip="Copy URL"
+				 svgStyle="filter: opacity(0.6);"
+				  />
 			</h2>
 			</div>
 			{#each texts as textGroup, i}

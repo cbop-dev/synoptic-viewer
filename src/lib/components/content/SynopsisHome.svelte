@@ -241,7 +241,7 @@
         --bg-saturation: 1.3;
         --bg-brightness: 160%;
         --bg-contrast: 0.4;
-        min-height: 100vh;
+        min-height: 90vh;
         background-color: var(--bg-app);
         background-image: var(--codex-img);
         background-size: 100%;

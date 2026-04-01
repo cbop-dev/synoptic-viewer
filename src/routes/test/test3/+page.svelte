@@ -245,7 +245,7 @@ style="--grainTexture: url('{grainTexture}')">
     --bg-page: #E6D5B8; 
   }*/
   .app-container {
-    min-height: 100vh;
+    min-height: 90vh;
     background-color: var(--bg-app);
     background-image: var(--codex-img);
     background-size: 100%;

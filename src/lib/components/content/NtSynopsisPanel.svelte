@@ -1394,7 +1394,7 @@
 					{#if myOptions.viewOptions.menuOpen}
 						<div class="options-dropdown m-auto dropdown text-left">
 							<ul
-								class="menu menu-horizontal  rounded-box z-1 mt-3 w-auto p-2 shadow text-left"
+								class="menu menu-horizontal  z-1 mt-3 w-auto p-2 shadow text-left"
 							>
 								{@render resultsButtons(true, 'li')}
 							</ul>

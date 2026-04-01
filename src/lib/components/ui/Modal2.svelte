@@ -30,6 +30,10 @@
 		hr {
 			@apply border-slate-400 m-2;
 		}
+
+		.modal-box{
+			background-color: var(--bg-modal,#eeeeee);
+		}
 		
 	</style>
 

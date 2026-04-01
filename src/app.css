@@ -208,6 +208,7 @@ div.bible-block {
     --bg-app:#DCCFB0;
     --bg-content: #f4f0e6;
     --bg-content-trans: 0.4;
+    --bg-modal: #e6eaf4;
 }
 
 /* TO USE: */
@@ -221,7 +222,7 @@ div.bible-block {
 }
 **/
 
-.gospel-column, .other{
+.gospel-column, .other, .column{
     /*@apply  sm:w-full  md:w-1/2;*/
     /* Apply drop-shadow to the wrapper so the mask doesn't clip it */
     filter: drop-shadow(0 15px 15px rgba(0, 0, 0, 0.5));
@@ -316,7 +317,7 @@ div.bible-block{
 
     h2 {
         @apply text-xl font-bold;
-       /* text-shadow: 1px 1px 3px black;*/
+       
 
     }
     
@@ -356,4 +357,7 @@ div.bible-block{
 }
 body{
     @apply absolute left-0 top-0 md:static md:left-auto md:top-auto;
+}
+.options-dropdown{
+    background-color: var(--bg-content,#eeeeee);
 }
