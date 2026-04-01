@@ -232,6 +232,7 @@
 <div id="bottom-div"></div>
 </div>
 <style>
+    @reference "tailwindcss";
     #app-container{
         /*--bg-app: #e2decb;*/
         --bg-content: var(--bg-content,#dfbc6b);
@@ -247,13 +248,13 @@
         background-repeat: no-repeat;
         background-position: center;
         background-attachment: fixed;
-        padding: 2rem;
+        @apply p-0 sm:p-2;
         font-family: 'SBL BibLit', 'Gentium Plus', 'Times New Roman', serif;
         transition: background-color 0.4s ease;
         background-blend-mode:soft-light;
         
     }
-     @reference "tailwindcss";
+     
 /*     @reference "../../../app.css"*/
      
 

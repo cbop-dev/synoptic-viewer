@@ -1470,22 +1470,7 @@
 						{#each paginatedFilteredPerGroups[myOptions.viewOptions.page] as group, index}
 							<!--<hr class="mb-2 !border-slate-200" />-->
 							<div class="anchor text-center section-heading {index == 0 ? 'first': ''}" id="section-{group.id}">
-								<h2 class="inline-block">
-									<u><b>{group.title}:</b></u><br />
-									{group.getRefs()}<CopyText
-										copyText={group.getRefs()}
-										tooltip="Copy parallel group references"
-										svgStyle="filter: opacity(0.7);"
-									/>
-								</h2>
-
-								<h3>
-									{#if group.lexIdenticalPhrasesLocations.length > 0}
-										<!-- (TODO: remove) Got some phrases: {group.lexIdenticalPhrasesLocations} -->
-									{:else}{/if}
-								</h3>
-							</div>
-							<div class="float-right mr-2 break-after-all">
+								<div class="float-right mr-2 break-after-all">
 								<a
 									href=""
 									class=""
@@ -1511,8 +1496,23 @@
 									>{/if}
 								<a href="#" class="inline" title="Top"><ArrowTop height={20} width={20} /></a>
 							</div>
+								<h2 class="inline-block">
+									<u><b>{group.title}:</b></u><br />
+									{group.getRefs()}<CopyText
+										copyText={group.getRefs()}
+										tooltip="Copy parallel group references"
+										svgStyle="filter: opacity(0.7);"
+									/>
+								</h2>
 
-							
+								<h3>
+									{#if group.lexIdenticalPhrasesLocations.length > 0}
+										<!-- (TODO: remove) Got some phrases: {group.lexIdenticalPhrasesLocations} -->
+									{:else}{/if}
+								</h3>
+
+							</div>
+
 							<div class="section-content">
 								<ParallelGospelSection
 									parGroup={group}
