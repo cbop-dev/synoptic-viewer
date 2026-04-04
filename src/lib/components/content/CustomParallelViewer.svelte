@@ -20,7 +20,7 @@
 
 	import ParallelGospelSection from './ParallelGospelSection.svelte';
 	import { mylog } from '$lib/env/env';
-	import * as bibleUtils from '$lib/n1904/bibleRefUtils.js';
+	import * as bibleUtils from '$lib/utils/bibleRefUtils.js';
 	import * as mathUtils from '$lib/utils/math-utils.js';
 	//import Button from '../ui/Button.svelte';
 	import ButtonSelect from '../ui/ButtonSelect.svelte';

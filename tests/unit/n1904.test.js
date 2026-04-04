@@ -1,5 +1,5 @@
 import { test, expect } from "vitest";
-import * as bibleUtils from "$lib/n1904/bibleRefUtils";
+import * as bibleUtils from "$lib/utils/bibleRefUtils";
 import { N1904Server } from "$lib/n1904/tfN1904";
 const n1904=new N1904Server();
 test('dummy', async () => {

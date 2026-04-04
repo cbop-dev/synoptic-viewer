@@ -1,5 +1,5 @@
 import { test, expect } from "vitest";
-import * as bibleUtils from "$lib/n1904/bibleRefUtils";
+import * as bibleUtils from "$lib/utils/bibleRefUtils";
 test('createNumArrayFromStringListRange', async () => {
 	const numLists =[
         {string: "1-2,5", array:[1,2,5]},

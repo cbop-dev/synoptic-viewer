@@ -1,8 +1,9 @@
 import { writable, get } from 'svelte/store';
 //export const testing =  import.meta.env.MODE =='test' ? true : false;
-export const testing = ((typeof process !== 'undefined') && process.env && process.env.TEST) || (import.meta.env.MODE =='test') ? true: false
+const forceTesting = false ; // || true;
+export const testing = forceTesting  || ((typeof process !== 'undefined') && process.env && process.env.TEST) || (import.meta.env.MODE =='test') ? true: false
 
-const useLocalTF=true;
+const useLocalTF= true;// && false;
 export const tfserverurl = useLocalTF ? "http://localhost:5000" : "";//add alternate tf-fast server
 
 export const useSbl=true;
@@ -10,9 +11,13 @@ export const useSbl=true;
 
 //const testing = true;
 
-export const apiURI= testing ? '' : '/api/tf';
+export const apiURI= false && testing ? '' : '/api/tf';
 
+/**
+ * @type {Writable<boolean>} debug
+ */
 export const debug = writable(false);
+
 //debug.set(true);
 
 //debug = true;
@@ -36,6 +41,9 @@ let defaultLevel = 0;
 //$: defaultLevel = debugLevel.value;
 //debugLevel.set(levels.DEBUG);
 
+/**
+ * @type {{levels:Object,debug:Writable<boolean>,debugLevel:number,log:function(string,boolean,number):void}} myLog
+ */
 export const myLog={
     levels:levels,
     debug:debug,

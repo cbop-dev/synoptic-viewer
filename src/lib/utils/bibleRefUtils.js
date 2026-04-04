@@ -1,5 +1,4 @@
 import { mylog } from "$lib/env/env";
-import { tfNtBooksDict } from "./ntbooks";
 import * as mathUtils from '$lib/utils/math-utils.js';
 
 var bibleRefReverseLookupHash = {};
@@ -161,6 +160,11 @@ export function refIncludes(containingRef, includedRef) {
     return passed;
 }
 
+/**
+ * 
+ * @param {string} str 
+ * @returns {string}
+ */
 export function cleanString(str){
     return str.replaceAll(/[\s_]+/g, ' ').trim();
 }
@@ -744,11 +748,13 @@ export function formatBibRefs(inputString){
 }
 
 
-/*
- * matchBookName: try to match input string 'lookup' with Bible book names or abbreviations, 
+/** *
+ * @description matchBookName: try to match input string 'lookup' with Bible book names or abbreviations, 
  * using a "fuzzy" search: if the input is substring in any book name or abbrevation, returns
  * the matching full book name  (lower case). This is a very generous fuzzy search: any match will do.
  * So, searching for "s" will always return "Genesis", since this is the first book name that contains "s".
+ * @param {string} lookup 
+ * @returns {string} the matching full book name (lower case)
  */
 function matchBookName(lookup) {
 	var book = ''
@@ -799,13 +805,13 @@ buildbibleRefReverseLookupHash();
  * @param {string} lookup 
  * @returns {string}
  */
-function getBookAbbrev(lookup)
+export function getBookAbbrev(lookup)
 {
 	const match = matchBookName(lookup)
 	return match ? bibleRefReverseLookupHash[match] : ''
 }
 
-function getBookOrder(bookName) 
+export function getBookOrder(bookName) 
 {
 	
 	/* bookName.length > 0 ? @@bookAbbrevMap.find_index { |k,v| k.include?(bookName) or v.map{|b| b.include?(bookName)}.include?(true)} : nil

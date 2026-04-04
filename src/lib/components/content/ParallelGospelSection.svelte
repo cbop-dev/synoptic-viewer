@@ -359,7 +359,7 @@ function isUnique(wordid, uniqueSet){
         {#each otherData.textRefs as textRef, index}
                  
                  
-                <div class="rounded-box other bg-base-200 inline-block m-1  text-left">
+                <div class="rounded-box other inline-block m-1  text-left">
                          <BibleTextBlock {textRef}  {parGroup} {options}  {numCols} copyButton={true} 
                     cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} {selectedGreekPalette} {selectedLexes}
                     {showNotes}  notesClick={showNotesFunction} 

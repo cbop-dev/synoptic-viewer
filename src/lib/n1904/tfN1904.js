@@ -14,7 +14,7 @@ import ntChaps from './tfN1904chaps.json';
 * @type {Object<number,{name:string,abbrev:string, syn:string[],words:number,chapters:number,lemmas:number}>} tfNtBooksDict
 */
 import { tfNtBooksDict } from './ntbooks.js';
-import * as bibleUtils from './bibleRefUtils.js';
+import * as bibleUtils from '../utils/bibleRefUtils.js';
 import * as TfUtils from '$lib/components/content/TfUtils.js';
 import { ParallelColumn, GospelPericopeGroup,TextAndRef,VerseWords,Word,GospelPericopeGroupIndices } from '$lib/components/content/parallelTexts.svelte';
 

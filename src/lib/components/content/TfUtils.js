@@ -3,7 +3,7 @@ import { ParallelColumn, ParallelColumnGroup, GospelPericopeGroup, TextAndRef, V
 import * as env from '$lib/env/env.js'
 import gospelParallels from '@cbop-dev/aland-gospel-synopsis'
 import { mylog } from "$lib/env/env";
-import * as BibleUtils from '$lib/n1904/bibleRefUtils.js'
+import * as BibleUtils from '$lib/utils/bibleRefUtils.js'
 import * as MathUtils from '$lib/utils/math-utils.js';
 import { LexemeInfo, LexStats } from "../datastructures/lexeme.js";
 import { GospelFilter } from "./SynopsisClasses.svelte.js";
@@ -439,7 +439,7 @@ export class TfServer {
 
 
     /**
-     * @type {Object<number,{name:string,abbrev:string, syn:string[],words:number,chapters:number,lemmas:number}>}
+     * @type {Object<number,{name:string,abbrev:string, syn:string[],words:number,chapters:number,lemmas:number}>} booksDict
      */
     booksDict = {};
     dbURI = "/nt";

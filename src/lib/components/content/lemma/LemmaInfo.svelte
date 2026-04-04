@@ -15,7 +15,7 @@ That is, the <LemmaInfo> tag should be surrounded by tags such as : {#key bookID
 	import CopyText from '$lib/components/ui/CopyText.svelte';
 	import { LexemeInfo, LexStats, LemmaBookStats } from '$lib/components/datastructures/lexeme';
 	import { TextAndRef } from '../parallelTexts.svelte';
-	import * as BibleUtils from '$lib/n1904/bibleRefUtils';
+	import * as BibleUtils from '$lib/utils/bibleRefUtils';
 	import ButtonSelect from '$lib/components/ui/ButtonSelect.svelte';
 	//import LemmaRefs from "./LemmaRefs.svelte";
 	import { onMount, untrack } from 'svelte';

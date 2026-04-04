@@ -16,7 +16,7 @@
 	import { mylog } from '$lib/env/env.js';
 	import Button from '../ui/Button.svelte';
 	import { LexemeInfo } from '../datastructures/lexeme.js';
-	import * as BibleUtils from '$lib/n1904/bibleRefUtils';
+	import * as BibleUtils from '$lib/utils/bibleRefUtils.js';
 	
 	import mathUtils from '$lib/utils/math-utils.js';
 

@@ -210,7 +210,8 @@ div.bible-block {
     --bg-app:#DCCFB0;
     --bg-content: #f4f0e6;
     --bg-content-trans: 0.4;
-    --bg-modal: #e6eaf4;
+    /*--bg-modal: #e6eaf4;*/
+    --bg-modal: color-mix(in srgb, var(--bg-content) 50%, white);
 }
 
 /* TO USE: */

@@ -112,6 +112,11 @@ export function getDivAnchorIdsArray(){
 export function copyToClipboard(text){
   navigator.clipboard.writeText(theText);
 }
+export 	function jumpToDiv(divId = '') {
+		if (divId) {
+			document.location = document.location.toString().split('#')[0] + '#' + divId;
+		}
+}
 
 export function jumpToPrevSection(){
     const nextId=findPrevAnchor()

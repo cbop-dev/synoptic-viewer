@@ -18,7 +18,7 @@
   let {
     buttonText = "",
     buttonSize="btn",
-    buttonColors="btn-primary  hover:bg-blue-700 focus:ring-blue-300 ",
+    buttonColors="btn-primary  hover:bg-blue-700 focus:ring-blue-300  hover:text-white",
     buttonStyle = "btn-outline  m-1 font-bold focus:outline-none focus:ring-4 ",
     textSize = "base",
     tooltip='',

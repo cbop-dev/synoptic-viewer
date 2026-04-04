@@ -140,13 +140,13 @@
     <div id="top-tab-bar" class="block top-1 left-0 z-100 w-full text-right fixed" bind:clientHeight={headerHeight}>
         
         
-        <div id="tabs" role="tablist" class="inline-block float-left top-0 tabs tabs-lifted">
+        <div id="tabs" role="tablist" class="inline-block tabs tabs-lifted self-baseline text-baseline">
             {#each panes as pane, index}
             <a role="tab" class="tab {selectedPane==index ? 'tab-active' : ''} " tabindex={index} onclick={()=>{selectedPane=index}} >
                 <span class="sm:inline hidden">{pane.name}</span><span class="inline sm:hidden">{pane.short}</span></a>
             {/each}
         </div>
-        <div class="inline-block mr-1 mt-1">
+        <div class="inline-block mr-1 mt-0.5 mb-0.5">
             
 				
             
@@ -307,6 +307,16 @@
 }
 #version-select-panel{
     background-color: color-mix(in srgb, var(--secondary-bg) 60%, transparent 40%);
+}
+
+#tabs{
+    position: absolute;
+    left:0;
+    bottom:0;
+    height:100%;
+}
+a.tab{
+    height:100%;
 }
 
 </style>

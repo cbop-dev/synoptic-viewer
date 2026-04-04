@@ -58,7 +58,7 @@ import { ColorUtils } from "$lib/utils/color-utils";
   </style>
   
   <button  data-tip={tooltip} disabled={!ready} {onclick} 
-  class="{tooltip ? 'tooltip' : ''} {textSize} {buttonStyle} {buttonType} shadow-xl 
+  class="{tooltip ? 'tooltip' : ''} {textSize} {buttonStyle} {buttonType} {buttonColors} shadow-xl 
   {style} {bgFontObj.bg && bgFontObj.font ? 'customVars' : ''}
   {tooltipbottom ? 'tooltip-bottom' : ''}"
   style={ColorUtils.bgFontString(bgFontObj.bg,bgFontObj.font)}

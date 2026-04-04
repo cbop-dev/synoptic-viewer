@@ -3,7 +3,7 @@ import { describe, it, expect,test} from 'vitest';
 import { mylog } from '$lib/env/env';
 import * as mathUtils from '$lib/utils/math-utils.js';
 import { GreekUtils } from '$lib/utils/greek-utils';
-import * as bibleRefUtils from '$lib/n1904/bibleRefUtils.js';
+import * as bibleRefUtils from '$lib/utils/bibleRefUtils.js';
 import * as StringUtils from '$lib/utils/string-utils.js';
 import * as ArrayUtils from  '$lib/utils/array-utils.js';
 test('dummy', async () => {

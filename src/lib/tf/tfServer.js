@@ -1,7 +1,7 @@
 
 //import { mylog } from '../env/env';
 import { mylog,apiURI,useSbl } from '$lib/env/env.js';
-import * as BibleUtils from '$lib/n1904/bibleRefUtils.js';
+import * as BibleUtils from '$lib/utils/bibleRefUtils.js';
 import TfUtils from '$lib/components/content/TfUtils';
 import { ParallelColumn, TextAndRef,VerseWords,Word } from '$lib/components/content/parallelTexts.svelte';
 import { N1904Server } from '$lib/n1904/tfN1904';

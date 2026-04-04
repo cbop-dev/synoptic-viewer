@@ -45,8 +45,8 @@ export const tfVulgateBooksDict = {
     long: "Luke"
   },
   596444: {
-    name: "Giov",
-    abbrev: "Giov",
+    name: "John",
+    abbrev: "John",
     syn: [
       "Giov",
       "Iohn",

@@ -3,8 +3,8 @@ import { ColorUtils } from "$lib/utils/color-utils";
 import { untrack } from "svelte";
 
 import { GreekUtils } from "$lib/utils/greek-utils";
-import { combineRefs, formatBibRefs, expandRefs } from '$lib/n1904/bibleRefUtils.js';
-import * as BibleUtils from '$lib/n1904/bibleRefUtils.js'
+import { combineRefs, formatBibRefs, expandRefs } from '$lib/utils/bibleRefUtils.js';
+import * as BibleUtils from '$lib/utils/bibleRefUtils.js'
 //import { findAllCommonSubarraysAmongHybrid } from "$lib/utils/sais-array2";
 import { findMaximalCommonSubarraysAcrossColumns2, findMaximalCommonTextPhrasesAcrossColumns } from "$lib/utils/column-subarrays2.js";
 import mathUtils from "$lib/utils/math-utils";

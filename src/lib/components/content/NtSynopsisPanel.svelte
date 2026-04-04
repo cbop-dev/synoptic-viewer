@@ -20,7 +20,7 @@
 	//import {tfServer,lexemes} from '$lib/sblgnt/sblgnt.js'
 	import ParallelGospelSection from './ParallelGospelSection.svelte';
 	import { mylog,myLog } from '$lib/env/env';
-	import * as bibleUtils from '$lib/n1904/bibleRefUtils.js';
+	import * as bibleUtils from '$lib/utils/bibleRefUtils.js';
 	import * as mathUtils from '$lib/utils/math-utils.js';
 	//import Button from '../ui/Button.svelte';
 	import ButtonSelect from '../ui/ButtonSelect.svelte';
@@ -184,10 +184,11 @@
 	);
 
 	/**
-	 * @type {{matt:number[], mark:number[], luke:number[], john:number[], other:number[]}[]} perGroupsIndices
+	 * @type {import('./parallelTexts.svelte.js').GospelPericopeGroupIndices[]} perGroupsIndices
 	 */
 	// let perGroupsIndices = $state([]); //indices of groupsRefsArray
 	let perGroupsIndices = $derived.by(() => {
+		/** @type {import('./parallelTexts.svelte.js').GospelPericopeGroupIndices[]} */
 		let retVal = [];
 		if (perGroups && perGroups.length) {
 			retVal = TfUtils.getGospelGroupRefsArrays(perGroups, true).groupsIndices;
@@ -195,9 +196,10 @@
 		return retVal;
 	});
 	/**
-	 * @type string[] groupsRefsArray
+	 * @type {string[]} groupsRefsArray
 	 */
 	let groupsRefsArray = $derived.by(() => {
+		/** @type {string[]} */
 		let retVal = [];
 		if (perGroups && perGroups.length) {
 			retVal = TfUtils.getGospelGroupRefsArrays(perGroups, true).refsArray;
@@ -240,8 +242,6 @@
 		//  myLog.log("sorting pericopes. Sorted state = " + alandPericopeNums.join(","));
 
 		perGroups = TfUtils.getGroupsArray(filteredPericopes, true,currentServer.lang);
-
-		 
 	}
 
 	/**
