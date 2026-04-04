@@ -4,8 +4,13 @@ import { json } from '@sveltejs/kit';
 //import { getServer } from '$lib/tf/tfServer.js';
 import {mylog, debug } from '$lib/env/env.js'
 //import { env } from '$env/dynamic/private';
-import { TF_SERVER_URL } from '$env/static/private';
-const tfserverurl = TF_SERVER_URL ? TF_SERVER_URL : "http://localhost:5000" ;//: ;//add alternate tf-fast server
+ //let TF_SERVER_URL='';
+
+//import env from '$env/static/private';
+const env = await import('$env/static/private');
+//mylog(`server.env.keys: ${Object.keys(env)}`,true);
+const tfserverurl = env?.TF_SERVER_URL ? env.TF_SERVER_URL : "http://localhost:5000" ;//: ;//add alternate tf-fast server
+//mylog(`tfserverurl=${tfserverurl}`,true)
 const debugOn = debug;// || true;
 
 

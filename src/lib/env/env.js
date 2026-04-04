@@ -4,15 +4,22 @@ const forceTesting = false ; // || true;
 export const testing = forceTesting  || ((typeof process !== 'undefined') && process.env && process.env.TEST) || (import.meta.env.MODE =='test') ? true: false
 const useLocalTF= true;// && false;
 import { browser } from '$app/environment';
-let env={};
+
+let env ={}
+
+
 let env2={}
-let TF_SERVER_URL="";
+//let TF_SERVER_URL="";
+
 if (!browser){
-    env=await import("$env/dynamic/private");
-    env2= await import('$env/static/private');
+    env = await import('$env/static/public');
+    //env=await import("$env/dynamic/private");
+    //env2= await import('$env/static/private');
+    
 }
-TF_SERVER_URL=env2?.TF_SERVER_URL || env?.TF_SERVER_URL;
-export const tfserverurl = useLocalTF ? "http://localhost:5000" : TF_SERVER_URL;//add alternate tf-fast server
+//TF_SERVER_URL=env2?.TF_SERVER_URL || env?.TF_SERVER_URL;
+
+export const tfserverurl = (useLocalTF || !env?.PUBLIC_TF_URL) ? "http://localhost:5000" : env.PUBLIC_TF_URL;//add alternate tf-fast server
 
 
 export const useSbl=true;
