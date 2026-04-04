@@ -32,7 +32,7 @@ export async function POST({ url, request, params, cookies }) {
 	//const theBody = await request.json();
 	const fetchurl =  tfserverurl+"/" + params.path;
 	const theBody = await request.json();
-	mylog(`POST request (using: ${tfserverurl}) to: ${fetchurl}`,debugOn)
+	mylog(`POST request (using: ${tfserverurl}) to: ${fetchurl}; debugOn=${debugOn}; debug=${debug}`,debugOn)
 	//mylog(" POST request body to forward: " + JSON.stringify(theBody));
 	const response = await fetch(fetchurl, {
 		method: "post",

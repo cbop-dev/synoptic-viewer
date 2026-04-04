@@ -2,6 +2,17 @@ import { writable, get } from 'svelte/store';
 
 const forceTesting = false ; // || true;
 export const testing = forceTesting  || ((typeof process !== 'undefined') && process.env && process.env.TEST) || (import.meta.env.MODE =='test') ? true: false
+const useLocalTF= true;// && false;
+import { browser } from '$app/environment';
+let env={};
+let env2={}
+let TF_SERVER_URL="";
+if (!browser){
+    env=await import("$env/dynamic/private");
+    env2= await import('$env/static/private');
+}
+TF_SERVER_URL=env2?.TF_SERVER_URL || env?.TF_SERVER_URL;
+export const tfserverurl = useLocalTF ? "http://localhost:5000" : TF_SERVER_URL;//add alternate tf-fast server
 
 
 export const useSbl=true;
@@ -12,7 +23,7 @@ export const apiURI= false && testing ? '' : '/api/tf';
 /**
  * @type {Writable<boolean>} debug
  */
-export const debug = writable(false);
+export const debug = false;
 
 //debug.set(true);
 
@@ -38,7 +49,7 @@ let defaultLevel = 0;
 //debugLevel.set(levels.DEBUG);
 
 /**
- * @type {{levels:Object,debug:Writable<boolean>,debugLevel:number,log:function(string,boolean,number):void}} myLog
+ * @type {{levels:Object,debug:boolean,debugLevel:number,log:function(string,boolean,number):void}} myLog
  */
 export const myLog={
     levels:levels,
@@ -60,7 +71,7 @@ export const myLog={
 
     
 }
-export function mylog(msg, debugOn=get(debug),thelevel=levels.INFO) {
+export function mylog(msg, debugOn=debug,thelevel=levels.INFO) {
     //mylog("mylog with debug val = " + get(debug))
     if (debugOn && thelevel >= defaultLevel ) {
      //   mylog("mylog level at " + defaultLevel)
