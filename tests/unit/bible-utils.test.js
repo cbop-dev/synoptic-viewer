@@ -76,13 +76,15 @@ test('getBookChapVerseFromRef',()=>{
         {input:"2 Sam", output: {book:"2 Sam", chap:null, v:null}},
         {input:"2 Sam 1", output: {book:"2 Sam", chap:"1", v:null}},
         {input:"Isa", output: {book:"Isa", chap:null, v:null}},
+        {input:"II_Corinthians 5:19", output: {book:"II_Corinthians", chap:"5", v:"19"}, replaceUnderScores:false},
+        {input:"II_Corinthians 5:19", output: {book:"II Corinthians", chap:"5", v:"19"}, replaceUnderScores:true},
     ]
 
     
 
     for (const t of tests){
         
-      expect(bu.getBookChapVerseFromRef(t.input)).toEqual(t.output);
+      expect(bu.getBookChapVerseFromRef(t.input,t.replaceUnderScores? true:false)).toEqual(t.output);
     }
 
 })
@@ -105,6 +107,18 @@ test('bookChapVerseToString',()=>{
     }
 
 })
-    
 
 
+
+test('cleanString', async () => {
+	const tests=[
+        {input: 'asdf_asdf', output: 'asdf asdf', replaceUnderscores:true},
+        {input: 'asdf_asdf', output: 'asdf_asdf', replaceUnderscores:false},
+
+    ];
+    for (const t of tests){
+        expect(bu.cleanString(t.input,t.replaceUnderscores)).toEqual(t.output);
+    }
+	expect(true).toBe(true);
+
+});

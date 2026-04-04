@@ -1082,7 +1082,7 @@
 	});
 	let showGospelFilterModal = $state(false);
 	$inspect('page:',myOptions.viewOptions.page);
-	//$inspect('groupsRefsArray:',groupsRefsArray);
+	$inspect('groupsRefsArray:',groupsRefsArray);
 	
 	//$inspect("fetchedTextsResponse",fetchedTextsResponse);
 	//$inspect("groupsRefsArray", groupsRefsArray);
@@ -1105,6 +1105,7 @@
 	//$inspect(`myOptions.viewOptions.page:${myOptions.viewOptions.page}`)
 	//$inspect("NTSynPanel, myOptions.viewOptions.gospelFilter:", myOptions.viewOptions.gospelFilter);
 	//$inspect("NTSymPan: gospelsExcluded:",gospelsExcluded);
+	//groupsRefsArray
 	$inspect('dataReady',dataReady);
 	$inspect('selectedLexes',selectedLexes);
 </script>

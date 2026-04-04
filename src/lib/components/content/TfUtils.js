@@ -2,13 +2,13 @@
 import { ParallelColumn, ParallelColumnGroup, GospelPericopeGroup, TextAndRef, VerseWords, Word, GospelPericopeGroupIndices } from "./parallelTexts.svelte.js";
 import * as env from '$lib/env/env.js'
 import gospelParallels from '@cbop-dev/aland-gospel-synopsis'
-import { mylog } from "$lib/env/env";
+import { mylog,debug } from "$lib/env/env.js";
 import * as BibleUtils from '$lib/utils/bibleRefUtils.js'
 import * as MathUtils from '$lib/utils/math-utils.js';
 import { LexemeInfo, LexStats } from "../datastructures/lexeme.js";
 import { GospelFilter } from "./SynopsisClasses.svelte.js";
 
-
+const debugOn=debug;
 
 /**
  * 
@@ -409,6 +409,7 @@ export function getGospelGroupRefsArrays(groupsArray, includeSecondary = false) 
 
 export class TfServer {
     static abbrev = 'Dummy Server!';
+    useUnderscores=false;
     lang='greek';
     ready = false;
     name = "TF Empty DB";
@@ -477,7 +478,7 @@ export class TfServer {
          */
         const bcvArray = [];
         for (const [i, ref] of refs.entries()) {
-            const bookCv = BibleUtils.getBookChapVerseFromRef(ref);
+            const bookCv = BibleUtils.getBookChapVerseFromRef(ref,!this.useUnderscores);
             bookCv.chap = bookCv.chap ? bookCv.chap.replaceAll(/[a-zA-Z]/g, '') : ''
             bookCv.v = bookCv.v ? bookCv.v.replaceAll(/[a-zA-Z]/g, '') : ''
             if (!bookCv.book) {
@@ -676,8 +677,10 @@ export class TfServer {
      * @param {string} theRef - reference to NT book, chapter, or verse. Eg., "Matt", "Matt 1", or "Matt 1:3"
      */
     async getNodeFromRef(theRef) {
-        const logPref = 'getNodeFromRef(' + theRef + '): ';
-        const bookChapVObj = BibleUtils.getBookChapVerseFromRef(theRef);
+
+        const logPref = `getNodeFromRef(${theRef},${!this.useUnderscores}): `;
+        
+        const bookChapVObj = BibleUtils.getBookChapVerseFromRef(theRef,!this.useUnderscores);
 
         let bookName = '';
         let theNode = 0;
@@ -686,6 +689,9 @@ export class TfServer {
             bookName = this.getBookNameBySyn(bookChapVObj.book)
 
 
+        }
+        else{
+            mylog(`${logPref}: no book provided for ${theRef}`,debugOn);
         }
 
         theNode = await this.tfGetNodeFromSection(bookName, bookChapVObj.chap, bookChapVObj.v);
@@ -734,6 +740,9 @@ export class TfServer {
             }
             const thenode = await this.jsonFetch(this.getApiUri() + uri);
             nodeid = Number(thenode) ? Number(thenode) : 0;
+        }
+        else{
+            mylog(`tfGetNodeFromSection: no book provided`,debugOn);
         }
 
         return nodeid;

@@ -183,10 +183,12 @@ export function refIncludes(containingRef, includedRef) {
  * @param {string} str 
  * @returns {string}
  */
-export function cleanString(str) {
+export function cleanString(str, replaceUnderscores=true) {
     //mylog(`cleanString(${str}): type of ${typeof str}`,true);
     
-    return str.replaceAll(/[\s_]+/g, ' ').trim();
+   const ret = replaceUnderscores ? str.replaceAll(/[\s_]+/g, ' ').trim() : str.replaceAll(/[\s]+/g, ' ').trim();
+   //mylog(`cleanString(${str}, ${replaceUnderscores})->${ret}`,true);
+   return ret;
 }
 
 /**
@@ -239,8 +241,9 @@ export function createNumArrayFromStringListRange(numString) {
  * @param {string} string 
  * @returns {{book:string|null, chap:string|null}}
  */
-export function splitBookChap(string) {
-    const matches = cleanString(string).match(/^(([1-4]+ *)?[a-zA-Z ]+)( +([0-9a-z-]+))?$/); //reading 'chapters' which might actually be verses, i.e., Jude 3a
+export function splitBookChap(string, replaceUnderscores=true) {
+    //reading 'chapters' which might actually be verses, i.e., Jude 3a
+    const matches = cleanString(string, replaceUnderscores).match(/^(([1-4]+[ _]*)?[a-zA-Z _]+)([ _]+([0-9a-z-]+))?$/); 
     let theBook = null, theChap = theBook;
 
     if (matches && matches.length >= 5) { //got chapter
@@ -288,10 +291,10 @@ export function bookChapVerseToString(bcv){
  * @returns {{book:string|null, chap:string|null, v:string|null}}
  */
 
-export function getBookChapVerseFromRef(refString) {
+export function getBookChapVerseFromRef(refString, replaceUnderscores=true) {
 
    // mylog(`getBookChapVerseFromRef(${refString})`, true);
-    refString = cleanString(refString);
+    refString = cleanString(refString, replaceUnderscores);
     let book = null, chap = book, v = book;
     //NB books with only 1 chap: [Phlm, Jude,2 John, 3 John]
     let badInput = false;
@@ -299,7 +302,7 @@ export function getBookChapVerseFromRef(refString) {
         let bookChap = '';
         [bookChap, v] = refString.split(":");
         if (v) { //got verses as expected
-            const bookChapObj = splitBookChap(bookChap);
+            const bookChapObj = splitBookChap(bookChap, replaceUnderscores);
             book = bookChapObj.book;
             chap = bookChapObj.chap;
         }
@@ -309,7 +312,7 @@ export function getBookChapVerseFromRef(refString) {
         }
     }
     else { //no verses, just book and chap
-        const bookChapObj = splitBookChap(refString);
+        const bookChapObj = splitBookChap(refString, replaceUnderscores);
         book = bookChapObj.book;
         chap = bookChapObj.chap;
         if (!chap) {

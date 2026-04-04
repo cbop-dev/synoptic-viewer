@@ -2,9 +2,13 @@
 //import { PUBLIC_BASE_URL } from '$env/static/public';
 import { json } from '@sveltejs/kit';
 //import { getServer } from '$lib/tf/tfServer.js';
-import {tfserverurl, mylog, debug } from '$lib/env/env.js'
-//const server="http://localhost:5000/"
-//const tfServer=getServer();
+import {mylog, debug } from '$lib/env/env.js'
+//import { env } from '$env/dynamic/private';
+import { TF_SERVER_URL } from '$env/static/private';
+const tfserverurl = TF_SERVER_URL ? TF_SERVER_URL : "http://localhost:5000" ;//: ;//add alternate tf-fast server
+const debugOn = debug;// || true;
+
+
 export async function GET({ url, params }) {
 	const uri = params.path;
 	const theParams=url.searchParams.toString();
@@ -28,7 +32,7 @@ export async function POST({ url, request, params, cookies }) {
 	//const theBody = await request.json();
 	const fetchurl =  tfserverurl+"/" + params.path;
 	const theBody = await request.json();
-	mylog("POST request to: "+fetchurl)
+	mylog(`POST request (using: ${tfserverurl}) to: ${fetchurl}`,debugOn)
 	//mylog(" POST request body to forward: " + JSON.stringify(theBody));
 	const response = await fetch(fetchurl, {
 		method: "post",

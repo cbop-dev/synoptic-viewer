@@ -1,15 +1,11 @@
 import { writable, get } from 'svelte/store';
-//export const testing =  import.meta.env.MODE =='test' ? true : false;
+
 const forceTesting = false ; // || true;
 export const testing = forceTesting  || ((typeof process !== 'undefined') && process.env && process.env.TEST) || (import.meta.env.MODE =='test') ? true: false
 
-const useLocalTF= true;// && false;
-export const tfserverurl = useLocalTF ? "http://localhost:5000" : "";//add alternate tf-fast server
 
 export const useSbl=true;
-//export const useSbl=false;
 
-//const testing = true;
 
 export const apiURI= false && testing ? '' : '/api/tf';
 

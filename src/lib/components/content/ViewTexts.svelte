@@ -42,11 +42,11 @@
         let text = ''
         ref2Show='';
         if (!texts[ref]){
-           // mylog(`gonna fetch text for '${ref}'`, true)
+           //mylog(`gonna fetch text for '${ref}'`, true)
             fetching=true;
             //const bcvArray = tfServer.getBCVarrayFromRefs([ref]);
             const node=await tfServer.getNodeFromRef(ref);
-           // mylog(`Gotta bcvArray: [${bcvArray}]`, true);
+           //mylog(`Gotta node: ${node}`, true);
             const response = node ? await tfServer.fetchText(node) : '';// tfServer.getTexts(bcvArray,false) : null;
             
             if (response && response.text){
@@ -64,9 +64,10 @@
         else{
             text = texts[ref];
             ref2Show=ref;
+           
             showModal=true;
         }
-        
+         //mylog(`setText('${ref}'): ${text}`,true);
     }
 
     let chosenRefIdx=$state(-1);
@@ -118,8 +119,9 @@
      function bCvToString(bcv, omitBook=false){
 
         let ret = bcv.chap + ":" +bcv.v;
-        if (!omitBook){
-            ret = (bcv.book ? bcv.book.replaceAll(" ","") + " ":'') + ret;
+        if (!omitBook && bcv.book){
+            //ret = (bcv.book ? bcv.book.replaceAll(" ","") + " ":'') + ret;
+            ret = bcv.book + " " + ret;
         }
 //        mylog(`bCvToString(${JSON.stringify(bcv)},${omitBook}) --> ${ret}`,true);
         return ret;
@@ -132,7 +134,7 @@
       */
 //     let textsFetched=$state({});
 
-
+$inspect('the refs',refs);
 //SD$inspect(`ref2Show: '${ref2Show}'; fetching:${fetching}; textReady=${textReady}`)
 </script>
 <div class="text-center">
@@ -182,7 +184,7 @@ Jump to book:<br/> {#each books as book}
         <Button buttonText={bCvToString(ref,true)} 
         buttonColors="btn-ghost" 
         buttonStyle="btn-sm p-0.5 m-0.5 hover:bg-slate-500 hover:text-white rounded"
-        onclick={()=>{chosenRefIdx=indexOffset+j; getText(bCvToString(ref)); showModal=true;}}
+        onclick={()=>{chosenRefIdx=indexOffset+j; getText(refs[chosenRefIdx]); showModal=true;}}
 
         />
     {/each}
@@ -210,7 +212,7 @@ Jump to book:<br/> {#each books as book}
 </Modal2>
 -->
 
-
+<!---->
 
 <Modal2 bind:showModal={showModal}>
 {#if ref2Show && !fetching}

@@ -1,4 +1,4 @@
-import { mylog } from "$lib/env/env";
+import { mylog } from "$lib/env/env.js";
 import * as mathUtils from '$lib/utils/math-utils.js';
 
 var bibleRefReverseLookupHash = {};
@@ -163,10 +163,10 @@ export function refIncludes(containingRef, includedRef) {
 /**
  * 
  * @param {string} str 
- * @returns {string}
+ * @returns 
  */
-export function cleanString(str){
-    return str.replaceAll(/[\s_]+/g, ' ').trim();
+export function cleanString(str,replaceUnderscores=true){
+    return replaceUnderscores ? str.replaceAll(/[\s_]+/g, ' ').trim() : str.replaceAll(/[\s]+/g, ' ').trim();
 }
 
 export function cleanNumString(numString){
@@ -212,27 +212,30 @@ export function createNumArrayFromStringListRange(numString){
 /**
  * 
  * @param {string} string 
+ * @param {boolean} [replaceUnderscores=true] 
  * @returns {{book:string|null, chap:string|null}}
+ * 
  */
-export function splitBookChap(string){
-    const matches = cleanString(string).match(/^(([1-3]+ +)?[a-zA-Z]+)( +([0-9a-z-]+))?$/); //reading 'chapters' which might actually be verses, i.e., Jude 3a
-    let theBook = null,theChap = theBook;
+export function splitBookChap(string, replaceUnderscores=true) {
+    //reading 'chapters' which might actually be verses, i.e., Jude 3a
+    const matches = cleanString(string, replaceUnderscores).match(/^(([1-4]+[ _]*)?[a-zA-Z _]+)([ _]+([0-9a-z-]+))?$/); 
+    let theBook = null, theChap = theBook;
 
-    if (matches && matches.length >=5){ //got chapter
+    if (matches && matches.length >= 5) { //got chapter
         theBook = matches[1];
         theChap = matches[4] ? matches[4] : null;
     }
-    else if(matches && matches[1]){//just a book
-        theBook=matches[1];
-      
+    else if (matches && matches[1]) {//just a book
+        theBook = matches[1];
+
     }
-    else{
+    else {
         //error
-        mylog("splitBookChap could not parse '"+string+"'");
+        mylog("splitBookChap could not parse '" + string + "'");
     }
 
-   // mylog("splitBookChap(string)->{b:" + theBook + ", c:"+theChap+"}");
-    return {book: theBook, chap: theChap}
+//    mylog("splitBookChap(string)->{b:" + theBook + ", c:"+theChap+"}",true);
+    return { book: theBook, chap: theChap }
 }
 
 
@@ -243,10 +246,10 @@ export function splitBookChap(string){
  * @returns {{book:string|null, chap:string|null, v:string|null}}
  */
 
-export function getBookChapVerseFromRef(refString){
+export function getBookChapVerseFromRef(refString,replaceUnderscores=true){
 
 
-    refString=cleanString(refString);
+    refString=cleanString(refString,replaceUnderscores);
     let book = null,  chap = book, v = book;
     //NB books with only 1 chap: [Phlm, Jude,2 John, 3 John]
     let badInput = false;
@@ -254,7 +257,7 @@ export function getBookChapVerseFromRef(refString){
         let bookChap ='';
         [bookChap,v] = refString.split(":");
         if (v){ //got verses as expected
-            const bookChapObj = splitBookChap(bookChap);
+            const bookChapObj = splitBookChap(bookChap,replaceUnderscores);
             book = bookChapObj.book;
             chap = bookChapObj.chap;
         }
@@ -264,7 +267,7 @@ export function getBookChapVerseFromRef(refString){
         }
     }
     else { //no verses, just book and chap
-        const bookChapObj = splitBookChap(refString);
+        const bookChapObj = splitBookChap(refString,replaceUnderscores);
         book = bookChapObj.book;
         chap = bookChapObj.chap;
         if(!chap){
@@ -280,8 +283,8 @@ export function getBookChapVerseFromRef(refString){
  * @param {string} string  - chapter and verse(s). E.g.,  "1:3" or "2" or even "2-3" (w/o verses)
  * @returns {{chapter:string, verse:string}}
  */
-export function getChapVerseFromRef(string){
-    string = cleanString(string);
+export function getChapVerseFromRef(string,replaceUnderscores=true){
+    string = cleanString(string,replaceUnderscores);
     const vSplit = string.split(":");
     const chap = vSplit.length > 0 ? vSplit[0] : null;
     const v = vSplit.length > 0 ? (vSplit[1] ? vSplit[1] : null) : null;
@@ -369,20 +372,20 @@ export function sortChapVerseFunc(ref1, ref2) {
  *  E.g,: expandRefs("2 Tim 1:12; 2:3)"-->["2 Tim 1:12", "2 Tim 2:3"]; 
  *  and : expandRefs("Matt 3:2-10")-->["Matt 3:2", "Matt 3:3", ... "Matt 3:10"]
  */
-export function expandRefs(refString,splitVerseRanges=true){
+export function expandRefs(refString,splitVerseRanges=true,replaceUnderscores=true){
     const refArray = [];
-    refString = cleanString(refString);
+    refString = cleanString(refString,replaceUnderscores);
     let latestBook = '';
     for (const ref of refString.split(";").filter((s)=>s)){
         if(ref.length) {
-            let bookCv = getBookChapVerseFromRef(ref);
+            let bookCv = getBookChapVerseFromRef(ref,replaceUnderscores);
             mylog("expandRefs: bookCv of '"+ref +"'= "+[bookCv.book,bookCv.chap,bookCv.v].join(','));
             if (bookCv.book){
                 latestBook = bookCv.book;
             }
             else if (latestBook){
                 
-                bookCv = getBookChapVerseFromRef(latestBook + " " + ref);
+                bookCv = getBookChapVerseFromRef(latestBook + " " + ref,replaceUnderscores);
             }
             
             if(bookCv.book) {
