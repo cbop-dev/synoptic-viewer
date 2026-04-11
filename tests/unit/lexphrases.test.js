@@ -2,6 +2,8 @@ import { describe, it, expect,test} from 'vitest';
 import { mylog } from '$lib/env/env';
 import { GospelPericopeGroup, LexicalPhrase } from '$lib/components/content/parallelTexts.svelte';
 import { LexPhraseAndLocations, ParallelPhraseLocation } from '$lib/components/content/parallelTexts.svelte.js';
+import { SblGntServer } from '$lib/sblgnt/sblgnt';
+
 
 test('basic lexical phrase test!', async () => {
 	
@@ -50,7 +52,10 @@ test('calcMathTypes and reverse tests!', async () => {
 
     const tests=[
        {colsIndices: [1,2],numCols:4,matchTypeIndex:2},
-       {colsIndices: [0,1,2],numCols:5,matchTypeIndex:3}
+       {colsIndices: [0,1,2],numCols:5,matchTypeIndex:3},
+       {colsIndices: [0,1],numCols:2,matchTypeIndex:0},
+       {colsIndices: [0],numCols:2,matchTypeIndex:-1},
+       {colsIndices: [2],numCols:4,matchTypeIndex:-1}
 
 
     ]
@@ -64,8 +69,9 @@ test('calcMathTypes and reverse tests!', async () => {
         t.colsIndices.map((col)=>new ParallelPhraseLocation(col)));
         const matchIndex = lexPhraseAndLocations.calcMatchTypeIndex(t.numCols);
         expect(matchIndex).toEqual(t.matchTypeIndex);
-        expect(LexPhraseAndLocations.reverseCalcColumnMatchesFromMatchTypeIndex(matchIndex,t.numCols)?.map((b,i)=>[b,i])
-        .filter(([b,i])=>b).map(([b,i])=>i)).toEqual(t.colsIndices);
+        if (matchIndex >= 0)
+            expect(LexPhraseAndLocations.reverseCalcColumnMatchesFromMatchTypeIndex(matchIndex,t.numCols)?.map((b,i)=>[b,i])
+            .filter(([b,i])=>b).map(([b,i])=>i)).toEqual(t.colsIndices);
         //expect(true).toBe(false);
     }
 

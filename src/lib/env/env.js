@@ -5,13 +5,15 @@ export const testing = forceTesting  || ((typeof process !== 'undefined') && pro
 const useLocalTF= true;// && false;
 import { browser } from '$app/environment';
 
-let env ={}
+let env ={
+    //PUBLIC_TF_URL:"http://localhost:5000"
+}
 
 
 let env2={}
 //let TF_SERVER_URL="";
 
-if (!browser){
+if (!browser || testing){
     env = await import('$env/static/public');
     //env=await import("$env/dynamic/private");
     //env2= await import('$env/static/private');
@@ -19,18 +21,21 @@ if (!browser){
 }
 //TF_SERVER_URL=env2?.TF_SERVER_URL || env?.TF_SERVER_URL;
 
-export const tfserverurl = (useLocalTF || !env?.PUBLIC_TF_URL) ? "http://localhost:5000" : env.PUBLIC_TF_URL;//add alternate tf-fast server
+export const tfserverurl = env?.PUBLIC_TF_URL || "";//add alternate tf-fast server
 
 
 export const useSbl=true;
 
 
-export const apiURI= false && testing ? '' : '/api/tf';
+export const apiURI= testing ? '' : '/api/tf';
+
+
 
 /**
  * @type {Writable<boolean>} debug
  */
 export const debug = false;
+
 
 //debug.set(true);
 
@@ -54,6 +59,9 @@ let defaultLevel = 0;
 })*/
 //$: defaultLevel = debugLevel.value;
 //debugLevel.set(levels.DEBUG);
+
+
+
 
 /**
  * @type {{levels:Object,debug:boolean,debugLevel:number,log:function(string,boolean,number):void}} myLog
@@ -126,3 +134,5 @@ if(testing){
 else{
     mylog("NOT Testing.")
 }
+
+//mylog(`tfserverurl=${tfserverurl}; apiURI=${apiURI}`,true);

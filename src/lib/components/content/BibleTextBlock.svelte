@@ -137,21 +137,33 @@
 				return numNextMatches > numBestMatches  ? next : mostColumnsMatch;
 			});
 			
-			
-			const colorObj = parGroup.lexIdenticalPhrasePalette[lexPhrasesLocMostMatches.calcMatchTypeIndex(parGroup.parallelColumns.length)] 
+			let colorIndex = lexPhrasesLocMostMatches.calcMatchTypeIndex(parGroup.maxMatchCols ? parGroup.maxMatchCols : parGroup.parallelColumns.length);
+
+			if (colorIndex >= parGroup.lexIdenticalPhrasePalette.length || colorIndex < 0){
+//				mylog(`getWordStyle(${word.word}) invalid colorIndex: ${colorIndex}, maxMatchCols=${parGroup.maxMatchCols}; but parGroup.lexIdenticalPhrasePalette=${parGroup.lexIdenticalPhrasePalette.length}; resetting to last index!`,true)
+				colorIndex = parGroup.lexIdenticalPhrasePalette.length -1;
+			}
+			const colorObj = parGroup.lexIdenticalPhrasePalette[colorIndex] 
+
 			//        if (options.viewOptions.similarPhrases) {
 			if (colorObj) {
 				ret = ColorUtils.bgFontString(colorObj.bg, colorObj.font, colorObj.border);
 			}
-			if(!ret){
-				//mylog(`BibleBlock.getWorStyle(${word.word}) got no color! Color obj.bg=${colorObj?.bg}`,true);
+			else{
+//				mylog(`BibleBlock: got no colorObj for parGroup.lexIdenticalPhrasePalette.length=${parGroup.lexIdenticalPhrasePalette.length}, colorIndex=${colorIndex}`,true);
 			}
-
+			if(!ret){
+//				mylog(`BibleBlock.getWorStyle(${word.word}) got no color! Color obj.bg=${colorObj?.bg}`,true);
+				if (colorIndex >= parGroup.lexIdenticalPhrasePalette.length){
+//					mylog(`getWordStyle(${word.word}) got no colorObj!  colorIndex=${colorIndex}; but parGroup.lexIdenticalPhrasePalette=${parGroup.lexIdenticalPhrasePalette.length}`,true)
+				}
+			}
+			
 		}
 
 		return ret;
 	}
-//$inspect('parGroup.lexIdenticalPhrasePalette',parGroup.lexIdenticalPhrasePalette);
+$inspect('parGroup.lexIdenticalPhrasePalette',parGroup.lexIdenticalPhrasePalette);
 
 </script>
 

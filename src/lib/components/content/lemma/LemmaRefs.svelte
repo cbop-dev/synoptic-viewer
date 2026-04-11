@@ -10,7 +10,7 @@
     //import { LexQuery, LexQueryFilter } from "./LexQuery.svelte.js";
     //import LxxTextsDisplay from "./LxxTextsDisplay.svelte";
     //const getLexUrl = server + "getrefs/"
-//    let getLexUrl = "http://tf.lxx.cbop.faith:5000/getrefs/"
+
 
     //let query =$state(new LexQuery());
 

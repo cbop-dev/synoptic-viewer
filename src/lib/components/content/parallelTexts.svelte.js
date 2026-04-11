@@ -410,14 +410,16 @@ export class LexPhraseAndLocations {
     }
 
     /**
-     * @description Computes the "index" of a match type, where the match type is determined by the combination of columns in which the phrase is found when this includes at least 2 columns.
+     * @description Computes the "index" of a match type, where the match type is determined by the combination of columns 
+     * in which the phrase is found when this includes at least 2 columns.
      * The total number of possible match combination is 2^n - n - 1, where n is the number of columns in the ParallelColumn groups.
      * The index is computed by treating the columns ALMOST like bits in a binary number, where the least significant bit is the first column, and the most significant bit is the last column. 
      * BUT, any "binary number" with only 1 bit set is skipped, since that would mean the phrase is only found in one column.
-     * @param {number} numColumns 
-     * @returns {number} the index of the type of match Returns -1 if fewer than 2 flags are active.
+     * @param {number} numColumns - the number of columns in the ParallelColumn group (to check for matches) (what happens if this is different than the actual columns?)
+     * @returns {number} the index of the type of match. Returns -1 if fewer than 2 flags are active.
      */
     calcMatchTypeIndex(numColumns) {
+        
         const phraseColumnFlags = ArrayUtils.newArray(numColumns, false);
 
         //NB: each item in this.multiColumnLocations has a column (number) property, corresponding to the column index, from left to right.
@@ -450,8 +452,12 @@ export class LexPhraseAndLocations {
                 singleBitOffsets++;
             }
         }
-
-        return bitValue - 1 - singleBitOffsets;
+        
+        const ret =  bitValue - 1 - singleBitOffsets;
+        if (ret >= 0){
+          //  mylog(`calcMatchType(${numColumns}):${bitValue} - 1 - ${singleBitOffsets} = ${bitValue - 1 - singleBitOffsets}`,true)
+        }
+        return ret;
     }
 
 
@@ -517,6 +523,10 @@ export class ParallelColumnGroup {
      */
     parallelColumns = $state([]);
 
+    // the number of columns where we care about finding matches
+    //must be set manually if it is to be ued
+    //matchColNum = $derived(0);
+
     /** 
     * @type {number[]}
     * @description used when finding matching phrases (lex identical and perfect), such that if the column index is in this array, that columns texts are ignore for the column matching!
@@ -526,9 +536,9 @@ export class ParallelColumnGroup {
      * 
      * @param {ParallelColumn[]} parTexts 
      */
-    constructor(parTexts = [],paletteMatchCols=parTexts.length,lang="greek") {
+    constructor(parTexts = [],lang="greek") {
         this.parallelColumns = parTexts;
-        this.paletteMatchCols=paletteMatchCols;
+        this.maxMatchCols=this.parallelColumns.length;
         this.lang=lang;
     }
 
@@ -809,21 +819,9 @@ export class ParallelColumnGroup {
             //obj.css.add('underline').add('bold').add('bg-yellow-50');
         });
 
-        //this.lexIdenticalPhrasePalette=ColorUtils.generateHslBgFontPalette(this.lexIdenticalPhrasesLocations.length,60,70,true);
-        
-        //previous: by number of matchesphrases
-        //this.lexIdenticalPhrasePalette = ColorUtils.myColorPalette(this.lexIdenticalPhrasesLocations.length, 0, 2);
 
-        //new: by columns matche-types: that is, by which combination of the columns match. 
-        // this formula as follows: the sum of all r=n...2 for n choose r, where n is the number of columns, and r is the number of columns that match.
-        // we can figure this out as: (sum of r=n...0 for n choose r) - (sum of r=1...1 for n choose r) - (sum of r=1...0 for n choose r)  
-        // this comes to: 2^n - n - 1. 
-        // thus:  2^numCols - numCols - 1.
-        //const numMatchTypes = 2**this.paletteMatchCols - this.paletteMatchCols - 1;
-        //mylog(`buildLexIdenticalPhrases(): numCols = ${this.paletteMatchCols}; numMatchTypes=${numMatchTypes}`,true);
-        //this.lexIdenticalPhrasePalette = ColorUtils.myColorPalette(numMatchTypes, 0, 1,7);
 
-        this.lexIdenticalPhrasePalette=ParallelColumnGroup.getLexIdenticalPhrasePalette(this.paletteMatchCols);
+        this.lexIdenticalPhrasePalette=ParallelColumnGroup.getLexIdenticalPhrasePalette(this.parallelColumns.length);
         
         //TODO: figure out how to use this index!!
     }
@@ -832,10 +830,15 @@ export class ParallelColumnGroup {
      * 
      * @param {number} cols 
      */
-    static getLexIdenticalPhrasePalette(cols){
-        const numMatchTypes = 2**cols - cols - 1;
+    static getLexIdenticalPhrasePalette(cols,includeExtraMiscColor=true){
+        //would be 2**cols - cols - 1 if we didn't have the extra misc color, because this would be
+        // the total number of possible matching columns.
+        const numMatchTypes = 2**cols - cols - (includeExtraMiscColor?0:1);
+        
         //mylog(`buildLexIdenticalPhrases(): numCols = ${this.paletteMatchCols}; numMatchTypes=${numMatchTypes}`,true);
-        return ColorUtils.myColorPalette(numMatchTypes, 0, 1,7);
+        const pal= ColorUtils.myColorPalette(numMatchTypes, 0, 1,7);
+//        mylog(`getLexIdenticalPhrasePalette(${cols}): numMatchTypes=${numMatchTypes}; pal.length=${pal.length}`,true);
+        return pal;
     }
     /**
      * 
@@ -946,11 +949,7 @@ export class ParallelColumnGroup {
         const vWordsIdx = parLocation.singleColumnLocation.vWordIndices;
         const tR = this.getTextRefByLocation(parLocation);
 
-        /*parLocation.secondary ?
-            this.parallelColumns[parLocation.column].secondary[parLocation.singleColumnLocation.trIndex] 
-            :
-            this.parallelColumns[parLocation.column].textRefs[parLocation.singleColumnLocation.trIndex];
-            */
+        
 
         const words = tR ? vWordsIdx.map((vw) => tR.getWordByIndices(vw.verseIndex, vw.wordIndex)).filter((w) => w != null) : [];
         return words ? words : [];
@@ -1066,6 +1065,7 @@ export class GospelPericopeGroup extends ParallelColumnGroup {
         this.luke = luke;
         this.john = john;
         this.other = other;
+        this.maxMatchCols=4;
 
     }
 
