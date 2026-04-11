@@ -21,7 +21,7 @@ if (!browser || testing){
 }
 //TF_SERVER_URL=env2?.TF_SERVER_URL || env?.TF_SERVER_URL;
 
-export const tfserverurl = env?.PUBLIC_TF_URL || "";//add alternate tf-fast server
+export const tfserverurl = env?.PUBLIC_TF_URL || "http://localhost:5000";//add alternate tf-fast server
 
 
 export const useSbl=true;
