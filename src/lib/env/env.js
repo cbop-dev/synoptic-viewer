@@ -14,7 +14,7 @@ let env2={}
 //let TF_SERVER_URL="";
 
 if (!browser || testing){
-    env = await import('$env/static/public');
+   // env = await import('$env/static/public');
     //env=await import("$env/dynamic/private");
     //env2= await import('$env/static/private');
     
@@ -27,7 +27,7 @@ export const tfserverurl = env?.PUBLIC_TF_URL || "";//add alternate tf-fast serv
 export const useSbl=true;
 
 
-export const apiURI= testing ? '' : '/api/tf';
+export const apiURI= testing && tfserverurl ? '' : '/api/tf';
 
 
 
