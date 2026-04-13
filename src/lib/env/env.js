@@ -14,7 +14,7 @@ let env ={
 
 let env2={}
 //let TF_SERVER_URL="";
-const serverUrl=PUBLIC_TF_URL;
+const serverUrl=PUBLIC_TF_URL.length ? PUBLIC_TF_URL : env?.PUBLIC_TF_URL ? env.PUBLIC_TF_URL : "http://localhost:5000";
 
 //browser ? page.url.protocol+ "://" + page.url.host + (page.url.port ? ":" + page.url.port : "") : "http://localhost:5000";
 if (!browser || testing){
@@ -31,7 +31,7 @@ else {
 
 
 //what is this for???!?!??!?!?
-export const tfserverurl = env?.PUBLIC_TF_URL || serverUrl ||'http://localhost:5000'; //page.url.protocol+"://"+page.url.host + (page.url.port ? ":"+page.url.port : ""); //http://localhost:5000";//add alternate tf-fast server
+export const tfserverurl = serverUrl; //env?.PUBLIC_TF_URL || serverUrl ||'http://localhost:5000'; //page.url.protocol+"://"+page.url.host + (page.url.port ? ":"+page.url.port : ""); //http://localhost:5000";//add alternate tf-fast server
 
 
 export const useSbl=true;
