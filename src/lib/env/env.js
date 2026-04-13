@@ -5,7 +5,7 @@ export const testing = forceTesting  || ((typeof process !== 'undefined') && pro
 const useLocalTF= true;// && false;
 import { browser } from '$app/environment';
 import { page } from '$app/state';
-
+import {PUBLIC_TF_URL} from '$env/static/public';
 let env ={
     
     //PUBLIC_TF_URL:"http://localhost:5000"
@@ -14,7 +14,9 @@ let env ={
 
 let env2={}
 //let TF_SERVER_URL="";
-const serverUrl= browser ? page.url.protocol+ "://" + page.url.host + (page.url.port ? ":" + page.url.port : "") : "";
+const serverUrl=PUBLIC_TF_URL;
+
+//browser ? page.url.protocol+ "://" + page.url.host + (page.url.port ? ":" + page.url.port : "") : "http://localhost:5000";
 if (!browser || testing){
    // env = await import('$env/static/public');
     //env=await import("$env/dynamic/private");
@@ -29,7 +31,7 @@ else {
 
 
 //what is this for???!?!??!?!?
-export const tfserverurl = env?.PUBLIC_TF_URL || serverUrl; //page.url.protocol+"://"+page.url.host + (page.url.port ? ":"+page.url.port : ""); //http://localhost:5000";//add alternate tf-fast server
+export const tfserverurl = env?.PUBLIC_TF_URL || serverUrl ||'http://localhost:5000'; //page.url.protocol+"://"+page.url.host + (page.url.port ? ":"+page.url.port : ""); //http://localhost:5000";//add alternate tf-fast server
 
 
 export const useSbl=true;
