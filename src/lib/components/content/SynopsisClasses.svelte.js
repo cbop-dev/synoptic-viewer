@@ -286,6 +286,8 @@ export class SynopsisOptions3{
         lexes: {type: 'intArray', split: ",", category: 'view'},
         similarPhrases: {type: 'boolean', category: 'view'},
         exactPhrases: {type: 'boolean', category: 'view'},
+       // exactHighlights: {type: 'intArray', split: ",", category: 'view'}, //list integers: indices of exact matches to highlight
+        //similarHighlights: {type: 'intArray', split: ",", category: 'view'}, //list integers: indices of similar matches to highlight
         selectedGospelIndex: {type:"int",default:0, category: 'view'},
         greekStrings: {type: 'strArray', split: "|", category: 'view'},
         tab: {type:"int",default:0, category: 'request'},

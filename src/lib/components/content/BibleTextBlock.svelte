@@ -48,10 +48,12 @@
 	 * selectedLexes:number[]
 	 * uniqueSet:  Set<number>
 	 * options:SynopsisOptions3
-	 * notesClick:  function
-	 * wordClick:  function,
+	 * notesClick:  function():void
+	 * wordClick:  function(number,number):void,
 	 * selectedGreekPalette:{bg:string,font:string,border:string}[]
 	 * lexInfoDict:Object<number,LexemeInfo>
+	 * highlightedLexicalIndices:number[]
+	 * highlightedExactIndices:number[]
 	 * }}
 	 */
 	let {
@@ -70,13 +72,15 @@
 		selectedGreekPalette = [],
 		//based on strings: key:string, value:
 		cssCustomStringDict = {},
-		//        cssUniqueColor="border-black",
+		//        cssUniqueColor="border-black",	
 		showNotes = true,
 		uniqueSet = new Set(),
 		//options.viewOptions.highlightOnClick=$bindable(false),
 		notesClick = () => {},
 		wordClick = (wordid, bookid) => {},
-		lexInfoDict = {}
+		lexInfoDict = {},
+		highlightedLexicalIndices = $bindable([]),
+		highlightedExactIndices = $bindable([]),
 		// options.viewOptions.hideApp=false,
 	} = $props();
 	/**
@@ -93,6 +97,60 @@
 		return retVal;
 	}
 	//$inspect(`<BibleTextBlock>: textRef.ref=${textRef.reference}`)
+	/**
+	 * @type {number[]} highlightedLexicalIndices
+	*/
+	//let highlightedLexicalIndices = $state([]);
+	
+	/**
+	 * @type {number[]} highlightedExactIndices
+	*/
+	//let highlightedExactIndices = $state([]);
+	
+	
+	/**
+	 * 
+	 * @param {number} wordid
+	 * @param {number} bookid
+	 * @param {number[]} exactPhraseIndices 
+	 * @param {number[]} lexicalPhraseIndices 
+	 **/
+	function myWordClick(wordid,bookid,lexicalPhraseIndices,exactPhraseIndices){
+		
+		wordClick(wordid,bookid);
+		if (options.viewOptions.exactPhrases || options.viewOptions.similarPhrases){
+//			mylog(`myWordclick(). adding exacts: [${exactPhraseIndices.join(',')}]!`, true);
+			togglePhraseHighlights(lexicalPhraseIndices,exactPhraseIndices);
+			//lexicalPhraseIndices.forEach((index)=>{if (!highlightedLexicalIndices.includes(index)) highlightedLexicalIndices.push(index)});
+			//exactPhraseIndices.forEach((index)=>{if (!highlightedExactIndices.includes(index)) highlightedExactIndices.push(index)});
+			
+			
+		}
+	}
+
+	/**
+	 * 
+	 * @param {number[]} lexicalPhraseIndices
+	 * @param {number[]} exactPhraseIndices
+	 */
+	function togglePhraseHighlights(lexicalPhraseIndices,exactPhraseIndices){
+		if (options.viewOptions.similarPhrases){
+			lexicalPhraseIndices.forEach((index)=>{
+				if (!highlightedLexicalIndices.includes(index)) 
+					highlightedLexicalIndices.push(index);
+				else	
+					highlightedLexicalIndices.splice(highlightedLexicalIndices.indexOf(index),1);
+			});
+		}
+		if 	(options.viewOptions.exactPhrases){
+			exactPhraseIndices.forEach((index)=>{
+				if (!highlightedExactIndices.includes(index)) 
+					highlightedExactIndices.push(index);
+				else
+					highlightedExactIndices.splice(highlightedExactIndices.indexOf(index),1);
+			});
+		}
+	}
 
 	selectedLexes = options.viewOptions.lexes;
 
@@ -163,8 +221,9 @@
 
 		return ret;
 	}
-$inspect('parGroup.lexIdenticalPhrasePalette',parGroup.lexIdenticalPhrasePalette);
-
+//$inspect('parGroup.lexIdenticalPhrasePalette',parGroup.lexIdenticalPhrasePalette);
+$inspect('highlightedLexicalIndices',highlightedLexicalIndices);
+$inspect('highlightedExactIndices',highlightedExactIndices);
 </script>
 
 <div
@@ -244,21 +303,37 @@ $inspect('parGroup.lexIdenticalPhrasePalette',parGroup.lexIdenticalPhrasePalette
 						{@const customMatchIndex = customMatchSearchStrings.length
 							? options.viewOptions.greekStrings.indexOf(customMatchSearchStrings[0])
 							: -1}
+
+						{@const exactPhraseIndices = word.phrases.exact.map((pLoc)=>pLoc.phraseIndex)}
+						{@const lexicalPhraseIndices = word.phrases.lexical.map((pLoc)=>pLoc.phraseIndex)}
 						<!-- {#if customMatchIndex > -1 }Got match index={customMatchIndex}{/if}-->
 						<span
 							class={[
 								'word',
-								word.phrases.lexical.length ? 'lexical' : '',
-								isIdentical ? 'identical' : '',
-								word.phrases.exact.length ? 'exact' : '',
+								word.phrases.lexical.length ? 
+									'lexical ' +  	word.phrases.lexical.map((pLoc)=>'lexical-' + pLoc.phraseIndex).join(' ') 
+									: '',
+								isIdentical ? 'identical'	: '',
+								word.phrases.exact.length ? 
+									'exact ' + 
+										word.phrases.exact.map((pLoc)=>'exact-' + pLoc.phraseIndex).join(' ') 
+									: '',
 								isUnique(word.id, uniqueSet) ? 'unique' : '',
 								selectedLexIndex >= 0 ? 'selected selected-lex' : '',
-								customMatchIndex >= 0 ? 'selected selected-custom' : ''
+								customMatchIndex >= 0 ? 'selected selected-custom' : '',
+								options.viewOptions.exactPhrases && new Set(exactPhraseIndices).intersection(new Set(highlightedExactIndices)).size ? 'highlighted-exact' :'',
+								options.viewOptions.similarPhrases && new Set(lexicalPhraseIndices).intersection(new Set(highlightedLexicalIndices)).size ?'highlighted-lexical':''
+
+									
+								
+								
 							]}
 							style={getWordStyle(word, selectedLexIndex, customMatchIndex)}
 							onclick={() => {
-								wordClick(word.id, book);
-							}}>{getText([word], options.viewOptions.hideApp)}{' '}</span
+								myWordClick(word.id, book, lexicalPhraseIndices,exactPhraseIndices);
+							}}>{getText([word], options.viewOptions.hideApp)}{' '}
+							
+							</span
 						>
 
 						<!--                  <WordComp {word} wordIndex={index}
@@ -365,7 +440,7 @@ $inspect('parGroup.lexIdenticalPhrasePalette',parGroup.lexIdenticalPhrasePalette
 	
 
 	:not(.hide-similar) .word.lexical:not(.selected) {
-		background-color: hsl(from var(--bgColor, black) h s l / 40%);
+		background-color: hsl(from var(--bgColor, black) h s l / 60%);
 		/*background-color: hsl(from var(--bgColor, black) h s l / 40%);*/
 		/* color: black; /*hsl(var(--fontColor,black) h s 0.3 / 60%);*/
 	text-shadow: 2px 2px 2px rgba(0,0,0,0.3);
@@ -377,7 +452,7 @@ $inspect('parGroup.lexIdenticalPhrasePalette',parGroup.lexIdenticalPhrasePalette
 	.show-exact .word.exact {
 		/*background-color: color-mix(var(--bgColor, white 50%) 50%,transparent 50%) !important;*/
 		/*background-color: var(--bgColor, transparent) !important;*/
-		background-color: hsl(from var(--bgColor, white) h 70 l / 60%) !important;
+		background-color: hsl(from var(--bgColor, white) h 90 l / 90%);
 		color: var(--fontColor, default) !important;
 		
 		/*border-color: color-mix(var(--borderColor, black),transparent);*/
@@ -388,7 +463,7 @@ $inspect('parGroup.lexIdenticalPhrasePalette',parGroup.lexIdenticalPhrasePalette
 	}
 
 	.word.selected {
-		background-color: color-mix(var(--bgColor, transparent) 60%, transparent);
+		background-color: color-mix(var(--bgColor, transparent) 80%, transparent);
 		text-shadow: 1px 1px 1px hsl(from var(--fontColor) h s l / 50%);
 		color: var(--fontColor, default);
 	}
@@ -405,5 +480,8 @@ $inspect('parGroup.lexIdenticalPhrasePalette',parGroup.lexIdenticalPhrasePalette
         
     }*/
 
+	.show-exact .highlighted-exact, .bible-block:not(.hide-similar) .highlighted-lexical{
+		background:white !important;
+	}
 	/*background-color: hsl(from var(--bgColor,white) h s l /30%);*/
 </style>

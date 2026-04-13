@@ -13,7 +13,7 @@ const columnNames = $derived(useGospels? Object.values(gospelParallels.gospels.a
 </script>
 
 <div class="items-center text-center m-auto">
-<h1>Num colors: {palette.length}</h1>
+<!--<h1>Num colors: {palette.length}</h1>-->
 <table class="table table-compact self-center w-auto m-auto">
         <thead>
             <tr class="text-black">

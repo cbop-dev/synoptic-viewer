@@ -117,7 +117,7 @@
 		//return //ColorUtils.generateHslBgFontPalette(selectedLexes.length+myOptions.viewOptions.greekStrings.length,100,50,true));
 		//ColorUtils.generateDistinctColorsSetsPalette(selectedLexes.length+myOptions.viewOptions.greekStrings.length));
 		//ColorUtils.generateCubeHelixOklchPalette(num);
-		return ColorUtils.myColorPalette(num);
+		return ColorUtils.myColorPalette(num, 1, 1,7);
 	});
 	/**
 	 * @type {string[]} myOptions.viewOptions.greekStrings

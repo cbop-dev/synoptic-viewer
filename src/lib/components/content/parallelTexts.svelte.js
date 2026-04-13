@@ -836,7 +836,7 @@ export class ParallelColumnGroup {
         const numMatchTypes = 2**cols - cols - (includeExtraMiscColor?0:1);
         
         //mylog(`buildLexIdenticalPhrases(): numCols = ${this.paletteMatchCols}; numMatchTypes=${numMatchTypes}`,true);
-        const pal= ColorUtils.myColorPalette(numMatchTypes, 0, 1,7);
+        const pal= ColorUtils.myColorPalette(numMatchTypes, 1, 1,7);
 //        mylog(`getLexIdenticalPhrasePalette(${cols}): numMatchTypes=${numMatchTypes}; pal.length=${pal.length}`,true);
         return pal;
     }

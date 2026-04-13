@@ -53,7 +53,8 @@
     } = $props();
 
     let gospelFilter=$derived(GospelFilter.fromFilterVal(options.viewOptions.gospelFilter));
-
+    let highlightedExactIndices = $state([]);
+    let highlightedLexicalIndices = $state([]);
     /**
      * key: bible ref (string) that matches a textAndRef.reference value.
      * value: 3-d array [x][y]=[array z], where x and y are verse and word indexes into the correponding textAndRef.vwords instance(s):
@@ -190,6 +191,15 @@ function isUnique(wordid, uniqueSet){
 
 
 </style>
+{#snippet bibleTextBlock(textRef,uniqueSet,cssUniqueColor)}
+    <BibleTextBlock {textRef}  {parGroup} {options} {numCols} copyButton={true} 
+            bind:highlightedExactIndices={highlightedExactIndices}
+            bind:highlightedLexicalIndices={highlightedLexicalIndices}
+            cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} {selectedLexes}
+            {showNotes} {uniqueSet} notesClick={showNotesFunction} {selectedGreekPalette} --cssUniqueColor={cssUniqueColor}                                         {wordClick} 
+    />
+
+{/snippet}
 {#key gospelFilter && parGroup.updatedCounter}
 
 {#if !focus}
@@ -213,10 +223,8 @@ function isUnique(wordid, uniqueSet){
                             {@const unique = (options.viewOptions.unique && numCols > 1)? col.unique : new Set()}
                             {#if index2 > 0}<br/>{/if}
                             <div class="text-left">    
-                                <BibleTextBlock {textRef}  {parGroup} {options} {numCols} copyButton={true} 
-                                    cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} {selectedLexes}
-                                    {showNotes} uniqueSet={unique} notesClick={showNotesFunction} {selectedGreekPalette} --cssUniqueColor={uniqueColors[index]}                                         {wordClick} 
-                                />
+                                {@render bibleTextBlock(textRef,unique,uniqueColors[index])}
+                             
                             </div>
                             
                         {/each}       
@@ -232,12 +240,7 @@ function isUnique(wordid, uniqueSet){
                         {#if index2 > 0}<br/>{/if}
                         
                         <div class="text-left">
-                        
-                        <BibleTextBlock textRef={secondaryTextRef}  {parGroup} {options} {numCols} copyButton={true} 
-                        cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} {selectedLexes}
-                        {showNotes} uniqueSet={unique} notesClick={showNotesFunction} {selectedGreekPalette} --cssUniqueColor={uniqueColors[index]} 
-                            {wordClick} 
-                        />
+                        {@render bibleTextBlock(secondaryTextRef,unique,uniqueColors[index])}
                         </div>
                             
                     {/each}   
@@ -257,12 +260,8 @@ function isUnique(wordid, uniqueSet){
         {#each otherData.textRefs as textRef, index}
                
                 <div class="rounded-box  other inline-block m-1 p-1 text-left lg:flex-1">
-
-                    <BibleTextBlock {textRef}  {parGroup} {options} {numCols} copyButton={true} 
-                    cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} 
-                    {showNotes} notesClick={showNotesFunction} {selectedGreekPalette} {selectedLexes}
-                        {wordClick} --cssUniqueColor={uniqueColors[uniqueColors.length-1]} 
-                    />
+                    {@render bibleTextBlock(textRef,new Set(),uniqueColors.length-1)}
+                    
                 <!--{@render showText(myOptions)}-->
             
             </div>
@@ -277,11 +276,8 @@ function isUnique(wordid, uniqueSet){
         
         {@const unique = (options.viewOptions.unique && numCols > 1)? colData.cols[colData.focusIndex].unique : new Set()}
         <div class="rounded-box  inline-block p-2 m-1 {Object.values(gospels.abbreviations)[colData.focusIndex]} text-left">
-                 <BibleTextBlock {textRef}  {parGroup} {options} {numCols} copyButton={true} 
-                    cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} 
-                    {showNotes} uniqueSet={unique}  notesClick={showNotesFunction} {selectedGreekPalette} {selectedLexes}
-                        {wordClick} --cssUniqueColor={uniqueColors[colData.focusIndex]}
-                    />
+                {@render bibleTextBlock(textRef,unique,uniqueColors[colData.focusIndex])}
+                 
         </div>
         {/each}
         {#if enableSecondary && colData.cols[colData.focusIndex].secondary  && colData.cols[colData.focusIndex].secondary.length}
@@ -293,11 +289,8 @@ function isUnique(wordid, uniqueSet){
             {@const unique = (options.viewOptions.unique && numCols > 1)? colData.cols[colData.focusIndex].unique : new Set()}
             
             <div class="rounded-box  inline-block p-2 m-1 {Object.values(gospels.abbreviations)[colData.focusIndex]} text-left lg:flex-1">
-                    <BibleTextBlock textRef={secondRef}  {parGroup} {options} {numCols} copyButton={true} 
-                        cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} 
-                        {showNotes} uniqueSet={unique}  notesClick={showNotesFunction} {selectedGreekPalette} {selectedLexes}
-                            {wordClick} --cssUniqueColor={uniqueColors[colData.focusIndex]} 
-                        />
+             {@render bibleTextBlock(secondRef,unique,uniqueColors[colData.focusIndex])}
+                    
             <!--{@render showText(myOptions)}-->
             </div>
             {/each}
@@ -316,11 +309,8 @@ function isUnique(wordid, uniqueSet){
             {#each col.textRefs as textRef, tIndex}   
                 <!--{#if index > 0}{/if}-->
                 <div >
-                         <BibleTextBlock {textRef}  {parGroup} {options}  {numCols} copyButton={true} 
-                    cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} 
-                    {showNotes} uniqueSet={col.unique} notesClick={showNotesFunction} {selectedGreekPalette} {selectedLexes}
-                        {wordClick} --cssUniqueColor={uniqueColors[index]} 
-                    />
+                         {@render bibleTextBlock(textRef,col.unique,uniqueColors[index])}
+                        
                 <!--{@render showText(myOptions)}-->
                 </div>
                 
@@ -334,11 +324,8 @@ function isUnique(wordid, uniqueSet){
                     
                     {#if index > 0}<br/>{/if}
                     <div >
-                            <BibleTextBlock textRef={secRef}  {parGroup} {options}  {numCols} copyButton={true} 
-                        cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} 
-                        {showNotes} uniqueSet={col.unique} notesClick={showNotesFunction} {selectedGreekPalette} {selectedLexes}
-                            {wordClick} --cssUniqueColor={uniqueColors[index]} 
-                        />
+                         {@render bibleTextBlock(secRef,col.unique,uniqueColors[index])}
+                            
                     <!--{@render showText(myOptions)}-->
                     </div>
                     
@@ -360,11 +347,8 @@ function isUnique(wordid, uniqueSet){
                  
                  
                 <div class="rounded-box other inline-block m-1  text-left">
-                         <BibleTextBlock {textRef}  {parGroup} {options}  {numCols} copyButton={true} 
-                    cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} {selectedGreekPalette} {selectedLexes}
-                    {showNotes}  notesClick={showNotesFunction} 
-                        {wordClick} --cssUniqueColor={uniqueColors[uniqueColors.length-1]} 
-                    />
+                     {@render bibleTextBlock(textRef,new Set(),uniqueColors[uniqueColors.length-1])}
+                        
                     <!--{@render showText(myOptions)}-->
                 </div>
             {/each}

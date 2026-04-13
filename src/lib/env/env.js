@@ -4,30 +4,39 @@ const forceTesting = false ; // || true;
 export const testing = forceTesting  || ((typeof process !== 'undefined') && process.env && process.env.TEST) || (import.meta.env.MODE =='test') ? true: false
 const useLocalTF= true;// && false;
 import { browser } from '$app/environment';
+import { page } from '$app/state';
 
 let env ={
+    
     //PUBLIC_TF_URL:"http://localhost:5000"
 }
 
 
 let env2={}
 //let TF_SERVER_URL="";
-
+const serverUrl= browser ? page.url.protocol+ "://" + page.url.host + (page.url.port ? ":" + page.url.port : "") : "";
 if (!browser || testing){
    // env = await import('$env/static/public');
     //env=await import("$env/dynamic/private");
     //env2= await import('$env/static/private');
     
 }
+else {
+
+}
 //TF_SERVER_URL=env2?.TF_SERVER_URL || env?.TF_SERVER_URL;
 
-export const tfserverurl = env?.PUBLIC_TF_URL || "http://localhost:5000";//add alternate tf-fast server
+
+
+//what is this for???!?!??!?!?
+export const tfserverurl = env?.PUBLIC_TF_URL || serverUrl; //page.url.protocol+"://"+page.url.host + (page.url.port ? ":"+page.url.port : ""); //http://localhost:5000";//add alternate tf-fast server
 
 
 export const useSbl=true;
 
 
-export const apiURI= testing && tfserverurl ? '' : '/api/tf';
+//export const apiURI= testing && tfserverurl ? '' : '/api/tf';
+export const apiURI='/api/tf';
 
 
 

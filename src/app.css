@@ -274,6 +274,7 @@ div.bible-block{
     -webkit-mask-box-image: none;
 }
 
+
 .bible-block::before{
     content:"";
     --grainTexture: url('$lib/images/black-linen.png');
@@ -299,6 +300,8 @@ div.bible-block{
     --text-rubric: #4d0000;
 }
 
+
+
 .Mark, .column-1 {
        --bg-page: #5fd85a;
     --filter-saturate: 80%;
@@ -315,6 +318,12 @@ div.bible-block{
       --bg-page: #c36fd8c2;
   --text-rubric: #240252;
 
+}
+
+.bible-block.show-exact, .bible-block:not(.show-exact):not(.hide-similar) {
+    --filter-saturate:40% !important;
+    --filter-brightness:180% !important;
+    /*--bg-page:#ffffff;*/
 }
 
 .section-heading{

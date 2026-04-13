@@ -168,7 +168,7 @@ class ColorUtils{
      * @param {number} [contrastThreshold=7] 
      * @returns {{bg:string,font:string,border:string}[]} an array of css oklab color values 'bg','font',and optionally 'border': {bg:'oklab(0.3,0.5,0.6), font:'oklab(1,0,0), border: 'oklab(0.8,0.5,0.6'}
      */
-    static myColorPalette(size,sFactor=0,lFactor=0,contrastThreshold=7){
+    static myColorPalette(size,sFactor=1,lFactor=0,contrastThreshold=7,alternateSaturation=false){
         const theColorPoints2= {
             simple:['red','orange','yellow', 'green', 'blue','violet'],
             10: ['navy','green','yellow','red'],
@@ -234,8 +234,10 @@ class ColorUtils{
                 if(lFactor){
                     bgColor=bgColor.brighten(lFactor);
                 }
-                if(sFactor){
-                    bgColor=bgColor.saturate(sFactor);
+                if(sFactor && (!alternateSaturation || (alternateSaturation && i%2==0))){
+                    const newColor=bgColor.saturate(sFactor);
+//                    mylog(`saturated from ${bgColor.hex()} to ${newColor.hex()}`,true);
+                    bgColor=newColor;
                 }
                 //const [r,g,b]=bgColor.rgb()
                 
@@ -266,8 +268,14 @@ class ColorUtils{
                 }
                 const [h,s,l]=bgColor.hsl();
                 ret.bg=`hsl(${Math.round(h ? h : 0)},${Math.round(s*100)}%,${Math.round(l*100)}%)`;
-                const [r,g,b] = bgColor.darken().saturate(2).rgb();
-
+                const [r,g,b] =  bgColor.darken().saturate(1).rgb();
+                
+                /**false ||!alternateSaturation || i%2==0 ? 
+                    bgColor.darken(1).saturate(3).rgb() : 
+                    bgColor.brighten(2).saturate(2).rgb();
+                    //bgColor.darken(2).desaturate(3).rgb();
+                
+                */
                 //ret.font= bgColor.luminance() <0.5 ? 'white' : 'black';
                 ret.border=`rgb(${r},${g},${b})`;
               //  mylog(`got colors:${ret.bg},${ret.font},${ret.border}`, true);

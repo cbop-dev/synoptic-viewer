@@ -99,7 +99,15 @@ function notesClick(heading,note){
  
     
     let columnStyle = $derived('grid-cols-'+numCols);
+    /**
+     * @type {number[]} highlightedExactIndices
+     */
+    let highlightedExactIndices = $state([]);
 
+    /**
+     * @type {number[]} highlightedLexicalIndices
+     */
+    let highlightedLexicalIndices = $state([]);
    
 
 
@@ -141,6 +149,8 @@ function notesClick(heading,note){
                     <BibleTextBlock {textRef}  parGroup={parTextGroup} {options} {numCols} copyButton={true} 
                     cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} 
                     {showNotes} uniqueSet={unique} notesClick={showNotesFunction} {selectedGreekPalette} --cssUniqueColor={uniqueColors[index]}
+                    bind:highlightedExactIndices={highlightedExactIndices}
+            bind:highlightedLexicalIndices={highlightedLexicalIndices}
                         {wordClick} 
                     />
 

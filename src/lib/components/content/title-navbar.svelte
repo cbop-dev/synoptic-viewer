@@ -87,16 +87,17 @@ import MatchColorsKey from './MatchColorsKey.svelte';
                 </li>
                 {/if}
             {/each}
-            {#if useGospels && (options.viewOptions.similarPhrases || options.viewOptions.exactPhrases)}
             
-            <li class={[showResultsButtons? 'sm:list-item': '', 'hidden' ]}>
+        {:else}
+        {/if}
+        {#if useGospels && (options.viewOptions.similarPhrases || options.viewOptions.exactPhrases)}
+            
+            <li class='sm:list-item'>
                 <ButtonSelect buttonText="Colors" buttonStyle="btn btn-xs  btn-ghost p-0 ml-0.5 text-md "
             bind:selected={showColorsModal} tooltipbottom tooltip="Show Matching Colors Key"/>
             
             </li>
 
-        {/if}
-        {:else}
         {/if}
         
          
