@@ -14,7 +14,7 @@ let env ={
 
 let env2={}
 //let TF_SERVER_URL="";
-const serverUrl=PUBLIC_TF_URL.length ? PUBLIC_TF_URL : env?.PUBLIC_TF_URL ? env.PUBLIC_TF_URL : "http://localhost:5000";
+const serverUrl=PUBLIC_TF_URL.trim().length ? PUBLIC_TF_URL : env?.PUBLIC_TF_URL ? env.PUBLIC_TF_URL : "http://localhost:5000";
 
 //browser ? page.url.protocol+ "://" + page.url.host + (page.url.port ? ":" + page.url.port : "") : "http://localhost:5000";
 if (!browser || testing){

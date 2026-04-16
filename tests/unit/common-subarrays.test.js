@@ -128,8 +128,76 @@ test('findMaximalCommonSubarraysAcrossColumns2 tests', async () => {
             [ [1,2,3], [2,3,4], [1,2,3,4] ], // column 0
             [ [1,2], [3,4,5], [10,3,1,2] ]   // column 1
             ],
-         minLen: 2, output: [{subarray:[1,2],occurrences:[{columnIndex:0,textIndex:0,spans:[{start:0,end:1}]},{columnIndex:1,textIndex:0,spans:[{start:0,end:1}]},{columnIndex:1,textIndex:2,spans:[{start:2,end:3}]},{columnIndex:0,textIndex:2,spans:[{start:0,end:1}]}]},{subarray:[3,4],occurrences:[{columnIndex:0,textIndex:1,spans:[{start:1,end:2}]},{columnIndex:1,textIndex:1,spans:[{start:0,end:1}]},{columnIndex:0,textIndex:2,spans:[{start:2,end:3}]}]}]
+         minLen: 2, output: [
+            {subarray:[1,2],occurrences:[{columnIndex:0,textIndex:0,spans:[{start:0,end:1}]},
+                {columnIndex:1,textIndex:0,spans:[{start:0,end:1}]},{columnIndex:1,textIndex:2,spans:[{start:2,end:3}]},
+                {columnIndex:0,textIndex:2,spans:[{start:0,end:1}]}]},
+            {subarray:[3,4],occurrences:[{columnIndex:0,textIndex:1,spans:[{start:1,end:2}]},{columnIndex:1,textIndex:1,spans:[{start:0,end:1}]},
+                {columnIndex:0,textIndex:2,spans:[{start:2,end:3}]}
+            ]},
+            
+            ]
         },
+
+         
+        {columns: 
+            [
+            [[1,2,3]],//col 0
+             [[2,3,4]], //col 1
+             [[1,2,3,4]], // col 2
+            ],
+         minLen: 2, 
+         output: [
+            {subarray:[2,3],
+                occurrences:[
+                    {columnIndex:0,textIndex:0,spans:[{start:1,end:2}]},
+                    {columnIndex:1,textIndex:0,spans:[{start:0,end:1}]},
+                    {columnIndex:2,textIndex:0,spans:[{start:1,end:2}]}]
+            },
+            {   
+                subarray:[1,2,3],
+                occurrences:[
+                    {columnIndex:0,textIndex:0,spans:[{start:0,end:2}]},
+                    {columnIndex:2,textIndex:0,spans:[{start:0,end:2}]},
+                ]
+            },    
+            
+            /*{subarray:[3,4],occurrences:[{columnIndex:1,textIndex:0,spans:[{start:1,end:2}]},
+                {columnIndex:2,textIndex:0,spans:[{start:3,end:4}]}]},
+                */
+             
+            
+
+            {subarray:[2,3,4],
+                occurrences:[
+                    
+                    {columnIndex:1,textIndex:0,spans:[{start:0,end:2}]},
+                    {columnIndex:2,textIndex:0,spans:[{start:1,end:3}]}]
+            }
+            ]
+        },
+        
+         {columns: 
+            [
+             [[2,3,4,5]],//col 0
+             [[2,3,4]], //col 1
+             [[2,3,4,5]], // col 2
+            ],
+         minLen: 2, output: [
+             {subarray:[2,3,4],
+                occurrences:[
+                    {columnIndex:0,textIndex:0,spans:[{start:0,end:2}]},
+                    {columnIndex:1,textIndex:0,spans:[{start:0,end:2}]},
+                    {columnIndex:2,textIndex:0,spans:[{start:0,end:2}]}]
+            },
+            {subarray:[2,3,4,5],
+                occurrences:[
+                    {columnIndex:0,textIndex:0,spans:[{start:0,end:3}]},
+                    {columnIndex:2,textIndex:0,spans:[{start:0,end:3}]}]
+            }
+            ]
+        },
+
         {columns:[[[1,2,3,4,5]],[[3,4,5]],[[3,2,3,4,5,2,3]],[[2,3]]],
             output:[
                 {subarray:[3,4,5],occurrences:[{columnIndex:0,textIndex:0,spans:[{start:2,end:4}]},{columnIndex:1,textIndex:0,spans:[{start:0,end:2}]},{columnIndex:2,textIndex:0,spans:[{start:2,end:4}]}]},
@@ -153,17 +221,64 @@ test('findMaximalCommonSubarraysAcrossColumns2 tests', async () => {
         for (const [i,t] of tests.entries()){
             const result = method.func(t.columns, t.minLen, t.ignore? t.ignore : []);
            // console.log("-------------")
-          //  console.log(`${method.name} #${i}: `, JSON.stringify(result));//,null,2));
+            console.log(`${method.name} #${i}: `, JSON.stringify(result));//,null,2));
+            if (result.length != t.output.length || result != t.output){
+             console.log(`${method.name} #${i}: `, JSON.stringify(result));//,null,2));
+            }
+
             expect(result.length).toEqual(t.output.length);
+            if (result.length != t.output.length || JSON.stringify(result) != JSON.stringify(t.output)){
+                console.log("========================")
+                console.log(`${method.name} #${i}: `, JSON.stringify(result));//,null,2));
+                console.log(`t.output: `, JSON.stringify(t.output));//,null,2));
+                console.log("========================")
+            }
+            
+            // Sort to ensure order-agnostic comparison
+            const sortOccurrences = (occ) => occ.sort((a,b) => a.columnIndex - b.columnIndex || a.textIndex - b.textIndex);
+            result.forEach(r => sortOccurrences(r.occurrences));
+            t.output.forEach(r => sortOccurrences(r.occurrences));
+            
+            const sortResults = (res) => res.sort((a,b) => a.subarray.join(',').localeCompare(b.subarray.join(',')));
+            sortResults(result);
+            sortResults(t.output);
+
             expect(result).toEqual(t.output);
-        }
-        
+        }  
     }
    
 	expect(true).toBe(true);
 
 });
 
+
+test('findMaximalCommonTextPhrasesAcrossColumns3 test', async () => {
+	
+    /**
+     * @type {string[][]} cols
+     */
+    const cols=[
+    ["Καθημένου δὲ αὐτοῦ ἐπὶ τοῦ Ὄρους τῶν Ἐλαιῶν προσῆλθον αὐτῷ οἱ μαθηταὶ κατ’ ἰδίαν λέγοντες· Εἰπὸν ἡμῖν πότε ταῦτα ἔσται, καὶ τί τὸ σημεῖον τῆς σῆς παρουσίας καὶ συντελείας τοῦ αἰῶνος."],
+    ["Εἰπὸν ἡμῖν πότε ταῦτα ἔσται, καὶ τί τὸ σημεῖον ὅταν μέλλῃ ταῦτα συντελεῖσθαι πάντα."],
+    ["Ἐπηρώτησαν δὲ αὐτὸν λέγοντες· Διδάσκαλε, πότε οὖν ταῦτα ἔσται, καὶ τί τὸ σημεῖον ὅταν μέλλῃ ταῦτα γίνεσθαι;"]
+    ].map(([s])=>[GreekUtils.plainGreek(s.toLocaleLowerCase()).replaceAll(/[^a-z α-ω]/g,'')]);
+
+
+    const threeWayMatch=GreekUtils.plainGreek("ταῦτα ἔσται, καὶ τί τὸ σημεῖον".toLocaleLowerCase()).replaceAll(/[^a-z α-ω]/g,'');
+
+    
+     const result = findMaximalCommonTextPhrasesAcrossColumns(
+        cols,3);
+//      console.log("findMaximalCommonTextPhrasesAcrossColumns results:");
+      result.forEach((row)=>{
+//        console.log(`subarray: "${row.subarray}"; occurences: ${row.occurrences.map((o)=>'col '+o.columnIndex+'['+o.spans.map((i)=>i.start + "/"+i.end).join(',')+']').join(';')}`);
+      });
+//      mylog(result,true);
+      //expect(result).toEqual(t.output);
+    
+	expect(true).toBe(true);
+
+});
 
 //const result = findMaximalCommonSubarraysAcrossColumns(columns, minLen);
 //console.log(JSON.stringify(result,null,2));

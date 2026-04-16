@@ -307,24 +307,21 @@ export function findMaximalCommonSubarraysAcrossColumns2(columns, minLen = 2, ig
     col.map(arr => preprocessArray2(arr, ignoreSet))
   );
 
-  const resultsMap = new Map();
+  const candidatesSet = new Set();
+  const candidatesList = [];
 
   for (let colA = 0; colA < columns.length; colA++) {
     for (let colB = colA + 1; colB < columns.length; colB++) {
       const textsApre = preCols[colA];
       const textsBpre = preCols[colB];
 
-      const textsA = columns[colA]; // original arrays (for reference if needed)
-      const textsB = columns[colB];
-
-      for (let i = 0; i < textsA.length; i++) {
+      for (let i = 0; i < textsApre.length; i++) {
         const preA = textsApre[i];
         const filteredA = preA.filtered;
 
-        // if filtered length < minLen, skip matching because cannot produce matches
         if (filteredA.length < minLen) continue;
 
-        for (let j = 0; j < textsB.length; j++) {
+        for (let j = 0; j < textsBpre.length; j++) {
           const preB = textsBpre[j];
           const filteredB = preB.filtered;
           if (filteredB.length < minLen) continue;
@@ -332,38 +329,10 @@ export function findMaximalCommonSubarraysAcrossColumns2(columns, minLen = 2, ig
           const matches = maximalSubarraysPair2(filteredA, filteredB, minLen);
 
           for (const match of matches) {
-            // match.subarray is the filtered subarray; occurrences are in filtered-index spans
             const key = match.subarray.join(',');
-            if (!resultsMap.has(key)) resultsMap.set(key, { subarray: match.subarray, occurrences: [] });
-
-            const entry = resultsMap.get(key);
-
-            // For each of the pair occurrences (0 => A, 1 => B), map filtered spans to original spans
-            // and push them under respective column/text entries.
-            // match.occurrences[0] corresponds to arrA; match.occurrences[1] to arrB
-            const occFilteredA = match.occurrences[0].spans; // array of {start, end} in filtered indices
-            const occFilteredB = match.occurrences[1].spans;
-
-            // Map and add occurrences for arrA
-            let occA = entry.occurrences.find(o => o.columnIndex === colA && o.textIndex === i);
-            if (!occA) {
-              occA = { columnIndex: colA, textIndex: i, spans: [] };
-              entry.occurrences.push(occA);
-            }
-            for (const fspan of occFilteredA) {
-              const mapped = mapFilteredSpanToOriginal(fspan, preA);
-              if (mapped) occA.spans.push(mapped);
-            }
-
-            // Map and add occurrences for arrB
-            let occB = entry.occurrences.find(o => o.columnIndex === colB && o.textIndex === j);
-            if (!occB) {
-              occB = { columnIndex: colB, textIndex: j, spans: [] };
-              entry.occurrences.push(occB);
-            }
-            for (const fspan of occFilteredB) {
-              const mapped = mapFilteredSpanToOriginal(fspan, preB);
-              if (mapped) occB.spans.push(mapped);
+            if (!candidatesSet.has(key)) {
+                candidatesSet.add(key);
+                candidatesList.push(match.subarray);
             }
           }
         }
@@ -371,15 +340,50 @@ export function findMaximalCommonSubarraysAcrossColumns2(columns, minLen = 2, ig
     }
   }
 
-  // Merge overlapping/adjacent spans per text
+  // Find all occurrences for each candidate across all texts
   const final = [];
-  for (const entry of resultsMap.values()) {
-    const mergedOccurrences = entry.occurrences.map(o => ({
-      columnIndex: o.columnIndex,
-      textIndex: o.textIndex,
-      spans: mergeSpans2(o.spans)
-    }));
-    final.push({ subarray: entry.subarray, occurrences: mergedOccurrences });
+  for (const subarray of candidatesList) {
+    const occurrences = [];
+    const pLen = subarray.length;
+
+    for (let colIdx = 0; colIdx < columns.length; colIdx++) {
+      for (let textIdx = 0; textIdx < preCols[colIdx].length; textIdx++) {
+        const pre = preCols[colIdx][textIdx];
+        const filtered = pre.filtered;
+        
+        const fSpans = [];
+        if (pLen <= filtered.length && pLen > 0) {
+          for (let start = 0; start <= filtered.length - pLen; start++) {
+            let matches = true;
+            for (let k = 0; k < pLen; k++) {
+              if (filtered[start + k] !== subarray[k]) {
+                matches = false;
+                break;
+              }
+            }
+            if (matches) {
+              fSpans.push({ start: start, end: start + pLen - 1 });
+            }
+          }
+        }
+
+        if (fSpans.length > 0) {
+            const mappedSpans = [];
+            for (const fspan of fSpans) {
+              const mapped = mapFilteredSpanToOriginal(fspan, pre);
+              if (mapped) mappedSpans.push(mapped);
+            }
+            if (mappedSpans.length > 0) {
+              occurrences.push({
+                  columnIndex: colIdx,
+                  textIndex: textIdx,
+                  spans: mergeSpans2(mappedSpans)
+              });
+            }
+        }
+      }
+    }
+    final.push({ subarray, occurrences });
   }
 
   return final;

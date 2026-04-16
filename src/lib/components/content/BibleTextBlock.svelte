@@ -102,10 +102,7 @@
 	*/
 	//let highlightedLexicalIndices = $state([]);
 	
-	/**
-	 * @type {number[]} highlightedExactIndices
-	*/
-	//let highlightedExactIndices = $state([]);
+	
 	
 	
 	/**
@@ -120,9 +117,9 @@
 		wordClick(wordid,bookid);
 		if (options.viewOptions.exactPhrases || options.viewOptions.similarPhrases){
 //			mylog(`myWordclick(). adding exacts: [${exactPhraseIndices.join(',')}]!`, true);
-			togglePhraseHighlights(lexicalPhraseIndices,exactPhraseIndices);
-			//lexicalPhraseIndices.forEach((index)=>{if (!highlightedLexicalIndices.includes(index)) highlightedLexicalIndices.push(index)});
-			//exactPhraseIndices.forEach((index)=>{if (!highlightedExactIndices.includes(index)) highlightedExactIndices.push(index)});
+			togglePhraseHighlights(Array.from(new Set(lexicalPhraseIndices)),Array.from(new Set(exactPhraseIndices)));
+//			mylog(`toggled phrases: lex=${highlightedLexicalIndices.join(',')}, exact=${highlightedExactIndices.join(',')}`,true);
+			
 			
 			
 		}
@@ -143,12 +140,28 @@
 			});
 		}
 		if 	(options.viewOptions.exactPhrases){
+//			mylog(`togglePhraseHighlights(). adding exacts: [${exactPhraseIndices.join(',')}]!`, true);
+//			mylog(`exactPhraseIndices.len=${exactPhraseIndices.length}`,true);
+
+			const isToggled = exactPhraseIndices.reduce((on,idxVal)=>{
+				return on || highlightedExactIndices.includes(idxVal);
+			},false);
 			exactPhraseIndices.forEach((index)=>{
-				if (!highlightedExactIndices.includes(index)) 
+//				mylog(`   trying idx=${index}`, true);
+
+				if (!isToggled){
+					
 					highlightedExactIndices.push(index);
-				else
+//					mylog(`toggled exact index: ${index} to ON`,true);
+				}
+				else {
 					highlightedExactIndices.splice(highlightedExactIndices.indexOf(index),1);
+//					mylog(`toggled exact index: ${index} to OFF`,true);
+				}
 			});
+		}
+		else{
+			mylog("ExactPhrases disabled!")
 		}
 	}
 
@@ -196,10 +209,13 @@
 			});
 			
 			let colorIndex = lexPhrasesLocMostMatches.calcMatchTypeIndex(parGroup.maxMatchCols ? parGroup.maxMatchCols : parGroup.parallelColumns.length);
-
+			
 			if (colorIndex >= parGroup.lexIdenticalPhrasePalette.length || colorIndex < 0){
 //				mylog(`getWordStyle(${word.word}) invalid colorIndex: ${colorIndex}, maxMatchCols=${parGroup.maxMatchCols}; but parGroup.lexIdenticalPhrasePalette=${parGroup.lexIdenticalPhrasePalette.length}; resetting to last index!`,true)
 				colorIndex = parGroup.lexIdenticalPhrasePalette.length -1;
+			}
+			else{
+//				mylog(`getWordStyle(${word.word}) valid colorIndex: ${colorIndex}, maxMatchCols=${parGroup.maxMatchCols}; parGroup.lexIdenticalPhrasePalette=${parGroup.lexIdenticalPhrasePalette.length};`,true)
 			}
 			const colorObj = parGroup.lexIdenticalPhrasePalette[colorIndex] 
 
@@ -222,8 +238,8 @@
 		return ret;
 	}
 //$inspect('parGroup.lexIdenticalPhrasePalette',parGroup.lexIdenticalPhrasePalette);
-$inspect('highlightedLexicalIndices',highlightedLexicalIndices);
-$inspect('highlightedExactIndices',highlightedExactIndices);
+//$inspect('highlightedLexicalIndices',highlightedLexicalIndices);
+//$inspect('highlightedExactIndices',highlightedExactIndices);
 </script>
 
 <div
@@ -305,8 +321,12 @@ $inspect('highlightedExactIndices',highlightedExactIndices);
 							: -1}
 
 						{@const exactPhraseIndices = word.phrases.exact.map((pLoc)=>pLoc.phraseIndex)}
+						
 						{@const lexicalPhraseIndices = word.phrases.lexical.map((pLoc)=>pLoc.phraseIndex)}
 						<!-- {#if customMatchIndex > -1 }Got match index={customMatchIndex}{/if}-->
+						 {#if exactPhraseIndices.length}
+							<!--[exact phrases: {exactPhraseIndices.length}-->
+						 {/if}
 						<span
 							class={[
 								'word',
@@ -335,6 +355,9 @@ $inspect('highlightedExactIndices',highlightedExactIndices);
 							
 							</span
 						>
+						 {#if exactPhraseIndices.length}
+						<!--]-->
+						 {/if}
 
 						<!--                  <WordComp {word} wordIndex={index}
                          {book} {options} {wordClick}

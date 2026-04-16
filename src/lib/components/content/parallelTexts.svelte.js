@@ -783,7 +783,7 @@ export class ParallelColumnGroup {
 
                             const phraseWords = superPhraseWords.slice(span.start, span.end + 1);
                             phraseWords.forEach((aWord) => {
-                                if (aWord) {
+                                if (aWord && !aWord.phrases.exact.includes(exactPhraseAndLocations)) {
                                     aWord.phrases.exact.push(exactPhraseAndLocations);
                                     if (lexPhraseLoc.secondary) {
                                         // mylog("Got/marked secondary phrase!",true)
@@ -821,7 +821,7 @@ export class ParallelColumnGroup {
 
 
 
-        this.lexIdenticalPhrasePalette=ParallelColumnGroup.getLexIdenticalPhrasePalette(this.parallelColumns.length);
+        this.lexIdenticalPhrasePalette=ParallelColumnGroup.getLexIdenticalPhrasePalette(this.maxMatchCols ? this.maxMatchCols : this.parallelColumns.length);
         
         //TODO: figure out how to use this index!!
     }
@@ -1051,7 +1051,7 @@ export class GospelPericopeGroup extends ParallelColumnGroup {
         const luke = new ParallelColumn();
         const john = new ParallelColumn();
         const other = new ParallelColumn();
-        super([matt, mark, luke, john, other],4,lang);
+        super([matt, mark, luke, john, other],lang);
         this.gospelCols = {
             matt: matt,
             mark: mark,
@@ -1159,31 +1159,6 @@ export class GospelPericopeGroup extends ParallelColumnGroup {
      */
     getRefs(exclude = [4]) {
         return super.getRefs(exclude);
-        /*let refs=[];
-
-        const includeOther=!exclude.includes(4);
-
-        if (includeOther){
-            for (const gosp of ['matt','mark','luke','john','other']){
-                if(this[gosp].textRefs.length)
-                    refs.push(combineRefs(this[gosp].textRefs.map((tr)=>tr.reference)))
-                
-            }
-        }
-        else{
-
-            for (const gosp of ['matt','mark','luke','john']){
-                if(this[gosp].textRefs.length) {
-                    const gospRefs = this[gosp].textRefs.map((tr)=>tr.reference).join("; ").trim();
-                    if (gospRefs.length) {
-                        refs.push(formatBibRefs(gospRefs));
-                    }
-                }
-                
-            }
-        }
-        return refs.join('; ');  
-        */
 
 
 
