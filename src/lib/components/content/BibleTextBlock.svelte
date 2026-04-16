@@ -54,6 +54,7 @@
 	 * lexInfoDict:Object<number,LexemeInfo>
 	 * highlightedLexicalIndices:number[]
 	 * highlightedExactIndices:number[]
+	 * ignoreWordIds:number[]
 	 * }}
 	 */
 	let {
@@ -81,6 +82,7 @@
 		lexInfoDict = {},
 		highlightedLexicalIndices = $bindable([]),
 		highlightedExactIndices = $bindable([]),
+		ignoreWordsIds=[]
 		// options.viewOptions.hideApp=false,
 	} = $props();
 	/**
@@ -132,9 +134,13 @@
 	 */
 	function togglePhraseHighlights(lexicalPhraseIndices,exactPhraseIndices){
 		if (options.viewOptions.similarPhrases){
+			const isToggled = lexicalPhraseIndices.reduce((on,idxVal)=>{
+				return on || highlightedLexicalIndices.includes(idxVal);
+			},false);
 			lexicalPhraseIndices.forEach((index)=>{
-				if (!highlightedLexicalIndices.includes(index)) 
+				if(!isToggled){
 					highlightedLexicalIndices.push(index);
+				}
 				else	
 					highlightedLexicalIndices.splice(highlightedLexicalIndices.indexOf(index),1);
 			});
@@ -342,7 +348,8 @@
 								selectedLexIndex >= 0 ? 'selected selected-lex' : '',
 								customMatchIndex >= 0 ? 'selected selected-custom' : '',
 								options.viewOptions.exactPhrases && new Set(exactPhraseIndices).intersection(new Set(highlightedExactIndices)).size ? 'highlighted-exact' :'',
-								options.viewOptions.similarPhrases && new Set(lexicalPhraseIndices).intersection(new Set(highlightedLexicalIndices)).size ?'highlighted-lexical':''
+								options.viewOptions.similarPhrases && new Set(lexicalPhraseIndices).intersection(new Set(highlightedLexicalIndices)).size ?'highlighted-lexical':'',
+								ignoreWordsIds.includes(word.id)?'ignore':''
 
 									
 								
@@ -457,7 +464,7 @@
     }*/
 
 	:not(.hide-similar) .lexical {
-		@apply border-t-2 border-b-2;
+		@apply border-t-3 border-b-3;
 	}
 
 	
@@ -476,14 +483,20 @@
 		/*background-color: color-mix(var(--bgColor, white 50%) 50%,transparent 50%) !important;*/
 		/*background-color: var(--bgColor, transparent) !important;*/
 		background-color: hsl(from var(--bgColor, white) h 90 l / 90%);
-		color: var(--fontColor, default) !important;
+		color: var(--fontColor, default);
 		
 		/*border-color: color-mix(var(--borderColor, black),transparent);*/
 		border-color: black 90% !important;
 		text-shadow: 2px 2px 2px rgba(0,0,0,0.3);
-		@apply border-t-2 border-b-3  font-bold;
+		@apply border-t-3 border-b-3  font-bold;
 		/*color: var(--fontColor,default);*/
 	}
+
+	:not(.hide-similar) .word.lexical.ignore{
+		background-color: hsl(from var(--bgColor, black) h s l / 20%);
+		/*color: var(--fontColor,default);*/
+	}
+
 
 	.word.selected {
 		background-color: color-mix(var(--bgColor, transparent) 80%, transparent);
@@ -505,6 +518,7 @@
 
 	.show-exact .highlighted-exact, .bible-block:not(.hide-similar) .highlighted-lexical{
 		background:white !important;
+		color:black !important;
 	}
 	/*background-color: hsl(from var(--bgColor,white) h s l /30%);*/
 </style>

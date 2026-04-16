@@ -1530,6 +1530,7 @@
 									showNotes={currentServer.showNotes}
 									showNotesFunction={displayNote}
 									{selectedGreekPalette}
+									ignoreWordsIds={currentServer.ignoreWordIds}
 								/>
 							</div>
 						{/each}

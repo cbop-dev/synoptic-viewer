@@ -767,7 +767,7 @@ export class ParallelColumnGroup {
                 //this is an exactly matching (sub)phrase. need to map the 'column'/textindex/spans to the verse-word ranges in stringPhrasesAndLocs
                 commonPhraseObject.occurrences.forEach((occurrence) => {
                     //gotta find the word object...*:
-                    occurrence.textIndex
+                    
                     const [exactPhrase, lexIdenticalLocations] = Object.entries(stringPhrasesAndLocs[occurrence.columnIndex])[occurrence.textIndex];
                     const exactPhraseAndLocations = new LexPhraseAndLocations(new LexicalPhrase(), lexIdenticalLocations, subPhraseIndex);
                     //const stuff1= stringPhrasesAndLocs[occurrence.columnIndex]

@@ -234,6 +234,7 @@ class ColorUtils{
                 if(lFactor){
                     bgColor=bgColor.brighten(lFactor);
                 }
+                //bgColor=bgColor.darken();
                 if(sFactor && (!alternateSaturation || (alternateSaturation && i%2==0))){
                     const newColor=bgColor.saturate(sFactor);
 //                    mylog(`saturated from ${bgColor.hex()} to ${newColor.hex()}`,true);
@@ -268,7 +269,10 @@ class ColorUtils{
                 }
                 const [h,s,l]=bgColor.hsl();
                 ret.bg=`hsl(${Math.round(h ? h : 0)},${Math.round(s*100)}%,${Math.round(l*100)}%)`;
-                const [r,g,b] =  bgColor.darken().saturate(1).rgb();
+                
+                const [r,g,b] = true || bgColor.luminance() > 0.5 ?
+                      bgColor.darken(2).saturate(2).rgb()
+                     :bgColor.brighten(2).saturate(1).rgb();
                 
                 /**false ||!alternateSaturation || i%2==0 ? 
                     bgColor.darken(1).saturate(3).rgb() : 

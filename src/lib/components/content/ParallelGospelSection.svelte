@@ -29,6 +29,7 @@
      * selectedLexes:number[],
      * selectedGreekPalette:{bg:string,font:string,border:string}[]
      * showNotesFunction(heading:string,note:string):void
+     * ignoreWordsIds:number[]
      * }}
      */
     let {
@@ -47,7 +48,8 @@
         hideApp=false,*/
         showNotes=false,
         selectedGreekPalette=[],
-        showNotesFunction=(heading,note)=>{alert(heading+"\n"+note)}
+        showNotesFunction=(heading,note)=>{alert(heading+"\n"+note)},
+        ignoreWordsIds=[]
         
         
     } = $props();
@@ -196,7 +198,9 @@ function isUnique(wordid, uniqueSet){
             bind:highlightedExactIndices={highlightedExactIndices}
             bind:highlightedLexicalIndices={highlightedLexicalIndices}
             cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} {selectedLexes}
-            {showNotes} {uniqueSet} notesClick={showNotesFunction} {selectedGreekPalette} --cssUniqueColor={cssUniqueColor}                                         {wordClick} 
+            {showNotes} {uniqueSet} notesClick={showNotesFunction} {selectedGreekPalette} --cssUniqueColor={cssUniqueColor} 
+            {ignoreWordsIds}
+            {wordClick} 
     />
 
 {/snippet}
