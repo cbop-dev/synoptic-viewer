@@ -22,6 +22,7 @@
      * options:SynopsisOptions3,
      * focus:string,
      * enableSecondary:boolean,
+     * enableOther:boolean,
      * wordClick:function(number):void,
      * cssClassDict:Object,
      * cssCustomDict:Object,
@@ -36,6 +37,7 @@
         parGroup = new GospelPericopeGroup(),
         options=new SynopsisOptions3(),
         enableSecondary=false,
+        enableOther=false,
         focus = '',
        /* showUnique=false,
         showIdentical=true,*/
@@ -53,6 +55,8 @@
         
         
     } = $props();
+
+    //let enableOther=$derived(enableSecondary && parGroup.other?.textRefs?.length);
 
     let gospelFilter=$derived(GospelFilter.fromFilterVal(options.viewOptions.gospelFilter));
     let highlightedExactIndices = $state([]);
@@ -104,27 +108,27 @@
          */
         let cols = [parGroup.matt, parGroup.mark,parGroup.luke,parGroup.john].map((g,i)=>gospelFilter.isHidden(i) ? new ParallelColumn() : g); //.filter((g,index)=>(options.viewOptions.gospelFilter&Math.pow(2,index))==0);
         if (focus==gospels.names.MATTHEW){
-            if (parGroup.matt.textRefs.length || parGroup.matt.secondary?.length){
+            if (parGroup.matt.textRefs.length || enableSecondary && parGroup.matt.secondary?.length){
                 focusIndex = 0;
                 focused=true;            
             }
             
         }
         else if (focus==gospels.names.MARK){
-              if (parGroup.mark.textRefs.length || parGroup.mark.secondary?.length){
+              if (parGroup.mark.textRefs.length || enableSecondary && parGroup.mark.secondary?.length){
                  focusIndex = 1;
                     focused=true; 
                // bgClasses=['mark','matt','luke','john'];
             }
         }
         else if (focus==gospels.names.LUKE){
-              if (parGroup.luke.textRefs.length || parGroup.luke.secondary?.length){
+              if (parGroup.luke.textRefs.length || enableSecondary && parGroup.luke.secondary?.length){
                 focusIndex = 2;
                 focused=true; 
             }
         }
         else if (focus==gospels.names.JOHN){
-              if (parGroup.john.textRefs.length || parGroup.john.secondary?.length){
+              if (parGroup.john.textRefs.length || enableSecondary &&parGroup.john.secondary?.length){
                 focusIndex = 3;
                 focused=true; 
             }
@@ -259,7 +263,7 @@ function isUnique(wordid, uniqueSet){
 
 
     </div>
-    {#if otherData}
+    {#if enableOther && otherData}
     <div class="mt-2 p-2 flex flex-wrap">
         {#each otherData.textRefs as textRef, index}
                
@@ -344,7 +348,7 @@ function isUnique(wordid, uniqueSet){
             
         {/if}
         {/each}
-        {#if otherData}
+        {#if enableOther && otherData}
         <hr/>
     <div class="mt-2 p-1">
         {#each otherData.textRefs as textRef, index}

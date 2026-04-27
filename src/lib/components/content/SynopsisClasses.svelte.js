@@ -301,6 +301,7 @@ export class SynopsisOptions3{
         menuOpen: {type:'boolean', default: false, category: 'view',noURL:true},
         showLookup: {type:'boolean', default: false, category: 'view',noURL:true},
         hideSecondary: {type:'boolean', default: false, category: 'view',noURL:false},
+        hideOther: {type:'boolean', default: false, category: 'view',noURL:false},
         lexInfoClick:{ type: 'boolean', category: 'view',noURL:true},
         page:{ type: 'int', category: 'view',noURL:false,default: 0},
         showEverything:{ type: 'boolean', category: 'view',noURL:true,default: false},

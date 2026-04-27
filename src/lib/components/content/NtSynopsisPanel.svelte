@@ -99,6 +99,7 @@
 	let landingPage = $state(!myOptions.request.fromURL);
 	let requestProcessed = $state(false);
 	let enableSecondary = $derived(!myOptions.viewOptions.hideSecondary);
+	let enableOther = $derived(!myOptions.viewOptions.hideOther);
 	//let gospelFilterVal=$derived(myOptions.viewOptions.gospelFilter);
 	let gospelsExcluded = $derived(
 		GospelFilter.createValues(myOptions.viewOptions.gospelFilter)
@@ -138,7 +139,6 @@
 	let selectedGospel = $derived(gospelOptions[myOptions.viewOptions.selectedGospelIndex].value);
 	//let hideNonPrimary = $state(true);
 	//what is this for?
-	let hideOthers = $state(false);
 	//let focusOn=$state(false);
 	let focused = $derived.by(() => {
 		let retVal = '';
@@ -807,7 +807,7 @@
 	$effect(()=>{
 		hotkeys.enableHotkeys(hotkeysToUse);
 	});
-	hotkeysToUse='nptb2aesx';
+	hotkeysToUse='nptbo2aesx';
 
 	
 	/**
@@ -1268,6 +1268,21 @@
 				>
 			</svelte:element>
 
+			<svelte:element this={theTag} class={[classes, 'menu']}
+				><label
+					class="label tooltip"
+					data-tip="Hide non-gospel parallels from search results."
+					for="hide-other-check{short ? '-short' : ''}"
+				>
+					<input
+						class="toggle"
+						id="hide-other-check{short ? '-short' : ''}"
+						type="checkbox"
+						bind:checked={myOptions.viewOptions.hideOther}
+					/>Hide {#if short}other{:else}non-gospel parallels{/if}</label
+				>
+			</svelte:element>
+
 			{#if currentServer.hasApparatus}
 				<svelte:element this={theTag} class={[classes, 'menu']}
 					><label
@@ -1524,6 +1539,7 @@
 									focus={focused}
 									{wordClick}
 									{enableSecondary}
+									{enableOther}
 									cssClassDict={lexClasses}
 									{selectedLexes}
 									cssCustomDict={customGreekClasses}
