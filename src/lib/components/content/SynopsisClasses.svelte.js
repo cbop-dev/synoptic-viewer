@@ -318,7 +318,7 @@ export class SynopsisOptions3{
         // 6: 0 1 1 0 = hide Luke + mark
         // 7: 0 1 1 1 = hide all but john
         // ... etc.
-        gospelFilter:{ type: 'number', category: 'view',noURL:false,default: 0}, 
+        gospelFilter:{ type: 'int', category: 'view',noURL:false,default: 0}, 
     }
 
     /**
