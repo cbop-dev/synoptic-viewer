@@ -297,6 +297,7 @@ export class SynopsisOptions3{
         columns: {type: 'strArray', split: "|", category: 'request'},
         batch: {type: 'strArray', split:"^", category: 'request'},
         nt: {type:'str', category: 'request', default:'sblgnt'},           
+        bible: {type:'str', category: 'request', default:'sblgnt'}, 
         fromURL: {type:'boolean', category: 'request',noURL:true},
         menuOpen: {type:'boolean', default: false, category: 'view',noURL:true},
         showLookup: {type:'boolean', default: false, category: 'view',noURL:true},

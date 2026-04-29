@@ -1,6 +1,6 @@
 {
 	"name": "@cbop-dev/synoptic-viewer",
-	"version": "0.7.20",
+	"version": "0.7.21",
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
@@ -47,6 +47,7 @@
 	},
 	"dependencies": {
 		"@cbop-dev/aland-gospel-synopsis": "^0.1.13",
+		"@cbop-dev/tf-bible-booknames": "^0.0.2",
 		"@vortechsolutions/gridjs-svelte": "^2.1.6",
 		"chart.js": "^4.5.1",
 		"chroma-js": "^3.1.2",
