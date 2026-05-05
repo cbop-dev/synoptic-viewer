@@ -1,5 +1,6 @@
 <script>
 	import { onMount, untrack, tick } from 'svelte';
+	import Svelecte from 'svelecte';
 	import Loading from '../ui/Loading.svelte';
 	import ScribesImage from '$lib/images/scribes5.1.jpg';
 	import { SynopsisOptions3, GospelFilter } from './SynopsisClasses.svelte.js';
@@ -350,11 +351,60 @@
 	//      (gospelParallels.alandSynopsis.isPrimaryPericope(p,selectedGospel[selectedGospelIndex].value))))
 
 
-	let selectedSection = $state([1]);
+	/**
+	 * {#each gospelParallels.alandSynopsis.sections as section}
+					<option value={mathUtils.createNumArrayFromStringListRange(section.pericopes)}
+						>{mathUtils.romanize(section.section)}: {section.title}</option
+					>
+					<hr />
+				{/each}
+				{#each gospelParallels.alandSynopsis.pericopes as per}
+					{#if per.pericope == 1}
+						<option value={[per.pericope]} selected={true}>{per.pericope}: {per.title}</option>
+					{:else}
+						<option value={[per.pericope]}>{per.pericope}: {per.title}</option>
+					{/if}
+				{/each}
+
+				{#if myOptions.viewOptions.showEverything}
+					<hr />
+					<option value={gospelParallels.alandSynopsis.pericopes.map((p) => parseInt(p.pericope))}
+						>Everything!!</option
+					>
+				{/if}
+	*/
+	let selectSectionOptions=$derived.by(()=>{
+		let theOptions=[];
+		gospelParallels.alandSynopsis.sections.forEach((section)=>{
+			theOptions.push({pericopes:mathUtils.createNumArrayFromStringListRange(section.pericopes),
+				
+				label: mathUtils.romanize(section.section) +": "+ section.title
+			});
+		});
+
+		gospelParallels.alandSynopsis.pericopes.forEach((per)=>{			
+			theOptions.push({pericopes:[per.pericope],
+				label: per.pericope +": "+ per.title
+			})
+		})
+		if(myOptions.viewOptions.showEverything){
+			theOptions.push({pericopes:gospelParallels.alandSynopsis.pericopes.map((p)=>parseInt(p.pericope)),
+				label:"Everything!!"
+			})
+		}
+		theOptions.forEach((o,i)=>{
+			o.value=i;
+		})
+		return theOptions;
+
+	})
+	let selectedSections=$state([]);
 	async function selectSection() {
 		landingPage = false;
 		resetViewOptions();
-		alandPericopeNums = [...selectedSection];
+		alandPericopeNums = Array.from(new Set(selectedSections.map((s)=>s.pericopes).flat().sort()));
+		
+		//[...selectedSections];
 		//    myLog.log(`selectSection, alandPericopes.length=${alandPericopeNums.length}; alandPericopeNums:[${alandPericopeNums.join(',')}]`,true);
 		await buildAndFetchPericopes();
 		await populateAll();
@@ -1108,8 +1158,11 @@
 	//$inspect("NTSynPanel, myOptions.viewOptions.gospelFilter:", myOptions.viewOptions.gospelFilter);
 	//$inspect("NTSymPan: gospelsExcluded:",gospelsExcluded);
 	//groupsRefsArray
-	$inspect('dataReady',dataReady);
-	$inspect('selectedLexes',selectedLexes);
+	//$inspect('dataReady',dataReady);
+	//$inspect('selectedLexes',selectedLexes);
+	$inspect('selectOptions:', selectSectionOptions);
+	$inspect('selectedSections',selectedSections);
+	$inspect('alandPericopeNums',alandPericopeNums);
 </script>
 
 {#snippet appTitle(headingTag = 'h1', classes = ['text-center', 'inline'])}
@@ -1331,6 +1384,7 @@
 					bind:value={refAreaText}
 					onfocus={textAreaFocus}
 					onblur={textAreaBlur}
+					
 				></textarea> 
 				<button onclick={lookupShowNtParallels} class="btn btn-primary inline"
 					>Look up!</button
@@ -1338,8 +1392,19 @@
 			</div>
 
 			<p class="m-3 italic"> OR:</p>
-			<h2 class="cursor-default">Select a section:</h2>
-			<select id="select-section" bind:value={selectedSection}>
+			<h2 class="cursor-default">Select a section:</h2>	
+			
+			<div class="select-pericopes-wrapper w-full sm:w-3/4 md:w-1/2 m-auto">
+			<Svelecte options={selectSectionOptions} bind:value={selectedSections} multiple={true}
+			valueAsObject={true}
+			onFocus={textAreaFocus}
+			onBlur={textAreaBlur}
+			placeholder="Search section, e.g., 'Sermon on the Mount'"
+			/>
+			 </div>
+
+			<!---
+			<select id="select-section" bind:value={selectedSections}>
 			
 				{#each gospelParallels.alandSynopsis.sections as section}
 					<option value={mathUtils.createNumArrayFromStringListRange(section.pericopes)}
@@ -1362,8 +1427,11 @@
 					>
 				{/if}
 			</select>
-			<button onclick={selectSection} class="align-top btn btn-primary inline-block m-1">Go!</button
+			-->
+			<button onclick={selectSection} disabled={selectedSections.length==0} class="align-top btn btn-primary inline-block m-1">Go!</button
+			>	<button onclick={()=>{selectedSections=[]}} class="align-top btn btn-outline inline-block m-1">Clear</button
 			>
+		
 		</div>
 		<hr class="!border-slate-300 m-6" />
 	{/if}
@@ -1967,6 +2035,10 @@
 
 	}
 
+	
+	.select-pericopes-wrapper{
+/*		max-width: calc(var(--sv-dropdown-width) + 1rem);*/
+	}
 	div {
 		/*color: var(--text-color);*/
 	}
@@ -2083,6 +2155,9 @@
 	border-radius: 5rem 5rem 0 0;
 }
 
+.sv-input--sizer{
+	@apply min-w-10!;
+}
 #select-section{
 	max-width: 200px;
 }
