@@ -299,7 +299,7 @@ function txtmc_mergeSpans(spans) {
  * @returns {Array<{subarray:number[], occurrences: Array<{columnIndex:number,textIndex:number,spans:{start:number,end:number}[]}>}>}
  */
 export function findMaximalCommonSubarraysAcrossColumns2(columns, minLen = 2, ignoreNums = []) {
-  const ignoreSet = new Set(ignoreNums || []);
+  const ignoreSet = new Set(ignoreNums);
 
   // Preprocess: build filtered arrays and mappings for each original text.
   // Structure: preCols[colIdx][textIdx] = { filtered: [...], fIndexToOriginal: [...], originalToFIndex: [...] }

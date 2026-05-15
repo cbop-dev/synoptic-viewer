@@ -409,12 +409,18 @@ export class LexPhraseAndLocations {
         this.phraseIndex = phraseIndex
     }
 
+
+    
+
+
     /**
      * @description Computes the "index" of a match type, where the match type is determined by the combination of columns 
      * in which the phrase is found when this includes at least 2 columns.
      * The total number of possible match combination is 2^n - n - 1, where n is the number of columns in the ParallelColumn groups.
      * The index is computed by treating the columns ALMOST like bits in a binary number, where the least significant bit is the first column, and the most significant bit is the last column. 
      * BUT, any "binary number" with only 1 bit set is skipped, since that would mean the phrase is only found in one column.
+     * Thus the indexes are calculated as follows: (maybe?)
+     * 0=col0+1, 1=col0+2, 2=col1+2, 3=col0+1+2, 4=col0+3, 5=col1+3, 6=col0+2+3, ... 
      * @param {number} numColumns - the number of columns in the ParallelColumn group (to check for matches) (what happens if this is different than the actual columns?)
      * @returns {number} the index of the type of match. Returns -1 if fewer than 2 flags are active.
      */
@@ -580,12 +586,27 @@ export class ParallelColumnGroup {
 
 
     /**
-     * @description phrases that are perfect matches--same lexemes, same form (exact string match).
-     * @type {Object<string,ParallelPhraseLocation[]>}
+     * @returns {number} the lexPhraseAndLocations with the most columns matched. -1 if empty or there are no matches.
      */
-    //not used?
-    //exactlyIdenticalPhrases = {}
+    maxLexicalColumnMatch(){
+        const lexPhrasesLocMostMatches=this.lexIdenticalPhrasesLocations.map((lpLoc)=>
+            lpLoc.calcMatchTypeIndex(this.maxMatchCols ? this.maxMatchCols : this.parallelColumns.length)
+        ).sort().reverse();
+        return lexPhrasesLocMostMatches.length ? lexPhrasesLocMostMatches[0] : -1;
+        
+        
+        /*reduce((prev,current)=>{
+            const bestColsMatchBinFlag = mathUtils.makeBinaryNumberFromArray(
+					Array.from(new Set(prev.multiColumnLocations.map((mc)=>mc.column))).sort());
+				const nextColsBinFlag = mathUtils.makeBinaryNumberFromArray(
+					Array.from(new Set(current.multiColumnLocations.map((mc)=>mc.column))).sort());
+				const numBestMatches = mathUtils.calcBinaryOnes(bestColsMatchBinFlag,this.parallelColumns.length);
+				const numNextMatches = mathUtils.calcBinaryOnes(nextColsBinFlag,this.parallelColumns.length);
+				return numNextMatches > numBestMatches  ? current : prev;
 
+        });*/
+        //return lexPhrasesLocMostMatches;
+    }
 
     /**
      * @description reverse map from location to whether word is part of exact phrase match.
@@ -662,7 +683,7 @@ export class ParallelColumnGroup {
      * @param {any[]} [ignoreWordIDs=[]] 
      * @description finds all the lexically identical phrases across columns! amazing!
      */
-    buildLexIdenticalPhrases(minLength = 2, includeSecondary = false, markidenticalPhrases = false, excludeCols = [],ignoreWordIDs=[]) {
+    buildLexIdenticalPhrases(minLength = 2, includeSecondary = false, markidenticalPhrases = false, excludeCols = [],ignoreWordIDs=[],includeOther=true) {
         //mylog(`ParColGroup.buildLexidentical(excludeCols=[${excludeCols.join(',')}]`,true);
         //untrack(()=>this.resetAllPhrases());
         this.resetAllPhrases();
@@ -729,6 +750,7 @@ export class ParallelColumnGroup {
             this.updatedCounter++;
         }
 
+        // i.e., find exact string matches. TODO: document and/or refactor into separate function?
         if (markidenticalPhrases) {
 
             /**
@@ -767,8 +789,12 @@ export class ParallelColumnGroup {
                 //this is an exactly matching (sub)phrase. need to map the 'column'/textindex/spans to the verse-word ranges in stringPhrasesAndLocs
                 commonPhraseObject.occurrences.forEach((occurrence) => {
                     //gotta find the word object...*:
+                    //occurrence.textIndex
                     
-                    const [exactPhrase, lexIdenticalLocations] = Object.entries(stringPhrasesAndLocs[occurrence.columnIndex])[occurrence.textIndex];
+                    const [exactPhrase2, lexIdenticalLocations] = Object.entries(stringPhrasesAndLocs[occurrence.columnIndex])[occurrence.textIndex];
+                    //const t = lexIdenticalLocations[0];
+                    
+                    
                     const exactPhraseAndLocations = new LexPhraseAndLocations(new LexicalPhrase(), lexIdenticalLocations, subPhraseIndex);
                     //const stuff1= stringPhrasesAndLocs[occurrence.columnIndex]
                     // const fred = stuff1['stinrg'];
@@ -795,19 +821,10 @@ export class ParallelColumnGroup {
                                 else {
                                     //mylog("buildLexIdPhrases.matchExact: for LexPhraseLoc, could get a ! secondary:"+lexPhraseLoc.secondary, true)
                                 }
-
                             });
-
-                            //  });
-
                         });
-
                     });
-
-
                 })
-
-
             })
         }
 
@@ -823,7 +840,7 @@ export class ParallelColumnGroup {
 
         this.lexIdenticalPhrasePalette=ParallelColumnGroup.getLexIdenticalPhrasePalette(this.maxMatchCols ? this.maxMatchCols : this.parallelColumns.length);
         
-        //TODO: figure out how to use this index!!
+        //??OLD???: (TODO: figure out how to use this index!!) <-- what is this comment about? obsolete?
     }
 
     /**

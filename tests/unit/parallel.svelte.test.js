@@ -1,11 +1,14 @@
 import { describe, it, expect, test } from 'vitest';
 import { N1904Server } from '$lib/n1904/tfN1904.js';
 import { mylog } from '$lib/env/env.js';
-import { ParallelColumn, GospelPericopeGroup, TextAndRef, VerseWords, Word, parseSingleGroup } from '$lib/components/content/parallelTexts.svelte.js';
+import { ParallelColumn, ParallelColumnGroup, TextAndRef, VerseWords, Word, parseSingleGroup, GospelPericopeGroup } from '$lib/components/content/parallelTexts.svelte.js';
 import GP from '@cbop-dev/aland-gospel-synopsis';
+import { GreekUtils } from '$lib/utils/greek-utils';
 import * as TfUtils from '$lib/components/content/TfUtils.js';
+import { SblGntServer } from '$lib/sblgnt/sblgnt';
 
 const tfServer = new N1904Server();
+const sblGntServer = new SblGntServer();
 test('dummy', async () => {
     const tests = [
         { input: null, output: null }
@@ -63,6 +66,61 @@ test('parseSingleGroup', async () => {
             }
         }
 
+    }
+    expect(true).toBe(true);
+    //await expect(page.locator('h1')).toBeVisible();
+});
+
+test('maxLexicalColumnMatch', async () => {
+    const cols=[
+    ["Καθημένου δὲ αὐτοῦ ἐπὶ τοῦ Ὄρους τῶν Ἐλαιῶν προσῆλθον αὐτῷ οἱ μαθηταὶ κατ’ ἰδίαν λέγοντες· Εἰπὸν ἡμῖν πότε ταῦτα ἔσται, καὶ τί τὸ σημεῖον τῆς σῆς παρουσίας καὶ συντελείας τοῦ αἰῶνος."],
+    ["Εἰπὸν ἡμῖν πότε ταῦτα ἔσται, καὶ τί τὸ σημεῖον ὅταν μέλλῃ ταῦτα συντελεῖσθαι πάντα."],
+    ["Ἐπηρώτησαν δὲ αὐτὸν λέγοντες· Διδάσκαλε, πότε οὖν ταῦτα ἔσται, καὶ τί τὸ σημεῖον ὅταν μέλλῃ ταῦτα γίνεσθαι;"]
+    ].map(([s])=>[GreekUtils.plainGreek(s.toLocaleLowerCase()).replaceAll(/[^a-z α-ω]/g,'')]);
+
+
+/*    for (const t of tests) {
+        expect(true).toBe(true);
+    }
+*/
+    expect(true).toBe(true);
+    //await expect(page.locator('h1')).toBeVisible();
+});
+
+test('Matt 11:5-6 // Luke 7:22-23 matching', async () => {
+    //TODO: still working on this test. see TODOs below
+    const tests = [
+        {textRefs:['Matt 11:5-6',"Luke 7:22-23"],
+         lexMatches:[],
+         exactMatches:
+            ["τυφλοὶ ἀναβλέπουσιν καὶ χωλοὶ περιπατοῦσιν, λεπροὶ καθαρίζονται καὶ κωφοὶ ἀκούουσιν, καὶ νεκροὶ ἐγείρονται καὶ πτωχοὶ εὐαγγελίζονται· καὶ μακάριός ἐστιν ὃς ἐὰν μὴ σκανδαλισθῇ ἐν ἐμοί",
+            "τυφλοὶ ἀναβλέπουσιν, χωλοὶ περιπατοῦσιν, λεπροὶ καθαρίζονται, κωφοὶ ἀκούουσιν, νεκροὶ ἐγείρονται, πτωχοὶ εὐαγγελίζονται· καὶ μακάριός ἐστιν ὃς ἐὰν μὴ σκανδαλισθῇ ἐν ἐμοί."
+            ]
+        }
+
+    ];
+    
+    /*
+    matt 11:5-6; Luke 7:22-23
+
+        should lexically match:
+        Matt: "τυφλοὶ ἀναβλέπουσιν καὶ χωλοὶ περιπατοῦσιν, λεπροὶ καθαρίζονται καὶ κωφοὶ ἀκούουσιν, ⸀καὶ νεκροὶ ἐγείρονται καὶ πτωχοὶ εὐαγγελίζονται· καὶ μακάριός ἐστιν ὃς ⸀ἐὰν μὴ σκανδαλισθῇ ἐν ἐμοί."
+        Luke: "τυφλοὶ ἀναβλέπουσιν, χωλοὶ περιπατοῦσιν, λεπροὶ καθαρίζονται, κωφοὶ ἀκούουσιν, νεκροὶ ἐγείρονται, πτωχοὶ εὐαγγελίζονται· καὶ μακάριός ἐστιν ὃς ἐὰν μὴ σκανδαλισθῇ ἐν ἐμοί."
+
+        but (at time of test writing) it doesn't recognize: τυφλοὶ, ἀκούουσιν, νεκροὶ, ἐγείρονται
+    */
+
+
+
+    for (const t of tests) {
+        const response = await sblGntServer.fetchPostTextsBatch(t.textRefs)
+        const parColumns = response.texts.map((rt,i)=>new ParallelColumn([new TextAndRef(t.textRefs[i],rt.text)]));
+        const perGroup = new ParallelColumnGroup(parColumns);
+        perGroup.buildLexIdenticalPhrases(3,false,true,[],sblGntServer.ignoreWordIds);
+        //TODO: figure out how to test this.
+        //perGroup.
+        
+        //expect(true).toBe(true);
     }
     expect(true).toBe(true);
     //await expect(page.locator('h1')).toBeVisible();

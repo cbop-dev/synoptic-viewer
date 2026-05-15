@@ -221,15 +221,16 @@ export function getParallelRefsArrays(parallelColumns) {
  * @param {boolean} words 
  * @param {boolean} includeSecondary 
  * @param {number[]} [excludeCols=[]] indices of columns to exclude from phrase-matching. Will still populate them!
+ * @param {number[]} [ignoreWordIds=[]] 
  */
-export function populateGroupsText(perGroups, response, perGroupsIndices, words = true, includeSecondary = true, excludeCols = []) {
+export function populateGroupsText(perGroups, response, perGroupsIndices, words = true, includeSecondary = true, excludeCols = [],ignoreWordIds=[]) {
     // mylog("v==================================v", true);
     //mylog("populateGroupTexts()...",true);
 
     for (const [index, group] of perGroups.entries()) {
         mylog("checking group # " + group.id + " , title: '" + group.title + ", index: " + index);
         if (!group.populated) {
-            populateGroupText(group, response && response['texts'] ? response['texts'] : null, perGroupsIndices[index], words, includeSecondary, excludeCols)
+            populateGroupText(group, response && response['texts'] ? response['texts'] : null, perGroupsIndices[index], words, includeSecondary, excludeCols,ignoreWordIds)
         }
     }
     mylog("DONE! Populated the GroupTexts()!")
@@ -244,8 +245,9 @@ export function populateGroupsText(perGroups, response, perGroupsIndices, words 
  * @param {boolean} words 
  * @param {boolean} includeSecondary 
  * @param {number[]} [excludeCols=[]] indices of columns to exclude from phrase-matching. Will still populate them!
+ * @param {number[]} [ignoreWordIds=[]] 
  */
-export function populateGroupText(group, responseTexts = null, perGroupIndices, words = true, includeSecondary = true, excludeCols = []) {
+export function populateGroupText(group, responseTexts = null, perGroupIndices, words = true, includeSecondary = true, excludeCols = [],ignoreWordIds=[]) {
     for (const book of ['matt', 'mark', 'luke', 'john', 'other']) {
         for (const [i, textRef] of group[book].textRefs.entries()) {
             mylog("checking ref: " + textRef.reference);
@@ -291,7 +293,7 @@ export function populateGroupText(group, responseTexts = null, perGroupIndices, 
     }
     //const excludeCols=GospelFilter.createValues(gospelFilter.filter).map((g,i)=>g? i : -1).filter((i)=> i>=0);
     group.markUniqueAndIdenticalWords(includeSecondary, excludeCols);
-    group.buildLexIdenticalPhrases(3, true, true, excludeCols);
+    group.buildLexIdenticalPhrases(3, true, true, excludeCols,ignoreWordIds);
     group.populated = true;
 }
 
@@ -303,8 +305,10 @@ export function populateGroupText(group, responseTexts = null, perGroupIndices, 
 * @param {number[][]} parallelIndices - first index corresponding to that of parallelColumnGroup, then containing indices into response.text
 * @param {boolean} [words=true]
 * @param {number[]} [excludeCols=[]] 
+* @param {number[]} [ignoreWordIds=[]]
 */
-export function populateTextGroup(parallelColumnGroup, response, parallelIndices, words = true, excludeCols = []) {
+export function populateTextGroup(parallelColumnGroup, response, parallelIndices, 
+    words = true, excludeCols = [],ignoreWordIds=[]) {
 
     for (const [index, par] of parallelColumnGroup.parallelColumns.entries()) {
 
@@ -333,7 +337,7 @@ export function populateTextGroup(parallelColumnGroup, response, parallelIndices
         }
 
         parallelColumnGroup.markUniqueAndIdenticalWords(true, excludeCols);
-        parallelColumnGroup.buildLexIdenticalPhrases(3, true, true, excludeCols);
+        parallelColumnGroup.buildLexIdenticalPhrases(3, true, true, excludeCols,ignoreWordIds);
     }
 
 

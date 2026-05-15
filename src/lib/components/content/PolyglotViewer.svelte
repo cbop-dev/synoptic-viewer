@@ -311,7 +311,7 @@
 
 		//buildLexArrays();
 		for (const [i, textGroup] of texts.entries()) {
-			TfUtils.populateTextGroup(textGroup, response, parRefsObj.groupsIndices[i]);
+			TfUtils.populateTextGroup(textGroup, response, parRefsObj.groupsIndices[i],true,[],currentServer.ignoreWordIds);
 		}
 		fetching = false;
 		dataReady = true;

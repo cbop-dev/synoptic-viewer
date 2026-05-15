@@ -31,6 +31,7 @@ export class N1904Server extends TfUtils.TfServer {
     param=this.abbrev;
     server=env.tfserverurl;
     dbURI="/nt";
+    lang="greek";
 
     /**
      * @type {Object<string,{id:number,count:number, beta:string}>} 

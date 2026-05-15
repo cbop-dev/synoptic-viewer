@@ -164,6 +164,7 @@ That is, the <LemmaInfo> tag should be surrounded by tags such as : {#key bookID
 	{#if lemmaInfo.gloss}<h2 class="inline-block">Gloss:</h2>
 	{lemmaInfo.gloss}<br />
 	{/if}
+	<i>ID: {lemmaInfo.id}</i>
 	<!--<h2 class="inline-block">Part of speech:</h2> {lemma.pos}-->
 
 	<div class="block text-center m-0 p-0 mt-1 self-center">

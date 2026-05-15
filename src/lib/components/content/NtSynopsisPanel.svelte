@@ -543,9 +543,7 @@
 			currentPage.length &&
 			!currentPage.reduce((a, b) => a && b.populated, true)
 		) {
-			//TfUtils.populateGroupsText(currentPage,fetchedTextsResponse,currentIndices,true,true);
-			//  await tick();
-			// myLog.log(`checkAndPopulatePage(): populatedGroupsText(${paginatedFilteredPerGroups[myOptions.viewOptions.page]})`,true);
+			
 		} else {
 			// myLog.log(`checkAndPopulatePage(). Current page #${myOptions.viewOptions.page}.length:${currentPage.length}; !currentPage.reduce((a,b)=>a&&b.populated,true):${!currentPage.reduce((a,b)=>a&&b.populated,true)}`,true);
 		}
@@ -1136,30 +1134,7 @@
 	$inspect('page:',myOptions.viewOptions.page);
 	$inspect('groupsRefsArray:',groupsRefsArray);
 	
-	//$inspect("fetchedTextsResponse",fetchedTextsResponse);
-	//$inspect("groupsRefsArray", groupsRefsArray);
-	//$inspect('perGroups', perGroups);
-
-	//$inspect("hotkeys.hotkeysEnabled:", hotkeys.hotkeysEnabled);
-	//$inspect("myOptions.viewOptions.lexes:", myOptions.viewOptions.lexes)
-	//$inspect("selectedLexes:", selectedLexes)
-
-	//$inspect("myOptions.viewOptions.similarPhrases: ", myOptions.viewOptions.similarPhrases);
-	//$inspect("showLexModal",showLexModal)
-	//$inspect("chosenLexBookId:",chosenLexBookId);
-
-	//$inspect(`NYSyop.selectedGreekPalette:${selectedGreekPalette.map((o)=>`bg:${o.bg},font:${o.font},border:${o.border}`).join(";")}`);
-	//$inspect(`NTSynPan.alandPericopeNums:${alandPericopeNums.join(",")};`);
-	//$inspect(`NTSynPan.filteredPericopes:${filteredPericopes.join(",")};`);
-	//$inspect(`NTSynPan.paginatedFilteredPericopes:${paginatedFilteredPerGroups.flat().map((g)=>g.id).join(",")};`);
-	//$inspect(`myOptions.viewOptions.page:${myOptions.viewOptions.page}`);
-	//$inspect(`paginatedFilteredPerGroups[myOptions.viewOptions.page]:${paginatedFilteredPerGroups[myOptions.viewOptions.page].flat().map((g)=>g.id)}`)
-	//$inspect(`myOptions.viewOptions.page:${myOptions.viewOptions.page}`)
-	//$inspect("NTSynPanel, myOptions.viewOptions.gospelFilter:", myOptions.viewOptions.gospelFilter);
-	//$inspect("NTSymPan: gospelsExcluded:",gospelsExcluded);
-	//groupsRefsArray
-	//$inspect('dataReady',dataReady);
-	//$inspect('selectedLexes',selectedLexes);
+	
 	$inspect('selectOptions:', selectSectionOptions);
 	$inspect('selectedSections',selectedSections);
 	$inspect('alandPericopeNums',alandPericopeNums);
@@ -1386,7 +1361,7 @@
 					onblur={textAreaBlur}
 					
 				></textarea> 
-				<button onclick={lookupShowNtParallels} class="btn btn-primary inline"
+				<button onclick={lookupShowNtParallels} disabled={refAreaText.length==0} class="btn btn-primary inline"
 					>Look up!</button
 				>
 			</div>
@@ -2114,7 +2089,6 @@
 		background-color: color-mix(in srgb, var(--bg-content) 80%, transparent );
 	}
 	.options-dropdown{
-		/*background-color: color-mix(in srgb, var(--secondary-bg) 90%, transparent 10%);*/
 		background-color: var(--bg-content);
 	}
 

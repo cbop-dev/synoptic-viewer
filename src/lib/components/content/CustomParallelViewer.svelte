@@ -44,6 +44,14 @@
 	import Footer from './Footer.svelte';
 	import TitleNavbar from './title-navbar.svelte';
 
+	function jumpToDiv(divId = '') {
+		if (divId) {
+			mylog("Jumping to Div: '"+divId+"'", true);
+			document.location = document.location.toString().split('#')[0] + '#' + divId;
+		}
+	}
+
+	let resultsTitle=$state('');
 	let {
 		live = false,
 		keyevent = null,
@@ -263,7 +271,12 @@
 			.split('\n')
 			.filter((s) => s.length);
 		const parGroups = [];
-
+		//let resultsTitle='';
+		if(lines[0].match(/^ *\[([^\]\[]+)\] *$/)){
+			const theLine = lines.shift() || "";
+			resultsTitle=theLine.trim().substring(1,theLine.length-1);
+			
+		}
 		for (let line of lines) {
 			const group = new ParallelColumnGroup();
 			group.lang=currentServer.lang;
@@ -299,7 +312,8 @@
 			texts[0].parallelColumns = parseSingleGroup(refAreaInputs);
 		} else {
 			//presuming batch mode!
-			texts = parseGroupsBatch(batchInput);
+			texts= parseGroupsBatch(batchInput);
+			
 		}
 
 		//mylog("after parsing input, but texts.parTexts[0].ref: " + texts.parallelColumns[0].textRefs[0].reference)
@@ -310,7 +324,7 @@
 
 		//buildLexArrays();
 		for (const [i, textGroup] of texts.entries()) {
-			TfUtils.populateTextGroup(textGroup, response, parRefsObj.groupsIndices[i]);
+			TfUtils.populateTextGroup(textGroup, response, parRefsObj.groupsIndices[i],true,[],currentServer.ignoreWordIds);
 		}
 		fetching = false;
 		dataReady = true;
@@ -441,6 +455,7 @@
 			//     hotkeys:['m'], state:myOptions.viewOptions.identical,modal:false},
 			// sections: { description:  "Jump to a section", hotkeys:['j'], state:false,modal:true},
 			view: { description: 'View Options', hotkeys: ['v'], state: false, modal: true },
+			sections: { description: 'Jump to a section', hotkeys: ['j'], state: false, modal: true },
 			lookup: {
 				description: 'Toggle Lookup input panel',
 				hotkeys: ['l'],
@@ -1034,20 +1049,28 @@
 		{:else}
 
 			<div id="results-heading">
-			<h2>
-				Parallel NT Texts from {currentServer.name}:
-				<CopyText icon={LinkSvg} getTextFunc={makeURL}
+			<h1>
+				{#if resultsTitle.length}{resultsTitle}
+				{:else}Parallel NT Texts{/if}<CopyText icon={LinkSvg} getTextFunc={makeURL}
 				 tooltip="Copy URL"
 				 svgStyle="filter: opacity(0.6);"
 				  />
-			</h2>
+			</h1>
+			<i>from {currentServer.name}</i>
+				
+			
 			</div>
 			{#each texts as textGroup, i}
-				{#if texts.length > 1 || textGroup.title}<h3 class="font-bold underline section-heading">
+				{#if texts.length > 1 || textGroup.title}
+				<div  id="group-{i + 1}" class="anchor group {i == 0 ? 'first': ''} text-center section-heading ">
+				<h3 class=" font-bold underline ">
 							{#if texts.length > 1}Group #{i + 1}:&nbsp;{/if}{#if textGroup.title}
 								{textGroup.title}{/if}
-						</h3>{/if}
-				<div class="anchor group" id="group-{i + 1}">
+				</h3>
+				</div> 
+				{/if}
+					
+				<div class="section-content">
 					
 					<ParallelColumnSection
 						parTextGroup={textGroup}
@@ -1352,6 +1375,41 @@
 		</div>
 	{/if}
 </Modal2>
+
+
+{#if dataReady}
+	<Modal2 bind:showModal={viewStates.views.sections.state}>
+		<div id="results-navigation" class=" text-left">
+			<h1>Search Results Navigation</h1>
+			
+				<ul>
+					{#each texts as textGroup, groupIndex}
+					<!--
+							{@const section = perGroup.id}
+							{@const isCurrent = myOptions.viewOptions.page == pageIndex}
+							{@const pericope = gospelParallels.alandSynopsis.lookupPericope(section)}
+					-->
+							<li class={['m-1 p-1 dark']}>
+								<h3>
+									<a
+										class="link"
+										onclick={() => {
+											viewStates.views.sections.state = false;
+											jumpToDiv('group-'+(groupIndex+1));
+										}}
+										><b>Group {groupIndex+1}. {textGroup.title}</b>
+										<i>({textGroup.parallelColumns.map((col)=>col.textRefs?.map((tf)=>tf.reference).join(";")).join("|")})</i></a
+									>
+								</h3>
+							</li>
+						
+					{/each}
+				</ul>
+			
+		</div>
+	</Modal2>
+
+{/if}
 <style>
 @reference 'tailwindcss';
 
@@ -1379,7 +1437,23 @@
 .group{
 	/*@apply mt-3;*/
 }
+
 .section-heading{
-	@apply text-center;
+	@apply text-center min-h-10 m-2;
+	border-radius: 5rem 5rem 0 0;
+	--section-bg: var(--secondary-bg);
+   /* background: linear-gradient(to bottom, var(--section-bg, transparent), transparent);*/
+    background: color-mix(in srgb, var(--section-bg, transparent) 60%, transparent 40%);
+    background-clip: content-box;
+	
 }
+
+.anchor:not(.first) {
+		@apply md:-mt-30 md:pt-40 -mt-20 pt-30;
+}
+
+.anchor.first{
+	@apply -mt-5 pt-20 ;
+}
+
 </style>

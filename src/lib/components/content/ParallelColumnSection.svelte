@@ -112,7 +112,6 @@ function notesClick(heading,note){
 
 
 
-
 //$inspect("ParTexts, focus:", focus)
 //$inspect("numCols", numCols, "colData:", colData)
 //$inspect("ParText, customClass", cssCustomDict);
@@ -155,23 +154,13 @@ function notesClick(heading,note){
                     />
 
 
-                            
-                           
-
-
-                     <!--{@render showText(myOptions,cssClasses)}-->
                     </div>
                     <!--<hr class='border-accent-content'/> -->
                 {/each}
-                
-            
+                        
             {/if}
-            </div>
-        
-                
+            </div>                
         {/if}
         {/each}
-
-
     </div>
     

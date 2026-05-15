@@ -47,12 +47,15 @@ test('exact phrase test!', async () => {
  "Ὦ γενεὰ ἄπιστος";
 
 
-test('calcMathTypes and reverse tests!', async () => {
+test('calcMatchTypes and reverse tests!', async () => {
 	
 
     const tests=[
        {colsIndices: [1,2],numCols:4,matchTypeIndex:2},
        {colsIndices: [0,1,2],numCols:5,matchTypeIndex:3},
+       {colsIndices: [0,3],numCols:5,matchTypeIndex:4},
+       {colsIndices: [1,3],numCols:5,matchTypeIndex:5},
+       {colsIndices: [0,2],numCols:4,matchTypeIndex:1},
        {colsIndices: [0,1],numCols:2,matchTypeIndex:0},
        {colsIndices: [0],numCols:2,matchTypeIndex:-1},
        {colsIndices: [2],numCols:4,matchTypeIndex:-1}
