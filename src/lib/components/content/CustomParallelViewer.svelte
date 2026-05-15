@@ -1048,7 +1048,7 @@
 					{/if}
 		{:else}
 
-			<div id="results-heading">
+			<div id="results-heading" class="text-lg">
 			<h1>
 				{#if resultsTitle.length}{resultsTitle}
 				{:else}Parallel NT Texts{/if}<CopyText icon={LinkSvg} getTextFunc={makeURL}
@@ -1062,11 +1062,18 @@
 			</div>
 			{#each texts as textGroup, i}
 				{#if texts.length > 1 || textGroup.title}
+				{@const groupNum=i+1}
 				<div  id="group-{i + 1}" class="anchor group {i == 0 ? 'first': ''} text-center section-heading ">
-				<h3 class=" font-bold underline ">
-							{#if texts.length > 1}Group #{i + 1}:&nbsp;{/if}{#if textGroup.title}
-								{textGroup.title}{/if}
-				</h3>
+
+					<h3 class=" font-bold underline ">
+						{#if textGroup.title}
+						{groupNum}.&nbsp;{textGroup.title}
+						{:else}
+						Group #{groupNum}:
+						{/if}
+
+						
+					</h3>
 				</div> 
 				{/if}
 					
@@ -1439,14 +1446,18 @@
 }
 
 .section-heading{
-	@apply text-center min-h-10 m-2;
+	@apply text-center min-h-10 ;
 	border-radius: 5rem 5rem 0 0;
 	--section-bg: var(--secondary-bg);
    /* background: linear-gradient(to bottom, var(--section-bg, transparent), transparent);*/
     background: color-mix(in srgb, var(--section-bg, transparent) 60%, transparent 40%);
     background-clip: content-box;
-	
+	h3{
+		padding: 0.5em;
+		font-size:larger;
+	}	
 }
+
 
 .anchor:not(.first) {
 		@apply md:-mt-30 md:pt-40 -mt-20 pt-30;
