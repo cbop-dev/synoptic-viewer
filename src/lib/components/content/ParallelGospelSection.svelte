@@ -175,7 +175,7 @@ function isUnique(wordid, uniqueSet){
 //$inspect("numCols", numCols, "colData:", colData)
 //$inspect("ParText, customClass", cssCustomDict);
 
-
+$inspect('ParGospel.gospelFilter:',options.viewOptions.gospelFilter);
 
 
 </script>

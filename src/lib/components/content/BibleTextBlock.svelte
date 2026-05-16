@@ -384,8 +384,8 @@
 								isUnique(word.id, uniqueSet) ? 'unique' : '',
 								selectedLexIndex >= 0 ? 'selected selected-lex' : '',
 								customMatchIndex >= 0 ? 'selected selected-custom' : '',
-								options.viewOptions.exactPhrases && new Set(exactPhraseIndices).intersection(new Set(highlightedExactIndices)).size ? 'highlighted-exact' :'',
-								options.viewOptions.similarPhrases && new Set(lexicalPhraseIndices).intersection(new Set(highlightedLexicalIndices)).size ?'highlighted-lexical':'',
+								options.viewOptions.exactPhrases && exactPhraseIndices.some(idx => highlightedExactIndices.includes(idx)) ? 'highlighted-exact' :'',
+								options.viewOptions.similarPhrases && lexicalPhraseIndices.some(idx => highlightedLexicalIndices.includes(idx)) ? 'highlighted-lexical':'',
 								ignoreWordsIds.includes(word.id)?'ignore':''
 
 									
