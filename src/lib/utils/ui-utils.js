@@ -121,47 +121,42 @@ export function copyToClipboard(text){
 }
 export 	function jumpToDiv(divId = '') {
 		if (divId) {
-			document.location = document.location.toString().split('#')[0] + '#' + divId;
+            const el = document.getElementById(divId);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
 		}
 }
 
 export function jumpToPrevSection(anchorClass='anchor'){
-    const nextId=findPrevAnchor(anchorClass)
-    if (nextId){
-        document.location=document.location.toString().split('#')[0]+'#'+nextId;
+    const prevId=findPrevAnchor(anchorClass)
+    if (prevId){
+        jumpToDiv(prevId);
     }
 }
 export function jumpToTop(anchorClass='anchor'){
-  document.location=document.location=document.location.toString().split('#')[0]+"#";
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 export function jumpToFirstSection(anchorClass='anchor'){
     const anchors = getAnchors(anchorClass);
     if (anchors && anchors.length) {
-        document.location=document.location.toString().split('#')[0]+'#'+anchors[0].id;
-
+        anchors[0].scrollIntoView({ behavior: 'smooth', block: 'start' });
     }     
-    
 }
 
 export function jumpToLastSection(anchorClass='anchor'){
     const anchors = getAnchors(anchorClass);
     
     if (anchors && anchors.length) {
-        document.location=document.location.toString().split('#')[0]+'#'+anchors[anchors.length-1].id;
-
+        anchors[anchors.length-1].scrollIntoView({ behavior: 'smooth', block: 'start' });
     }     
-    
 }
 
-
 export function jumpToNextSection(anchorClass='anchor'){
-  mylog("Jumping to next div."+anchorClass, true);
+    mylog("Jumping to next div."+anchorClass, true);
     const nextId=findNextAnchor(anchorClass)
     if (nextId){
-        const loc=document.location.toString().split('#')[0]+'#'+nextId;
-        document.location=loc;
-        mylog(`jumpToNextSection->${loc}`)
+        jumpToDiv(nextId);
+        mylog(`jumpToNextSection->${nextId}`)
     }
 }
 
