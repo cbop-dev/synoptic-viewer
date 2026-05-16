@@ -539,7 +539,7 @@
 	});
 
 	const hotkeys = new SynopsisHotkeys(myOptions);
-	hotkeys.enableHotkeys('><tbax');
+	hotkeys.enableHotkeys('nptbacx');
 	const hotkeys2 = [
 		{
 			key: 'c',
@@ -1412,7 +1412,7 @@
 											viewStates.views.sections.state = false;
 											jumpToDiv('group-'+(groupIndex+1));
 										}}
-										><b>{groupIndex+1}.{#if  textGroup.title} {textGroup.title}{/if}</b>
+										><b>{groupIndex+1}. {#if  textGroup.title} {textGroup.title}{/if}</b>
 										<i class="">({textGroup.parallelColumns.map((col)=>col.textRefs?.map((tf)=>tf.reference).join(";")).join("|")})</i></a
 									>
 								</h3>
