@@ -95,8 +95,25 @@
 		const retVal = uniqueSet && uniqueSet.has(wordid);
 		if (uniqueSet && uniqueSet.size) 0;
 		//mylog("IsUnique("+wordid+", "+Array.from(uniqueSet).join(',')+")--> "+retVal)
-		mylog(`isUnique(${wordid},(${uniqueSet}))=>${retVal}`);
+		//mylog(`isUnique(${wordid},(${uniqueSet}))=>${retVal}`);
 		return retVal;
+	}
+
+	/**
+	 * Pre-calculate custom match indices per verse to avoid per-word calculations.
+	 */
+	function buildCustomMatchMap(customMatchedWords, greekStrings) {
+		const map = new Map();
+		const sortedEntries = Object.entries(customMatchedWords).sort(([a], [b]) => b.length - a.length);
+		sortedEntries.forEach(([searchPhrase, array2d]) => {
+			const matchIndex = greekStrings.indexOf(searchPhrase);
+			array2d.flat().forEach(wordIndex => {
+				if (!map.has(wordIndex)) {
+					map.set(wordIndex, matchIndex);
+				}
+			});
+		});
+		return map;
 	}
 	//$inspect(`<BibleTextBlock>: textRef.ref=${textRef.reference}`)
 	/**
@@ -322,6 +339,7 @@
 						verseWords.words.map((w) => GreekUtils.onlyPlainGreek(w.word, true, true, true)),
 						options.viewOptions.greekStrings.map((str) => GreekUtils.onlyPlainGreek(str))
 					)}
+					{@const customMatchMap = buildCustomMatchMap(customMatchedWords, options.viewOptions.greekStrings)}
 					<!-- NB: first index is that of cssCustomDict; second is into textRef.vwords-->
 					<!--{#if Object.values(customMatchedWords).length}Custom matched!: {Object.keys(customMatchedWords).join(",")}{/if}-->
 					<span class="bg-white/30 border-black/40 border-0 m-0 p-0 rounded-xl ">
@@ -342,15 +360,8 @@
 					{#each verseWords.words as word, index}
 						<!--                    {@const selectedLexIndex=selectedLexes.indexOf(word.id)}-->
 						{@const selectedLexIndex = selectedLexes.indexOf(word.id)}
-						{@const isIdentical = parGroup.matchingWords.includes(stripWord(word.word))}
-						{@const customMatchSearchStrings = Object.entries(customMatchedWords)
-							.filter(([searchPhrase, array2d]) => array2d.flat().includes(index))
-							.map(([s, a2d]) => s)
-							.sort((a, b) => b.length - a.length)}
-						<!--{#if customMatchSearchStrings.length}Got match search strings![{customMatchSearchStrings.join(",")}]{/if}-->
-						{@const customMatchIndex = customMatchSearchStrings.length
-							? options.viewOptions.greekStrings.indexOf(customMatchSearchStrings[0])
-							: -1}
+						{@const isIdentical = parGroup.matchingWords.includes(word.clean)/*stripWord(word.word)*/}
+						{@const customMatchIndex = customMatchMap.has(index) ? customMatchMap.get(index) : -1}
 
 						{@const exactPhraseIndices = word.phrases.exact.map((pLoc)=>pLoc.phraseIndex)}
 						
