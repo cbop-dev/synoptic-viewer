@@ -35,8 +35,8 @@ export class SblGntServer extends N1904Server{
      * @type {number[]}  ignoreWordIds
      * 
      */
-    ignoreWordIds=[1156,1058,3635,1060,4889,3180,675,676,3182,3184,4958,3634,2514,234]; 
-//[δε,γαρ,ουν,γε,τε,μεν,ἄρα,ἆρα,μενοῦν,μέντοι,τοίνυν,οὐκοῦν,και,ἀλλά] (I think this is the order...)
+    ignoreWordIds=[1156,1058,3635,1060,4889,3180,675,676,3182,3184,4958,3634,2514,234,3454]; 
+//[δε,γαρ,ουν,γε,τε,μεν,ἄρα,ἆρα,μενοῦν,μέντοι,τοίνυν,οὐκοῦν,και,ἀλλά,ὁ] (I think this is the order...)
 // NB: this has the ids from SBL, will not work in other versions! (This is a bug in need of fixing?)
     
     /**

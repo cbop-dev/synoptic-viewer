@@ -786,6 +786,17 @@ export class ParallelColumnGroup {
 
                 const subphrase = commonPhraseObject.subarray;
 
+                // 1. Gather ALL locations for this exact match across all columns
+                const allExactLocations = [];
+                commonPhraseObject.occurrences.forEach((occurrence) => {
+                    const [exactPhrase2, lexIdenticalLocations] = Object.entries(stringPhrasesAndLocs[occurrence.columnIndex])[occurrence.textIndex];
+                    allExactLocations.push(...lexIdenticalLocations);
+                });
+
+                // 2. Create ONE unified LexPhraseAndLocations object representing the multi-column match
+                const exactPhraseAndLocations = new LexPhraseAndLocations(new LexicalPhrase(), allExactLocations, subPhraseIndex);
+
+                // 3. Mark the words using this unified object
                 //this is an exactly matching (sub)phrase. need to map the 'column'/textindex/spans to the verse-word ranges in stringPhrasesAndLocs
                 commonPhraseObject.occurrences.forEach((occurrence) => {
                     //gotta find the word object...*:
@@ -794,11 +805,6 @@ export class ParallelColumnGroup {
                     const [exactPhrase2, lexIdenticalLocations] = Object.entries(stringPhrasesAndLocs[occurrence.columnIndex])[occurrence.textIndex];
                     //const t = lexIdenticalLocations[0];
                     
-                    
-                    const exactPhraseAndLocations = new LexPhraseAndLocations(new LexicalPhrase(), lexIdenticalLocations, subPhraseIndex);
-                    //const stuff1= stringPhrasesAndLocs[occurrence.columnIndex]
-                    // const fred = stuff1['stinrg'];
-
                     /**
                     // * @type {ParallelPhraseLocation[]} lexIdenticalLocations
                      */

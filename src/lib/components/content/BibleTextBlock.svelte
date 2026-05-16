@@ -202,22 +202,48 @@
 						selectedGreekPalette[selectedLexes.length + customMatchIndex].font
 					);
 			}
-		} else if (word.phrases.lexical.length) {
+		} 
+		else if(word.phrases.exact.length || word.phrases.lexical.length){ //should we split exact and lexical blocks?!!
+
 			//wizardry with binary numbers!! :-) 
-			const lexPhrasesLocMostMatches=word.phrases.lexical.reduce((mostColumnsMatch,next)=>{
-				const bestColsMatchBinFlag = mathUtils.makeBinaryNumberFromArray(
-					Array.from(new Set(mostColumnsMatch.multiColumnLocations.map((mc)=>mc.column))).sort());
-				const nextColsBinFlag = mathUtils.makeBinaryNumberFromArray(
-					Array.from(new Set(next.multiColumnLocations.map((mc)=>mc.column))).sort());
-				const numBestMatches = mathUtils.calcBinaryOnes(bestColsMatchBinFlag,parGroup.parallelColumns.length);
-				const numNextMatches = mathUtils.calcBinaryOnes(nextColsBinFlag,parGroup.parallelColumns.length);
-				return numNextMatches > numBestMatches  ? next : mostColumnsMatch;
+			const thePhrases = ((options.viewOptions.exactPhrases && word.phrases.exact.length) ? word.phrases.exact : word.phrases.lexical);
+			const lexPhrasesLocMostMatches=thePhrases.reduce((mostColumnsMatch,next)=>{
+				if(mostColumnsMatch.calcMatchTypeIndex(parGroup.maxMatchCols ? parGroup.maxMatchCols : parGroup.parallelColumns.length) > 
+				   next.calcMatchTypeIndex(parGroup.maxMatchCols ? parGroup.maxMatchCols : parGroup.parallelColumns.length)){
+					return mostColumnsMatch
+				}
+				else{
+					return next;
+				}
+				
 			});
+			if(word.phrases.exact.length && options.viewOptions.exactPhrases){
+				const cols=Array.from(new Set(word.phrases.exact.map((p)=>p.multiColumnLocations.map((m)=>m.column)).flat())).sort();
+				//debug
+				if (cols.length > 1){
+					//mylog(`Exact phrase MULTI col!! (${word.word}): [${cols.join(',')}]`,true);
+				}
+				else{
+					//mylog(`Exact phrase, only 1 column (${word.word}): [${cols.join(',')}]`,true);
+				}
+
+			
+
+			}
+			if(options.viewOptions.exactPhrases){
+				//mylog(`EXACT: getWordStyle(${word.word}) lexPhrasesLocMostMatches[${lexPhrasesLocMostMatches.multiColumnLocations.map((m)=>'col:'+m.column + ', '+'sec:'+m.secondary).join(';')}]`,true);
+			}
+			else{
+				//mylog(`LEXICAL:getWordStyle(${word.word}) lexPhrasesLocMostMatches[${lexPhrasesLocMostMatches.multiColumnLocations.map((m)=>'col:'+m.column + ', '+'sec:'+m.secondary).join(';')}]`,true);
+				//mylog("Waht?", true);
+			}
+
+
 			
 			let colorIndex = lexPhrasesLocMostMatches.calcMatchTypeIndex(parGroup.maxMatchCols ? parGroup.maxMatchCols : parGroup.parallelColumns.length);
 			
 			if (colorIndex >= parGroup.lexIdenticalPhrasePalette.length || colorIndex < 0){
-//				mylog(`getWordStyle(${word.word}) invalid colorIndex: ${colorIndex}, maxMatchCols=${parGroup.maxMatchCols}; but parGroup.lexIdenticalPhrasePalette=${parGroup.lexIdenticalPhrasePalette.length}; resetting to last index!`,true)
+				mylog(`getWordStyle(${word.word}) invalid colorIndex: ${colorIndex}, maxMatchCols=${parGroup.maxMatchCols}; but parGroup.lexIdenticalPhrasePalette=${parGroup.lexIdenticalPhrasePalette.length}; resetting to last index!`,true)
 				colorIndex = parGroup.lexIdenticalPhrasePalette.length -1;
 			}
 			else{
@@ -366,52 +392,9 @@
 						<!--]-->
 						 {/if}
 
-						<!--                  <WordComp {word} wordIndex={index}
-                         {book} {options} {wordClick}
-                            {high}
-                            {cssLexClassDict} {customMatchedWords}
-                            {cssWordClassDict}
-                            {verseIndex}
-                            isUnique={isUnique(word.id,uniqueSet)}
-                            {cssCustomStringDict}
-                            highlightIndex={selectedLexes.indexOf(word.id)}
-                            
-                            
-                            isIdentical={parGroup.matchingWords.includes(stripWord(word.word))}
-                    
-                    />
--->
-						<!--{[...word.phrases.lexical].map((phr)=>parGroup.lexIdenticalPhrasesLocations.findIndex((v)=>v.phrase==phr))}-->
-
-						<!--                    
-                         
-                        {@const lexicalPhrases = word.phrases['lexical'] ? Array.from(word.phrases['lexical']).
-                            map((p)=>parGroup.getCssClassesForPhrase(p)).flat()  : []}
-                        
-                        {@const phraseNum = parGroup.lexIdenticalPhrasesLocations.findIndex(
-                            (v)=>(v.phrase==(word.phrases['lexical'] ? Array.from(word.phrases['lexical']) : [null]).flat()[0]))}
-                        
-                       
-                        {@const lexCssClasses=cssLexClassDict[word.id]}
-                        {@const plainGreek=GreekUtils.onlyPlainGreek(word.word)}
-                        {@const customMatchSearchStrings=Object.entries(customMatchedWords).filter(([searchPhrase,array2d])=>array2d.flat().includes(index)).map(([s,a2d])=>s)}
-                        {@const customClasses = customMatchSearchStrings.map((s)=>cssCustomStringDict[s])}
-                        {@const wordClasses = (cssWordClassDict[verseIndex] && cssWordClassDict[verseIndex][index])? cssWordClassDict[verseIndex][index] : []}
-                            {#if false && word.specialCss.size}[[Special class={[...word.specialCss].join(",")}]]:
-                            {/if}
-                        <span role="none"
-                            class={["m-0", "word", "lex-"+word.id, 
-                                options.viewOptions.unique && uniqueSet && isUnique(word.id,uniqueSet) && "lex-unique",
-                                customClasses?.length ? customClasses[0] : '', wordClasses,  lexicalPhrases,
-                                options.viewOptions.identical && lexCssClasses && parGroup.matchingWords.includes(stripWord(word.word)) && 'identical-word',
-                                lexCssClasses, ...word.specialCss]} 
-                            onclick={()=>{if (options.viewOptions.highlightOnClick || options.viewOptions.lexInfoClick) wordClick(word.id,book)}}>{getText([word],options.viewOptions.hideApp)}{'  '} 
-                            
-                      
-                        </span>
--->
+						
 					{/each}
-				{/each}<!--<CopyText linkText="IDs!" getTextFunc={()=>textRef.getWordIdArray().join(',')} />-->
+				{/each}
 			{:else if textRef.text }
 				{options.viewOptions.hideApp && parGroup.lang=='greek'? GreekUtils.removeApparatusMarks(textRef.text) : textRef.text}
 			{/if}

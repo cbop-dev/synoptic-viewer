@@ -538,7 +538,8 @@
 		}
 	});
 
-	const hotkeys = new SynopsisHotkeys(myOptions,'','customParAnchor');
+	const hotkeys = new SynopsisHotkeys(myOptions);
+	hotkeys.anchorClass='customParAnchor';
 	hotkeys.enableHotkeys('nptbacx');
 	const hotkeys2 = [
 		{
