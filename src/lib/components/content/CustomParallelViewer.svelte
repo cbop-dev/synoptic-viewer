@@ -538,7 +538,7 @@
 		}
 	});
 
-	const hotkeys = new SynopsisHotkeys(myOptions);
+	const hotkeys = new SynopsisHotkeys(myOptions,'','customParAnchor');
 	hotkeys.enableHotkeys('nptbacx');
 	const hotkeys2 = [
 		{
@@ -1064,7 +1064,7 @@
 				{#if texts.length > 1 || textGroup.title}
 				{@const groupRefs=textGroup.getRefs()}
 				{@const groupNum=i+1}
-				<div  id="group-{i + 1}" class="anchor group {i == 0 ? 'first': ''} text-center section-heading ">
+				<div  id="group-{i + 1}" class="anchor customParAnchor group {i == 0 ? 'first': ''} text-center section-heading ">
 
 					<h3 class=" font-bold underline  mb-0! pb-0! leading-none">
 						{#if textGroup.title}

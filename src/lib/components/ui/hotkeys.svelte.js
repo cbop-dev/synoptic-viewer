@@ -49,14 +49,15 @@ export class SynopsisHotkeys{
      */
     hotkeys=$state(new Map());
     options=$state(new SynopsisOptions3());
-    
-    hotkeysTable=[
-        {key:'n', name:'Next Section',function: UiUtils.jumpToNextSection},
-        {key:'p',name:'Previous Section',function: UiUtils.jumpToPrevSection},
-        {key:'>', name:'Next Section',function: UiUtils.jumpToNextSection},
-        {key:'<',name:'Previous Section',function: UiUtils.jumpToPrevSection},
-        {key:'t',name:'Top/First Section',function: UiUtils.jumpToTop},
-        {key:'b',name:'Bottom/Last Section',function: UiUtils.jumpToLastSection},
+    anchorClass=$state('anchor');
+
+    hotkeysTable=$derived([
+        {key:'n', name:'Next Section',function: ()=>{UiUtils.jumpToNextSection(this.anchorClass)}},
+        {key:'p',name:'Previous Section',function: ()=>{UiUtils.jumpToPrevSection(this.anchorClass)}},
+        {key:'>', name:'Next Section',function: ()=>{UiUtils.jumpToNextSection(this.anchorClass)}},
+        {key:'<',name:'Previous Section',function: ()=>{UiUtils.jumpToPrevSection(this.anchorClass)}},
+        {key:'t',name:'Top/First Section',function: ()=>{UiUtils.jumpToTop(this.anchorClass)}},
+        {key:'b',name:'Bottom/Last Section',function: ()=>{UiUtils.jumpToLastSection(this.anchorClass)}},
         {key:'2', name:'Show/hide secondary gospelparallels',optionName:"hideSecondary", function: ()=>{this.options.viewOptions.hideSecondary= !this.options.viewOptions.hideSecondary}, navLetterButton:true,navKeyClasses:'line-through text-lg'},
         {key:'o', name:'Show/hide non-gospel parallels',optionName:"hideOther", function: ()=>{this.options.viewOptions.hideOther= !this.options.viewOptions.hideOther}, navLetterButton:true,navKeyClasses:'line-through text-lg'},
         {key:'c',name:'Highlight on Click',optionName:"highlightOnClick",function: ()=>{this.options.viewOptions.highlightOnClick =!this.options.viewOptions.highlightOnClick},navLetterButton:true,condition:isLexCondition},
@@ -68,14 +69,16 @@ export class SynopsisHotkeys{
         {key:'m',letter:'☰', name:'Show/hide options menu',optionName:"menuOpen",function: ()=>{this.options.viewOptions.menuOpen =!this.options.viewOptions.menuOpen},navLetterButton:false},
         {key:'x',name:'Lexeme Info and Stats on Click',optionName:"lexInfoClick",function: ()=>{this.options.viewOptions.lexInfoClick =!this.options.viewOptions.lexInfoClick},navLetterButton:true,condition:isLexCondition},
         
-    ];
+    ]);
     
     /**
      * 
      * @param {string} hotkeysEnabled a string of hotkeys letters to be enabled. Each char is one key.
      * @param {SynopsisOptions3} options 
      */
-    constructor(options=new SynopsisOptions3(),hotkeysEnabled='cuisme'){
+    constructor(options=new SynopsisOptions3(),hotkeysEnabled='cuisme',anchorClass='anchor'){
+        mylog(`new hotkeys class with anchor: '${anchorClass}'`, true);
+        this.anchorClass=anchorClass;
         this.hotkeys=new Map();
         this.options=options;
         for (const k of hotkeysEnabled){

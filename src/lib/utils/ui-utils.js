@@ -1,8 +1,10 @@
 import { mylog } from "$lib/env/env.js";
 
-export function findCurrentAnchorInfo() {
+export const anchorClass = 'anchor';
+
+export function findCurrentAnchorInfo(anchorClass='anchor') {
   const maxTop=30;
-    const anchors = getAnchors();
+    const anchors = getAnchors(anchorClass);
     /**
      * @type {Element|null} curAnchor
      */
@@ -27,34 +29,39 @@ export function findCurrentAnchorInfo() {
     return curAnchor ? {id: curAnchor.id, index: curIndex} : null;
   }
 
-export function getCurrentAnchor(){
-    const anchor=findCurrentAnchorInfo();
+export function getCurrentAnchor(anchorClass='anchor'){
+    const anchor=findCurrentAnchorInfo(anchorClass);
     return anchor?.id;
 }
 
-export function getTopAnchorIndex(){
-    return findCurrentAnchorInfo()?.index;
+export function getTopAnchorIndex(anchorClass='anchor'){
+    return findCurrentAnchorInfo(anchorClass)?.index;
 }
 
-export function getAnchors(){
-    return Array.from(document.querySelectorAll('div[id].anchor'));
+export function getAnchors(anchorClass='anchor'){
+    return Array.from(document.querySelectorAll('div[id].'+ anchorClass)).filter(el => {
+        // Elements with display:none have 0 width/height and cause rect.top to be 0, breaking the calculations.
+        // We filter out anything that has no dimensions and no offsetParent.
+        const rect = el.getBoundingClientRect();
+        return rect.width > 0 || rect.height > 0 || el.offsetParent !== null;
+    });
 }
 
-export function findPrevAnchor(){
-    const anchorInfo=findCurrentAnchorInfo();
-    const anchors=getAnchors();
+export function findPrevAnchor(anchorClass='anchor'){
+    const anchorInfo=findCurrentAnchorInfo(anchorClass);
+    const anchors=getAnchors(anchorClass);
     let id=''
     if (anchorInfo && anchorInfo.index >0 && anchors.length > 0){
-        id=anchors[anchorInfo.index+1].id ? anchors[anchorInfo.index-1].id : '';
+        id=anchors[anchorInfo.index-1].id ? anchors[anchorInfo.index-1].id : '';
 
     }
     return id;
 
 }
 
-export function findNextAnchor(){
-    const anchorInfo=findCurrentAnchorInfo();
-    const anchors=getAnchors();
+export function findNextAnchor(anchorClass='anchor'){
+    const anchorInfo=findCurrentAnchorInfo(anchorClass);
+    const anchors=getAnchors(anchorClass);
     let id=''
     if (anchorInfo && anchorInfo.index < anchors.length-1){
         id=anchors[anchorInfo.index+1].id ? anchors[anchorInfo.index+1].id : '';
@@ -65,7 +72,7 @@ export function findNextAnchor(){
 }
 /* //working todo: finish!!
 export function findTopMostAnchorInfo() {
-    const anchors = document.querySelectorAll('div[id].anchor');
+    const anchors = document.querySelectorAll('div[id].'+ anchorClass);
     let topMost = null;
     let minTop = Infinity;
 
@@ -96,8 +103,8 @@ export function findTopMostAnchorInfo() {
     return findTopMostAnchorInfo()?.id;
   }*/
 
-export function findLastAnchor(){
-    const anchors = document.querySelectorAll('div[id].anchor');
+export function findLastAnchor(anchorClass='anchor'){
+    const anchors = document.querySelectorAll('div[id].'+ anchorClass);
     const last= anchors[anchors.length-1].id ? anchors[anchors.length-1].id : '';
     
     return last;
@@ -105,8 +112,8 @@ export function findLastAnchor(){
   }
 
 
-export function getDivAnchorIdsArray(){
-    return Array.from(document.querySelectorAll('div[id].anchor')).map((a)=>a.id);
+export function getDivAnchorIdsArray(anchorClass='anchor'){
+    return Array.from(document.querySelectorAll('div[id].'+ anchorClass)).map((a)=>a.id);
 }
 
 export function copyToClipboard(text){
@@ -118,18 +125,18 @@ export 	function jumpToDiv(divId = '') {
 		}
 }
 
-export function jumpToPrevSection(){
-    const nextId=findPrevAnchor()
+export function jumpToPrevSection(anchorClass='anchor'){
+    const nextId=findPrevAnchor(anchorClass)
     if (nextId){
         document.location=document.location.toString().split('#')[0]+'#'+nextId;
     }
 }
-export function jumpToTop(){
+export function jumpToTop(anchorClass='anchor'){
   document.location=document.location=document.location.toString().split('#')[0]+"#";
 }
 
-export function jumpToFirstSection(){
-    const anchors = getAnchors();
+export function jumpToFirstSection(anchorClass='anchor'){
+    const anchors = getAnchors(anchorClass);
     if (anchors && anchors.length) {
         document.location=document.location.toString().split('#')[0]+'#'+anchors[0].id;
 
@@ -137,8 +144,9 @@ export function jumpToFirstSection(){
     
 }
 
-export function jumpToLastSection(){
-    const anchors = getAnchors();
+export function jumpToLastSection(anchorClass='anchor'){
+    const anchors = getAnchors(anchorClass);
+    
     if (anchors && anchors.length) {
         document.location=document.location.toString().split('#')[0]+'#'+anchors[anchors.length-1].id;
 
@@ -147,8 +155,9 @@ export function jumpToLastSection(){
 }
 
 
-export function jumpToNextSection(){
-    const nextId=findNextAnchor()
+export function jumpToNextSection(anchorClass='anchor'){
+  mylog("Jumping to next div."+anchorClass, true);
+    const nextId=findNextAnchor(anchorClass)
     if (nextId){
         const loc=document.location.toString().split('#')[0]+'#'+nextId;
         document.location=loc;

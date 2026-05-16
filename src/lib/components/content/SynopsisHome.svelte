@@ -188,9 +188,9 @@
     <div id="pane-{pane.name}" class={index==selectedPane ? 'block' : 'hidden'}>
             
             {#if options.request.tab==index}
-            <pane.comp options={options.copy()} live={index==selectedPane} tfServer={tfServer} keyevent={keyEvents[index]} --bg-app={bgApp} --bg-content={bgContent}/>
+            <pane.comp options={options.copy()} live={index==selectedPane} tfServer={tfServer} keyevent={index==selectedPane ? keyEvents[index]: null} --bg-app={bgApp} --bg-content={bgContent}/>
             {:else}
-            <pane.comp live={index==selectedPane} tfServer={tfServer} keyevent={keyEvents[index]} --bg-app={bgApp} --bg-content={bgContent}/>
+            <pane.comp live={index==selectedPane} tfServer={tfServer} keyevent={index==selectedPane ? keyEvents[index]: null} --bg-app={bgApp} --bg-content={bgContent}/>
             {/if}
             
         
