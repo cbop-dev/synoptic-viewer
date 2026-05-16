@@ -42,6 +42,12 @@
         
     }
     */
+
+    .column.solo{
+        text-align: center;
+        @apply flex flex-wrap;
+
+    }
 </style>
 <script>
     import { mylog } from '$lib/env/env.js';
@@ -66,6 +72,7 @@
      * options:SynopsisOptions3,
      * showNotes:boolean,
      * selectedGreekPalette:{bg:string,font:string,border:string}[],
+     * showBlankColumns:boolean,
      * showNotesFunction(heading:string,note:string):void
      * }}
      */
@@ -81,6 +88,7 @@
         showNotes=true,
         //hideApp=false,
         selectedGreekPalette=[],
+        showBlankColumns=false,
         showNotesFunction=(heading,note)=>{alert(heading+"\n"+note)}
         
     } = $props();
@@ -95,8 +103,8 @@ function notesClick(heading,note){
     showNotesFunction(heading,note);
 }
 
-    let numCols=$derived(parTextGroup.parallelColumns.length)
- 
+    let numCols=$derived(parTextGroup.parallelColumns.filter((pc)=>pc.textRefs.length).length);
+    
     
     let columnStyle = $derived('grid-cols-'+numCols);
     /**
@@ -119,31 +127,32 @@ function notesClick(heading,note){
 //$inspect(`ParalColSec.lexPalette:`, selectedGreekPalette);
 </script>
 
+    <!--<h2 class="text-center">showing blanks: {showBlankColumns}</h2>-->
+
 
     <div 
-    class="grid  
-    {numCols >=2 ? "sm:grid-cols-2" : ''}
+    class=" 
+    {numCols==1 ? "flex flex-1 flex-wrap ":'' }
+    {numCols >=2 ? "grid sm:grid-cols-2" : 'grid grid-cols-1'}
     {
-        numCols == 3 ? "md:!grid-cols-3 gap-1" : 
-        numCols ==4 ? "lg:!grid-cols-4 gap-1" :
-        numCols ==5 ? "lg:grid-cols-5 gap-1" :
+        numCols == 3 ? " grid  md:!grid-cols-3 gap-1" : 
+        numCols ==4 ? " grid lg:!grid-cols-4 gap-1" :
+        numCols ==5 ? " grid lg:grid-cols-5 gap-1" :
         ""
-    } grid-cols-1 text-2xl">
+    }  text-2xl">
        
         {#each parTextGroup.parallelColumns as col, index}
+        
+        {#if showBlankColumns || (col.textRefs && col.textRefs.length)}
             
-        {#if col.textRefs && col.textRefs.length}
-            <div class="rounded-box  m-1 p-2 column column-{index}">
-            {#if col.textRefs.length}
-            
-                
+            <div class="rounded-box  m-1 p-2 column {numCols==1 ? 'solo' : ''} column-{index}  ">
+            {#if  showBlankColumns || col.textRefs.length}                            
                 {#each col.textRefs as textRef, index2}
                 
                 {@const unique = (options.viewOptions.unique && numCols > 1)? col.unique : new Set()}
-                 
-                
-                    {#if index2 > 0}<br/>{/if}
-                    <div class="text-left">
+                             
+                    <!--{#if numCols>1 && index2 > 0} {/if}-->
+                    <div class="text-left align-top {numCols == 1 ? 'inline-block mt-1 mb-1 md:max-w-1/2 lg:max-w-1/3 ' :''}">
    
                     <BibleTextBlock {textRef}  parGroup={parTextGroup} {options} {numCols} copyButton={true} 
                     cssLexClassDict={cssClassDict} cssCustomStringDict={cssCustomDict} 
@@ -152,8 +161,6 @@ function notesClick(heading,note){
             bind:highlightedLexicalIndices={highlightedLexicalIndices}
                         {wordClick} 
                     />
-
-
                     </div>
                     <!--<hr class='border-accent-content'/> -->
                 {/each}

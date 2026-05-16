@@ -287,8 +287,8 @@
 				mylog(`Got Batch row.title:'${group.title}'`);
 			}
 			line = line.replace(regex, '');
-			group.parallelColumns = parseSingleGroup(line.split('|').filter((l) => l.trim().length));
-
+			//group.parallelColumns = parseSingleGroup(line.split('|').filter((l) => l.trim().length));
+			group.parallelColumns = parseSingleGroup(line.split('|'));
 			parGroups.push(group);
 		}
 		return parGroups;
@@ -1088,6 +1088,7 @@
 						showNotes={true}
 						showNotesFunction={displayNote}
 						{selectedGreekPalette}
+						showBlankColumns={false}
 					/>
 				</div>
 			{/each}
