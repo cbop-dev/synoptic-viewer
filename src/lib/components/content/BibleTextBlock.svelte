@@ -234,26 +234,7 @@
 				}
 				
 			});
-			if(word.phrases.exact.length && options.viewOptions.exactPhrases){
-				const cols=Array.from(new Set(word.phrases.exact.map((p)=>p.multiColumnLocations.map((m)=>m.column)).flat())).sort();
-				//debug
-				if (cols.length > 1){
-					//mylog(`Exact phrase MULTI col!! (${word.word}): [${cols.join(',')}]`,true);
-				}
-				else{
-					//mylog(`Exact phrase, only 1 column (${word.word}): [${cols.join(',')}]`,true);
-				}
 
-			
-
-			}
-			if(options.viewOptions.exactPhrases){
-				//mylog(`EXACT: getWordStyle(${word.word}) lexPhrasesLocMostMatches[${lexPhrasesLocMostMatches.multiColumnLocations.map((m)=>'col:'+m.column + ', '+'sec:'+m.secondary).join(';')}]`,true);
-			}
-			else{
-				//mylog(`LEXICAL:getWordStyle(${word.word}) lexPhrasesLocMostMatches[${lexPhrasesLocMostMatches.multiColumnLocations.map((m)=>'col:'+m.column + ', '+'sec:'+m.secondary).join(';')}]`,true);
-				//mylog("Waht?", true);
-			}
 
 
 			

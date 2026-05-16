@@ -425,6 +425,9 @@ export class LexPhraseAndLocations {
      * @returns {number} the index of the type of match. Returns -1 if fewer than 2 flags are active.
      */
     calcMatchTypeIndex(numColumns) {
+        if (this._matchTypeIndex !== undefined && this._lastNumColumns === numColumns) {
+            return this._matchTypeIndex;
+        }
         
         const phraseColumnFlags = ArrayUtils.newArray(numColumns, false);
 
@@ -460,9 +463,9 @@ export class LexPhraseAndLocations {
         }
         
         const ret =  bitValue - 1 - singleBitOffsets;
-        if (ret >= 0){
-          //  mylog(`calcMatchType(${numColumns}):${bitValue} - 1 - ${singleBitOffsets} = ${bitValue - 1 - singleBitOffsets}`,true)
-        }
+        
+        this._matchTypeIndex = ret;
+        this._lastNumColumns = numColumns;
         return ret;
     }
 
