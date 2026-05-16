@@ -1062,18 +1062,25 @@
 			</div>
 			{#each texts as textGroup, i}
 				{#if texts.length > 1 || textGroup.title}
+				{@const groupRefs=textGroup.getRefs()}
 				{@const groupNum=i+1}
 				<div  id="group-{i + 1}" class="anchor group {i == 0 ? 'first': ''} text-center section-heading ">
 
-					<h3 class=" font-bold underline ">
+					<h3 class=" font-bold underline  mb-0! pb-0! leading-none">
 						{#if textGroup.title}
 						{groupNum}.&nbsp;{textGroup.title}
 						{:else}
 						Group #{groupNum}:
 						{/if}
-
+						
 						
 					</h3>
+					<i>{groupRefs}</i>
+					<CopyText
+										copyText={groupRefs}
+										tooltip="Copy parallel group references"
+										svgStyle="filter: opacity(0.7);"
+					/>
 				</div> 
 				{/if}
 					

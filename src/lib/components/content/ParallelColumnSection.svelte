@@ -45,7 +45,7 @@
 
     .column.solo{
         text-align: center;
-        @apply flex flex-wrap;
+        @apply flex flex-wrap items-center;
 
     }
 </style>
