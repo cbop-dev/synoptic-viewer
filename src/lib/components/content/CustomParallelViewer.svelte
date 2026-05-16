@@ -130,7 +130,7 @@
 	let batchInput = $state(
 		myOptions.request.batch && myOptions.request.batch.length
 			? myOptions.request.batch.join('\n')
-			: 'Matt 1:1|Mark 1:1|John 1:1\nMatt 5:17|Eph 2:14-16'
+			: '[Gospel Intros]Matt 1:1|Mark 1:1|Luke 1:1-4|John 1:1\n[On (not) Abolishing the Law]Matt 5:17|Eph 2:14-16'
 	);
 
 	/**
@@ -1412,8 +1412,8 @@
 											viewStates.views.sections.state = false;
 											jumpToDiv('group-'+(groupIndex+1));
 										}}
-										><b>Group {groupIndex+1}. {textGroup.title}</b>
-										<i>({textGroup.parallelColumns.map((col)=>col.textRefs?.map((tf)=>tf.reference).join(";")).join("|")})</i></a
+										><b>{groupIndex+1}.{#if  textGroup.title} {textGroup.title}{/if}</b>
+										<i class="">({textGroup.parallelColumns.map((col)=>col.textRefs?.map((tf)=>tf.reference).join(";")).join("|")})</i></a
 									>
 								</h3>
 							</li>
