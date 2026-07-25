@@ -191,26 +191,7 @@ Jump to book:<br/> {#each books as book}
 {/each}
 </div>
 </div>
-<!--
-<Modal2 bind:showModal={showModal} max={true}>
-    
-    {#if !textsFetched[chosenRefIdx]}
-    Loading...<span class="loading loading-spinner loading-lg"></span>
-    {:else}
-        {@const theText=textsFetched[chosenRefIdx]}
-        {@const theRef = refs[chosenRefIdx]}
 
-        <div class="block" >
-        <h2>{theRef}</h2>
-        <p class="greek text-2xl">{theText}</p>
-        
-        <CopyText copyText={theRef+": " +theText} />
-        
-        </div>
-
-    {/if}
-</Modal2>
--->
 
 <!---->
 

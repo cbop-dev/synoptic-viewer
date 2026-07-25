@@ -46,7 +46,7 @@
 
 	function jumpToDiv(divId = '') {
 		if (divId) {
-			mylog("Jumping to Div: '"+divId+"'", true);
+//			mylog("Jumping to Div: '"+divId+"'", true);
 			document.location = document.location.toString().split('#')[0] + '#' + divId;
 		}
 	}

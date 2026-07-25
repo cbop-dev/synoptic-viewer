@@ -110,9 +110,9 @@ export function makeBinaryNumberFromArray(arr){
 }
 
 // Examples:
-console.log(calcBinaryOnes(2, 4));  // 0010 -> 1
-console.log(calcBinaryOnes(7, 4));  // 0111 -> 3
-console.log(calcBinaryOnes(63, 6)); // 111111 -> 6
+//console.log(calcBinaryOnes(2, 4));  // 0010 -> 1
+//console.log(calcBinaryOnes(7, 4));  // 0111 -> 3
+//console.log(calcBinaryOnes(63, 6)); // 111111 -> 6
 export default {
 
 floatRound,romanize,createNumArrayFromStringListRange,range,sum,calcBinaryOnes,makeBinaryNumberFromArray}

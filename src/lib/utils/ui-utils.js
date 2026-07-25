@@ -152,7 +152,7 @@ export function jumpToLastSection(anchorClass='anchor'){
 }
 
 export function jumpToNextSection(anchorClass='anchor'){
-    mylog("Jumping to next div."+anchorClass, true);
+//    mylog("Jumping to next div."+anchorClass, true);
     const nextId=findNextAnchor(anchorClass)
     if (nextId){
         jumpToDiv(nextId);

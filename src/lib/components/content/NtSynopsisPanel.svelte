@@ -40,7 +40,7 @@
 	import ArrowTop from '../ui/icons/arrow-top-icon.svelte';
 	import BulletsIcons from '../ui/icons/bullets-outline.svelte';
 	import CopyText from '../ui/CopyText.svelte';
-	import { findNextAnchor, findPrevAnchor, getAnchors } from '$lib/utils/ui-utils';
+	import { findNextAnchor, findPrevAnchor, getAnchors, jumpToTop } from '$lib/utils/ui-utils';
 	import TitleNavbar from './title-navbar.svelte';
 	import { Hotkey, SynopsisHotkeys } from '../ui/hotkeys.svelte';
 	import LemmaInfo from './lemma/LemmaInfo.svelte';
@@ -303,7 +303,12 @@
 		}
 
 		if (alandPerGroupId) {
+			//mylog(`GotoPageSection(${pageNum},${alandPerGroupId}): jumping to div, not top!`,true)
 			jumpToDiv('section-' + alandPerGroupId);
+		}
+		else{
+			//mylog(`GotoPageSection(${pageNum},${alandPerGroupId}): jumping to top...`,true)
+			jumpToTop();
 		}
 		loadingPageSection = false;
 	}

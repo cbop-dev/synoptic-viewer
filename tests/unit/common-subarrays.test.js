@@ -221,9 +221,9 @@ test('findMaximalCommonSubarraysAcrossColumns2 tests', async () => {
         for (const [i,t] of tests.entries()){
             const result = method.func(t.columns, t.minLen, t.ignore? t.ignore : []);
            // console.log("-------------")
-            console.log(`${method.name} #${i}: `, JSON.stringify(result));//,null,2));
+          //  console.log(`${method.name} #${i}: `, JSON.stringify(result));//,null,2));
             if (result.length != t.output.length || result != t.output){
-             console.log(`${method.name} #${i}: `, JSON.stringify(result));//,null,2));
+            // console.log(`${method.name} #${i}: `, JSON.stringify(result));//,null,2));
             }
 
             expect(result.length).toEqual(t.output.length);

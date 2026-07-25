@@ -77,7 +77,7 @@ export class SynopsisHotkeys{
      * @param {SynopsisOptions3} options 
      */
     constructor(options=new SynopsisOptions3(),hotkeysEnabled='cuisme',anchorClass='anchor'){
-        mylog(`new hotkeys class with anchor: '${anchorClass}'`, true);
+//        mylog(`new hotkeys class with anchor: '${anchorClass}'`, true);
         this.anchorClass=anchorClass;
         this.hotkeys=new Map();
         this.options=options;

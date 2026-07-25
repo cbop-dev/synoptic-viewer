@@ -241,7 +241,7 @@
 			let colorIndex = lexPhrasesLocMostMatches.calcMatchTypeIndex(parGroup.maxMatchCols ? parGroup.maxMatchCols : parGroup.parallelColumns.length);
 			
 			if (colorIndex >= parGroup.lexIdenticalPhrasePalette.length || colorIndex < 0){
-				mylog(`getWordStyle(${word.word}) invalid colorIndex: ${colorIndex}, maxMatchCols=${parGroup.maxMatchCols}; but parGroup.lexIdenticalPhrasePalette=${parGroup.lexIdenticalPhrasePalette.length}; resetting to last index!`,true)
+//				mylog(`getWordStyle(${word.word}) invalid colorIndex: ${colorIndex}, maxMatchCols=${parGroup.maxMatchCols}; but parGroup.lexIdenticalPhrasePalette=${parGroup.lexIdenticalPhrasePalette.length}; resetting to last index!`,true)
 				colorIndex = parGroup.lexIdenticalPhrasePalette.length -1;
 			}
 			else{
