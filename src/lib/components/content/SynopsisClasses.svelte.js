@@ -105,7 +105,7 @@ export class SynopsisOptions3{
     request=$state({});
 
 
-    reset(){
+    reset(refsOnly=false){
         //const theCopy=new SynopsisOptions3();
         //this.viewOptions=copyObject(theCopy.viewOptions);
         //this.request=copyObject(theCopy.request);
@@ -113,6 +113,8 @@ export class SynopsisOptions3{
             this.resetProp(propName);
 
         }
+
+        this.viewOptions.refsOnly=refsOnly;
 
     }
 
@@ -273,7 +275,7 @@ export class SynopsisOptions3{
     }
     
     static SynopsisUrlParamsMap ={
-
+        refsOnly: {type: 'boolean', category: 'view',default:false},
         hideSolos: {type: 'boolean', category: 'view'},
         hideNonPrimary: { type: 'boolean', category: 'view'},
         focusOn: { type: 'boolean', category: 'view'},

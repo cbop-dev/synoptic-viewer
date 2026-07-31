@@ -260,7 +260,7 @@ export function populateGroupText(group, responseTexts = null, perGroupIndices, 
                         textRef.note = notes;
                     }
                 }
-                if (words) {
+                if (words && responseTexts && responseTexts[queryIndex]?.words) {
 
                     textRef.vwords = VerseWords.buildFromObj(responseTexts[queryIndex].words);
                 }

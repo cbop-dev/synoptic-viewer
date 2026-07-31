@@ -509,11 +509,16 @@
 
 		buildPericopeRefs();
 		await tick();
-		fetching = true;
 		
-
-		fetchedTextsResponse = await currentServer.fetchPostTextsBatch(groupsRefsArray);
 		
+		if(!myOptions.viewOptions.refsOnly) {
+			fetching = true;
+			mylog("fetching from server...",true)
+			fetchedTextsResponse = await currentServer.fetchPostTextsBatch(groupsRefsArray);
+		}
+		else{
+			mylog("getting refs only; thus no server fetching!", true);
+		}
 		fetching = false;
 //		mylog("buildAndFetch setting dataready!",true);
 		dataReady = true;
@@ -521,19 +526,21 @@
 	//let lemmasByID={}
 
 	async function populateAll() {
-		dataReady = false;
-		TfUtils.populateGroupsText(
-			perGroups,
-			fetchedTextsResponse,
-			perGroupsIndices,
-			true,
-			true,
-			gospelsExcluded
-		);
-		await tick();
-		//    myLog.log(`populatedAll! are all populated?:${perGroups.map((g)=>g.populated).reduce((a,b)=>a&&b, true)}`, true)
-//		mylog("popAll() setting dataready!",true)
-		dataReady = true;
+		if((!myOptions.viewOptions.refsOnly)) {
+			dataReady = false;
+			TfUtils.populateGroupsText(
+				perGroups,
+				fetchedTextsResponse,
+				perGroupsIndices,
+				true,
+				true,
+				gospelsExcluded
+			);
+			await tick();
+			//    myLog.log(`populatedAll! are all populated?:${perGroups.map((g)=>g.populated).reduce((a,b)=>a&&b, true)}`, true)
+	//		mylog("popAll() setting dataready!",true)
+			dataReady = true;
+		}
 	}
 
 	function checkAndPopulatePage() {
@@ -591,7 +598,7 @@
 		viewStates.reset(lookup);
 		emptySelectedLexemes();
 		emptySelectedCustomGreek();
-		myOptions.reset();
+		myOptions.reset(myOptions.viewOptions.refsOnly);
 		//myOptions.viewOptions.hideNonPrimary=false;
 		//myOptions.viewOptions.focusOn=false;
 		//myOptions.viewOptions.unique=false;
@@ -1354,7 +1361,17 @@
 		</div>
 	{:else}
 		<div class="text-center">
+			<label class="label tooltip pt-1" data-tip="Fetch and show only the synoptic passage references, and not any biblical text." for="highlight-click-check">
+					<input
+						class="toggle"
+						id="refs-only-check"
+						type="checkbox"
+						bind:checked={myOptions.viewOptions.refsOnly}
+					/>Lookup references only.
+				</label>
+			<br/>
 			<span class="underline font-bold italic">Choose One:</span>
+			
 			<h2 class="cursor-default">Enter References</h2>
 			<div class="inline mb-2">
 				<textarea
@@ -1520,7 +1537,7 @@
 	{#if alandPericopeNums.length}
 		<div id="results" class="min-h-screen" style="min-height:400px;">
 	
-			{#if dataReady && fetchedTextsResponse}
+			{#if dataReady && (fetchedTextsResponse||myOptions.viewOptions.refsOnly)}
 				<h1 class="text-center">
 					Results from {currentServer.name}:
 					{#key myOptions.viewOptions}<CopyText
@@ -1532,7 +1549,16 @@
 						</h1>
 					
 				{#key paginatedFilteredPerGroups && myOptions.viewOptions.page}
-					{#if paginatedFilteredPerGroups[myOptions.viewOptions.page] && paginatedFilteredPerGroups[myOptions.viewOptions.page].length && paginatedFilteredPerGroups[myOptions.viewOptions.page].reduce((a, b) => a && b.populated, true)}
+					{#if myOptions.viewOptions.refsOnly}
+					<h2 class="section-content m-auto w-auto italic">Showing only the parallel passage description and references:</h2>
+					
+					<ul class="text-left center  inline-block section-heading  rounded-2xl!">
+					{#each perGroups as thePerGroup, i}
+						<li class="p-1">{i+1}. <b>{thePerGroup.title}</b>: {thePerGroup.getRefs()} 
+							<CopyText copyText={thePerGroup.getRefs()} /></li>
+					{/each}
+					</ul>
+					{:else if (paginatedFilteredPerGroups[myOptions.viewOptions.page] && paginatedFilteredPerGroups[myOptions.viewOptions.page].length && paginatedFilteredPerGroups[myOptions.viewOptions.page].reduce((a, b) => a && b.populated, true))}
 						{@render pageNav()}
 						{#each paginatedFilteredPerGroups[myOptions.viewOptions.page] as group, index}
 							<!--<hr class="mb-2 !border-slate-200" />-->
