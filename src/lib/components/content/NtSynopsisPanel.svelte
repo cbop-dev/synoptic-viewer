@@ -1537,185 +1537,173 @@
 	{#if alandPericopeNums.length}
 		<div id="results" class="min-h-screen" style="min-height:400px;">
 	
-			{#if dataReady && (fetchedTextsResponse||myOptions.viewOptions.refsOnly)}
-				<h1 class="text-center">
-					Results from {currentServer.name}:
-					{#key myOptions.viewOptions}<CopyText
-							icon={LinkSvg}
-							getTextFunc={makeURL}
-							tooltip="Copy Link to share these results"
-							svgStyle="filter: opacity(0.6);"
-						/>{/key} 
-						</h1>
-					
-				{#key paginatedFilteredPerGroups && myOptions.viewOptions.page}
-					{#if myOptions.viewOptions.refsOnly}
-					<h2 class="section-content m-auto w-auto italic">Showing only Aland's parallel passage group title and references:</h2>
-					<div class="text-left center  section-content inline-block  rounded-2xl! p-5! mt-2" >
-						<!--<ul >-->
-
-					<table><tbody>
-					{#each perGroups as thePerGroup, i}
-						{@const primaryRefs=thePerGroup.getRefs().trim()}
-						{@const secondaryRefs=thePerGroup.getSecondaryRefs().trim()}
-
-						
-								<tr class={i>0 ? ['border-t-1', 'border-slate-500']: []}>
-									<td colspan="2"><u><b>{thePerGroup.title}</b>.</u>
-								<CopyText tooltip="Copy all group references to the clipboard."
-										copyText={primaryRefs + "; " + secondaryRefs}
-										svgStyle="filter: opacity(0.6);"
-										btnSizeCssClass='btn-xs'
-										height={16}
-										width={16}/>
-								</td>	
-								</tr>
-								<tr>
-									<td><i><CopyText copyText={primaryRefs} 
-										linkText='Primary:'
-										tooltip="Copy primary references to the clipboard."
-										
-										buttonTypeClass="btn btn-xs"
-										showButton={false}						/>
-										</i> </td>
-										<td>{primaryRefs}</td>
-								</tr>
-								
-								{#if secondaryRefs}
-								
-								<tr>
-									<td>
-										<i><CopyText copyText={secondaryRefs} 
-										linkText='Secondary:'
-										tooltip="Copy secondary references to the clipboard."
-										
-										buttonTypeClass="btn btn-xs"
-										showButton={false}						/>
-										</i> 
-
-									</td>
-									<td>
-										{secondaryRefs} 
-									</td>
-								</tr>
-								{/if}
-						<!--<li class="p-0! m-0!"><u>{i+1}. <b>{thePerGroup.title}</b>.</u>
-							<CopyText tooltip="Copy all group references to the clipboard."
-								copyText={primaryRefs + "; " + secondaryRefs}
+			{#if dataReady}
+			
+				{#if (fetchedTextsResponse||myOptions.viewOptions.refsOnly)}
+					{@const headingText=myOptions.viewOptions.refsOnly ? "Parallel References" : 
+					"Results from"+ currentServer.name}
+					<h1 class="text-center">
+						{headingText}:
+						{#key myOptions.viewOptions}<CopyText
+								icon={LinkSvg}
+								getTextFunc={makeURL}
+								tooltip="Copy Link to share these results"
 								svgStyle="filter: opacity(0.6);"
-								btnSizeCssClass='btn-xs'
-								height={16}
-								width={16}
-								
-							/>
-							<br/> 
-							
-							<i><CopyText copyText={primaryRefs} 
-							linkText='Primary:'
-							tooltip="Copy primary references to the clipboard."
-							
-							buttonTypeClass="btn btn-xs"
-        					showButton={false}						/>
-							</i> {primaryRefs} 
-							
-							{#if secondaryRefs}
-								<br/> <i><CopyText copyText={secondaryRefs} 
-								tooltip="Copy secondary references to the clipboard."
-							linkText='Secondary:'
-							
-							
-							buttonTypeClass="btn btn-xs"
-        					showButton={false}/></i> {secondaryRefs} 
-								
-							{/if}</li>-->
-					{/each}
-							</tbody>
+							/>{/key} 
+							</h1>
+						
+					{#key paginatedFilteredPerGroups && myOptions.viewOptions.page}
+						{#if myOptions.viewOptions.refsOnly}
+							<span class="section-content m-auto w-auto italic p-1">Showing only Aland's parallel passage group title and references:</span>
+							<div class="text-left center norefs-table-div  inline-block  rounded-2xl! p-5! mt-2 " >
+								<!--<ul >-->
 
-						</table>
-					<!--</ul>-->
+							<table class="norefs-table"><tbody >
+							{#each perGroups as thePerGroup, i}
+								{@const primaryRefs=thePerGroup.getRefs().trim()}
+								{@const secondaryRefs=thePerGroup.getSecondaryRefs().trim()}
+								{@const allRefs=thePerGroup.getRefs([],true)}
 
-					</div>
-					
-					{:else if (paginatedFilteredPerGroups[myOptions.viewOptions.page] && paginatedFilteredPerGroups[myOptions.viewOptions.page].length && paginatedFilteredPerGroups[myOptions.viewOptions.page].reduce((a, b) => a && b.populated, true))}
-						{@render pageNav()}
-						{#each paginatedFilteredPerGroups[myOptions.viewOptions.page] as group, index}
-							<!--<hr class="mb-2 !border-slate-200" />-->
-							<div class="anchor text-center section-heading {index == 0 ? 'first': ''}" id="section-{group.id}">
-								<div class="float-right mr-2 break-after-all">
-								<a
-									href=""
-									class=""
-									title="Jump to section"
-									onclick={() => {
-										viewStates.views.sections.state = true;
-									}}><BulletsIcons height={20} width={20} /></a
-								>
-								{#if index > 0}
-									<a
-										href="#section-{paginatedFilteredPerGroups[myOptions.viewOptions.page][
-											index - 1
-										].id}"
-										title="Previous"><ArrowUp height={20} width={20} /></a
-									>{/if}
-								{#if paginatedFilteredPerGroups[myOptions.viewOptions.page] && index < paginatedFilteredPerGroups[myOptions.viewOptions.page].length - 1}
-									<a
-										href="#section-{paginatedFilteredPerGroups[myOptions.viewOptions.page][
-											index + 1
-										].id}"
-										class="break-after-all"
-										title="Next"><ArrowDown height={20} width={20} /></a
-									>{/if}
-								<a href="#" class="inline" title="Top"><ArrowTop height={20} width={20} /></a>
+								
+										<tr class={i> 0 ? ['border-t-1', 'border-slate-500']: []}>
+											<td colspan="2" class="pt-2 align-top" ><u><b>{thePerGroup.title}</b>.</u>
+										<CopyText tooltip="Combine and copy all group references (primary and secondary) to the clipboard."
+												copyText={allRefs}
+												svgStyle="filter: opacity(0.6);"
+												btnSizeCssClass='btn-xs'
+												height={16}
+												width={16}/>
+										</td>	
+										</tr>
+										<tr>
+											<td><i><CopyText copyText={primaryRefs} 
+												linkText={'Primary:'}
+												tooltip="Copy primary references to the clipboard."
+												
+												buttonTypeClass=" btn btn-xs btn-ghost"
+												showButton={false}						/>
+												</i> </td>
+												<td>{primaryRefs}<CopyText tooltip="Copy primary references to the clipboard."
+												copyText={primaryRefs}
+												svgStyle="filter: opacity(0.6);"
+												btnSizeCssClass='btn-xs'
+												height={12}
+												width={12}/></td>
+										</tr>
+										
+										{#if secondaryRefs}
+										
+										<tr>
+											<td>
+												<i><CopyText copyText={secondaryRefs} 
+												linkText='Secondary:'
+												tooltip="Copy secondary references to the clipboard."
+												
+												buttonTypeClass="btn btn-xs btn-ghost"
+												showButton={false}						/>
+												</i> 
+
+											</td>
+											<td>
+												{secondaryRefs}<CopyText tooltip="Copy secondary references to the clipboard."
+												copyText={secondaryRefs}
+												svgStyle="filter: opacity(0.6);"
+												btnSizeCssClass='btn-xs'
+												height={12}
+												width={12}/> 
+											</td>
+										</tr>
+										{/if}
+								
+							{/each}
+									</tbody>
+
+								</table>
+							<!--</ul>-->
+
 							</div>
-								<h2 class="inline-block">
-									<u><b>{group.title}:</b></u><br />
-									{group.getRefs()}<CopyText
-										copyText={group.getRefs()}
-										tooltip="Copy parallel group references"
-										svgStyle="filter: opacity(0.7);"
+							
+						{:else if (paginatedFilteredPerGroups[myOptions.viewOptions.page] && paginatedFilteredPerGroups[myOptions.viewOptions.page].length && paginatedFilteredPerGroups[myOptions.viewOptions.page].reduce((a, b) => a && b.populated, true))}
+							{@render pageNav()}
+							{#each paginatedFilteredPerGroups[myOptions.viewOptions.page] as group, index}
+								<!--<hr class="mb-2 !border-slate-200" />-->
+								<div class="anchor text-center section-heading {index == 0 ? 'first': ''}" id="section-{group.id}">
+									<div class="float-right mr-2 break-after-all">
+									<a
+										href=""
+										class=""
+										title="Jump to section"
+										onclick={() => {
+											viewStates.views.sections.state = true;
+										}}><BulletsIcons height={20} width={20} /></a
+									>
+									{#if index > 0}
+										<a
+											href="#section-{paginatedFilteredPerGroups[myOptions.viewOptions.page][
+												index - 1
+											].id}"
+											title="Previous"><ArrowUp height={20} width={20} /></a
+										>{/if}
+									{#if paginatedFilteredPerGroups[myOptions.viewOptions.page] && index < paginatedFilteredPerGroups[myOptions.viewOptions.page].length - 1}
+										<a
+											href="#section-{paginatedFilteredPerGroups[myOptions.viewOptions.page][
+												index + 1
+											].id}"
+											class="break-after-all"
+											title="Next"><ArrowDown height={20} width={20} /></a
+										>{/if}
+									<a href="#" class="inline" title="Top"><ArrowTop height={20} width={20} /></a>
+								</div>
+									<h2 class="inline-block">
+										<u><b>{group.title}:</b></u><br />
+										{group.getRefs()}<CopyText
+											copyText={group.getRefs()}
+											tooltip="Copy parallel group references"
+											svgStyle="filter: opacity(0.7);"
+										/>
+									</h2>
+
+									<h3>
+										{#if group.lexIdenticalPhrasesLocations.length > 0}
+											<!-- (TODO: remove) Got some phrases: {group.lexIdenticalPhrasesLocations} -->
+										{:else}{/if}
+									</h3>
+
+								</div>
+
+								<div class="section-content">
+									<ParallelGospelSection
+										parGroup={group}
+										options={myOptions}
+										focus={focused}
+										{wordClick}
+										{enableSecondary}
+										{enableOther}
+										cssClassDict={lexClasses}
+										{selectedLexes}
+										cssCustomDict={customGreekClasses}
+										showNotes={currentServer.showNotes}
+										showNotesFunction={displayNote}
+										{selectedGreekPalette}
+										ignoreWordsIds={currentServer.ignoreWordIds}
 									/>
-								</h2>
-
-								<h3>
-									{#if group.lexIdenticalPhrasesLocations.length > 0}
-										<!-- (TODO: remove) Got some phrases: {group.lexIdenticalPhrasesLocations} -->
-									{:else}{/if}
-								</h3>
-
-							</div>
-
-							<div class="section-content">
-								<ParallelGospelSection
-									parGroup={group}
-									options={myOptions}
-									focus={focused}
-									{wordClick}
-									{enableSecondary}
-									{enableOther}
-									cssClassDict={lexClasses}
-									{selectedLexes}
-									cssCustomDict={customGreekClasses}
-									showNotes={currentServer.showNotes}
-									showNotesFunction={displayNote}
-									{selectedGreekPalette}
-									ignoreWordsIds={currentServer.ignoreWordIds}
-								/>
-							</div>
-						{/each}
-						{@render pageNav()}
-					{:else if paginatedFilteredPerGroups[myOptions.viewOptions.page] && !paginatedFilteredPerGroups[myOptions.viewOptions.page].reduce((a, b) => a && b.populated, true)}
-						<Loading message={[]} title="Populating data..." />
-					{:else}
-						(No results. Try <a href="" data-sveltekit-reload>another search</a
-						>{#if myOptions.viewOptions.hideNonPrimary || myOptions.viewOptions.focusOn || myOptions.viewOptions.hideSolos},
-							or change the <a
-								href=""
-								onclick={() => {
-									viewStates.toggle('view');
-								}}>View Options</a
-							>{/if}.)
-					{/if}
-				{/key}
+								</div>
+							{/each}
+							{@render pageNav()}
+						{:else if paginatedFilteredPerGroups[myOptions.viewOptions.page] && !paginatedFilteredPerGroups[myOptions.viewOptions.page].reduce((a, b) => a && b.populated, true)}
+							<Loading message={[]} title="Populating data..." />
+						{:else}
+							(No results. Try <a href="" data-sveltekit-reload>another search</a
+							>{#if myOptions.viewOptions.hideNonPrimary || myOptions.viewOptions.focusOn || myOptions.viewOptions.hideSolos},
+								or change the <a
+									href=""
+									onclick={() => {
+										viewStates.toggle('view');
+									}}>View Options</a
+								>{/if}.)
+						{/if}
+					{/key}
+				{/if}
 			{:else}
 			<!--<div style="background-image: url('{ScribesImage}');" class="w-full h-full bg-black"></div>-->
 			<div id="scribes-loading-container" style="--scribes-image: url('{ScribesImage}');" >
@@ -2190,6 +2178,15 @@
 		background-color: var(--bg-content);
 		color: var(--text-color);
 
+	}
+	.norefs-table-div{
+		/*background-color: var(--bg-content,white);*/
+		background-color: color-mix(in srgb, var(--secondary-bg,white) 80%, transparent);
+		
+	}
+
+	.norefs-table td{
+		@apply align-top;		
 	}
 	#title-panel{
 		background-color: var(--bg-content,white);
