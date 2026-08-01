@@ -14,7 +14,8 @@
         tooltipBottom=false,
         width=0,
         height=0,
-        svgStyle=''
+        svgStyle='',
+        buttonTypeClass="btn btn-ghost"
     } = $props();
 
     function copyToClipboard(){
@@ -27,7 +28,7 @@
     }
 </script>
 <button title={tooltip} onclick={copyToClipboard} 
-class={["btn btn-ghost p-0.5",btnSizeCssClass, btnCssClass,
+class={[buttonTypeClass," p-0.5",btnSizeCssClass, btnCssClass,
  tooltip? "tooltip":'',
  tooltipBottom ? 'tooltip-bottom' : '']}
 data-tip={tooltip} >

@@ -1,6 +1,6 @@
 {
 	"name": "@cbop-dev/synoptic-viewer",
-	"version": "0.7.36",
+	"version": "0.7.37",
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",

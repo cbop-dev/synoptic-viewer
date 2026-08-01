@@ -280,7 +280,7 @@ export function populateGroupText(group, responseTexts = null, perGroupIndices, 
                             textRef.note = notes;
                         }
                     }
-                    if (words) {
+                    if (words && responseTexts && responseTexts[queryIndex]?.words) {
 
                         textRef.vwords = VerseWords.buildFromObj(responseTexts[queryIndex].words);
                     }
@@ -292,8 +292,12 @@ export function populateGroupText(group, responseTexts = null, perGroupIndices, 
         }
     }
     //const excludeCols=GospelFilter.createValues(gospelFilter.filter).map((g,i)=>g? i : -1).filter((i)=> i>=0);
-    group.markUniqueAndIdenticalWords(includeSecondary, excludeCols);
-    group.buildLexIdenticalPhrases(3, true, true, excludeCols,ignoreWordIds);
+    if(responseTexts){
+        group.markUniqueAndIdenticalWords(includeSecondary, excludeCols);
+        group.buildLexIdenticalPhrases(3, true, true, excludeCols,ignoreWordIds);
+
+    }
+
     group.populated = true;
 }
 

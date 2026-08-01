@@ -934,7 +934,23 @@ export class ParallelColumnGroup {
         this.updatedCounter++;
     }
 
+    /**
+     * 
+     * @param {number[]} exclude - the indexes of parallelColumns to exclude
+     */
+    getSecondaryRefs(exclude=[]){
+        let refs = [];
 
+        for (const [index, par] of this.parallelColumns.entries().filter(([i, p]) => !exclude.includes(i))) {
+            if (par.secondary && par.secondary.length) {
+                const secondaryRefsMapped = par.secondary.map((tr) => tr.reference)
+                //mylog(`getRefs.refsMapped=[${refsMapped.join("//")}]`);
+                refs.push(formatBibRefs(secondaryRefsMapped.join(";")))
+            }
+
+        }
+        return refs.join('; ');
+    }
 
     /**
      * 
@@ -1181,10 +1197,11 @@ export class GospelPericopeGroup extends ParallelColumnGroup {
     /**
      * 
      * @param {number[]} exclude indexes of parallelColumn to exclude. By default here, it excludes "other"
+     * @param {boolean} [includeSecondary=false] 
      * @returns 
      */
-    getRefs(exclude = [4]) {
-        return super.getRefs(exclude);
+    getRefs(exclude = [4],includeSecondary=false) {
+        return super.getRefs(exclude,includeSecondary);
 
 
 

@@ -1550,14 +1550,92 @@
 					
 				{#key paginatedFilteredPerGroups && myOptions.viewOptions.page}
 					{#if myOptions.viewOptions.refsOnly}
-					<h2 class="section-content m-auto w-auto italic">Showing only the parallel passage description and references:</h2>
-					
-					<ul class="text-left center  inline-block section-heading  rounded-2xl!">
+					<h2 class="section-content m-auto w-auto italic">Showing only Aland's parallel passage group title and references:</h2>
+					<div class="text-left center  section-content inline-block  rounded-2xl! p-5! mt-2" >
+						<!--<ul >-->
+
+					<table><tbody>
 					{#each perGroups as thePerGroup, i}
-						<li class="p-1">{i+1}. <b>{thePerGroup.title}</b>: {thePerGroup.getRefs()} 
-							<CopyText copyText={thePerGroup.getRefs()} /></li>
+						{@const primaryRefs=thePerGroup.getRefs().trim()}
+						{@const secondaryRefs=thePerGroup.getSecondaryRefs().trim()}
+
+						
+								<tr class={i>0 ? ['border-t-1', 'border-slate-500']: []}>
+									<td colspan="2"><u><b>{thePerGroup.title}</b>.</u>
+								<CopyText tooltip="Copy all group references to the clipboard."
+										copyText={primaryRefs + "; " + secondaryRefs}
+										svgStyle="filter: opacity(0.6);"
+										btnSizeCssClass='btn-xs'
+										height={16}
+										width={16}/>
+								</td>	
+								</tr>
+								<tr>
+									<td><i><CopyText copyText={primaryRefs} 
+										linkText='Primary:'
+										tooltip="Copy primary references to the clipboard."
+										
+										buttonTypeClass="btn btn-xs"
+										showButton={false}						/>
+										</i> </td>
+										<td>{primaryRefs}</td>
+								</tr>
+								
+								{#if secondaryRefs}
+								
+								<tr>
+									<td>
+										<i><CopyText copyText={secondaryRefs} 
+										linkText='Secondary:'
+										tooltip="Copy secondary references to the clipboard."
+										
+										buttonTypeClass="btn btn-xs"
+										showButton={false}						/>
+										</i> 
+
+									</td>
+									<td>
+										{secondaryRefs} 
+									</td>
+								</tr>
+								{/if}
+						<!--<li class="p-0! m-0!"><u>{i+1}. <b>{thePerGroup.title}</b>.</u>
+							<CopyText tooltip="Copy all group references to the clipboard."
+								copyText={primaryRefs + "; " + secondaryRefs}
+								svgStyle="filter: opacity(0.6);"
+								btnSizeCssClass='btn-xs'
+								height={16}
+								width={16}
+								
+							/>
+							<br/> 
+							
+							<i><CopyText copyText={primaryRefs} 
+							linkText='Primary:'
+							tooltip="Copy primary references to the clipboard."
+							
+							buttonTypeClass="btn btn-xs"
+        					showButton={false}						/>
+							</i> {primaryRefs} 
+							
+							{#if secondaryRefs}
+								<br/> <i><CopyText copyText={secondaryRefs} 
+								tooltip="Copy secondary references to the clipboard."
+							linkText='Secondary:'
+							
+							
+							buttonTypeClass="btn btn-xs"
+        					showButton={false}/></i> {secondaryRefs} 
+								
+							{/if}</li>-->
 					{/each}
-					</ul>
+							</tbody>
+
+						</table>
+					<!--</ul>-->
+
+					</div>
+					
 					{:else if (paginatedFilteredPerGroups[myOptions.viewOptions.page] && paginatedFilteredPerGroups[myOptions.viewOptions.page].length && paginatedFilteredPerGroups[myOptions.viewOptions.page].reduce((a, b) => a && b.populated, true))}
 						{@render pageNav()}
 						{#each paginatedFilteredPerGroups[myOptions.viewOptions.page] as group, index}
