@@ -366,7 +366,7 @@ export function sortChapVerseFunc(ref1, ref2) {
 
 /**
  * 
- * @param {string} refString -- biblical references, with diffrerent chapters or books separated by semi-colons. 
+ * @param {string} refString -- biblical references, with different chapters or books separated by semi-colons. 
  * NB: ranges must not cross chapter boundaries: e.g., Mark 2:1-3:4 is invalid and will not work (yet).
  * @returns {string[]} an array of NT references, where each can stand on its own. 
  *  E.g,: expandRefs("2 Tim 1:12; 2:3)"-->["2 Tim 1:12", "2 Tim 2:3"]; 

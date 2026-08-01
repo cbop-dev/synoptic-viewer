@@ -1542,6 +1542,8 @@
 				{#if (fetchedTextsResponse||myOptions.viewOptions.refsOnly)}
 					{@const headingText=myOptions.viewOptions.refsOnly ? "Parallel References" : 
 					"Results from"+ currentServer.name}
+					{@const subText=myOptions.viewOptions.refsOnly ? "Showing only Aland's parallel passage group title and references:" : ''}
+					
 					<h1 class="text-center">
 						{headingText}:
 						{#key myOptions.viewOptions}<CopyText
@@ -1551,11 +1553,13 @@
 								svgStyle="filter: opacity(0.6);"
 							/>{/key} 
 							</h1>
+						{#if subText}<p class="section-content m-auto w-auto italic p-1">
+							{subText}</p>{/if}
 						
 					{#key paginatedFilteredPerGroups && myOptions.viewOptions.page}
 						{#if myOptions.viewOptions.refsOnly}
-							<span class="section-content m-auto w-auto italic p-1">Showing only Aland's parallel passage group title and references:</span>
-							<div class="text-left center norefs-table-div  inline-block  rounded-2xl! p-5! mt-2 " >
+							
+								<div class="text-left center norefs-table-div  inline-block  rounded-2xl! p-5! mt-2 " >
 								<!--<ul >-->
 
 							<table class="norefs-table"><tbody >
