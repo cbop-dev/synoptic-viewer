@@ -147,6 +147,51 @@ export class SynopsisOptions3{
     /**
      * 
      * @param {string} propName 
+     */
+    toggleBooleanProp(propName){
+        mylog(`toggleBooleanProp(${propName})`, true);
+        if (Object.hasOwn(SynopsisOptions3.SynopsisUrlParamsMap,propName) &&
+            SynopsisOptions3.SynopsisUrlParamsMap[propName].type=='boolean'){
+           this.setPropVal(propName,!this.getPropVal(propName));
+        }
+        else{
+            mylog(`toggleBooleanProp(${propName}): did not found propname!`, true);
+        }
+    }
+
+    /**
+     * 
+     * @param {string} propName 
+     */
+    correctMutuallyExclusive(propName){
+        if (!this.getPropVal(propName)) return;
+        const mutuallyExclusive = SynopsisOptions3.mutuallyExclusiveOptions.filter((list)=>list.includes(propName));
+        if (mutuallyExclusive.length){
+            for(const list of mutuallyExclusive){
+                for (const otherProp of list){
+                    if(otherProp!=propName){
+                        this.setPropVal(otherProp, false);
+                    }
+                }
+            }
+        }
+    }
+
+    setPropVal(propName,value){
+        mylog(`setPropVal(${propName},${value})`,true);
+        if (Object.hasOwn(SynopsisOptions3.SynopsisUrlParamsMap,propName)){
+            const row = SynopsisOptions3.SynopsisUrlParamsMap[propName];
+            if (row.category=='view' && Object.hasOwn(this.viewOptions,propName)){
+                this.viewOptions[propName]=value;
+            }
+            else if (row.category=='request' && Object.hasOwn(this.request,propName)){
+                this.request[propName]=value;
+            }
+        }
+    }
+    /**
+     * 
+     * @param {string} propName 
      * @returns true if the property was actually reset
      */
     resetProp(propName){
@@ -239,8 +284,30 @@ export class SynopsisOptions3{
             else if(row.category=='request'){
                 this.request[name]=val;
             }
-        })
-        
+        });
+
+        const createExclusivityProxy = (targetObj) => {
+            return new Proxy(targetObj, {
+                set: (target, prop, value) => {
+                    target[prop] = value;
+                    if (value === true) {
+                        for (const group of SynopsisOptions3.mutuallyExclusiveOptions) {
+                            if (group.includes(prop)) {
+                                for (const otherProp of group) {
+                                    if (otherProp !== prop) {
+                                        target[otherProp] = false;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    return true;
+                }
+            });
+        };
+
+        this.viewOptions = createExclusivityProxy(this.viewOptions);
+        this.request = createExclusivityProxy(this.request);
     }
 
     
@@ -273,6 +340,7 @@ export class SynopsisOptions3{
 
         return options;
     }
+    //when one is enabled, the other should be disabled.
     
     static SynopsisUrlParamsMap ={
         refsOnly: {type: 'boolean', category: 'view',default:false},
@@ -323,6 +391,10 @@ export class SynopsisOptions3{
         // ... etc.
         gospelFilter:{ type: 'int', category: 'view',noURL:false,default: 0}, 
     }
+
+    static mutuallyExclusiveOptions=[
+        ['highlightOnClick','lexInfoClick'],
+    ];
 
     /**
      * 
@@ -379,8 +451,12 @@ export class SynopsisOptions3{
      */
     copy(){
         const theCopy=new SynopsisOptions3();
-        theCopy.viewOptions=copyObject(this.viewOptions);
-        theCopy.request=copyObject(this.request)
+        Object.entries(this.viewOptions).forEach(([k,v]) => {
+            theCopy.viewOptions[k] = Array.isArray(v) ? [...v] : v;
+        });
+        Object.entries(this.request).forEach(([k,v]) => {
+            theCopy.request[k] = Array.isArray(v) ? [...v] : v;
+        });
         return theCopy;
     }
 

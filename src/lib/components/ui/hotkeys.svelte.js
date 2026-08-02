@@ -50,7 +50,7 @@ export class SynopsisHotkeys{
     hotkeys=$state(new Map());
     options=$state(new SynopsisOptions3());
     anchorClass=$state('anchor');
-
+    
     hotkeysTable=$derived([
         {key:'n', name:'Next Section',function: ()=>{UiUtils.jumpToNextSection(this.anchorClass)}},
         {key:'p',name:'Previous Section',function: ()=>{UiUtils.jumpToPrevSection(this.anchorClass)}},
@@ -67,7 +67,7 @@ export class SynopsisHotkeys{
         {key:'e',name:'Exact Phrases',optionName:"exactPhrases",function: ()=>{this.options.viewOptions.exactPhrases =!this.options.viewOptions.exactPhrases},navLetterButton:true,condition:hasPhraseComparisionCondition},
         {key:'a',name:'Hide apparatus marks',optionName:"hideApp",function: ()=>{this.options.viewOptions.hideApp =!this.options.viewOptions.hideApp},navLetterButton:true,condition:{property:'hasApparatus', value:true}},
         {key:'m',letter:'☰', name:'Show/hide options menu',optionName:"menuOpen",function: ()=>{this.options.viewOptions.menuOpen =!this.options.viewOptions.menuOpen},navLetterButton:false},
-        {key:'x',name:'Lexeme Info and Stats on Click',optionName:"lexInfoClick",function: ()=>{this.options.viewOptions.lexInfoClick =!this.options.viewOptions.lexInfoClick},navLetterButton:true,condition:isLexCondition},
+        {key:'x',name:'Lexeme Info and Stats on Click',optionName:"lexInfoClick",function: ()=>{this.options.toggleBooleanProp('lexInfoClick')},navLetterButton:true,condition:isLexCondition},
         
     ]);
     
@@ -127,7 +127,7 @@ export class SynopsisHotkeys{
             const kRow = this.getKeyRowFromTable(key);
                         
             if(kRow && !this.isEnabled(key) ){
-                const thekey = new Hotkey(key,kRow.name,kRow.function,kRow.optionName ? kRow.optionName : '',
+                const thekey = new Hotkey(key,kRow.name,()=>{this.options.toggleBooleanProp(kRow.optionName)},kRow.optionName ? kRow.optionName : '',
                     kRow.navLetterButton? true: false,kRow.letter? kRow.letter: '','','',
                     kRow.navKeyClasses ? kRow.navKeyClasses : '',kRow?.condition ? kRow.condition :null)
                 if (Object.entries(conditions).filter(([prop,val])=>!thekey.passesCondition(prop,val)).length == 0){
