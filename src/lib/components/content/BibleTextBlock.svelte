@@ -17,7 +17,7 @@
 	import Button from '../ui/Button.svelte';
 	import { LexemeInfo } from '../datastructures/lexeme.js';
 	import * as BibleUtils from '$lib/utils/bibleRefUtils.js';
-	
+
 	import mathUtils from '$lib/utils/math-utils.js';
 
 	//import WordComp from "$lib/components/content/Word.svelte"
@@ -68,12 +68,12 @@
 		//key is index of textRef.vwords, value is array of arrays of css classes (strings) to apply to it. Each array corresponds with a verse/item in textRef.vwords[key]
 		// Thus {2:{3: ["text-blue-300"]}}} would mean that for the third verse, i.e., textRef[2], the fourth word, textRef[2].words[3], should have the class "text-blue-300".
 		cssWordClassDict = {}, //{2:{3: ["text-blue-300"]}},
-		cssLexClassDict = {},//not used anymore!
+		cssLexClassDict = {}, //not used anymore!
 		selectedLexes = [],
 		selectedGreekPalette = [],
 		//based on strings: key:string, value:
 		cssCustomStringDict = {},
-		//        cssUniqueColor="border-black",	
+		//        cssUniqueColor="border-black",
 		showNotes = true,
 		uniqueSet = new Set(),
 		//options.viewOptions.highlightOnClick=$bindable(false),
@@ -82,7 +82,7 @@
 		lexInfoDict = {},
 		highlightedLexicalIndices = $bindable([]),
 		highlightedExactIndices = $bindable([]),
-		ignoreWordsIds=[]
+		ignoreWordsIds = []
 		// options.viewOptions.hideApp=false,
 	} = $props();
 	/**
@@ -104,10 +104,12 @@
 	 */
 	function buildCustomMatchMap(customMatchedWords, greekStrings) {
 		const map = new Map();
-		const sortedEntries = Object.entries(customMatchedWords).sort(([a], [b]) => b.length - a.length);
+		const sortedEntries = Object.entries(customMatchedWords).sort(
+			([a], [b]) => b.length - a.length
+		);
 		sortedEntries.forEach(([searchPhrase, array2d]) => {
 			const matchIndex = greekStrings.indexOf(searchPhrase);
-			array2d.flat().forEach(wordIndex => {
+			array2d.flat().forEach((wordIndex) => {
 				if (!map.has(wordIndex)) {
 					map.set(wordIndex, matchIndex);
 				}
@@ -118,73 +120,64 @@
 	//$inspect(`<BibleTextBlock>: textRef.ref=${textRef.reference}`)
 	/**
 	 * @type {number[]} highlightedLexicalIndices
-	*/
+	 */
 	//let highlightedLexicalIndices = $state([]);
-	
-	
-	
-	
+
 	/**
-	 * 
+	 *
 	 * @param {number} wordid
 	 * @param {number} bookid
-	 * @param {number[]} exactPhraseIndices 
-	 * @param {number[]} lexicalPhraseIndices 
+	 * @param {number[]} exactPhraseIndices
+	 * @param {number[]} lexicalPhraseIndices
 	 **/
-	function myWordClick(wordid,bookid,lexicalPhraseIndices,exactPhraseIndices){
-		
-		wordClick(wordid,bookid);
-		if (options.viewOptions.exactPhrases || options.viewOptions.similarPhrases){
-//			mylog(`myWordclick(). adding exacts: [${exactPhraseIndices.join(',')}]!`, true);
-			togglePhraseHighlights(Array.from(new Set(lexicalPhraseIndices)),Array.from(new Set(exactPhraseIndices)));
-//			mylog(`toggled phrases: lex=${highlightedLexicalIndices.join(',')}, exact=${highlightedExactIndices.join(',')}`,true);
-			
-			
-			
+	function myWordClick(wordid, bookid, lexicalPhraseIndices, exactPhraseIndices) {
+		wordClick(wordid, bookid);
+		if (options.viewOptions.exactPhrases || options.viewOptions.similarPhrases) {
+			//			mylog(`myWordclick(). adding exacts: [${exactPhraseIndices.join(',')}]!`, true);
+			togglePhraseHighlights(
+				Array.from(new Set(lexicalPhraseIndices)),
+				Array.from(new Set(exactPhraseIndices))
+			);
+			//			mylog(`toggled phrases: lex=${highlightedLexicalIndices.join(',')}, exact=${highlightedExactIndices.join(',')}`,true);
 		}
 	}
 
 	/**
-	 * 
+	 *
 	 * @param {number[]} lexicalPhraseIndices
 	 * @param {number[]} exactPhraseIndices
 	 */
-	function togglePhraseHighlights(lexicalPhraseIndices,exactPhraseIndices){
-		if (options.viewOptions.similarPhrases){
-			const isToggled = lexicalPhraseIndices.reduce((on,idxVal)=>{
+	function togglePhraseHighlights(lexicalPhraseIndices, exactPhraseIndices) {
+		if (options.viewOptions.similarPhrases) {
+			const isToggled = lexicalPhraseIndices.reduce((on, idxVal) => {
 				return on || highlightedLexicalIndices.includes(idxVal);
-			},false);
-			lexicalPhraseIndices.forEach((index)=>{
-				if(!isToggled){
+			}, false);
+			lexicalPhraseIndices.forEach((index) => {
+				if (!isToggled) {
 					highlightedLexicalIndices.push(index);
-				}
-				else	
-					highlightedLexicalIndices.splice(highlightedLexicalIndices.indexOf(index),1);
+				} else highlightedLexicalIndices.splice(highlightedLexicalIndices.indexOf(index), 1);
 			});
 		}
-		if 	(options.viewOptions.exactPhrases){
-//			mylog(`togglePhraseHighlights(). adding exacts: [${exactPhraseIndices.join(',')}]!`, true);
-//			mylog(`exactPhraseIndices.len=${exactPhraseIndices.length}`,true);
+		if (options.viewOptions.exactPhrases) {
+			//			mylog(`togglePhraseHighlights(). adding exacts: [${exactPhraseIndices.join(',')}]!`, true);
+			//			mylog(`exactPhraseIndices.len=${exactPhraseIndices.length}`,true);
 
-			const isToggled = exactPhraseIndices.reduce((on,idxVal)=>{
+			const isToggled = exactPhraseIndices.reduce((on, idxVal) => {
 				return on || highlightedExactIndices.includes(idxVal);
-			},false);
-			exactPhraseIndices.forEach((index)=>{
-//				mylog(`   trying idx=${index}`, true);
+			}, false);
+			exactPhraseIndices.forEach((index) => {
+				//				mylog(`   trying idx=${index}`, true);
 
-				if (!isToggled){
-					
+				if (!isToggled) {
 					highlightedExactIndices.push(index);
-//					mylog(`toggled exact index: ${index} to ON`,true);
-				}
-				else {
-					highlightedExactIndices.splice(highlightedExactIndices.indexOf(index),1);
-//					mylog(`toggled exact index: ${index} to OFF`,true);
+					//					mylog(`toggled exact index: ${index} to ON`,true);
+				} else {
+					highlightedExactIndices.splice(highlightedExactIndices.indexOf(index), 1);
+					//					mylog(`toggled exact index: ${index} to OFF`,true);
 				}
 			});
-		}
-		else{
-			mylog("ExactPhrases disabled!")
+		} else {
+			mylog('ExactPhrases disabled!');
 		}
 	}
 
@@ -194,7 +187,7 @@
 		if (!textRef?.reference) return 0;
 		// Create a consistent pseudo-random offset (0-733) based on the reference string
 		const hash = textRef.reference.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-		
+
 		return (hash * 47) % 733;
 	});
 	/**
@@ -219,57 +212,60 @@
 						selectedGreekPalette[selectedLexes.length + customMatchIndex].font
 					);
 			}
-		} 
-		else if(word.phrases.exact.length || word.phrases.lexical.length){ //should we split exact and lexical blocks?!!
+		} else if (word.phrases.exact.length || word.phrases.lexical.length) {
+			//should we split exact and lexical blocks?!!
 
-			//wizardry with binary numbers!! :-) 
-			const thePhrases = ((options.viewOptions.exactPhrases && word.phrases.exact.length) ? word.phrases.exact : word.phrases.lexical);
-			const lexPhrasesLocMostMatches=thePhrases.reduce((mostColumnsMatch,next)=>{
-				if(mostColumnsMatch.calcMatchTypeIndex(parGroup.maxMatchCols ? parGroup.maxMatchCols : parGroup.parallelColumns.length) > 
-				   next.calcMatchTypeIndex(parGroup.maxMatchCols ? parGroup.maxMatchCols : parGroup.parallelColumns.length)){
-					return mostColumnsMatch
-				}
-				else{
+			//wizardry with binary numbers!! :-)
+			const thePhrases =
+				options.viewOptions.exactPhrases && word.phrases.exact.length
+					? word.phrases.exact
+					: word.phrases.lexical;
+			const lexPhrasesLocMostMatches = thePhrases.reduce((mostColumnsMatch, next) => {
+				if (
+					mostColumnsMatch.calcMatchTypeIndex(
+						parGroup.maxMatchCols ? parGroup.maxMatchCols : parGroup.parallelColumns.length
+					) >
+					next.calcMatchTypeIndex(
+						parGroup.maxMatchCols ? parGroup.maxMatchCols : parGroup.parallelColumns.length
+					)
+				) {
+					return mostColumnsMatch;
+				} else {
 					return next;
 				}
-				
 			});
 
+			let colorIndex = lexPhrasesLocMostMatches.calcMatchTypeIndex(
+				parGroup.maxMatchCols ? parGroup.maxMatchCols : parGroup.parallelColumns.length
+			);
 
-
-			
-			let colorIndex = lexPhrasesLocMostMatches.calcMatchTypeIndex(parGroup.maxMatchCols ? parGroup.maxMatchCols : parGroup.parallelColumns.length);
-			
-			if (colorIndex >= parGroup.lexIdenticalPhrasePalette.length || colorIndex < 0){
-//				mylog(`getWordStyle(${word.word}) invalid colorIndex: ${colorIndex}, maxMatchCols=${parGroup.maxMatchCols}; but parGroup.lexIdenticalPhrasePalette=${parGroup.lexIdenticalPhrasePalette.length}; resetting to last index!`,true)
-				colorIndex = parGroup.lexIdenticalPhrasePalette.length -1;
+			if (colorIndex >= parGroup.lexIdenticalPhrasePalette.length || colorIndex < 0) {
+				//				mylog(`getWordStyle(${word.word}) invalid colorIndex: ${colorIndex}, maxMatchCols=${parGroup.maxMatchCols}; but parGroup.lexIdenticalPhrasePalette=${parGroup.lexIdenticalPhrasePalette.length}; resetting to last index!`,true)
+				colorIndex = parGroup.lexIdenticalPhrasePalette.length - 1;
+			} else {
+				//				mylog(`getWordStyle(${word.word}) valid colorIndex: ${colorIndex}, maxMatchCols=${parGroup.maxMatchCols}; parGroup.lexIdenticalPhrasePalette=${parGroup.lexIdenticalPhrasePalette.length};`,true)
 			}
-			else{
-//				mylog(`getWordStyle(${word.word}) valid colorIndex: ${colorIndex}, maxMatchCols=${parGroup.maxMatchCols}; parGroup.lexIdenticalPhrasePalette=${parGroup.lexIdenticalPhrasePalette.length};`,true)
-			}
-			const colorObj = parGroup.lexIdenticalPhrasePalette[colorIndex] 
+			const colorObj = parGroup.lexIdenticalPhrasePalette[colorIndex];
 
 			//        if (options.viewOptions.similarPhrases) {
 			if (colorObj) {
 				ret = ColorUtils.bgFontString(colorObj.bg, colorObj.font, colorObj.border);
+			} else {
+				//				mylog(`BibleBlock: got no colorObj for parGroup.lexIdenticalPhrasePalette.length=${parGroup.lexIdenticalPhrasePalette.length}, colorIndex=${colorIndex}`,true);
 			}
-			else{
-//				mylog(`BibleBlock: got no colorObj for parGroup.lexIdenticalPhrasePalette.length=${parGroup.lexIdenticalPhrasePalette.length}, colorIndex=${colorIndex}`,true);
-			}
-			if(!ret){
-//				mylog(`BibleBlock.getWorStyle(${word.word}) got no color! Color obj.bg=${colorObj?.bg}`,true);
-				if (colorIndex >= parGroup.lexIdenticalPhrasePalette.length){
-//					mylog(`getWordStyle(${word.word}) got no colorObj!  colorIndex=${colorIndex}; but parGroup.lexIdenticalPhrasePalette=${parGroup.lexIdenticalPhrasePalette.length}`,true)
+			if (!ret) {
+				//				mylog(`BibleBlock.getWorStyle(${word.word}) got no color! Color obj.bg=${colorObj?.bg}`,true);
+				if (colorIndex >= parGroup.lexIdenticalPhrasePalette.length) {
+					//					mylog(`getWordStyle(${word.word}) got no colorObj!  colorIndex=${colorIndex}; but parGroup.lexIdenticalPhrasePalette=${parGroup.lexIdenticalPhrasePalette.length}`,true)
 				}
 			}
-			
 		}
 
 		return ret;
 	}
-//$inspect('parGroup.lexIdenticalPhrasePalette',parGroup.lexIdenticalPhrasePalette);
-//$inspect('highlightedLexicalIndices',highlightedLexicalIndices);
-//$inspect('highlightedExactIndices',highlightedExactIndices);
+	//$inspect('parGroup.lexIdenticalPhrasePalette',parGroup.lexIdenticalPhrasePalette);
+	//$inspect('highlightedLexicalIndices',highlightedLexicalIndices);
+	//$inspect('highlightedExactIndices',highlightedExactIndices);
 </script>
 
 <div
@@ -285,9 +281,7 @@
 	{#key parGroup && parGroup.updatedCounter && parGroup.lexIdenticalPhrasesMap.size && parGroup.lexIdenticalPhrasesMap}
 		{#if textRef.text}
 			{@const book = BibleUtils.getBookChapVerseFromRef(textRef.reference)?.book}
-			<span
-				class="font-bold bg-white/20 rounded-sm mr-1 ml-0 bible-text-block"
-			>
+			<span class="font-bold bg-white/20 rounded-sm mr-1 ml-0 bible-text-block">
 				{#if copyButton}
 					<CopyText
 						copyText={textRef.reference}
@@ -297,7 +291,6 @@
 						tooltipBottom={true}
 						showButton={false}
 						svgStyle="filter: opacity(0.6);"
-						
 					/>
 					{#if !showNotes}{:else if textRef.note}
 						<Button
@@ -320,10 +313,13 @@
 						verseWords.words.map((w) => GreekUtils.onlyPlainGreek(w.word, true, true, true)),
 						options.viewOptions.greekStrings.map((str) => GreekUtils.onlyPlainGreek(str))
 					)}
-					{@const customMatchMap = buildCustomMatchMap(customMatchedWords, options.viewOptions.greekStrings)}
+					{@const customMatchMap = buildCustomMatchMap(
+						customMatchedWords,
+						options.viewOptions.greekStrings
+					)}
 					<!-- NB: first index is that of cssCustomDict; second is into textRef.vwords-->
 					<!--{#if Object.values(customMatchedWords).length}Custom matched!: {Object.keys(customMatchedWords).join(",")}{/if}-->
-					<span class="bg-white/30 border-black/40 border-0 m-0 p-0 rounded-xl ">
+					<span class="bg-white/30 border-black/40 border-0 m-0 p-0 rounded-xl">
 						{#if copyButton}
 							<CopyText
 								getTextFunc={() => getText(verseWords.words, options.viewOptions.hideApp)}
@@ -341,54 +337,56 @@
 					{#each verseWords.words as word, index}
 						<!--                    {@const selectedLexIndex=selectedLexes.indexOf(word.id)}-->
 						{@const selectedLexIndex = selectedLexes.indexOf(word.id)}
-						{@const isIdentical = parGroup.matchingWords.includes(word.clean)/*stripWord(word.word)*/}
+						{@const isIdentical = parGroup.matchingWords.includes(stripWord(word.clean))}
 						{@const customMatchIndex = customMatchMap.has(index) ? customMatchMap.get(index) : -1}
 
-						{@const exactPhraseIndices = word.phrases.exact.map((pLoc)=>pLoc.phraseIndex)}
-						
-						{@const lexicalPhraseIndices = word.phrases.lexical.map((pLoc)=>pLoc.phraseIndex)}
+						{@const exactPhraseIndices = word.phrases.exact.map((pLoc) => pLoc.phraseIndex)}
+
+						{@const lexicalPhraseIndices = word.phrases.lexical.map((pLoc) => pLoc.phraseIndex)}
 						<!-- {#if customMatchIndex > -1 }Got match index={customMatchIndex}{/if}-->
-						 {#if exactPhraseIndices.length}
+						{#if exactPhraseIndices.length}
 							<!--[exact phrases: {exactPhraseIndices.length}-->
-						 {/if}
+						{/if}
 						<span
 							class={[
 								'word',
-								word.phrases.lexical.length ? 
-									'lexical ' +  	word.phrases.lexical.map((pLoc)=>'lexical-' + pLoc.phraseIndex).join(' ') 
+								word.phrases.lexical.length
+									? 'lexical ' +
+										word.phrases.lexical.map((pLoc) => 'lexical-' + pLoc.phraseIndex).join(' ')
 									: '',
-								isIdentical ? 'identical'	: '',
-								word.phrases.exact.length ? 
-									'exact ' + 
-										word.phrases.exact.map((pLoc)=>'exact-' + pLoc.phraseIndex).join(' ') 
+								isIdentical ? 'identical' : '',
+								word.phrases.exact.length
+									? 'exact ' +
+										word.phrases.exact.map((pLoc) => 'exact-' + pLoc.phraseIndex).join(' ')
 									: '',
 								isUnique(word.id, uniqueSet) ? 'unique' : '',
 								selectedLexIndex >= 0 ? 'selected selected-lex' : '',
 								customMatchIndex >= 0 ? 'selected selected-custom' : '',
-								options.viewOptions.exactPhrases && exactPhraseIndices.some(idx => highlightedExactIndices.includes(idx)) ? 'highlighted-exact' :'',
-								options.viewOptions.similarPhrases && lexicalPhraseIndices.some(idx => highlightedLexicalIndices.includes(idx)) ? 'highlighted-lexical':'',
-								ignoreWordsIds.includes(word.id)?'ignore':''
-
-									
-								
-								
+								options.viewOptions.exactPhrases &&
+								exactPhraseIndices.some((idx) => highlightedExactIndices.includes(idx))
+									? 'highlighted-exact'
+									: '',
+								options.viewOptions.similarPhrases &&
+								lexicalPhraseIndices.some((idx) => highlightedLexicalIndices.includes(idx))
+									? 'highlighted-lexical'
+									: '',
+								ignoreWordsIds.includes(word.id) ? 'ignore' : ''
 							]}
 							style={getWordStyle(word, selectedLexIndex, customMatchIndex)}
 							onclick={() => {
-								myWordClick(word.id, book, lexicalPhraseIndices,exactPhraseIndices);
-							}}>{getText([word], options.viewOptions.hideApp)}{' '}
-							
-							</span
-						>
-						 {#if exactPhraseIndices.length}
-						<!--]-->
-						 {/if}
-
-						
+								myWordClick(word.id, book, lexicalPhraseIndices, exactPhraseIndices);
+							}}
+							>{getText([word], options.viewOptions.hideApp)}{' '}
+						</span>
+						{#if exactPhraseIndices.length}
+							<!--]-->
+						{/if}
 					{/each}
 				{/each}
-			{:else if textRef.text }
-				{options.viewOptions.hideApp && parGroup.lang=='greek'? GreekUtils.removeApparatusMarks(textRef.text) : textRef.text}
+			{:else if textRef.text}
+				{options.viewOptions.hideApp && parGroup.lang == 'greek'
+					? GreekUtils.removeApparatusMarks(textRef.text)
+					: textRef.text}
 			{/if}
 		{:else}
 			<i class="text-sm">("{textRef.reference}" not found in the selected NT version.)</i>
@@ -396,7 +394,7 @@
 		{#if copyButton && textRef.text}
 			<CopyText
 				getTextFunc={() =>
-					parGroup.lang=='greek' && options.viewOptions.hideApp 
+					parGroup.lang == 'greek' && options.viewOptions.hideApp
 						? GreekUtils.removeApparatusMarks(textRef.text)
 						: textRef.text}
 				tooltip="Copy pericope"
@@ -408,12 +406,12 @@
 
 <style>
 	@reference "tailwindcss";
-	@function makeRgb($hexcolor){
-		$red:red($hexcolor);
-		$green:green($hexcolor);
-		$blue:blue($hexcolor);
-		$alpha:alpha($hexcolor);
-		@return unquote("rgb(#{$red},#{$green},#{$blue})");
+	@function makeRgb($hexcolor) {
+		$red: red($hexcolor);
+		$green: green($hexcolor);
+		$blue: blue($hexcolor);
+		$alpha: alpha($hexcolor);
+		@return unquote('rgb(#{$red},#{$green},#{$blue})');
 	}
 
 	/*.bible-block {
@@ -426,7 +424,12 @@
 	}
 
 	.show-identical .word.identical {
-		@apply outline-1 outline-dashed outline-blue-700;
+		/*@apply outline-2 p-0 m-0;*/
+		/*outline-color: var(--cssUniqueColor, black);*/
+		/*@apply outline-1  outline-white;*/
+		/*@apply decoration-white p-0 m-0;
+		text-decoration: overline underline white;*/
+		@apply border-1 border-white/70;
 	}
 
 	.word.lexical,
@@ -442,13 +445,11 @@
 		@apply border-t-3 border-b-3;
 	}
 
-	
-
 	:not(.hide-similar) .word.lexical:not(.selected) {
 		background-color: hsl(from var(--bgColor, black) h s l / 60%);
 		/*background-color: hsl(from var(--bgColor, black) h s l / 40%);*/
 		/* color: black; /*hsl(var(--fontColor,black) h s 0.3 / 60%);*/
-	text-shadow: 2px 2px 2px rgba(0,0,0,0.3);
+		text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.3);
 		border-color: var(--borderColor, white);
 		/*color: black;*/
 		color: var(--fontColor, white);
@@ -459,26 +460,24 @@
 		/*background-color: var(--bgColor, transparent) !important;*/
 		background-color: hsl(from var(--bgColor, white) h 90 l / 90%);
 		color: var(--fontColor, default);
-		
+
 		/*border-color: color-mix(var(--borderColor, black),transparent);*/
 		border-color: black 90% !important;
-		text-shadow: 2px 2px 2px rgba(0,0,0,0.3);
+		text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.3);
 		@apply border-t-3 border-b-3  font-bold;
 		/*color: var(--fontColor,default);*/
 	}
 
-	:not(.hide-similar) .word.lexical.ignore{
+	:not(.hide-similar) .word.lexical.ignore {
 		background-color: hsl(from var(--bgColor, black) h s l / 20%);
 		/*color: var(--fontColor,default);*/
 	}
-
 
 	.word.selected {
 		background-color: color-mix(var(--bgColor, transparent) 80%, transparent);
 		text-shadow: 1px 1px 1px hsl(from var(--fontColor) h s l / 50%);
 		color: var(--fontColor, default);
 	}
-
 
 	:not(.hide-similar).show-exact .word.exact {
 		text-decoration: underline var(--fontColor, black);
@@ -491,9 +490,10 @@
         
     }*/
 
-	.show-exact .highlighted-exact, .bible-block:not(.hide-similar) .highlighted-lexical{
-		background:white !important;
-		color:black !important;
+	.show-exact .highlighted-exact,
+	.bible-block:not(.hide-similar) .highlighted-lexical {
+		background: white !important;
+		color: black !important;
 	}
 	/*background-color: hsl(from var(--bgColor,white) h s l /30%);*/
 </style>

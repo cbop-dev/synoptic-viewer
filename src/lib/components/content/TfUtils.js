@@ -2,13 +2,13 @@
 import { ParallelColumn, ParallelColumnGroup, GospelPericopeGroup, TextAndRef, VerseWords, Word, GospelPericopeGroupIndices } from "./parallelTexts.svelte.js";
 import * as env from '$lib/env/env.js'
 import gospelParallels from '@cbop-dev/aland-gospel-synopsis'
-import { mylog,debug } from "$lib/env/env.js";
+import { mylog, debug } from "$lib/env/env.js";
 import * as BibleUtils from '$lib/utils/bibleRefUtils.js'
 import * as MathUtils from '$lib/utils/math-utils.js';
 import { LexemeInfo, LexStats } from "../datastructures/lexeme.js";
 import { GospelFilter } from "./SynopsisClasses.svelte.js";
 
-const debugOn=debug;
+const debugOn = debug;
 
 /**
  * 
@@ -63,11 +63,11 @@ export function getTextRefsArray(bookAbbrev, ref) {
  * @param {number[]} pericopeNums
  * @returns  {GospelPericopeGroup[]}
  */
-export function getGroupsArray(pericopeNums, includeSecondary = false,lang='greek') {
+export function getGroupsArray(pericopeNums, includeSecondary = false, lang = 'greek') {
     return pericopeNums.map((pericope) => {
         const row = gospelParallels.alandSynopsis.lookupPericope(pericope);
         const perGroup = new GospelPericopeGroup();
-        perGroup.lang=lang;
+        perGroup.lang = lang;
         perGroup.id = row.pericope;
         perGroup.title = row.pericope + ": " + row.title;
         if (row.Matt.ref) {
@@ -223,14 +223,14 @@ export function getParallelRefsArrays(parallelColumns) {
  * @param {number[]} [excludeCols=[]] indices of columns to exclude from phrase-matching. Will still populate them!
  * @param {number[]} [ignoreWordIds=[]] 
  */
-export function populateGroupsText(perGroups, response, perGroupsIndices, words = true, includeSecondary = true, excludeCols = [],ignoreWordIds=[]) {
+export function populateGroupsText(perGroups, response, perGroupsIndices, words = true, includeSecondary = true, excludeCols = [], ignoreWordIds = []) {
     // mylog("v==================================v", true);
     //mylog("populateGroupTexts()...",true);
 
     for (const [index, group] of perGroups.entries()) {
         mylog("checking group # " + group.id + " , title: '" + group.title + ", index: " + index);
         if (!group.populated) {
-            populateGroupText(group, response && response['texts'] ? response['texts'] : null, perGroupsIndices[index], words, includeSecondary, excludeCols,ignoreWordIds)
+            populateGroupText(group, response && response['texts'] ? response['texts'] : null, perGroupsIndices[index], words, includeSecondary, excludeCols, ignoreWordIds)
         }
     }
     mylog("DONE! Populated the GroupTexts()!")
@@ -247,7 +247,7 @@ export function populateGroupsText(perGroups, response, perGroupsIndices, words 
  * @param {number[]} [excludeCols=[]] indices of columns to exclude from phrase-matching. Will still populate them!
  * @param {number[]} [ignoreWordIds=[]] 
  */
-export function populateGroupText(group, responseTexts = null, perGroupIndices, words = true, includeSecondary = true, excludeCols = [],ignoreWordIds=[]) {
+export function populateGroupText(group, responseTexts = null, perGroupIndices, words = true, includeSecondary = true, excludeCols = [], ignoreWordIds = []) {
     for (const book of ['matt', 'mark', 'luke', 'john', 'other']) {
         for (const [i, textRef] of group[book].textRefs.entries()) {
             mylog("checking ref: " + textRef.reference);
@@ -292,9 +292,9 @@ export function populateGroupText(group, responseTexts = null, perGroupIndices, 
         }
     }
     //const excludeCols=GospelFilter.createValues(gospelFilter.filter).map((g,i)=>g? i : -1).filter((i)=> i>=0);
-    if(responseTexts){
-        group.markUniqueAndIdenticalWords(includeSecondary, excludeCols);
-        group.buildLexIdenticalPhrases(3, true, true, excludeCols,ignoreWordIds);
+    if (responseTexts) {
+        group.markUniqueAndIdenticalWords(false, excludeCols);
+        group.buildLexIdenticalPhrases(3, true, true, excludeCols, ignoreWordIds);
 
     }
 
@@ -311,8 +311,8 @@ export function populateGroupText(group, responseTexts = null, perGroupIndices, 
 * @param {number[]} [excludeCols=[]] 
 * @param {number[]} [ignoreWordIds=[]]
 */
-export function populateTextGroup(parallelColumnGroup, response, parallelIndices, 
-    words = true, excludeCols = [],ignoreWordIds=[]) {
+export function populateTextGroup(parallelColumnGroup, response, parallelIndices,
+    words = true, excludeCols = [], ignoreWordIds = []) {
 
     for (const [index, par] of parallelColumnGroup.parallelColumns.entries()) {
 
@@ -341,7 +341,7 @@ export function populateTextGroup(parallelColumnGroup, response, parallelIndices
         }
 
         parallelColumnGroup.markUniqueAndIdenticalWords(true, excludeCols);
-        parallelColumnGroup.buildLexIdenticalPhrases(3, true, true, excludeCols,ignoreWordIds);
+        parallelColumnGroup.buildLexIdenticalPhrases(3, true, true, excludeCols, ignoreWordIds);
     }
 
 
@@ -417,8 +417,8 @@ export function getGospelGroupRefsArrays(groupsArray, includeSecondary = false) 
 
 export class TfServer {
     static abbrev = 'Dummy Server!';
-    useUnderscores=false;
-    lang='greek';
+    useUnderscores = false;
+    lang = 'greek';
     ready = false;
     name = "TF Empty DB";
     longname = '';
@@ -426,7 +426,7 @@ export class TfServer {
     abbrev = '';
     param = 'nt';
     showNotes = false;
-    hasApparatus=false;
+    hasApparatus = false;
 
     // Capability Flags for Graceful Degradation in UI
     hasLexicalInfo = true;
@@ -436,7 +436,7 @@ export class TfServer {
     /**
      * @type {number[]} ignoreWordIds
      */
-    ignoreWordIds=[];
+    ignoreWordIds = [];
     /**
      * @type {Object<string,{id:number,count:number, beta:string}>} 
      */
@@ -486,7 +486,7 @@ export class TfServer {
          */
         const bcvArray = [];
         for (const [i, ref] of refs.entries()) {
-            const bookCv = BibleUtils.getBookChapVerseFromRef(ref,!this.useUnderscores);
+            const bookCv = BibleUtils.getBookChapVerseFromRef(ref, !this.useUnderscores);
             bookCv.chap = bookCv.chap ? bookCv.chap.replaceAll(/[a-zA-Z]/g, '') : ''
             bookCv.v = bookCv.v ? bookCv.v.replaceAll(/[a-zA-Z]/g, '') : ''
             if (!bookCv.book) {
@@ -613,9 +613,9 @@ export class TfServer {
             }
 
             url += bookname + "&chapter=" + chap + "&verse=" + v;
-//            mylog(`trying to fetch url: ${url}`, true);
+            //            mylog(`trying to fetch url: ${url}`, true);
             const resp = await this.jsonFetch(url);
-//            mylog(`fetchVerseTextByRef(${book},${chap},${v}) returned: ${resp && resp.text ? resp.text.trim() : ''}`, true);
+            //            mylog(`fetchVerseTextByRef(${book},${chap},${v}) returned: ${resp && resp.text ? resp.text.trim() : ''}`, true);
             return resp && resp.text ? resp.text.trim() : '';
         }
         return ''
@@ -687,8 +687,8 @@ export class TfServer {
     async getNodeFromRef(theRef) {
 
         const logPref = `getNodeFromRef(${theRef},${!this.useUnderscores}): `;
-        
-        const bookChapVObj = BibleUtils.getBookChapVerseFromRef(theRef,!this.useUnderscores);
+
+        const bookChapVObj = BibleUtils.getBookChapVerseFromRef(theRef, !this.useUnderscores);
 
         let bookName = '';
         let theNode = 0;
@@ -698,8 +698,8 @@ export class TfServer {
 
 
         }
-        else{
-            mylog(`${logPref}: no book provided for ${theRef}`,debugOn);
+        else {
+            mylog(`${logPref}: no book provided for ${theRef}`, debugOn);
         }
 
         theNode = await this.tfGetNodeFromSection(bookName, bookChapVObj.chap, bookChapVObj.v);
@@ -749,8 +749,8 @@ export class TfServer {
             const thenode = await this.jsonFetch(this.getApiUri() + uri);
             nodeid = Number(thenode) ? Number(thenode) : 0;
         }
-        else{
-            mylog(`tfGetNodeFromSection: no book provided`,debugOn);
+        else {
+            mylog(`tfGetNodeFromSection: no book provided`, debugOn);
         }
 
         return nodeid;

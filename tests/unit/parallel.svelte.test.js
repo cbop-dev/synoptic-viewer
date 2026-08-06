@@ -21,6 +21,21 @@ test('dummy', async () => {
     //await expect(page.locator('h1')).toBeVisible();
 });
 
+test('identical words test', () => {
+    const group = new GospelPericopeGroup();
+    group.matt.textRefs = [new TextAndRef('Matt 1:1', 'καὶ [Ἰησοῦ]', [
+        { verse: 1, words: [new Word(1, 'καὶ'), new Word(2, '[Ἰησοῦ]')] }
+    ])];
+    group.mark.textRefs = [new TextAndRef('Mark 1:1', 'καὶ Ἰησοῦ', [
+        { verse: 1, words: [new Word(3, 'καὶ'), new Word(4, 'Ἰησοῦ')] }
+    ])];
+
+    group.markUniqueAndIdenticalWords();
+
+    expect(group.matchingWords).toContain('και');
+    expect(group.matchingWords).toContain('Ιησου');
+});
+
 
 test('Groups: unique words', async () => {
     const tests = [
@@ -39,7 +54,7 @@ test('Groups: unique words', async () => {
         //await tfServer.fetchAndPopulateGroupsPericopes([group],true,true,true)
         const response = await tfServer.fetchPostTextsBatch(groupsArrays.refsArray);
         TfUtils.populateGroupsText([group], response, groupsArrays.groupsIndices)
-        //group.markUniqueAndIdenticalWords();
+        group.markUniqueAndIdenticalWords();//todo: comment out again? ai uncommented this, but popGroupsTExt should call it...?
         //console.log("marked uniq words!")
         for (const book of ['matt', 'mark', 'luke', 'john']) {
             // mylog('checking ' + book + ':')
@@ -72,17 +87,17 @@ test('parseSingleGroup', async () => {
 });
 
 test('maxLexicalColumnMatch', async () => {
-    const cols=[
-    ["Καθημένου δὲ αὐτοῦ ἐπὶ τοῦ Ὄρους τῶν Ἐλαιῶν προσῆλθον αὐτῷ οἱ μαθηταὶ κατ’ ἰδίαν λέγοντες· Εἰπὸν ἡμῖν πότε ταῦτα ἔσται, καὶ τί τὸ σημεῖον τῆς σῆς παρουσίας καὶ συντελείας τοῦ αἰῶνος."],
-    ["Εἰπὸν ἡμῖν πότε ταῦτα ἔσται, καὶ τί τὸ σημεῖον ὅταν μέλλῃ ταῦτα συντελεῖσθαι πάντα."],
-    ["Ἐπηρώτησαν δὲ αὐτὸν λέγοντες· Διδάσκαλε, πότε οὖν ταῦτα ἔσται, καὶ τί τὸ σημεῖον ὅταν μέλλῃ ταῦτα γίνεσθαι;"]
-    ].map(([s])=>[GreekUtils.plainGreek(s.toLocaleLowerCase()).replaceAll(/[^a-z α-ω]/g,'')]);
+    const cols = [
+        ["Καθημένου δὲ αὐτοῦ ἐπὶ τοῦ Ὄρους τῶν Ἐλαιῶν προσῆλθον αὐτῷ οἱ μαθηταὶ κατ’ ἰδίαν λέγοντες· Εἰπὸν ἡμῖν πότε ταῦτα ἔσται, καὶ τί τὸ σημεῖον τῆς σῆς παρουσίας καὶ συντελείας τοῦ αἰῶνος."],
+        ["Εἰπὸν ἡμῖν πότε ταῦτα ἔσται, καὶ τί τὸ σημεῖον ὅταν μέλλῃ ταῦτα συντελεῖσθαι πάντα."],
+        ["Ἐπηρώτησαν δὲ αὐτὸν λέγοντες· Διδάσκαλε, πότε οὖν ταῦτα ἔσται, καὶ τί τὸ σημεῖον ὅταν μέλλῃ ταῦτα γίνεσθαι;"]
+    ].map(([s]) => [GreekUtils.plainGreek(s.toLocaleLowerCase()).replaceAll(/[^a-z α-ω]/g, '')]);
 
 
-/*    for (const t of tests) {
-        expect(true).toBe(true);
-    }
-*/
+    /*    for (const t of tests) {
+            expect(true).toBe(true);
+        }
+    */
     expect(true).toBe(true);
     //await expect(page.locator('h1')).toBeVisible();
 });
@@ -90,16 +105,17 @@ test('maxLexicalColumnMatch', async () => {
 test('Matt 11:5-6 // Luke 7:22-23 matching', async () => {
     //TODO: still working on this test. see TODOs below
     const tests = [
-        {textRefs:['Matt 11:5-6',"Luke 7:22-23"],
-         lexMatches:[],
-         exactMatches:
-            ["τυφλοὶ ἀναβλέπουσιν καὶ χωλοὶ περιπατοῦσιν, λεπροὶ καθαρίζονται καὶ κωφοὶ ἀκούουσιν, καὶ νεκροὶ ἐγείρονται καὶ πτωχοὶ εὐαγγελίζονται· καὶ μακάριός ἐστιν ὃς ἐὰν μὴ σκανδαλισθῇ ἐν ἐμοί",
-            "τυφλοὶ ἀναβλέπουσιν, χωλοὶ περιπατοῦσιν, λεπροὶ καθαρίζονται, κωφοὶ ἀκούουσιν, νεκροὶ ἐγείρονται, πτωχοὶ εὐαγγελίζονται· καὶ μακάριός ἐστιν ὃς ἐὰν μὴ σκανδαλισθῇ ἐν ἐμοί."
-            ]
+        {
+            textRefs: ['Matt 11:5-6', "Luke 7:22-23"],
+            lexMatches: [],
+            exactMatches:
+                ["τυφλοὶ ἀναβλέπουσιν καὶ χωλοὶ περιπατοῦσιν, λεπροὶ καθαρίζονται καὶ κωφοὶ ἀκούουσιν, καὶ νεκροὶ ἐγείρονται καὶ πτωχοὶ εὐαγγελίζονται· καὶ μακάριός ἐστιν ὃς ἐὰν μὴ σκανδαλισθῇ ἐν ἐμοί",
+                    "τυφλοὶ ἀναβλέπουσιν, χωλοὶ περιπατοῦσιν, λεπροὶ καθαρίζονται, κωφοὶ ἀκούουσιν, νεκροὶ ἐγείρονται, πτωχοὶ εὐαγγελίζονται· καὶ μακάριός ἐστιν ὃς ἐὰν μὴ σκανδαλισθῇ ἐν ἐμοί."
+                ]
         }
 
     ];
-    
+
     /*
     matt 11:5-6; Luke 7:22-23
 
@@ -114,12 +130,12 @@ test('Matt 11:5-6 // Luke 7:22-23 matching', async () => {
 
     for (const t of tests) {
         const response = await sblGntServer.fetchPostTextsBatch(t.textRefs)
-        const parColumns = response.texts.map((rt,i)=>new ParallelColumn([new TextAndRef(t.textRefs[i],rt.text)]));
+        const parColumns = response.texts.map((rt, i) => new ParallelColumn([new TextAndRef(t.textRefs[i], rt.text)]));
         const perGroup = new ParallelColumnGroup(parColumns);
-        perGroup.buildLexIdenticalPhrases(3,false,true,[],sblGntServer.ignoreWordIds);
+        perGroup.buildLexIdenticalPhrases(3, false, true, [], sblGntServer.ignoreWordIds);
         //TODO: figure out how to test this.
         //perGroup.
-        
+
         //expect(true).toBe(true);
     }
     expect(true).toBe(true);

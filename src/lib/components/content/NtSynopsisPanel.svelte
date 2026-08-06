@@ -20,7 +20,7 @@
 	import { LexemeInfo } from '../datastructures/lexeme';
 	//import {tfServer,lexemes} from '$lib/sblgnt/sblgnt.js'
 	import ParallelGospelSection from './ParallelGospelSection.svelte';
-	import { mylog,myLog } from '$lib/env/env';
+	import { mylog, myLog } from '$lib/env/env';
 	import * as bibleUtils from '$lib/utils/bibleRefUtils.js';
 	import * as mathUtils from '$lib/utils/math-utils.js';
 	//import Button from '../ui/Button.svelte';
@@ -77,8 +77,8 @@
 	//myLog.log("NTSynPanel: about to copy options")
 	//myLog.log(`typeof options: ${typeof options}`);
 	let myOptions = $state(options);
-	myLog.debug=false;
-	myLog.log("starting to load: myOptions.viewOptions.page = " + myOptions.viewOptions.page);
+	myLog.debug = false;
+	myLog.log('starting to load: myOptions.viewOptions.page = ' + myOptions.viewOptions.page);
 	let fetching = $state(false);
 	let expecting = $state(0);
 	let numReady = $state(0);
@@ -119,7 +119,7 @@
 		//return //ColorUtils.generateHslBgFontPalette(selectedLexes.length+myOptions.viewOptions.greekStrings.length,100,50,true));
 		//ColorUtils.generateDistinctColorsSetsPalette(selectedLexes.length+myOptions.viewOptions.greekStrings.length));
 		//ColorUtils.generateCubeHelixOklchPalette(num);
-		return ColorUtils.myColorPalette(num, 1, 1,7);
+		return ColorUtils.myColorPalette(num, 1, 1, 7);
 	});
 	/**
 	 * @type {string[]} myOptions.viewOptions.greekStrings
@@ -207,13 +207,13 @@
 		}
 		return retVal;
 	});
-	
+
 	//let groupsRefsArray = $state([]);
 	let currentServer = $state(tfServer);
 
 	function setServer() {
 		currentServer = tfServer;
-		myOptions.request.nt=currentServer.abbrev
+		myOptions.request.nt = currentServer.abbrev;
 	}
 	/**
 	 * @type {Object|null}
@@ -242,7 +242,7 @@
 
 		//  myLog.log("sorting pericopes. Sorted state = " + alandPericopeNums.join(","));
 
-		perGroups = TfUtils.getGroupsArray(filteredPericopes, true,currentServer.lang);
+		perGroups = TfUtils.getGroupsArray(filteredPericopes, true, currentServer.lang);
 	}
 
 	/**
@@ -293,11 +293,10 @@
 			pageNum < paginatedFilteredPerGroups.length
 		) {
 			//already showing the right page data. just jump to the anchor
-			
+
 			myOptions.viewOptions.page = pageNum;
 			paginatedFilteredPerGroups;
 			await tick();
-			
 		} else {
 			//pageNum=0;
 		}
@@ -305,8 +304,7 @@
 		if (alandPerGroupId) {
 			//mylog(`GotoPageSection(${pageNum},${alandPerGroupId}): jumping to div, not top!`,true)
 			jumpToDiv('section-' + alandPerGroupId);
-		}
-		else{
+		} else {
 			//mylog(`GotoPageSection(${pageNum},${alandPerGroupId}): jumping to top...`,true)
 			jumpToTop();
 		}
@@ -334,8 +332,6 @@
 		ArrayUtils.splitArray(filteredPerGroupsIndices, groupsPerPage)
 	);
 
-	
-
 	let lemmasByID = $derived.by(() => {
 		let dict = {};
 		if (fetchedTextsResponse && fetchedTextsResponse.lexemes) {
@@ -354,7 +350,6 @@
 	//   let filteredPericopes = $state([]);
 	//$derived(alandPericopeNums.filter((p)=>!hideNonPrimary ||
 	//      (gospelParallels.alandSynopsis.isPrimaryPericope(p,selectedGospel[selectedGospelIndex].value))))
-
 
 	/**
 	 * {#each gospelParallels.alandSynopsis.sections as section}
@@ -378,37 +373,43 @@
 					>
 				{/if}
 	*/
-	let selectSectionOptions=$derived.by(()=>{
-		let theOptions=[];
-		gospelParallels.alandSynopsis.sections.forEach((section)=>{
-			theOptions.push({pericopes:mathUtils.createNumArrayFromStringListRange(section.pericopes),
-				
-				label: mathUtils.romanize(section.section) +": "+ section.title
+	let selectSectionOptions = $derived.by(() => {
+		let theOptions = [];
+		gospelParallels.alandSynopsis.sections.forEach((section) => {
+			theOptions.push({
+				pericopes: mathUtils.createNumArrayFromStringListRange(section.pericopes),
+
+				label: mathUtils.romanize(section.section) + ': ' + section.title
 			});
 		});
 
-		gospelParallels.alandSynopsis.pericopes.forEach((per)=>{			
-			theOptions.push({pericopes:[per.pericope],
-				label: per.pericope +": "+ per.title
-			})
-		})
-		if(myOptions.viewOptions.showEverything){
-			theOptions.push({pericopes:gospelParallels.alandSynopsis.pericopes.map((p)=>parseInt(p.pericope)),
-				label:"Everything!!"
-			})
+		gospelParallels.alandSynopsis.pericopes.forEach((per) => {
+			theOptions.push({ pericopes: [per.pericope], label: per.pericope + ': ' + per.title });
+		});
+		if (myOptions.viewOptions.showEverything) {
+			theOptions.push({
+				pericopes: gospelParallels.alandSynopsis.pericopes.map((p) => parseInt(p.pericope)),
+				label: 'Everything!!'
+			});
 		}
-		theOptions.forEach((o,i)=>{
-			o.value=i;
-		})
+		theOptions.forEach((o, i) => {
+			o.value = i;
+		});
 		return theOptions;
-
-	})
-	let selectedSections=$state([]);
+	});
+	let selectedSections = $state([]);
 	async function selectSection() {
 		landingPage = false;
 		resetViewOptions();
-		alandPericopeNums = Array.from(new Set(selectedSections.map((s)=>s.pericopes).flat().sort()));
-		
+		alandPericopeNums = Array.from(
+			new Set(
+				selectedSections
+					.map((s) => s.pericopes)
+					.flat()
+					.sort()
+			)
+		);
+
 		//[...selectedSections];
 		//    myLog.log(`selectSection, alandPericopes.length=${alandPericopeNums.length}; alandPericopeNums:[${alandPericopeNums.join(',')}]`,true);
 		await buildAndFetchPericopes();
@@ -509,24 +510,22 @@
 
 		buildPericopeRefs();
 		await tick();
-		
-		
-		if(!myOptions.viewOptions.refsOnly) {
+
+		if (!myOptions.viewOptions.refsOnly) {
 			fetching = true;
-			mylog("fetching from server...",true)
+			//			mylog('fetching from server...', true);
 			fetchedTextsResponse = await currentServer.fetchPostTextsBatch(groupsRefsArray);
-		}
-		else{
-			mylog("getting refs only; thus no server fetching!", true);
+		} else {
+			//			mylog('getting refs only; thus no server fetching!', true);
 		}
 		fetching = false;
-//		mylog("buildAndFetch setting dataready!",true);
+		//		mylog("buildAndFetch setting dataready!",true);
 		dataReady = true;
 	}
 	//let lemmasByID={}
 
 	async function populateAll() {
-		if((!myOptions.viewOptions.refsOnly)) {
+		if (!myOptions.viewOptions.refsOnly) {
 			dataReady = false;
 			TfUtils.populateGroupsText(
 				perGroups,
@@ -538,7 +537,7 @@
 			);
 			await tick();
 			//    myLog.log(`populatedAll! are all populated?:${perGroups.map((g)=>g.populated).reduce((a,b)=>a&&b, true)}`, true)
-	//		mylog("popAll() setting dataready!",true)
+			//		mylog("popAll() setting dataready!",true)
 			dataReady = true;
 		}
 	}
@@ -555,7 +554,6 @@
 			currentPage.length &&
 			!currentPage.reduce((a, b) => a && b.populated, true)
 		) {
-			
 		} else {
 			// myLog.log(`checkAndPopulatePage(). Current page #${myOptions.viewOptions.page}.length:${currentPage.length}; !currentPage.reduce((a,b)=>a&&b.populated,true):${!currentPage.reduce((a,b)=>a&&b.populated,true)}`,true);
 		}
@@ -569,14 +567,18 @@
 		perGroups.forEach(async (g) => {
 			g.resetAllPhrases();
 			await tick();
-			g.buildLexIdenticalPhrases(3, !myOptions.viewOptions.hideSecondary, true, gospelsExcluded,
+			g.buildLexIdenticalPhrases(
+				3,
+				!myOptions.viewOptions.hideSecondary,
+				true,
+				gospelsExcluded,
 				currentServer.ignoreWordIds
 			);
 			await tick(); //g.updatedCounter+=1;
 		});
 
 		//perGroups=perGroups;
-//		mylog("finMatchingPhrases setting dataready!",true)
+		//		mylog("finMatchingPhrases setting dataready!",true)
 		dataReady = true;
 	}
 
@@ -650,8 +652,8 @@
 			//await checkAndPopulatePage();
 			await populateAll();
 			await tick();
-			myOptions.viewOptions.page=page;
-			myLog.log("setting and jumping to page: "+page);
+			myOptions.viewOptions.page = page;
+			myLog.log('setting and jumping to page: ' + page);
 			await gotoPageSection(myOptions.viewOptions.page);
 			//        myLog.log("URLrequestShowNTParallels: ...done!",true)
 		} else {
@@ -838,14 +840,13 @@
 			myOptions.viewOptions.page = 0;
 			//checkAndPopulatePage();
 			gotoPageSection(myOptions.viewOptions.page).then(() => {
-//				mylog("effect() setting dataready!",true)
+				//				mylog("effect() setting dataready!",true)
 				dataReady = true;
 			});
-			
 		}
 	});
 	const hotkeys = new SynopsisHotkeys(myOptions);
-	
+
 	hotkeys.addHotkey('>', 'Next Page', gotoNextPage);
 	hotkeys.addHotkey('<', 'Previous Page', gotoPreviousPage);
 	hotkeys.addHotkey('g', 'Show/Hide Individual Gospels', () => {
@@ -863,13 +864,12 @@
 	hotkeys.addHotkey('$', 'Show/Hide John! ([shift]-4)', () => {
 		toggleGospelHide(3);
 	});
-	let hotkeysToUse=$state('');
-	$effect(()=>{
+	let hotkeysToUse = $state('');
+	$effect(() => {
 		hotkeys.enableHotkeys(hotkeysToUse);
 	});
-	hotkeysToUse='nptbo2aesx';
+	hotkeysToUse = 'nptbo2aesx';
 
-	
 	/**
 	 *
 	 * @param {number} index
@@ -1097,8 +1097,7 @@
 
 	$effect(() => {
 		myOptions.viewOptions.gospelFilter;
-		if (myOptions.viewOptions.gospelFilter >= 0 && untrack(()=>dataReady)) {
-			
+		if (myOptions.viewOptions.gospelFilter >= 0 && untrack(() => dataReady)) {
 			findMatchingPhrases();
 		}
 	});
@@ -1121,21 +1120,24 @@
 
 	function loadRequestOptions() {
 		//myLog.log("loadRequestOptions...")
-		
 	}
 
 	let mounted = $state(false);
 	onMount(() => {
-		myLog.log("onMount: page = " + myOptions.viewOptions.page);
+		myLog.log('onMount: page = ' + myOptions.viewOptions.page);
 		if (myOptions.request.fromURL) {
 			//        myLog.log("NTSynPanel got url params. Let's make a request!")
 			landingPage = false;
 			viewStates.views.lookup.state = false;
 			loadRequestOptions();
 			viewStates.views.lookup.state = false;
-			urlRequestShowNtParallels().then(() => {
-				requestProcessed = true;
-			}).then(()=>{if (myOptions.viewOptions.page) gotoPageSection(myOptions.viewOptions.page)});
+			urlRequestShowNtParallels()
+				.then(() => {
+					requestProcessed = true;
+				})
+				.then(() => {
+					if (myOptions.viewOptions.page) gotoPageSection(myOptions.viewOptions.page);
+				});
 		} else {
 			viewStates.reset();
 		}
@@ -1143,13 +1145,12 @@
 		mounted = true;
 	});
 	let showGospelFilterModal = $state(false);
-	$inspect('page:',myOptions.viewOptions.page);
-	$inspect('groupsRefsArray:',groupsRefsArray);
-	
-	
+	$inspect('page:', myOptions.viewOptions.page);
+	$inspect('groupsRefsArray:', groupsRefsArray);
+
 	$inspect('selectOptions:', selectSectionOptions);
-	$inspect('selectedSections',selectedSections);
-	$inspect('alandPericopeNums',alandPericopeNums);
+	$inspect('selectedSections', selectedSections);
+	$inspect('alandPericopeNums', alandPericopeNums);
 </script>
 
 {#snippet appTitle(headingTag = 'h1', classes = ['text-center', 'inline'])}
@@ -1176,7 +1177,7 @@
 		<hr />
 	{/if}
 
-	<SiteInfo/>
+	<SiteInfo />
 	<br />
 	Enter NT reference to view parallel texts and click "Look up!", or select a section and press "Go!"
 {/snippet}
@@ -1199,7 +1200,6 @@
 					buttonText="☰ Jump to ↓"
 					bind:selected={viewStates.views.sections.state}
 					tooltipbottom
-					
 					tooltip="Jump to a section"
 				/></svelte:element
 			>
@@ -1213,14 +1213,14 @@
 			>
 
 			{#if currentServer.hasLexicalInfo}
-			<svelte:element this={theTag} class={classes}
-				><ButtonSelect
-					bind:selected={viewStates.views.words.state}
-					buttonText="☰ Words"
-					tooltipbottom
-					tooltip="Show lexeme options"
-				/>
-			</svelte:element>
+				<svelte:element this={theTag} class={classes}
+					><ButtonSelect
+						bind:selected={viewStates.views.words.state}
+						buttonText="☰ Words"
+						tooltipbottom
+						tooltip="Show lexeme options"
+					/>
+				</svelte:element>
 			{/if}
 			<svelte:element this={theTag} class={classes}>
 				<ButtonSelect
@@ -1231,66 +1231,66 @@
 				/>
 			</svelte:element>
 			{#if currentServer.hasPhraseComparison}
-			<svelte:element this={theTag} class={classes}
-				><ButtonSelect
-					buttonText="Similar"
-					bind:selected={myOptions.viewOptions.similarPhrases}
-					tooltipbottom
-					tooltip="Show lexically identical phrases"
-				/></svelte:element
-			>
-			<svelte:element this={theTag} class={classes}
-				><ButtonSelect
-					buttonText="Exact"
-					bind:selected={myOptions.viewOptions.exactPhrases}
-					tooltipbottom
-					tooltip="Show exactly matching phrases"
-				/></svelte:element
-			>
+				<svelte:element this={theTag} class={classes}
+					><ButtonSelect
+						buttonText="Similar"
+						bind:selected={myOptions.viewOptions.similarPhrases}
+						tooltipbottom
+						tooltip="Show lexically identical phrases"
+					/></svelte:element
+				>
+				<svelte:element this={theTag} class={classes}
+					><ButtonSelect
+						buttonText="Exact"
+						bind:selected={myOptions.viewOptions.exactPhrases}
+						tooltipbottom
+						tooltip="Show exactly matching phrases"
+					/></svelte:element
+				>
 			{/if}
 			{#if currentServer.hasLexicalInfo}
-			<svelte:element this={theTag} class={classes}
-				><ButtonSelect
-					bind:selected={myOptions.viewOptions.unique}
-					buttonText="Unique"
-					tooltipbottom
-					tooltip="Outline all lexemes unique to each column."
-				/></svelte:element
-			>
-			<svelte:element this={theTag} class={classes}
-				><ButtonSelect
-					bind:selected={myOptions.viewOptions.identical}
-					tooltipbottom
-					tooltip="Bold/underline all morphologically identical words. (This generates many 'false positives.')"
-					buttonText="Identical"
-				/>
-			</svelte:element>
+				<svelte:element this={theTag} class={classes}
+					><ButtonSelect
+						bind:selected={myOptions.viewOptions.unique}
+						buttonText="Unique"
+						tooltipbottom
+						tooltip="Outline all lexemes unique to each column."
+					/></svelte:element
+				>
+				<svelte:element this={theTag} class={classes}
+					><ButtonSelect
+						bind:selected={myOptions.viewOptions.identical}
+						tooltipbottom
+						tooltip="Bold/underline all morphologically identical words. (This generates many 'false positives.')"
+						buttonText="Identical"
+					/>
+				</svelte:element>
 
-			<!-- <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={myOptions.viewOptions.highlightOnClick} buttonText="Auto Highlight" 
+				<!-- <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={myOptions.viewOptions.highlightOnClick} buttonText="Auto Highlight" 
                     tooltipbottom={true}
                     tooltip="If enabled, clicking/tapping on a word will toggle highlighting of that lexeme. Press 'c' to toggle this option."/></svelte:element>  -->
 
-			<svelte:element this={theTag} class={[classes, 'menu']}>
-				<label class="label tooltip" data-tip="Highlight lexemes" for="highlight-click-check">
-					<input
-						class="toggle"
-						id="highlight-click-check"
-						type="checkbox"
-						bind:checked={myOptions.viewOptions.highlightOnClick}
-					/>Highlight{#if !short}
-						Lexemes{/if}
-				</label>
-			</svelte:element>
-			<svelte:element this={theTag} class={[classes, 'menu']}>
-				<label class="label tooltip" data-tip="Show Lexeme Info on Click" for="lexeme-info-click">
-					<input
-						class="toggle"
-						id="lexeme-info-click"
-						type="checkbox"
-						bind:checked={myOptions.viewOptions.lexInfoClick}
-					/>Stats{#if short}{:else}{/if}
-				</label>
-			</svelte:element>
+				<svelte:element this={theTag} class={[classes, 'menu']}>
+					<label class="label tooltip" data-tip="Highlight lexemes" for="highlight-click-check">
+						<input
+							class="toggle"
+							id="highlight-click-check"
+							type="checkbox"
+							bind:checked={myOptions.viewOptions.highlightOnClick}
+						/>Highlight{#if !short}
+							Lexemes{/if}
+					</label>
+				</svelte:element>
+				<svelte:element this={theTag} class={[classes, 'menu']}>
+					<label class="label tooltip" data-tip="Show Lexeme Info on Click" for="lexeme-info-click">
+						<input
+							class="toggle"
+							id="lexeme-info-click"
+							type="checkbox"
+							bind:checked={myOptions.viewOptions.lexInfoClick}
+						/>Stats{#if short}{:else}{/if}
+					</label>
+				</svelte:element>
 			{/if}
 
 			<svelte:element this={theTag} class={[classes, 'menu']}
@@ -1361,17 +1361,21 @@
 		</div>
 	{:else}
 		<div class="text-center">
-			<label class="label tooltip pt-1" data-tip="Fetch and show only the synoptic passage references, and not any biblical text." for="highlight-click-check">
-					<input
-						class="toggle"
-						id="refs-only-check"
-						type="checkbox"
-						bind:checked={myOptions.viewOptions.refsOnly}
-					/>Lookup references only.
-				</label>
-			<br/>
+			<label
+				class="label tooltip pt-1"
+				data-tip="Fetch and show only the synoptic passage references, and not any biblical text."
+				for="highlight-click-check"
+			>
+				<input
+					class="toggle"
+					id="refs-only-check"
+					type="checkbox"
+					bind:checked={myOptions.viewOptions.refsOnly}
+				/>Lookup references only.
+			</label>
+			<br />
 			<span class="underline font-bold italic">Choose One:</span>
-			
+
 			<h2 class="cursor-default">Enter References</h2>
 			<div class="inline mb-2">
 				<textarea
@@ -1381,24 +1385,28 @@
 					bind:value={refAreaText}
 					onfocus={textAreaFocus}
 					onblur={textAreaBlur}
-					
-				></textarea> 
-				<button onclick={lookupShowNtParallels} disabled={refAreaText.length==0} class="btn btn-primary inline"
-					>Look up!</button
+				></textarea>
+				<button
+					onclick={lookupShowNtParallels}
+					disabled={refAreaText.length == 0}
+					class="btn btn-primary inline">Look up!</button
 				>
 			</div>
 
-			<p class="m-3 italic"> OR:</p>
-			<h2 class="cursor-default">Select a section:</h2>	
-			
+			<p class="m-3 italic">OR:</p>
+			<h2 class="cursor-default">Select a section:</h2>
+
 			<div class="select-pericopes-wrapper w-full sm:w-3/4 md:w-1/2 m-auto">
-			<Svelecte options={selectSectionOptions} bind:value={selectedSections} multiple={true}
-			valueAsObject={true}
-			onFocus={textAreaFocus}
-			onBlur={textAreaBlur}
-			placeholder="Search section, e.g., 'Sermon on the Mount'"
-			/>
-			 </div>
+				<Svelecte
+					options={selectSectionOptions}
+					bind:value={selectedSections}
+					multiple={true}
+					valueAsObject={true}
+					onFocus={textAreaFocus}
+					onBlur={textAreaBlur}
+					placeholder="Search section, e.g., 'Sermon on the Mount'"
+				/>
+			</div>
 
 			<!---
 			<select id="select-section" bind:value={selectedSections}>
@@ -1425,10 +1433,17 @@
 				{/if}
 			</select>
 			-->
-			<button onclick={selectSection} disabled={selectedSections.length==0} class="align-top btn btn-primary inline-block m-1">Go!</button
-			>	<button onclick={()=>{selectedSections=[]}} class="align-top btn btn-outline inline-block m-1">Clear</button
+			<button
+				onclick={selectSection}
+				disabled={selectedSections.length == 0}
+				class="align-top btn btn-primary inline-block m-1">Go!</button
 			>
-		
+			<button
+				onclick={() => {
+					selectedSections = [];
+				}}
+				class="align-top btn btn-outline inline-block m-1">Clear</button
+			>
 		</div>
 		<hr class="!border-slate-300 m-6" />
 	{/if}
@@ -1455,291 +1470,302 @@
 	{/if}
 {/snippet}
 <div id="nt-synopsis-panel">
-<div id="top-fixed" class="self-center fixed left-0 text-center w-full top-8  z-40">
-	<div id="header-nav-section" class="block self-center text-center m-auto w-full">
-		<div class="navbar ">
-			<div class="navbar-start text-left sm:navbar-center sm:self-center w-full m-auto">
-				<div class="text-center self-center w-full border-0">
-					<div id="title-panel">
-						<TitleNavbar
-							title="Greek New Testament Synopsis"
-							mediumtitle="Greek NT Synopsis"
-							shorttitle="NT Synopsis"
-							bind:viewStates
-							{hotkeys}
-							bind:options={myOptions}
-							showResultsButtons={dataReady}
-							hideLookup={!dataReady || landingPage}
-							conditions={{hasLexicalInfo: currentServer.hasLexicalInfo,hasApparatus:currentServer.hasApparatus}}
-						/>
-					</div>
-
-					{#if myOptions.viewOptions.menuOpen}
-						<div class="options-dropdown m-auto dropdown text-left">
-							<ul
-								class="menu menu-horizontal  z-1 mt-3 w-auto p-2 shadow text-left"
-							>
-								{@render resultsButtons(true, 'li')}
-							</ul>
+	<div id="top-fixed" class="self-center fixed left-0 text-center w-full top-8 z-40">
+		<div id="header-nav-section" class="block self-center text-center m-auto w-full">
+			<div class="navbar">
+				<div class="navbar-start text-left sm:navbar-center sm:self-center w-full m-auto">
+					<div class="text-center self-center w-full border-0">
+						<div id="title-panel">
+							<TitleNavbar
+								title="Greek New Testament Synopsis"
+								mediumtitle="Greek NT Synopsis"
+								shorttitle="NT Synopsis"
+								bind:viewStates
+								{hotkeys}
+								bind:options={myOptions}
+								showResultsButtons={dataReady}
+								hideLookup={!dataReady || landingPage}
+								conditions={{
+									hasLexicalInfo: currentServer.hasLexicalInfo,
+									hasApparatus: currentServer.hasApparatus,
+									hasPhraseComparison: currentServer.hasPhraseComparison
+								}}
+							/>
 						</div>
-					{/if}
-				</div>
-			</div>
-			<div class="navbar-end hidden"></div>
-		</div>
-	</div>
-</div>
 
-{#if landingPage}
-	<div id="landing-lookup" class="block m-auto top-0  text-center">
-		<div id="landing" class="center-block">
-			<div id="landing-panel text-center">
-				<div class="text-center m-auto">
-					{@render appSummary(false)}
+						{#if myOptions.viewOptions.menuOpen}
+							<div class="options-dropdown m-auto dropdown text-left">
+								<ul class="menu menu-horizontal z-1 mt-3 w-auto p-2 shadow text-left">
+									{@render resultsButtons(true, 'li')}
+								</ul>
+							</div>
+						{/if}
+					</div>
 				</div>
-				<hr />
+				<div class="navbar-end hidden"></div>
 			</div>
 		</div>
-
-		<div id="landinglookup" class={['center-block', ]}>
-			{@render lookup()}
-		</div>
 	</div>
-{/if}
-<!--end fixed section-->
 
-<div id="main-content-div" class="self-center relative text-center  mt-15 z-20 shadow-2xl">
-	<!--<div style="background-image: url('{ScribesImage}');" class="w-full h-full bg-black" ></div>-->
-	
-	<!--<div style="background-image: url('{ScribesImage}');" class="w-full h-full bg-black"></div>-->
-			<!--<Loading title="Results loading..." 
+	{#if landingPage}
+		<div id="landing-lookup" class="block m-auto top-0 text-center">
+			<div id="landing" class="center-block">
+				<div id="landing-panel text-center">
+					<div class="text-center m-auto">
+						{@render appSummary(false)}
+					</div>
+					<hr />
+				</div>
+			</div>
+
+			<div id="landinglookup" class={['center-block']}>
+				{@render lookup()}
+			</div>
+		</div>
+	{/if}
+	<!--end fixed section-->
+
+	<div id="main-content-div" class="self-center relative text-center mt-15 z-20 shadow-2xl">
+		<!--<div style="background-image: url('{ScribesImage}');" class="w-full h-full bg-black" ></div>-->
+
+		<!--<div style="background-image: url('{ScribesImage}');" class="w-full h-full bg-black"></div>-->
+		<!--<Loading title="Results loading..." 
 				loadingBackground={ScribesImage}
 				message={['Please wait while our digital experts gather the texts...']}
 				minHeight={'400px'}
 				
 				width={'100%'}
 				 />-->
-	{#if !landingPage}
-		{#if myOptions.request.fromURL && !requestProcessed}
-			<h3><i>Processing Request...</i></h3>
-			<span class="loading loading-spinner loading-xl"></span>
+		{#if !landingPage}
+			{#if myOptions.request.fromURL && !requestProcessed}
+				<h3><i>Processing Request...</i></h3>
+				<span class="loading loading-spinner loading-xl"></span>
+			{/if}
 		{/if}
-	{/if}
-</div>
-<div id="results-container" class="text-center mt-10">
-
-			<!--<Loading title="Results loading..." 
+	</div>
+	<div id="results-container" class="text-center mt-10">
+		<!--<Loading title="Results loading..." 
 				loadingBackground={ScribesImage}
 				minHeight='800px'
 				height='1000px'
 				width='200px'
 				message={[]} />-->
-	{#if alandPericopeNums.length}
-		<div id="results" class="min-h-screen" style="min-height:400px;">
-	
-			{#if dataReady}
-			
-				{#if (fetchedTextsResponse||myOptions.viewOptions.refsOnly)}
-					{@const headingText=myOptions.viewOptions.refsOnly ? "Parallel References" : 
-					"Results from"+ currentServer.name}
-					{@const subText=myOptions.viewOptions.refsOnly ? "Showing only Aland's parallel passage group title and references:" : ''}
-					
-					<h1 class="text-center">
-						{headingText}:
-						{#key myOptions.viewOptions}<CopyText
-								icon={LinkSvg}
-								getTextFunc={makeURL}
-								tooltip="Copy Link to share these results"
-								svgStyle="filter: opacity(0.6);"
-							/>{/key} 
-							</h1>
+		{#if alandPericopeNums.length}
+			<div id="results" class="min-h-screen" style="min-height:400px;">
+				{#if dataReady}
+					{#if fetchedTextsResponse || myOptions.viewOptions.refsOnly}
+						{@const headingText = myOptions.viewOptions.refsOnly
+							? 'Parallel References'
+							: 'Results from' + currentServer.name}
+						{@const subText = myOptions.viewOptions.refsOnly
+							? "Showing only Aland's parallel passage group title and references:"
+							: ''}
+
+						<h1 class="text-center">
+							{headingText}:
+							{#key myOptions.viewOptions}<CopyText
+									icon={LinkSvg}
+									getTextFunc={makeURL}
+									tooltip="Copy Link to share these results"
+									svgStyle="filter: opacity(0.6);"
+								/>{/key}
+						</h1>
 						{#if subText}<p class="section-content m-auto w-auto italic p-1">
-							{subText}</p>{/if}
-						
-					{#key paginatedFilteredPerGroups && myOptions.viewOptions.page}
-						{#if myOptions.viewOptions.refsOnly}
-							
-								<div class="text-left center norefs-table-div  inline-block  rounded-2xl! p-5! mt-2 " >
-								<!--<ul >-->
+								{subText}
+							</p>{/if}
 
-							<table class="norefs-table"><tbody >
-							{#each perGroups as thePerGroup, i}
-								{@const primaryRefs=thePerGroup.getRefs().trim()}
-								{@const secondaryRefs=thePerGroup.getSecondaryRefs().trim()}
-								{@const allRefs=thePerGroup.getRefs([],true)}
+						{#key paginatedFilteredPerGroups && myOptions.viewOptions.page}
+							{#if myOptions.viewOptions.refsOnly}
+								<div class="text-left center norefs-table-div inline-block rounded-2xl! p-5! mt-2">
+									<!--<ul >-->
 
-								
-										<tr class={i> 0 ? ['border-t-1', 'border-slate-500']: []}>
-											<td colspan="2" class="pt-2 align-top" ><u><b>{thePerGroup.title}</b>.</u>
-										<CopyText tooltip="Combine and copy all group references (primary and secondary) to the clipboard."
-												copyText={allRefs}
-												svgStyle="filter: opacity(0.6);"
-												btnSizeCssClass='btn-xs'
-												height={16}
-												width={16}/>
-										</td>	
-										</tr>
-										<tr>
-											<td><i><CopyText copyText={primaryRefs} 
-												linkText={'Primary:'}
-												tooltip="Copy primary references to the clipboard."
-												
-												buttonTypeClass=" btn btn-xs btn-ghost"
-												showButton={false}						/>
-												</i> </td>
-												<td>{primaryRefs}<CopyText tooltip="Copy primary references to the clipboard."
-												copyText={primaryRefs}
-												svgStyle="filter: opacity(0.6);"
-												btnSizeCssClass='btn-xs'
-												height={12}
-												width={12}/></td>
-										</tr>
-										
-										{#if secondaryRefs}
-										
-										<tr>
-											<td>
-												<i><CopyText copyText={secondaryRefs} 
-												linkText='Secondary:'
-												tooltip="Copy secondary references to the clipboard."
-												
-												buttonTypeClass="btn btn-xs btn-ghost"
-												showButton={false}						/>
-												</i> 
+									<table class="norefs-table">
+										<tbody>
+											{#each perGroups as thePerGroup, i}
+												{@const primaryRefs = thePerGroup.getRefs().trim()}
+												{@const secondaryRefs = thePerGroup.getSecondaryRefs().trim()}
+												{@const allRefs = thePerGroup.getRefs([], true)}
 
-											</td>
-											<td>
-												{secondaryRefs}<CopyText tooltip="Copy secondary references to the clipboard."
-												copyText={secondaryRefs}
-												svgStyle="filter: opacity(0.6);"
-												btnSizeCssClass='btn-xs'
-												height={12}
-												width={12}/> 
-											</td>
-										</tr>
-										{/if}
-								
-							{/each}
-									</tbody>
+												<tr class={i > 0 ? ['border-t-1', 'border-slate-500'] : []}>
+													<td colspan="2" class="pt-2 align-top"
+														><u><b>{thePerGroup.title}</b>.</u>
+														<CopyText
+															tooltip="Combine and copy all group references (primary and secondary) to the clipboard."
+															copyText={allRefs}
+															svgStyle="filter: opacity(0.6);"
+															btnSizeCssClass="btn-xs"
+															height={16}
+															width={16}
+														/>
+													</td>
+												</tr>
+												<tr>
+													<td
+														><i
+															><CopyText
+																copyText={primaryRefs}
+																linkText={'Primary:'}
+																tooltip="Copy primary references to the clipboard."
+																buttonTypeClass=" btn btn-xs btn-ghost"
+																showButton={false}
+															/>
+														</i>
+													</td>
+													<td
+														>{primaryRefs}<CopyText
+															tooltip="Copy primary references to the clipboard."
+															copyText={primaryRefs}
+															svgStyle="filter: opacity(0.6);"
+															btnSizeCssClass="btn-xs"
+															height={12}
+															width={12}
+														/></td
+													>
+												</tr>
 
-								</table>
-							<!--</ul>-->
-
-							</div>
-							
-						{:else if (paginatedFilteredPerGroups[myOptions.viewOptions.page] && paginatedFilteredPerGroups[myOptions.viewOptions.page].length && paginatedFilteredPerGroups[myOptions.viewOptions.page].reduce((a, b) => a && b.populated, true))}
-							{@render pageNav()}
-							{#each paginatedFilteredPerGroups[myOptions.viewOptions.page] as group, index}
-								<!--<hr class="mb-2 !border-slate-200" />-->
-								<div class="anchor text-center section-heading {index == 0 ? 'first': ''}" id="section-{group.id}">
-									<div class="float-right mr-2 break-after-all">
-									<a
-										href=""
-										class=""
-										title="Jump to section"
-										onclick={() => {
-											viewStates.views.sections.state = true;
-										}}><BulletsIcons height={20} width={20} /></a
+												{#if secondaryRefs}
+													<tr>
+														<td>
+															<i
+																><CopyText
+																	copyText={secondaryRefs}
+																	linkText="Secondary:"
+																	tooltip="Copy secondary references to the clipboard."
+																	buttonTypeClass="btn btn-xs btn-ghost"
+																	showButton={false}
+																/>
+															</i>
+														</td>
+														<td>
+															{secondaryRefs}<CopyText
+																tooltip="Copy secondary references to the clipboard."
+																copyText={secondaryRefs}
+																svgStyle="filter: opacity(0.6);"
+																btnSizeCssClass="btn-xs"
+																height={12}
+																width={12}
+															/>
+														</td>
+													</tr>
+												{/if}
+											{/each}
+										</tbody>
+									</table>
+									<!--</ul>-->
+								</div>
+							{:else if paginatedFilteredPerGroups[myOptions.viewOptions.page] && paginatedFilteredPerGroups[myOptions.viewOptions.page].length && paginatedFilteredPerGroups[myOptions.viewOptions.page].reduce((a, b) => a && b.populated, true)}
+								{@render pageNav()}
+								{#each paginatedFilteredPerGroups[myOptions.viewOptions.page] as group, index}
+									<!--<hr class="mb-2 !border-slate-200" />-->
+									<div
+										class="anchor text-center section-heading {index == 0 ? 'first' : ''}"
+										id="section-{group.id}"
 									>
-									{#if index > 0}
-										<a
-											href="#section-{paginatedFilteredPerGroups[myOptions.viewOptions.page][
-												index - 1
-											].id}"
-											title="Previous"><ArrowUp height={20} width={20} /></a
-										>{/if}
-									{#if paginatedFilteredPerGroups[myOptions.viewOptions.page] && index < paginatedFilteredPerGroups[myOptions.viewOptions.page].length - 1}
-										<a
-											href="#section-{paginatedFilteredPerGroups[myOptions.viewOptions.page][
-												index + 1
-											].id}"
-											class="break-after-all"
-											title="Next"><ArrowDown height={20} width={20} /></a
-										>{/if}
-									<a href="#" class="inline" title="Top"><ArrowTop height={20} width={20} /></a>
-								</div>
-									<h2 class="inline-block">
-										<u><b>{group.title}:</b></u><br />
-										{group.getRefs()}<CopyText
-											copyText={group.getRefs()}
-											tooltip="Copy parallel group references"
-											svgStyle="filter: opacity(0.7);"
+										<div class="float-right mr-2 break-after-all">
+											<a
+												href=""
+												class=""
+												title="Jump to section"
+												onclick={() => {
+													viewStates.views.sections.state = true;
+												}}><BulletsIcons height={20} width={20} /></a
+											>
+											{#if index > 0}
+												<a
+													href="#section-{paginatedFilteredPerGroups[myOptions.viewOptions.page][
+														index - 1
+													].id}"
+													title="Previous"><ArrowUp height={20} width={20} /></a
+												>{/if}
+											{#if paginatedFilteredPerGroups[myOptions.viewOptions.page] && index < paginatedFilteredPerGroups[myOptions.viewOptions.page].length - 1}
+												<a
+													href="#section-{paginatedFilteredPerGroups[myOptions.viewOptions.page][
+														index + 1
+													].id}"
+													class="break-after-all"
+													title="Next"><ArrowDown height={20} width={20} /></a
+												>{/if}
+											<a href="#" class="inline" title="Top"><ArrowTop height={20} width={20} /></a>
+										</div>
+										<h2 class="inline-block">
+											<u><b>{group.title}:</b></u><br />
+											{group.getRefs()}<CopyText
+												copyText={group.getRefs()}
+												tooltip="Copy parallel group references"
+												svgStyle="filter: opacity(0.7);"
+											/>
+										</h2>
+
+										<h3>
+											{#if group.lexIdenticalPhrasesLocations.length > 0}
+												<!-- (TODO: remove) Got some phrases: {group.lexIdenticalPhrasesLocations} -->
+											{:else}{/if}
+										</h3>
+									</div>
+
+									<div class="section-content">
+										<ParallelGospelSection
+											parGroup={group}
+											options={myOptions}
+											focus={focused}
+											{wordClick}
+											{enableSecondary}
+											{enableOther}
+											cssClassDict={lexClasses}
+											{selectedLexes}
+											cssCustomDict={customGreekClasses}
+											showNotes={currentServer.showNotes}
+											showNotesFunction={displayNote}
+											{selectedGreekPalette}
+											ignoreWordsIds={currentServer.ignoreWordIds}
 										/>
-									</h2>
-
-									<h3>
-										{#if group.lexIdenticalPhrasesLocations.length > 0}
-											<!-- (TODO: remove) Got some phrases: {group.lexIdenticalPhrasesLocations} -->
-										{:else}{/if}
-									</h3>
-
-								</div>
-
-								<div class="section-content">
-									<ParallelGospelSection
-										parGroup={group}
-										options={myOptions}
-										focus={focused}
-										{wordClick}
-										{enableSecondary}
-										{enableOther}
-										cssClassDict={lexClasses}
-										{selectedLexes}
-										cssCustomDict={customGreekClasses}
-										showNotes={currentServer.showNotes}
-										showNotesFunction={displayNote}
-										{selectedGreekPalette}
-										ignoreWordsIds={currentServer.ignoreWordIds}
-									/>
-								</div>
-							{/each}
-							{@render pageNav()}
-						{:else if paginatedFilteredPerGroups[myOptions.viewOptions.page] && !paginatedFilteredPerGroups[myOptions.viewOptions.page].reduce((a, b) => a && b.populated, true)}
-							<Loading message={[]} title="Populating data..." />
-						{:else}
-							(No results. Try <a href="" data-sveltekit-reload>another search</a
-							>{#if myOptions.viewOptions.hideNonPrimary || myOptions.viewOptions.focusOn || myOptions.viewOptions.hideSolos},
-								or change the <a
-									href=""
-									onclick={() => {
-										viewStates.toggle('view');
-									}}>View Options</a
-								>{/if}.)
-						{/if}
-					{/key}
-				{/if}
-			{:else}
-			<!--<div style="background-image: url('{ScribesImage}');" class="w-full h-full bg-black"></div>-->
-			<div id="scribes-loading-container" style="--scribes-image: url('{ScribesImage}');" >
-				<div id="scribes-loading-element">
-				<Loading title="Results loading..." 
-				
-				message={['Please wait while our digital scribes gather the texts...']}
-				
-				
-				 />
-				 </div>
-			</div>
-			{/if}
-		</div>
-	{:else}
-		<div id="no-results-message" class="text-center" >
-			<i class="m-auto"
-				>Results will show up here.
-				{#if !viewStates.views.lookup.state && !landingPage}<a
-						class="link hover:text-blue-700"
-						href="#"
-						onclick={() => {
-							viewStates.views.lookup.state = true;
-						}}>Search for a text or select a section.</a
-					>
+									</div>
+								{/each}
+								{@render pageNav()}
+							{:else if paginatedFilteredPerGroups[myOptions.viewOptions.page] && !paginatedFilteredPerGroups[myOptions.viewOptions.page].reduce((a, b) => a && b.populated, true)}
+								<Loading message={[]} title="Populating data..." />
+							{:else}
+								(No results. Try <a href="" data-sveltekit-reload>another search</a
+								>{#if myOptions.viewOptions.hideNonPrimary || myOptions.viewOptions.focusOn || myOptions.viewOptions.hideSolos},
+									or change the <a
+										href=""
+										onclick={() => {
+											viewStates.toggle('view');
+										}}>View Options</a
+									>{/if}.)
+							{/if}
+						{/key}
+					{/if}
 				{:else}
-					Search for a text or select a section above.
+					<!--<div style="background-image: url('{ScribesImage}');" class="w-full h-full bg-black"></div>-->
+					<div id="scribes-loading-container" style="--scribes-image: url('{ScribesImage}');">
+						<div id="scribes-loading-element">
+							<Loading
+								title="Results loading..."
+								message={['Please wait while our digital scribes gather the texts...']}
+							/>
+						</div>
+					</div>
 				{/if}
-			</i>
-		</div>
-	{/if}
-</div>
+			</div>
+		{:else}
+			<div id="no-results-message" class="text-center">
+				<i class="m-auto"
+					>Results will show up here.
+					{#if !viewStates.views.lookup.state && !landingPage}<a
+							class="link hover:text-blue-700"
+							href="#"
+							onclick={() => {
+								viewStates.views.lookup.state = true;
+							}}>Search for a text or select a section.</a
+						>
+					{:else}
+						Search for a text or select a section above.
+					{/if}
+				</i>
+			</div>
+		{/if}
+	</div>
 </div>
 {#if dataReady}
 	<Modal2 bind:showModal={viewStates.views.sections.state}>
@@ -1790,7 +1816,6 @@
 			bind:selected={myOptions.viewOptions.sort}
 			disable={!gospelParallels.gospels.isValid(selectedGospel)}
 			buttonText="Sort"
-			
 			tooltip="Sort according to the selected gospel's order."
 		/>
 		<ButtonSelect
@@ -2104,34 +2129,28 @@
 
 <style>
 	@reference "tailwindcss";
-	#nt-synopsis-panel{
-		--mybg-content: var(--bg-content,rgb(247, 245, 255));
-		
-		--text-color: #080700;
+	#nt-synopsis-panel {
+		--mybg-content: var(--bg-content, rgb(247, 245, 255));
 
+		--text-color: #080700;
 	}
 
-	
-	.select-pericopes-wrapper{
-/*		max-width: calc(var(--sv-dropdown-width) + 1rem);*/
+	.select-pericopes-wrapper {
+		/*		max-width: calc(var(--sv-dropdown-width) + 1rem);*/
 	}
 	div {
 		/*color: var(--text-color);*/
 	}
 	#results {
 		/*@apply bg-white;*/
-
 	}
 
-	#results-container{
+	#results-container {
 		/*background-color: rgba(255,255,255,0.4);*/
 		/*background-color: var(--mybg-content), transparency(0.4);*/
 		@apply shadow-amber-300;
 		/*background-color: color-mix(in srgb, var(--mybg-content) 70%, transparent 30%);*/
-		
-
 	}
-	
 
 	hr {
 		@apply border-slate-400 m-2;
@@ -2147,8 +2166,8 @@
 		@apply md:-mt-30 md:pt-40 -mt-20 pt-30;
 	}
 
-	.anchor.first{
-		@apply -mt-5 pt-20 ;
+	.anchor.first {
+		@apply -mt-5 pt-20;
 	}
 
 	select {
@@ -2177,72 +2196,69 @@
 		background-color: darkgrey;
 		text-align: center;
 	}
-	.center-block{
-		@apply  m-auto block self-center rounded-xl shadow-2xl;
+	.center-block {
+		@apply m-auto block self-center rounded-xl shadow-2xl;
 		background-color: var(--bg-content);
 		color: var(--text-color);
-
 	}
-	.norefs-table-div{
+	.norefs-table-div {
 		/*background-color: var(--bg-content,white);*/
-		background-color: color-mix(in srgb, var(--secondary-bg,white) 80%, transparent);
-		
+		background-color: color-mix(in srgb, var(--secondary-bg, white) 80%, transparent);
 	}
 
-	.norefs-table td{
-		@apply align-top;		
+	.norefs-table td {
+		@apply align-top;
 	}
-	#title-panel{
-		background-color: var(--bg-content,white);
+	#title-panel {
+		background-color: var(--bg-content, white);
 	}
-	#results h1{
-		background-color: color-mix(in srgb, var(--bg-content) 80%, transparent );
+	#results h1 {
+		background-color: color-mix(in srgb, var(--bg-content) 80%, transparent);
 	}
-	.options-dropdown{
+	.options-dropdown {
 		background-color: var(--bg-content);
 	}
 
-	#scribes-loading::before{
-		content:"HERE WE ARE!";
+	#scribes-loading::before {
+		content: 'HERE WE ARE!';
 	}
-#scribes-loading-container{
-	/*background-color: var(--bg-content);*/
-	display: block;
-	position:absolute;
-	background-image: var(--scribes-image);
-	background-size:cover; 
-	@apply absolute left-0 top-0 w-full h-full;
-	background-repeat: no-repeat; 
-	background-position: center; 
-	/*
+	#scribes-loading-container {
+		/*background-color: var(--bg-content);*/
+		display: block;
+		position: absolute;
+		background-image: var(--scribes-image);
+		background-size: cover;
+		@apply absolute left-0 top-0 w-full h-full;
+		background-repeat: no-repeat;
+		background-position: center;
+		/*
 	'background-size:cover; background-repeat: no-repeat; background-position: center; background-image: url(' + loadingBackground + ');' : '')
 + (width ? 'width: ' + width  : '') + ";" 
 + (height? 'height: ' + height : '') + ";" 
 + (minHeight? 'min-height: ' + minHeight : '') + ";" 
 + (!height && minHeight ? 'height: ' + minHeight:'')*/
-}
+	}
 
-#scribes-loading-element{
-	@apply inline-block m-auto self-center text-center items-center;
-	/*background-color: var(--bg-content);	*/
-}
-.navbar{
-	@apply  shadow-sm text-center min-h-12;
-}
-#no-results-message{
-	background-color: color-mix(var(--bg-content) 70%, transparent 30%);
+	#scribes-loading-element {
+		@apply inline-block m-auto self-center text-center items-center;
+		/*background-color: var(--bg-content);	*/
+	}
+	.navbar {
+		@apply shadow-sm text-center min-h-12;
+	}
+	#no-results-message {
+		background-color: color-mix(var(--bg-content) 70%, transparent 30%);
 
-	@apply rounded-xl shadow-2xl inline-block p-2;
-}
-.section-heading{
-	
-	border-radius: 5rem 5rem 0 0;
-}
+		@apply rounded-xl shadow-2xl inline-block p-2;
+	}
+	.section-heading {
+		border-radius: 5rem 5rem 0 0;
+	}
 
-.sv-input--sizer{
-	@apply min-w-10!;
-}
-#select-section{
-	max-width: 200px;
-}
+	.sv-input--sizer {
+		@apply min-w-10!;
+	}
+	#select-section {
+		max-width: 200px;
+	}
 </style>
