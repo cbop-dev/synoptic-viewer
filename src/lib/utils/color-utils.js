@@ -168,125 +168,103 @@ class ColorUtils{
      * @param {number} [contrastThreshold=7] 
      * @returns {{bg:string,font:string,border:string}[]} an array of css oklab color values 'bg','font',and optionally 'border': {bg:'oklab(0.3,0.5,0.6), font:'oklab(1,0,0), border: 'oklab(0.8,0.5,0.6'}
      */
-    static myColorPalette(size,sFactor=1,lFactor=0,contrastThreshold=7,alternateSaturation=false){
-        const theColorPoints2= {
-            simple:['red','orange','yellow', 'green', 'blue','violet'],
-            10: ['navy','green','yellow','red'],
-            20: ['navy','coral','green','red','chartreuse','teal','hotpink','yellow'],
-            long:['#300','#040','#005','#800','#080','#008','#f00','#0f0','#00f','#f88','#8f8','#88f'],
-            short:['#f00','#0f0','#00f'],
-            first: ['red','yellow','green','blue'],
-            second: ['#700','#770','#070','#077','#007'],
-            third: ['#d36','#ea3','#4e7','#5dc','#84b'],
-            fourth: ['#e8a','#fe0','#af8','#3bf','#c0f'],
-        }
+    /**
+     * Master set of maximally distinct colors, ordered so that adjacent indices
+     * have maximum visual perceptual distance (Delta E) to the human eye.
+     */
+    static MASTER_DISTINCT_COLORS = [
+        '#e6194b', // 0: Red
+        '#4363d8', // 1: Blue
+        '#3cb44b', // 2: Green
+        '#f58231', // 3: Orange
+        '#911eb4', // 4: Purple
+        '#ffe119', // 5: Yellow
+        '#008080', // 6: Teal
+        '#f032e6', // 7: Magenta
+        '#bcf60c', // 8: Lime
+        '#800000', // 9: Maroon
+        '#46f0f0', // 10: Cyan
+        '#9a6324', // 11: Brown
+        '#e6beff', // 12: Lavender
+        '#000075', // 13: Navy
+        '#fabebe', // 14: Pink
+        '#808000', // 15: Olive
+        '#ffd8b1', // 16: Apricot
+        '#aaffc3', // 17: Mint
+        '#d8b4e2', // 18: Plum
+        '#a9a9a9'  // 19: Slate
+    ];
 
-        const theColorPoints3= [['red','yellow','green','blue'],
-            ['#700','#770','#070','#077','#007'],
-            ['#d36','#ea3','#4e7','#5dc','#84b'],
-            ['#e8a','#fe0','#af8','#3bf','#c0f']];
-    
-        const theColorPoints= [
-            ['red','#ff0','green','#0ff','blue'], 
-            ['#603','#074','#007'],
-            ['#d36','#ea3','#4e7','#85d']
+    /**
+     * Generates a color palette where neighboring colors (i and i+1) are maximally
+     * distinct to the human eye, suitable for textual phrase match highlighting.
+     * 
+     * @param {number} size Number of colors to generate
+     * @param {number} [sFactor=1] Saturation adjustment factor
+     * @param {number} [lFactor=0] Lightness adjustment factor
+     * @param {number} [contrastThreshold=4.5] Minimum WCAG contrast threshold (default 4.5)
+     * @param {boolean} [alternateSaturation=false] Whether to alternate saturation
+     * @returns {{bg:string,font:string,border:string}[]} Array of color objects
+     */
+    static myColorPalette(size, sFactor=1, lFactor=0, contrastThreshold=4.5, alternateSaturation=false) {
+        if (!size || size <= 0) return [];
 
+        // Effective threshold for background highlights (cap at 4.5 to avoid washing out vivid hues)
+        const targetContrast = Math.min(contrastThreshold, 4.5);
 
-            //['red','#ff0','green','#0ff','blue'],
-            //['#700','#770','#070','#077','#007'],
-            //['#d36','#ea3','#4e7','#5dc','#84b'],
-        //    ['#e8a','#fe0','#af8','#3bf','#c0f']
-           // ['#d36','#ea3','#4e7','#5dc','#85d']
-        ];
-    
+        return Array.from({ length: size }, (_, i) => {
+            let bgColor;
 
+            if (i < ColorUtils.MASTER_DISTINCT_COLORS.length) {
+                bgColor = chroma(ColorUtils.MASTER_DISTINCT_COLORS[i]);
+            } else {
+                // Golden angle hue dispersion (137.50776 deg) for size > 20
+                const hue = (15 + i * 137.50776) % 360;
+                // Alternate lightness & chroma between adjacent items for maximum distinction
+                const L = 65 + 14 * (i % 2 === 0 ? 1 : -1);
+                const C = 55 + 15 * ((i % 3) - 1);
+                bgColor = chroma.lch(L, C, hue);
+            }
 
+            if (lFactor) {
+                bgColor = bgColor.brighten(lFactor);
+            }
 
-        function getColorPoints(num){
-            
-        }
-        //.mode('lch')
-        //const generator=  chroma.scale(theColorPoints.simple).mode('lch').domain([0,size]).classes(size);
-        const batchSize = 8;
-        const numRowsToGet = size / batchSize > theColorPoints.length ?   theColorPoints.length : Math.floor(size / batchSize)+1;
-       
-       const colorArray = [...theColorPoints.entries().filter(([i,item])=>i<numRowsToGet).map(([i,item])=>item)].flat();
-       //mylog(`colorArray=${colorArray.join(',')}`,true)
-       
-        /* const colorArray = size > batchSize*3 ? 
-                            [...theColorPoints.first,...theColorPoints.second,...theColorPoints.third,...theColorPoints.fourth]
-                            :
-                            size > batchSize*2 ?
-                                [...theColorPoints.first,...theColorPoints.second,...theColorPoints.third]
-                                :
-                                size > batchSiztheColorPoints.first
-         */                   
-//        const generator=  chroma.scale(colorArray).mode('hsl').domain([0,size]);
-        //const generator=  chroma.scale(theColorPoints2.simple).mode('lch').domain([0,size]).classes(size);      
-        const generator=  chroma.scale(colorArray).mode('lch').domain([0,size]).classes(size);      
-        
-        //const rotations = -1.1 -(Math.floor(size /12));  
-        //const generator = chroma.cubehelix().lightness([0.1,0.8]).hue(4).rotations(rotations).scale().mode('lch').domain([0,size]).classes(size);
-        return MathUtils.range(size,0).map((i)=>{
-            let ret={bg:'',font:'',border:''};
-            //mylog('=asdf;lkjasdf==========================',true);
-                let bgColor =generator(i);
-                if(lFactor){
-                    bgColor=bgColor.brighten(lFactor);
+            if (sFactor && sFactor !== 1) {
+                if (!alternateSaturation || (alternateSaturation && i % 2 === 0)) {
+                    bgColor = bgColor.saturate(sFactor - 1);
                 }
-                //bgColor=bgColor.darken();
-                if(sFactor && (!alternateSaturation || (alternateSaturation && i%2==0))){
-                    const newColor=bgColor.saturate(sFactor);
-//                    mylog(`saturated from ${bgColor.hex()} to ${newColor.hex()}`,true);
-                    bgColor=newColor;
+            }
+
+            // Determine contrast against white and black
+            const whiteContrast = chroma.contrast(bgColor, 'white');
+            const blackContrast = chroma.contrast(bgColor, 'black');
+            let fontColor = whiteContrast > blackContrast ? 'white' : 'black';
+            const maxContrast = Math.max(whiteContrast, blackContrast);
+
+            // Adjust background color if contrast falls below effective target threshold
+            if (maxContrast < targetContrast) {
+                if (fontColor === 'white') {
+                    bgColor = ColorUtils.increaseBgContrast(bgColor, chroma('white'), targetContrast);
+                } else {
+                    bgColor = ColorUtils.increaseBgContrast(bgColor, chroma('black'), targetContrast);
                 }
-                //const [r,g,b]=bgColor.rgb()
-                
-                
-                
-                const contrasts = {white: chroma.contrast(bgColor,'white'), black: chroma.contrast(bgColor,'black')};
-               // const contrastThreshold=7;
-                if (contrasts.white < contrastThreshold && contrasts.black < contrastThreshold){
-                    //need to increase the contrast by changing the color.
-                    if (contrasts.white > contrasts.black){
-                        //we're sticking with white font, which means we need to darken the background color:
-                        bgColor=ColorUtils.increaseBgContrast(bgColor,chroma('white'),contrastThreshold)
-                        ret.font='white';
-                    }
-                    else{
-                        //using black font, thus we'll make the background lighter:
-                        bgColor=ColorUtils.increaseBgContrast(bgColor,chroma('black'),contrastThreshold)
-                        ret.font='black';
-                    }
-                }
-                else {
-                    if (contrasts.white > contrasts.black){
-                        ret.font='white';
-                    }
-                    else{
-                        ret.font='black;'
-                    }
-                }
-                const [h,s,l]=bgColor.hsl();
-                ret.bg=`hsl(${Math.round(h ? h : 0)},${Math.round(s*100)}%,${Math.round(l*100)}%)`;
-                
-                const [r,g,b] = true || bgColor.luminance() > 0.5 ?
-                      bgColor.darken(2).saturate(2).rgb()
-                     :bgColor.brighten(2).saturate(1).rgb();
-                
-                /**false ||!alternateSaturation || i%2==0 ? 
-                    bgColor.darken(1).saturate(3).rgb() : 
-                    bgColor.brighten(2).saturate(2).rgb();
-                    //bgColor.darken(2).desaturate(3).rgb();
-                
-                */
-                //ret.font= bgColor.luminance() <0.5 ? 'white' : 'black';
-                ret.border=`rgb(${r},${g},${b})`;
-              //  mylog(`got colors:${ret.bg},${ret.font},${ret.border}`, true);
-            return ret;
-        })
-        //return //chroma.scale(['yellow', 'navy', 'red']).mode('lab').classes(size);
-        
+            }
+
+            const [h, s, l] = bgColor.hsl();
+            const bgStr = `hsl(${Math.round(h || 0)}, ${Math.round((s || 0) * 100)}%, ${Math.round((l || 0) * 100)}%)`;
+
+            // Border color: slightly darkened and saturated version of background
+            const borderCol = bgColor.darken(1.2).saturate(0.5);
+            const [br, bg_g, bb] = borderCol.rgb();
+            const borderStr = `rgb(${Math.round(br)}, ${Math.round(bg_g)}, ${Math.round(bb)})`;
+
+            return {
+                bg: bgStr,
+                font: fontColor,
+                border: borderStr
+            };
+        });
     }
 
 
