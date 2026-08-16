@@ -169,35 +169,35 @@ class ColorUtils{
      * @returns {{bg:string,font:string,border:string}[]} an array of css oklab color values 'bg','font',and optionally 'border': {bg:'oklab(0.3,0.5,0.6), font:'oklab(1,0,0), border: 'oklab(0.8,0.5,0.6'}
      */
     /**
-     * Master set of maximally distinct colors, ordered so that adjacent indices
-     * have maximum visual perceptual distance (Delta E) to the human eye.
+     * Helper to compute greatest common divisor.
      */
-    static MASTER_DISTINCT_COLORS = [
-        '#e6194b', // 0: Red
-        '#4363d8', // 1: Blue
-        '#3cb44b', // 2: Green
-        '#f58231', // 3: Orange
-        '#911eb4', // 4: Purple
-        '#ffe119', // 5: Yellow
-        '#008080', // 6: Teal
-        '#f032e6', // 7: Magenta
-        '#bcf60c', // 8: Lime
-        '#800000', // 9: Maroon
-        '#46f0f0', // 10: Cyan
-        '#9a6324', // 11: Brown
-        '#e6beff', // 12: Lavender
-        '#000075', // 13: Navy
-        '#fabebe', // 14: Pink
-        '#808000', // 15: Olive
-        '#ffd8b1', // 16: Apricot
-        '#aaffc3', // 17: Mint
-        '#d8b4e2', // 18: Plum
-        '#a9a9a9'  // 19: Slate
-    ];
+    static _gcd(a, b) {
+        while (b) {
+            const t = b;
+            b = a % b;
+            a = t;
+        }
+        return a;
+    }
 
     /**
-     * Generates a color palette where neighboring colors (i and i+1) are maximally
-     * distinct to the human eye, suitable for textual phrase match highlighting.
+     * Helper to find optimal coprime stride for size N (~0.382 * N).
+     */
+    static _getOptimalStride(n) {
+        if (n <= 3) return 1;
+        const target = Math.round(n * 0.381966);
+        for (let offset = 0; offset < n; offset++) {
+            const s1 = target + offset;
+            if (s1 < n && ColorUtils._gcd(s1, n) === 1) return s1;
+            const s2 = target - offset;
+            if (s2 > 0 && ColorUtils._gcd(s2, n) === 1) return s2;
+        }
+        return 1;
+    }
+
+    /**
+     * Generates a color palette where ALL pairs of colors (and especially neighboring
+     * colors i and i+1) are maximally distinct to the human eye for any given size N.
      * 
      * @param {number} size Number of colors to generate
      * @param {number} [sFactor=1] Saturation adjustment factor
@@ -209,52 +209,42 @@ class ColorUtils{
     static myColorPalette(size, sFactor=1, lFactor=0, contrastThreshold=4.5, alternateSaturation=false) {
         if (!size || size <= 0) return [];
 
-        // Effective threshold for background highlights (cap at 4.5 to avoid washing out vivid hues)
         const targetContrast = Math.min(contrastThreshold, 4.5);
+        const stride = ColorUtils._getOptimalStride(size);
 
         return Array.from({ length: size }, (_, i) => {
-            let bgColor;
+            // Map index i to a coprime-stride position k to disperse adjacent hues
+            const k = (i * stride) % size;
 
-            if (i < ColorUtils.MASTER_DISTINCT_COLORS.length) {
-                bgColor = chroma(ColorUtils.MASTER_DISTINCT_COLORS[i]);
-            } else {
-                // Golden angle hue dispersion (137.50776 deg) for size > 20
-                const hue = (15 + i * 137.50776) % 360;
-                // Alternate lightness & chroma between adjacent items for maximum distinction
-                const L = 65 + 14 * (i % 2 === 0 ? 1 : -1);
-                const C = 55 + 15 * ((i % 3) - 1);
-                bgColor = chroma.lch(L, C, hue);
-            }
+            // Partition 360 degrees into size equal hue slices
+            const baseHue = (15 + (360 * k) / size) % 360;
 
+            // Alternate lightness and chroma across items for multi-dimensional contrast
+            let L = 64 + 14 * (i % 2 === 0 ? -1 : 1);
+            let C = 55 + 10 * (i % 3 === 0 ? 1 : -1);
+
+            // Apply lFactor and sFactor smoothly in LCH space if provided
             if (lFactor) {
-                bgColor = bgColor.brighten(lFactor);
+                L = Math.min(88, L + lFactor * 4);
             }
-
             if (sFactor && sFactor !== 1) {
                 if (!alternateSaturation || (alternateSaturation && i % 2 === 0)) {
-                    bgColor = bgColor.saturate(sFactor - 1);
+                    C = Math.max(25, Math.min(85, C * sFactor));
                 }
             }
 
-            // Determine contrast against white and black
-            const whiteContrast = chroma.contrast(bgColor, 'white');
-            const blackContrast = chroma.contrast(bgColor, 'black');
-            let fontColor = whiteContrast > blackContrast ? 'white' : 'black';
-            const maxContrast = Math.max(whiteContrast, blackContrast);
+            let bgColor = chroma.lch(L, C, baseHue);
 
-            // Adjust background color if contrast falls below effective target threshold
-            if (maxContrast < targetContrast) {
-                if (fontColor === 'white') {
-                    bgColor = ColorUtils.increaseBgContrast(bgColor, chroma('white'), targetContrast);
-                } else {
-                    bgColor = ColorUtils.increaseBgContrast(bgColor, chroma('black'), targetContrast);
-                }
-            }
+            // Determine font color: cool dark hues (blue, purple, violet, dark teal: 180-330 deg)
+            // switch to white when L* < 60, while warm hues (red, orange, yellow) keep black font unless very dark (L* < 45).
+            const labL = bgColor.lab()[0];
+            const isCoolHue = baseHue >= 180 && baseHue <= 330;
+            const fontColor = (labL < (isCoolHue ? 60 : 45)) ? 'white' : 'black';
 
             const [h, s, l] = bgColor.hsl();
             const bgStr = `hsl(${Math.round(h || 0)}, ${Math.round((s || 0) * 100)}%, ${Math.round((l || 0) * 100)}%)`;
 
-            // Border color: slightly darkened and saturated version of background
+            // Border color: darkened and slightly saturated version of background
             const borderCol = bgColor.darken(1.2).saturate(0.5);
             const [br, bg_g, bb] = borderCol.rgb();
             const borderStr = `rgb(${Math.round(br)}, ${Math.round(bg_g)}, ${Math.round(bb)})`;

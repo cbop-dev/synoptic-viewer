@@ -434,66 +434,44 @@
 
 	.word.lexical,
 	.word.exact {
-		border-color: var(--borderColor, black);
+		border-color: var(--borderColor, currentColor);
 	}
-
-	/* .hide-similar .lexical{
-        @apply bg-transparent;
-    }*/
 
 	:not(.hide-similar) .lexical {
 		@apply border-t-3 border-b-3;
 	}
 
 	:not(.hide-similar) .word.lexical:not(.selected) {
-		background-color: hsl(from var(--bgColor, black) h s l / 60%);
-		/*background-color: hsl(from var(--bgColor, black) h s l / 40%);*/
-		/* color: black; /*hsl(var(--fontColor,black) h s 0.3 / 60%);*/
-		text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.3);
-		border-color: var(--borderColor, white);
-		/*color: black;*/
-		color: var(--fontColor, white);
+		background-color: var(--bgColor, transparent);
+		color: var(--fontColor, inherit);
+		border-color: var(--borderColor, currentColor);
 	}
 
 	.show-exact .word.exact {
-		/*background-color: color-mix(var(--bgColor, white 50%) 50%,transparent 50%) !important;*/
-		/*background-color: var(--bgColor, transparent) !important;*/
-		background-color: hsl(from var(--bgColor, white) h 90 l / 90%);
-		color: var(--fontColor, default);
-
-		/*border-color: color-mix(var(--borderColor, black),transparent);*/
-		border-color: black 90% !important;
-		text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.3);
-		@apply border-t-3 border-b-3  font-bold;
-		/*color: var(--fontColor,default);*/
+		background-color: var(--bgColor, transparent);
+		color: var(--fontColor, inherit);
+		border-color: var(--borderColor, currentColor) !important;
+		@apply border-t-3 border-b-3 font-bold;
 	}
 
 	:not(.hide-similar) .word.lexical.ignore {
-		background-color: hsl(from var(--bgColor, black) h s l / 20%);
-		/*color: var(--fontColor,default);*/
+		background-color: color-mix(in srgb, var(--bgColor, transparent) 30%, transparent);
+		color: var(--fontColor, inherit);
 	}
 
 	.word.selected {
-		background-color: color-mix(var(--bgColor, transparent) 80%, transparent);
-		text-shadow: 1px 1px 1px hsl(from var(--fontColor) h s l / 50%);
-		color: var(--fontColor, default);
+		background-color: var(--bgColor, transparent);
+		color: var(--fontColor, inherit);
 	}
 
 	:not(.hide-similar).show-exact .word.exact {
-		text-decoration: underline var(--fontColor, black);
+		text-decoration: underline var(--fontColor, currentColor);
 	}
-
-	/*.hide-similar.show-exact :not(.selected-lex).word.exact{
-     
-        border-color: var(--borderColor,black) !important;
-        border-top-color: var(--bgColor,black) !important;
-        
-    }*/
 
 	.show-exact .highlighted-exact,
 	.bible-block:not(.hide-similar) .highlighted-lexical {
-		background: white !important;
-		color: black !important;
+		background-color: #ffffff !important;
+		color: #000000 !important;
 	}
 	/*background-color: hsl(from var(--bgColor,white) h s l /30%);*/
 </style>

@@ -51,8 +51,8 @@ import { ColorUtils } from "$lib/utils/color-utils";
     }
 
     button.customVars{
-      background-color: var(--bgColor,default);
-      color: var(--fontColor,default);
+      background-color: var(--bgColor, inherit);
+      color: var(--fontColor, inherit);
 
     }
   </style>
