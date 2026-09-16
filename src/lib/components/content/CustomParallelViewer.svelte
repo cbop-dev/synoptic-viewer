@@ -667,7 +667,7 @@
 
 		opt.request.tab = 1;
 
-		const baseurl = window.location.protocol + '//' + window.location.pathname;
+		indow.location.protocol + '//' + window.location.host + window.location.pathname + '/';
 		return baseurl + opt.generateURI();
 	}
 

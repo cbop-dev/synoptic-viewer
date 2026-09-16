@@ -1027,7 +1027,8 @@
 	function makeURL() {
 		myOptions.request.pericopes = alandPericopeNums;
 		//    myLog.log("MakeURL: about to call generateURL()!")
-		const baseurl = window.location.protocol + '//' + window.location.host + '/';
+		const baseurl =
+			window.location.protocol + '//' + window.location.host + window.location.pathname + '/';
 		return baseurl + myOptions.generateURI();
 	}
 
