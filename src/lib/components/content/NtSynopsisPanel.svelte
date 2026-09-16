@@ -1556,7 +1556,7 @@
 					{#if fetchedTextsResponse || myOptions.viewOptions.refsOnly}
 						{@const headingText = myOptions.viewOptions.refsOnly
 							? 'Parallel References'
-							: 'Results from' + currentServer.name}
+							: 'Results from ' + currentServer.name}
 						{@const subText = myOptions.viewOptions.refsOnly
 							? "Showing only Aland's parallel passage group title and references:"
 							: ''}

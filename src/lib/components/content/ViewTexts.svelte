@@ -38,36 +38,28 @@
      */
     async function getText(ref){
         mylog(`getText('${ref}')`);
-        showModal=false;
-        let text = ''
-        ref2Show='';
+        if (!ref) return;
+        ref2Show = ref;
+        showModal = true;
         if (!texts[ref]){
-           //mylog(`gonna fetch text for '${ref}'`, true)
-            fetching=true;
-            //const bcvArray = tfServer.getBCVarrayFromRefs([ref]);
-            const node=await tfServer.getNodeFromRef(ref);
-           //mylog(`Gotta node: ${node}`, true);
-            const response = node ? await tfServer.fetchText(node) : '';// tfServer.getTexts(bcvArray,false) : null;
-            
-            if (response && response.text){
-                text=response.text;
-                ref2Show=ref;
-                texts[ref2Show]=text;
-             //   mylog(`ViewTexts got reponse: ${response.text}`,true)
-                showModal=true;
+            fetching = true;
+            try {
+                const bcvArray = tfServer.getBCVarrayFromRefs([ref]);
+                const response = await tfServer.getTexts(bcvArray, false, false, tfServer.showNotes);
+                if (response && response.texts && response.texts[0] && response.texts[0].text) {
+                    texts[ref] = response.texts[0].text;
+                } else {
+                    const fallback = await tfServer.fetchText(ref);
+                    if (fallback && fallback.text) {
+                        texts[ref] = fallback.text;
+                    }
+                }
+            } catch (err) {
+                console.error(`ViewTexts error fetching text for ${ref}:`, err);
+            } finally {
+                fetching = false;
             }
-            else{
-               // mylog(`ViewTexts got nadda! Reponse props:${Object.getOwnPropertyNames(response)}`, true);
-            }
-            fetching=false;
         }
-        else{
-            text = texts[ref];
-            ref2Show=ref;
-           
-            showModal=true;
-        }
-         //mylog(`setText('${ref}'): ${text}`,true);
     }
 
     let chosenRefIdx=$state(-1);
@@ -184,8 +176,7 @@ Jump to book:<br/> {#each books as book}
         <Button buttonText={bCvToString(ref,true)} 
         buttonColors="btn-ghost" 
         buttonStyle="btn-sm p-0.5 m-0.5 hover:bg-slate-500 hover:text-white rounded"
-        onclick={()=>{chosenRefIdx=indexOffset+j; getText(refs[chosenRefIdx]); showModal=true;}}
-
+        onclick={()=>{ const fullRef = bCvToString(ref); chosenRefIdx=indexOffset+j; getText(fullRef); }}
         />
     {/each}
 {/each}

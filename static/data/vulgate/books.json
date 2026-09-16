@@ -1,0 +1,164 @@
+{
+  "Matt": {
+    "name": "Matthew",
+    "abbrev": "Matt",
+    "node": 596441,
+    "chapters": 28
+  },
+  "Mark": {
+    "name": "Mark",
+    "abbrev": "Mark",
+    "node": 596442,
+    "chapters": 16
+  },
+  "Luke": {
+    "name": "Luke",
+    "abbrev": "Luke",
+    "node": 596443,
+    "chapters": 24
+  },
+  "John": {
+    "name": "John",
+    "abbrev": "John",
+    "node": 596444,
+    "chapters": 21
+  },
+  "Acts": {
+    "name": "Acts",
+    "abbrev": "Acts",
+    "node": 596445,
+    "chapters": 28
+  },
+  "Rom": {
+    "name": "Romans",
+    "abbrev": "Rom",
+    "node": 596446,
+    "chapters": 16
+  },
+  "1 Cor": {
+    "name": "1_Corinthians",
+    "abbrev": "1 Cor",
+    "node": 596447,
+    "chapters": 16
+  },
+  "2 Cor": {
+    "name": "2_Corinthians",
+    "abbrev": "2 Cor",
+    "node": 596448,
+    "chapters": 13
+  },
+  "Gal": {
+    "name": "Galatians",
+    "abbrev": "Gal",
+    "node": 596449,
+    "chapters": 6
+  },
+  "Eph": {
+    "name": "Ephesians",
+    "abbrev": "Eph",
+    "node": 596450,
+    "chapters": 6
+  },
+  "Phil": {
+    "name": "Philippians",
+    "abbrev": "Phil",
+    "node": 596451,
+    "chapters": 4
+  },
+  "Col": {
+    "name": "Colossians",
+    "abbrev": "Col",
+    "node": 596452,
+    "chapters": 4
+  },
+  "1 Thess": {
+    "name": "1_Thessalonians",
+    "abbrev": "1 Thess",
+    "node": 596453,
+    "chapters": 5
+  },
+  "2 Thess": {
+    "name": "2_Thessalonians",
+    "abbrev": "2 Thess",
+    "node": 596454,
+    "chapters": 3
+  },
+  "1 Tim": {
+    "name": "1_Timothy",
+    "abbrev": "1 Tim",
+    "node": 596455,
+    "chapters": 6
+  },
+  "2 Tim": {
+    "name": "2_Timothy",
+    "abbrev": "2 Tim",
+    "node": 596456,
+    "chapters": 4
+  },
+  "Titus": {
+    "name": "Titus",
+    "abbrev": "Titus",
+    "node": 596457,
+    "chapters": 3
+  },
+  "Phlm": {
+    "name": "Philemon",
+    "abbrev": "Phlm",
+    "node": 596458,
+    "chapters": 1
+  },
+  "Heb": {
+    "name": "Hebrews",
+    "abbrev": "Heb",
+    "node": 596459,
+    "chapters": 13
+  },
+  "Jas": {
+    "name": "James",
+    "abbrev": "Jas",
+    "node": 596460,
+    "chapters": 5
+  },
+  "1 Pet": {
+    "name": "1_Peter",
+    "abbrev": "1 Pet",
+    "node": 596461,
+    "chapters": 5
+  },
+  "2 Pet": {
+    "name": "2_Peter",
+    "abbrev": "2 Pet",
+    "node": 596462,
+    "chapters": 3
+  },
+  "1 John": {
+    "name": "1_John",
+    "abbrev": "1 John",
+    "node": 596463,
+    "chapters": 5
+  },
+  "2 John": {
+    "name": "2_John",
+    "abbrev": "2 John",
+    "node": 596464,
+    "chapters": 1
+  },
+  "3 John": {
+    "name": "3_John",
+    "abbrev": "3 John",
+    "node": 596465,
+    "chapters": 1
+  },
+  "Jude": {
+    "name": "Jude",
+    "abbrev": "Jude",
+    "node": 596466,
+    "chapters": 1
+  },
+  "Rev": {
+    "name": "Revelation",
+    "abbrev": "Rev",
+    "node": 596467,
+    "chapters": 22
+  }
+}

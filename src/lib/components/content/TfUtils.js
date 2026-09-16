@@ -7,6 +7,7 @@ import * as BibleUtils from '$lib/utils/bibleRefUtils.js'
 import * as MathUtils from '$lib/utils/math-utils.js';
 import { LexemeInfo, LexStats } from "../datastructures/lexeme.js";
 import { GospelFilter } from "./SynopsisClasses.svelte.js";
+import { staticProvider } from '$lib/data/StaticDatasetProvider.js';
 
 const debugOn = debug;
 
@@ -534,16 +535,7 @@ export class TfServer {
     * @returns {Promise.<Object>} respone from fetch request, converted from the HTTP JSON response into a javascript object.
     */
     async getTexts(bcvArray, showVerses = true, lexemes = true, showNotes = this.showNotes) {
-        //mylog("getTexts!...",true);
-        const reqObject = { refs: bcvArray, options: { showVerses: showVerses, lexemes: lexemes, showNotes: showNotes } }
-
-        //const bodyData = JSON.stringify(reqObject)
-        const url = this.getApiUri() + "/texts";
-        const response = await this.jsonPOSTFetch(url, reqObject)
-        mylog("getTexts(fetchURL: '" + url + "') body data = " + JSON.stringify(reqObject));
-        // mylog("response: ")
-        // mylog(response)
-        return response;
+        return await staticProvider.getTexts(this.abbrev, bcvArray, showVerses, lexemes, showNotes, this);
     }
 
     /**
@@ -556,13 +548,7 @@ export class TfServer {
     }
     async load() {
         if (!this.ready) {
-            mylog("bypassing checking for tf ...")
-
-
             this.ready = true;
-        }
-        else {
-            mylog("already ready!")
         }
     }
 
@@ -573,63 +559,53 @@ export class TfServer {
      * @returns {Promise<LexemeInfo>}
      */
     async fetchLexInfo(lexID) {
-        const lemma = new LexemeInfo();
-        const getLexUrl = this.getApiUri() + "/lex/";
-        const url = getLexUrl + lexID.toString();
-        //console.debug("Fetching " + url);
-        const res = await fetch(url);
-        // query.sent = true;
-        mylog(`fetchLexInfo(${lexID})....`)
-        const theJsonObj = await res.json();
-        const foundLex = new LexemeInfo(theJsonObj.id, theJsonObj.lemma, theJsonObj.gloss, theJsonObj.total, theJsonObj.pos, theJsonObj.total, theJsonObj.beta)
-        //lemma.copyFrom(foundLex);
-
+        const lexObj = await staticProvider.getLexInfo(this.abbrev, lexID);
+        if (!lexObj) {
+            return new LexemeInfo(Number(lexID), '', '', 0);
+        }
+        const foundLex = new LexemeInfo(lexObj.id, lexObj.lemma, lexObj.gloss, lexObj.total);
+        foundLex.pos = lexObj.pos;
+        foundLex.beta = lexObj.beta;
+        if (lexObj.plain) {
+            foundLex.plain = lexObj.plain;
+        }
         return foundLex;
     }
 
 
     /**
      * 
-     * @param {number} node 
-     * @returns 
+     * @param {number|string} nodeOrRef 
+     * @returns {Promise<{text: string, reference?: string}>}
      */
-    async fetchText(node) {
-        const url = this.getApiUri() + "/text/" + node;
-        mylog("fetchText(" + url + ")");
-        const theResp = await this.jsonFetch(url);
-        return theResp ? theResp : ''
+    async fetchText(nodeOrRef) {
+        if (typeof nodeOrRef === 'string') {
+            const bcvArray = this.getBCVarrayFromRefs([nodeOrRef]);
+            const res = await this.getTexts(bcvArray, false, false, this.showNotes);
+            if (res && res.texts && res.texts[0]) {
+                return { text: res.texts[0].text, reference: nodeOrRef };
+            }
+        }
+        const name = this.getBookName(nodeOrRef);
+        if (name) {
+            const txt = await this.fetchVerseTextByRef(name, '1', '1');
+            return { text: txt };
+        }
+        return { text: '' };
     }
 
     async fetchVerseTextByRef(book, chap = '1', v = '1') {
-        mylog("fetchVerseTextByRef(" + [book, chap, v].join(',') + ")");
-        if (book && parseInt(chap) && parseInt(v)) {
-            v = v.replaceAll(/[a-zA-z]/g, '')
-            chap = chap.replaceAll(/[a-zA-Z]/g, '')
-            let url = this.getApiUri() + "/verse?book=";
-            let bookname = this.getBookNameBySyn(book);
-            if (!bookname) {
-                mylog("fetchVerseTextByRef Bookname not found for " + book);
-                bookname = this.getBookName(this.getBookID(book));
-            }
-
-            url += bookname + "&chapter=" + chap + "&verse=" + v;
-            //            mylog(`trying to fetch url: ${url}`, true);
-            const resp = await this.jsonFetch(url);
-            //            mylog(`fetchVerseTextByRef(${book},${chap},${v}) returned: ${resp && resp.text ? resp.text.trim() : ''}`, true);
-            return resp && resp.text ? resp.text.trim() : '';
-        }
-        return ''
-
+        return await staticProvider.getVerseText(this.abbrev, book, chap, v, this);
     }
 
     /**
      * 
-     * @param {number} node 
-     * @returns 
+     * @param {number|string} nodeOrRef 
+     * @returns {Promise<string>}
      */
-    async fetchTextAlone(node) {
-        const resp = await this.fetchText(node);
-        return resp && resp.text ? resp.text.trim() : '';
+    async fetchTextAlone(nodeOrRef) {
+        const res = await this.fetchText(nodeOrRef);
+        return res && res.text ? res.text.trim() : '';
     }
 
     /**
@@ -674,10 +650,7 @@ export class TfServer {
      * @param {string} end 
      */
     async tfGetTextFromRange(book, chap, start, end, showVerses = true) {
-        const url = this.getApiUri() + "/verses?book=" + book.trim() + "&chapter=" + chap.trim()
-            + "&start=" + start.trim() + "&end=" + end + "&showVerses=" + (showVerses ? '1' : '0');
-        // mylog("tfGetNodeFromRange fetching: "+url)
-        return await this.jsonFetch(url);
+        return await staticProvider.getVersesFromRange(this.abbrev, book, chap, start, end, showVerses, this);
     }
 
     /**
@@ -685,30 +658,12 @@ export class TfServer {
      * @param {string} theRef - reference to NT book, chapter, or verse. Eg., "Matt", "Matt 1", or "Matt 1:3"
      */
     async getNodeFromRef(theRef) {
-
-        const logPref = `getNodeFromRef(${theRef},${!this.useUnderscores}): `;
-
         const bookChapVObj = BibleUtils.getBookChapVerseFromRef(theRef, !this.useUnderscores);
-
-        let bookName = '';
-        let theNode = 0;
-
         if (bookChapVObj.book) {
-            bookName = this.getBookNameBySyn(bookChapVObj.book)
-
-
+            const bookId = this.getBookID(bookChapVObj.book);
+            return bookId || 0;
         }
-        else {
-            mylog(`${logPref}: no book provided for ${theRef}`, debugOn);
-        }
-
-        theNode = await this.tfGetNodeFromSection(bookName, bookChapVObj.chap, bookChapVObj.v);
-        //  mylog(logPref + "searchString = '" + searchString +"'; node = " + theNode) ;
-        // mylog(logPref+"bookChapVObj:");
-        //mylog(bookChapVObj);
-        //mylog(logPref + " bookName:'" + bookName+"'; bookID=" + bookID);
-        return theNode;
-
+        return 0;
     }
 
     //TODO: and test:
@@ -719,65 +674,23 @@ export class TfServer {
      * @returns the response object from getTexts()
      */
     async fetchPostTextsBatch(refsArray = [], options = null, secondary = false) {
-        /**
-        * @type {{book:string,chapter:number|null,verses:number[]}[]} bcvFetchArray
-        */
-        //mylog(`fetchpostTextsBath(["${refsArray.join('","')}"])`);
         const bcvFetchArray = this.getBCVarrayFromRefs(refsArray);
-
         return await this.getTexts(bcvFetchArray, true, true);
-        //return texts;
     }
 
     async tfGetNodeFromSection(book, chap, v) {
-        if (typeof v === 'string') {
-            v = v.replaceAll(/[a-zA-Z ]+/g, '').trim();
-        }
-        if (typeof chap === 'string') {
-            chap = chap.trim();
-        }
-
-        let nodeid = 0;
-        let uri = "/node"
-        if (book) {
-            uri += "?book=" + book.trim();
-            if (chap) {
-                uri += "&chapter=" + chap;
-                if (v)
-                    uri += "&verse=" + v;
-            }
-            const thenode = await this.jsonFetch(this.getApiUri() + uri);
-            nodeid = Number(thenode) ? Number(thenode) : 0;
-        }
-        else {
-            mylog(`tfGetNodeFromSection: no book provided`, debugOn);
-        }
-
-        return nodeid;
+        if (!book) return 0;
+        const bookId = this.getBookID(book);
+        return bookId || 0;
     }
-
-
 
     /**
      * @param {number} lexID 
      * @returns {Promise<LexStats>} counts fetched and stats calculated for the lexeme
      * 
      */
-    async fetchLexRefsCounts(lexID, calculate = true) {//},theSections=null){//},lexObj=null) { //not doing this yet.
-
-        /*if (lexObj){
-            lemmaInfo.copyFrom(lexObj);
-        }*/
-
-        /**
-         * 
-         */
-        // let theSections=[];
-
-        const url = this.getApiUri() + "/getrefs/" + lexID;
-
-        // console.debug("Fetching " + url);
-        const theJsonObj = await this.jsonFetch(url);
+    async fetchLexRefsCounts(lexID, calculate = true) {
+        const theJsonObj = await staticProvider.getLexRefsCounts(this.abbrev, lexID);
         const lexStats = new LexStats(0, this.totalWords);
         if (theJsonObj) {
             if (theJsonObj.total) {
@@ -787,49 +700,28 @@ export class TfServer {
 
             if (theJsonObj.bookcounts) {
                 Object.entries(theJsonObj.bookcounts).forEach(([bookId, theBookCount]) => {
-                    const theBookId = parseInt(bookId)
-                    lexStats.addAndCalcBookStatsIfNeeded(theBookId, theBookCount, this.booksDict[theBookId].words, theJsonObj.total, this.totalWords);
-                })
+                    const theBookId = parseInt(bookId);
+                    const bookWords = this.booksDict[theBookId]?.words || 1000;
+                    lexStats.addAndCalcBookStatsIfNeeded(theBookId, theBookCount, bookWords, theJsonObj.total, this.totalWords);
+                });
             }
-
-            //try to make convert book names into their abbreviations
-            /* const themap=theJsonObj.bookcounts ? 
-                     Object.entries(theJsonObj.bookcounts).map(([b,count])=>[book,{count: v,}])
-                         //.map(([k,v])=>this.booksDict[k] && this.booksDict[k].abbrev ? [this.booksDict[k].abbrev, (typeof v == 'number' ? v : parseInt(v))] : null).filter((o)=>o) 
-                         :
-                         null;
-             const bookcounts = themap ? Object.fromEntries(themap) : null;
-             
-             if (bookcounts && Object.keys(bookcounts).length){
-                 lexStats.bookCounts=bookcounts;
- 
-             }*/
-
 
             const refs = theJsonObj.refs;
             if (refs && refs.length) {
-                //mylog(`got refs(${lexID}):['${JSON.stringify(refs)}']`, true);
                 lexStats.references = refs.map((r) => {
                     let ret = r;
                     const bcv = BibleUtils.getBookChapVerseFromRef(r);
-
                     const book = bcv && bcv.book ? this.getBookAbbrev(bcv.book) : '';
                     if (book) {
                         r = book + (bcv.chap ? (" " + bcv.chap) : '') + (bcv.v ? ":" + bcv.v : '');
                     }
-
                     if (r && r != book) {
                         ret = r;
                     }
                     return ret;
-
                 });
-            } else {
-                // mylog(`got not refs for id ${lexID}`,true)
             }
         }
-        //lexStats.calculateFrequencies(calculate);
-
         return lexStats;
     }
 
