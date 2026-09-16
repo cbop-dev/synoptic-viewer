@@ -1,10 +1,11 @@
 {
 	"name": "@cbop-dev/synoptic-viewer",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build",
+		"build:static": "ADAPTER=static vite build",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json",
