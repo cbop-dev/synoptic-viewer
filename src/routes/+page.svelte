@@ -34,6 +34,8 @@
 	onMount(() => {
 		if (data.newURL) {
 			window.history.pushState({}, document.title, data.newURL ? data.newURL : '/');
+		} else {
+			window.history.pushState({}, document.title, window.location.pathname);
 		}
 	});
 </script>

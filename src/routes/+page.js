@@ -14,7 +14,7 @@ export async function load({ url }) {
   //mylog(theOpts);
   const myoptions = SynopsisOptions3.fromURLParams(getRequestParamsObj3(url.searchParams));
   //mylog("+page.js: options-- similarPhrases="+myoptions.viewOptions.similarPhrases)
-  const newURL = url.pathname ? (url.protocol + "//" + url.pathname) : '';
+  //const newURL = url.pathname ? (url.protocol + "//" + url.pathname) : '';
 
-  return { options: myoptions, newURL: newURL };
+  return { options: myoptions };//, newURL: newURL };
 }

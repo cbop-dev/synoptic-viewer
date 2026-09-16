@@ -46,12 +46,12 @@
 
 	function jumpToDiv(divId = '') {
 		if (divId) {
-//			mylog("Jumping to Div: '"+divId+"'", true);
+			//			mylog("Jumping to Div: '"+divId+"'", true);
 			document.location = document.location.toString().split('#')[0] + '#' + divId;
 		}
 	}
 
-	let resultsTitle=$state('');
+	let resultsTitle = $state('');
 	let {
 		live = false,
 		keyevent = null,
@@ -272,14 +272,13 @@
 			.filter((s) => s.length);
 		const parGroups = [];
 		//let resultsTitle='';
-		if(lines[0].match(/^ *\[([^\]\[]+)\] *$/)){
-			const theLine = lines.shift() || "";
-			resultsTitle=theLine.trim().substring(1,theLine.length-1);
-			
+		if (lines[0].match(/^ *\[([^\]\[]+)\] *$/)) {
+			const theLine = lines.shift() || '';
+			resultsTitle = theLine.trim().substring(1, theLine.length - 1);
 		}
 		for (let line of lines) {
 			const group = new ParallelColumnGroup();
-			group.lang=currentServer.lang;
+			group.lang = currentServer.lang;
 			const regex = new RegExp(/^\[([^\]\[]+)\]/);
 			const titleMatch = line.match(regex);
 			group.title = titleMatch && titleMatch.length > 1 ? titleMatch[1] : '';
@@ -312,8 +311,7 @@
 			texts[0].parallelColumns = parseSingleGroup(refAreaInputs);
 		} else {
 			//presuming batch mode!
-			texts= parseGroupsBatch(batchInput);
-			
+			texts = parseGroupsBatch(batchInput);
 		}
 
 		//mylog("after parsing input, but texts.parTexts[0].ref: " + texts.parallelColumns[0].textRefs[0].reference)
@@ -324,7 +322,14 @@
 
 		//buildLexArrays();
 		for (const [i, textGroup] of texts.entries()) {
-			TfUtils.populateTextGroup(textGroup, response, parRefsObj.groupsIndices[i],true,[],currentServer.ignoreWordIds);
+			TfUtils.populateTextGroup(
+				textGroup,
+				response,
+				parRefsObj.groupsIndices[i],
+				true,
+				[],
+				currentServer.ignoreWordIds
+			);
 		}
 		fetching = false;
 		dataReady = true;
@@ -539,7 +544,7 @@
 	});
 
 	const hotkeys = new SynopsisHotkeys(myOptions);
-	hotkeys.anchorClass='customParAnchor';
+	hotkeys.anchorClass = 'customParAnchor';
 	hotkeys.enableHotkeys('nptbacx');
 	const hotkeys2 = [
 		{
@@ -662,7 +667,7 @@
 
 		opt.request.tab = 1;
 
-		const baseurl = window.location.protocol + '//' + window.location.host + '/';
+		const baseurl = window.location.protocol + '//' + window.location.pathname;
 		return baseurl + opt.generateURI();
 	}
 
@@ -813,10 +818,9 @@
 {#snippet appSummary(heading = true, headingTag = 'h1')}
 	{#if heading}
 		{@render appTitle(headingTag)}
-		
 	{/if}
 
-	<SiteInfo/><br />
+	<SiteInfo /><br />
 	Enter some NT references in the columns, or select "batch" mode to trying something more fancy.
 {/snippet}
 {#snippet resultsNav(short = false, tag = 'li', classes = [])}
@@ -824,73 +828,73 @@
 	{#if mounted && dataReady}
 		<!-- <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={viewStates.views.lookup.state} buttonText="Again!" tooltip="Toggle lookup panel." /></svelte:element>-->
 		{#if currentServer.hasLexicalInfo}
-		<svelte:element this={theTag} class={classes}
-			><ButtonSelect
-				buttonText="☰ Words"
-				bind:selected={viewStates.views.words.state}
-				tooltipbottom
-				tooltip="View Lexeme and custom Greek options."
-			/></svelte:element
-		>
+			<svelte:element this={theTag} class={classes}
+				><ButtonSelect
+					buttonText="☰ Words"
+					bind:selected={viewStates.views.words.state}
+					tooltipbottom
+					tooltip="View Lexeme and custom Greek options."
+				/></svelte:element
+			>
 		{/if}
 		{#if currentServer.hasPhraseComparison}
-		<svelte:element this={theTag} class={classes}
-			><ButtonSelect
-				buttonText="Similar"
-				bind:selected={myOptions.viewOptions.similarPhrases}
-				tooltipbottom
-				tooltip="Show lexically similar phrases (same lexemes, but possibly different forms/morphology). With notes of sandlewood and bourbon, this pairs well with the 'Exact' option."
-			/></svelte:element
-		>
-		<svelte:element this={theTag} class={classes}
-			><ButtonSelect
-				buttonText="Exact"
-				bind:selected={myOptions.viewOptions.exactPhrases}
-				tooltipbottom
-				tooltip="Show exactly matching phrases (same lexemes, same order, some forms). This pairs well with the 'Similar' option."
-			/></svelte:element
-		>
+			<svelte:element this={theTag} class={classes}
+				><ButtonSelect
+					buttonText="Similar"
+					bind:selected={myOptions.viewOptions.similarPhrases}
+					tooltipbottom
+					tooltip="Show lexically similar phrases (same lexemes, but possibly different forms/morphology). With notes of sandlewood and bourbon, this pairs well with the 'Exact' option."
+				/></svelte:element
+			>
+			<svelte:element this={theTag} class={classes}
+				><ButtonSelect
+					buttonText="Exact"
+					bind:selected={myOptions.viewOptions.exactPhrases}
+					tooltipbottom
+					tooltip="Show exactly matching phrases (same lexemes, same order, some forms). This pairs well with the 'Similar' option."
+				/></svelte:element
+			>
 		{/if}
 		{#if currentServer.hasLexicalInfo}
-		<svelte:element this={theTag} class={classes}
-			><ButtonSelect
-				bind:selected={myOptions.viewOptions.unique}
-				buttonText="Unique"
-				tooltipbottom
-				tooltip="Outline all lexemes unique to each column."
-			/></svelte:element
-		>
-		<svelte:element this={theTag} class={classes}
-			><ButtonSelect
-				bind:selected={myOptions.viewOptions.identical}
-				tooltipbottom
-				tooltip="Toggle Bold/underline morphologically identical words, even if they are in diverse positions. This generates 'false positives.'"
-				buttonText="Identical"
-			/></svelte:element
-		>
-		<!--<svelte:element this={theTag} class={classes}><ButtonSelect buttonText="Auto Highlight" bind:selected={myOptions.viewOptions.highlightOnClick}  tooltipbottom  tooltip="If enabled, clicking on any word will highlight all instances of the lexeme. Like fish with red wine, this does not pair well with 'Similar phrases' highlighting."/></svelte:element>-->
+			<svelte:element this={theTag} class={classes}
+				><ButtonSelect
+					bind:selected={myOptions.viewOptions.unique}
+					buttonText="Unique"
+					tooltipbottom
+					tooltip="Outline all lexemes unique to each column."
+				/></svelte:element
+			>
+			<svelte:element this={theTag} class={classes}
+				><ButtonSelect
+					bind:selected={myOptions.viewOptions.identical}
+					tooltipbottom
+					tooltip="Toggle Bold/underline morphologically identical words, even if they are in diverse positions. This generates 'false positives.'"
+					buttonText="Identical"
+				/></svelte:element
+			>
+			<!--<svelte:element this={theTag} class={classes}><ButtonSelect buttonText="Auto Highlight" bind:selected={myOptions.viewOptions.highlightOnClick}  tooltipbottom  tooltip="If enabled, clicking on any word will highlight all instances of the lexeme. Like fish with red wine, this does not pair well with 'Similar phrases' highlighting."/></svelte:element>-->
 
-		<svelte:element this={theTag} class={[classes, 'menu']}>
-			<label class="label tooltip" data-tip="Highlight lexemes" for="highlight-click-check2">
-				<input
-					class="toggle"
-					id="highlight-click-check2"
-					type="checkbox"
-					bind:checked={myOptions.viewOptions.highlightOnClick}
-				/>Highlight {#if !short}
-					Lexemes{/if}
-			</label>
-		</svelte:element>
-		<svelte:element this={theTag} class={[classes, 'menu']}>
-			<label class="label tooltip" data-tip="Show Lexeme Info on Click" for="lexeme-info-click2">
-				<input
-					class="toggle"
-					id="lexeme-info-click2"
-					type="checkbox"
-					bind:checked={myOptions.viewOptions.lexInfoClick}
-				/>Stats{#if short}{:else}{/if}
-			</label>
-		</svelte:element>
+			<svelte:element this={theTag} class={[classes, 'menu']}>
+				<label class="label tooltip" data-tip="Highlight lexemes" for="highlight-click-check2">
+					<input
+						class="toggle"
+						id="highlight-click-check2"
+						type="checkbox"
+						bind:checked={myOptions.viewOptions.highlightOnClick}
+					/>Highlight {#if !short}
+						Lexemes{/if}
+				</label>
+			</svelte:element>
+			<svelte:element this={theTag} class={[classes, 'menu']}>
+				<label class="label tooltip" data-tip="Show Lexeme Info on Click" for="lexeme-info-click2">
+					<input
+						class="toggle"
+						id="lexeme-info-click2"
+						type="checkbox"
+						bind:checked={myOptions.viewOptions.lexInfoClick}
+					/>Stats{#if short}{:else}{/if}
+				</label>
+			</svelte:element>
 		{/if}
 		{#if currentServer.hasApparatus}
 			<svelte:element
@@ -986,11 +990,8 @@
 		</div>
 	</div>
 {/snippet}
-<div
-	id="header-nav-section"
-	class="self-center text-center fixed z-40 left-0 top-8 m-auto w-full"
->
-	<div class="navbar  ">
+<div id="header-nav-section" class="self-center text-center fixed z-40 left-0 top-8 m-auto w-full">
+	<div class="navbar">
 		<div class="text-left sm:navbar-center sm:self-center w-full m-auto">
 			<div class="text-left sm:text-center sm:self-center w-full border-0">
 				<div id="title-panel">
@@ -1004,15 +1005,14 @@
 						showResultsButtons={dataReady}
 						hideLookup={!dataReady || landingPage}
 						useGospels={false}
-						
 					/>
 				</div>
 
 				{#if myOptions.viewOptions.menuOpen}
-					<div class="options-dropdown absolute left-0 m-auto dropdown sm:hidden text-left overflow-auto">
-						<ul
-							class=" menu menu-horizontal rounded-box z-1 mt-3 w-auto p-2 shadow text-left"
-						>
+					<div
+						class="options-dropdown absolute left-0 m-auto dropdown sm:hidden text-left overflow-auto"
+					>
+						<ul class=" menu menu-horizontal rounded-box z-1 mt-3 w-auto p-2 shadow text-left">
 							{@render resultsNav(true, 'li')}
 						</ul>
 					</div>
@@ -1036,57 +1036,54 @@
 	{/if}
 
 	<div id="texts1" class="block">
-
-
 		{#if !(mounted && dataReady)}
 			{#if fetching && !dataReady}
 				<Loading title="Loading texts..." message={[]} />
 			{:else}
 				<div class="text-center mt-3">
 					<span class="self-center bg-content-60 m-3 p-1 rounded">
-					Enter some valid NT references and click "Lookup!"</span>
-					</div>
-					{/if}
+						Enter some valid NT references and click "Lookup!"</span
+					>
+				</div>
+			{/if}
 		{:else}
-
 			<div id="results-heading" class="text-lg">
-			<h1>
-				{#if resultsTitle.length}{resultsTitle}
-				{:else}Parallel NT Texts{/if}<CopyText icon={LinkSvg} getTextFunc={makeURL}
-				 tooltip="Copy URL"
-				 svgStyle="filter: opacity(0.6);"
-				  />
-			</h1>
-			<i>from {currentServer.name}</i>
-				
-			
+				<h1>
+					{#if resultsTitle.length}{resultsTitle}
+					{:else}Parallel NT Texts{/if}<CopyText
+						icon={LinkSvg}
+						getTextFunc={makeURL}
+						tooltip="Copy URL"
+						svgStyle="filter: opacity(0.6);"
+					/>
+				</h1>
+				<i>from {currentServer.name}</i>
 			</div>
 			{#each texts as textGroup, i}
 				{#if texts.length > 1 || textGroup.title}
-				{@const groupRefs=textGroup.getRefs()}
-				{@const groupNum=i+1}
-				<div  id="group-{i + 1}" class="anchor customParAnchor group {i == 0 ? 'first': ''} text-center section-heading ">
-
-					<h3 class=" font-bold underline  mb-0! pb-0! leading-none">
-						{#if textGroup.title}
-						{groupNum}.&nbsp;{textGroup.title}
-						{:else}
-						Group #{groupNum}:
-						{/if}
-						
-						
-					</h3>
-					<i>{groupRefs}</i>
-					<CopyText
-										copyText={groupRefs}
-										tooltip="Copy parallel group references"
-										svgStyle="filter: opacity(0.7);"
-					/>
-				</div> 
+					{@const groupRefs = textGroup.getRefs()}
+					{@const groupNum = i + 1}
+					<div
+						id="group-{i + 1}"
+						class="anchor customParAnchor group {i == 0 ? 'first' : ''} text-center section-heading"
+					>
+						<h3 class=" font-bold underline mb-0! pb-0! leading-none">
+							{#if textGroup.title}
+								{groupNum}.&nbsp;{textGroup.title}
+							{:else}
+								Group #{groupNum}:
+							{/if}
+						</h3>
+						<i>{groupRefs}</i>
+						<CopyText
+							copyText={groupRefs}
+							tooltip="Copy parallel group references"
+							svgStyle="filter: opacity(0.7);"
+						/>
+					</div>
 				{/if}
-					
+
 				<div class="section-content">
-					
 					<ParallelColumnSection
 						parTextGroup={textGroup}
 						{wordClick}
@@ -1392,88 +1389,89 @@
 	{/if}
 </Modal2>
 
-
 {#if dataReady}
 	<Modal2 bind:showModal={viewStates.views.sections.state}>
 		<div id="results-navigation" class=" text-left">
 			<h1>Search Results Navigation</h1>
-			
-				<ul>
-					{#each texts as textGroup, groupIndex}
+
+			<ul>
+				{#each texts as textGroup, groupIndex}
 					<!--
 							{@const section = perGroup.id}
 							{@const isCurrent = myOptions.viewOptions.page == pageIndex}
 							{@const pericope = gospelParallels.alandSynopsis.lookupPericope(section)}
 					-->
-							<li class={['m-1 p-1 dark']}>
-								<h3>
-									<a
-										class="link"
-										onclick={() => {
-											viewStates.views.sections.state = false;
-											jumpToDiv('group-'+(groupIndex+1));
-										}}
-										><b>{groupIndex+1}. {#if  textGroup.title} {textGroup.title}{/if}</b>
-										<i class="">({textGroup.parallelColumns.map((col)=>col.textRefs?.map((tf)=>tf.reference).join(";")).join("|")})</i></a
-									>
-								</h3>
-							</li>
-						
-					{/each}
-				</ul>
-			
+					<li class={['m-1 p-1 dark']}>
+						<h3>
+							<a
+								class="link"
+								onclick={() => {
+									viewStates.views.sections.state = false;
+									jumpToDiv('group-' + (groupIndex + 1));
+								}}
+								><b
+									>{groupIndex + 1}. {#if textGroup.title}
+										{textGroup.title}{/if}</b
+								>
+								<i class=""
+									>({textGroup.parallelColumns
+										.map((col) => col.textRefs?.map((tf) => tf.reference).join(';'))
+										.join('|')})</i
+								></a
+							>
+						</h3>
+					</li>
+				{/each}
+			</ul>
 		</div>
 	</Modal2>
-
 {/if}
+
 <style>
-@reference 'tailwindcss';
+	@reference 'tailwindcss';
 
-#header-nav-section{
-	/*background: var(--bg-content, rgba(255,255,255,0.7));*/
-}
-.navbar{
-	@apply  shadow-sm text-center min-h-12 text-left sm:text-center shadow-sm pb-0 mb-0 sm:mb-1 sm:pb-1;
-}
-
-#landing-lookup{
-	background-color: color-mix(var(--bg-content,white 50%) 70%, transparent);
-	padding: 15px;
-	box-shadow: 10px 10px 5px rgba(0, 0, 0, 0.4);
-	
-}
-#results-heading{
-	background-color: color-mix(var(--bg-content,white 50%) 70%, transparent);
-	
-	@apply text-center mb-5;
-	h2{
-		@apply text-xl font-bold;
+	#header-nav-section {
+		/*background: var(--bg-content, rgba(255,255,255,0.7));*/
 	}
-}
-.group{
-	/*@apply mt-3;*/
-}
+	.navbar {
+		@apply shadow-sm text-center min-h-12 text-left sm:text-center shadow-sm pb-0 mb-0 sm:mb-1 sm:pb-1;
+	}
 
-.section-heading{
-	@apply text-center min-h-10 ;
-	border-radius: 5rem 5rem 0 0;
-	--section-bg: var(--secondary-bg);
-   /* background: linear-gradient(to bottom, var(--section-bg, transparent), transparent);*/
-    background: color-mix(in srgb, var(--section-bg, transparent) 60%, transparent 40%);
-    background-clip: content-box;
-	h3{
-		padding: 0.5em;
-		font-size:larger;
-	}	
-}
+	#landing-lookup {
+		background-color: color-mix(var(--bg-content, white 50%) 70%, transparent);
+		padding: 15px;
+		box-shadow: 10px 10px 5px rgba(0, 0, 0, 0.4);
+	}
+	#results-heading {
+		background-color: color-mix(var(--bg-content, white 50%) 70%, transparent);
 
+		@apply text-center mb-5;
+		h2 {
+			@apply text-xl font-bold;
+		}
+	}
+	.group {
+		/*@apply mt-3;*/
+	}
 
-.anchor:not(.first) {
+	.section-heading {
+		@apply text-center min-h-10;
+		border-radius: 5rem 5rem 0 0;
+		--section-bg: var(--secondary-bg);
+		/* background: linear-gradient(to bottom, var(--section-bg, transparent), transparent);*/
+		background: color-mix(in srgb, var(--section-bg, transparent) 60%, transparent 40%);
+		background-clip: content-box;
+		h3 {
+			padding: 0.5em;
+			font-size: larger;
+		}
+	}
+
+	.anchor:not(.first) {
 		@apply md:-mt-30 md:pt-40 -mt-20 pt-30;
-}
+	}
 
-.anchor.first{
-	@apply -mt-5 pt-20 ;
-}
-
+	.anchor.first {
+		@apply -mt-5 pt-20;
+	}
 </style>
