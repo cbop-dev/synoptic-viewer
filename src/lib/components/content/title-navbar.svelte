@@ -8,6 +8,7 @@
 	import Modal from '../ui/Modal.svelte';
 	import Modal2 from '../ui/Modal2.svelte';
 	import MatchColorsKey from './MatchColorsKey.svelte';
+	import VersionButton from '../ui/version-button.svelte';
 	/**
 	 * @type {{hotkeys:SynopsisHotkeys,
 	 * title:string,
@@ -64,7 +65,7 @@
 			<span class={['md:inline hidden ', extraTitleclasses]}>{title}</span>
 		{/if}</a
 	></svelte:element
->
+><VersionButton />
 
 <ul class="menu menu-horizontal w-auto">
 	<li>

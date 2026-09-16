@@ -239,7 +239,7 @@ export function populateGroupsText(perGroups, response, perGroupsIndices, words 
 }
 
 /**
- * @description Populates a group (one set/row of parallel columns) of aligned Gospel texts, based on the http/json response already given by a tf-fast service ('/texts/') request.
+ * @description Populates a group (one set/row of parallel columns) of aligned Gospel texts.
  * @param {GospelPericopeGroup} group
  * @param {Object|null} responseTexts 
  * @param {GospelPericopeGroupIndices} perGroupIndices 
@@ -304,8 +304,7 @@ export function populateGroupText(group, responseTexts = null, perGroupIndices, 
 
 
 /**
-* @description Populates on group of parallel columns of texts based on the http/json response already given by a tf-fast service ('/texts/') request.
-* @param {ParallelColumnGroup} parallelColumnGroup 
+* @description Populates on group of parallel columns of texts.
 * @param {Object} response
 * @param {number[][]} parallelIndices - first index corresponding to that of parallelColumnGroup, then containing indices into response.text
 * @param {boolean} [words=true]
@@ -462,9 +461,6 @@ export class TfServer {
         return this.server + this.dbURI;
     }
 
-    getApiUri() {
-        return env.testing ? this.getURL() : env.apiURI + this.dbURI;
-    }
 
     /**
      * 

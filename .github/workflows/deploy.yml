@@ -38,12 +38,12 @@ jobs:
           # For GitHub Pages hosted at https://<username>.github.io/<repo>/
           # If using a custom root domain, change this to: BASE_PATH: ''
           BASE_PATH: '/${{ github.event.repository.name }}'
-        run: npm run build
+        run: npm run build:www
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: 'build/'
+          path: 'build/www/'
 
   deploy:
     needs: build

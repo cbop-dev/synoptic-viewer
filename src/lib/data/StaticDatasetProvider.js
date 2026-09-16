@@ -20,7 +20,6 @@ const GOSPEL_ABBREVS = new Set(['Matt', 'Mark', 'Luke', 'John']);
 
 /**
  * StaticDatasetProvider - Build-time static data provider for Synoptic Viewer 2.0.
- * Completely replaces the runtime Python `tf-fast` microservice with instant in-memory JSON resolution.
  */
 export class StaticDatasetProvider {
     constructor() {
@@ -109,7 +108,7 @@ export class StaticDatasetProvider {
     async ensureBook(version, bookAbbrev) {
         const v = normalizeVersion(version);
         const abbrev = bookAbbrev.trim();
-        
+
         // Check if it is a Gospel and gospels.json has it
         if (GOSPEL_ABBREVS.has(abbrev)) {
             const gospels = await this.ensureGospels(v);
@@ -245,7 +244,6 @@ export class StaticDatasetProvider {
     }
 
     /**
-     * Batch resolver matching the tf-fast POST /texts contract.
      * Resolves an array of { book, chapter, verses } objects into formatted texts, word tokens, and apparatus notes.
      * @param {string} version 
      * @param {{book:string,chapter:number|null,verses:number[]}[]} bcvArray 
@@ -327,7 +325,7 @@ export class StaticDatasetProvider {
             texts: textsResponse
         };
 
-        // Extract response lexemes dictionary matching tf-fast behavior
+        // Extract response lexemes dictionary
         if (lexemes) {
             const responseLexemes = {};
             const allLexDict = await this.ensureLexemes(v);

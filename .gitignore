@@ -14,8 +14,10 @@ node_modules
 Thumbs.db
 
 # Env
+.env
 .env.*
 !.env.example
+!.env.deploy.example
 !.env.test
 
 # Vite
@@ -33,3 +35,5 @@ tests/unit/del/
 tf-output/vulgate/
 
 tf-output/webc/
+
+.env.deploy.example

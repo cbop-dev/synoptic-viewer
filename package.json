@@ -1,12 +1,15 @@
 {
 	"name": "@cbop-dev/synoptic-viewer",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
-		"build": "vite build",
-		"build:static": "ADAPTER=static vite build",
+		"build": "ADAPTER=node vite build",
+		"build:node": "ADAPTER=node vite build",
+		"build:www": "ADAPTER=static vite build",
+		"build:static": "npm run build:www",
 		"preview": "vite preview",
+		"preview:node": "node build/node/index.js",
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json --watch",
@@ -14,7 +17,18 @@
 		"test:unit": "vitest",
 		"test": "npm run test:unit -- --run && npm run test:e2e",
 		"test:e2e": "playwright test",
-		"format": "prettier --write ."
+		"format": "prettier --write .",
+		"deploy:www": "./scripts/deploy_www.sh",
+		"deploy:www:quick": "./scripts/deploy_www.sh --no-build",
+		"deploy:www:promote": "./scripts/deploy_www.sh --promote",
+		"deploy:promote": "npm run deploy:www:promote",
+		"deploy:www:history": "./scripts/deploy_www.sh --history",
+		"deploy:history": "npm run deploy:www:history",
+		"deploy:www:clean": "./scripts/deploy_www.sh --clean",
+		"rollback:www": "./scripts/deploy_www.sh --rollback",
+		"rollback": "npm run rollback:www",
+		"deploy:vps": "npm run deploy:www",
+		"deploy:vps:quick": "npm run deploy:www:quick"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.2.5",
@@ -49,7 +63,6 @@
 	},
 	"dependencies": {
 		"@cbop-dev/aland-gospel-synopsis": "^0.1.13",
-		"@cbop-dev/tf-bible-booknames": "^0.0.2",
 		"@vortechsolutions/gridjs-svelte": "^2.1.6",
 		"chart.js": "^4.5.1",
 		"chroma-js": "^3.1.2",

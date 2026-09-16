@@ -2261,4 +2261,17 @@
 	#select-section {
 		max-width: 200px;
 	}
+	.version-badge {
+		font-size: 0.7rem;
+		padding: 0.15rem 0.4rem;
+		background: var(--border, #d4d8d3);
+		color: var(--text-mid, #545b5c);
+		border-radius: 10px;
+		text-decoration: none;
+		font-weight: 600;
+	}
+	.version-badge:hover {
+		background: var(--accent, #1f6f7a);
+		color: #fff;
+	}
 </style>

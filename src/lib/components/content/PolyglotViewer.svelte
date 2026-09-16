@@ -5,7 +5,7 @@
 	import LinkSvg from '../ui/icons/link.svg';
 	import SiteInfo from './SiteInfo.svelte';
 	import { SynopsisOptions3 } from './SynopsisClasses.svelte.js';
-	import { tfBibleBookNames } from '@cbop-dev/tf-bible-booknames';
+
 	import {
 		ParallelColumn,
 		Word,
@@ -267,7 +267,7 @@
 
 		for (let line of lines) {
 			const group = new ParallelColumnGroup();
-			group.lang=currentServer.lang;
+			group.lang = currentServer.lang;
 			const regex = new RegExp(/^\[([^\]\[]+)\]/);
 			const titleMatch = line.match(regex);
 			group.title = titleMatch && titleMatch.length > 1 ? titleMatch[1] : '';
@@ -311,7 +311,14 @@
 
 		//buildLexArrays();
 		for (const [i, textGroup] of texts.entries()) {
-			TfUtils.populateTextGroup(textGroup, response, parRefsObj.groupsIndices[i],true,[],currentServer.ignoreWordIds);
+			TfUtils.populateTextGroup(
+				textGroup,
+				response,
+				parRefsObj.groupsIndices[i],
+				true,
+				[],
+				currentServer.ignoreWordIds
+			);
 		}
 		fetching = false;
 		dataReady = true;
@@ -798,10 +805,9 @@
 {#snippet appSummary(heading = true, headingTag = 'h1')}
 	{#if heading}
 		{@render appTitle(headingTag)}
-		
 	{/if}
 
-	<SiteInfo/><br />
+	<SiteInfo /><br />
 	Enter some NT references in the columns, or select "batch" mode to trying something more fancy.
 {/snippet}
 {#snippet resultsNav(short = false, tag = 'li', classes = [])}
@@ -809,73 +815,73 @@
 	{#if mounted && dataReady}
 		<!-- <svelte:element this={theTag} class={classes}><ButtonSelect bind:selected={viewStates.views.lookup.state} buttonText="Again!" tooltip="Toggle lookup panel." /></svelte:element>-->
 		{#if currentServer.hasLexicalInfo}
-		<svelte:element this={theTag} class={classes}
-			><ButtonSelect
-				buttonText="☰ Words"
-				bind:selected={viewStates.views.words.state}
-				tooltipbottom
-				tooltip="View Lexeme and custom Greek options."
-			/></svelte:element
-		>
+			<svelte:element this={theTag} class={classes}
+				><ButtonSelect
+					buttonText="☰ Words"
+					bind:selected={viewStates.views.words.state}
+					tooltipbottom
+					tooltip="View Lexeme and custom Greek options."
+				/></svelte:element
+			>
 		{/if}
 		{#if currentServer.hasPhraseComparison}
-		<svelte:element this={theTag} class={classes}
-			><ButtonSelect
-				buttonText="Similar"
-				bind:selected={myOptions.viewOptions.similarPhrases}
-				tooltipbottom
-				tooltip="Show lexically similar phrases (same lexemes, but possibly different forms/morphology). With notes of sandlewood and bourbon, this pairs well with the 'Exact' option."
-			/></svelte:element
-		>
-		<svelte:element this={theTag} class={classes}
-			><ButtonSelect
-				buttonText="Exact"
-				bind:selected={myOptions.viewOptions.exactPhrases}
-				tooltipbottom
-				tooltip="Show exactly matching phrases (same lexemes, same order, some forms). This pairs well with the 'Similar' option."
-			/></svelte:element
-		>
+			<svelte:element this={theTag} class={classes}
+				><ButtonSelect
+					buttonText="Similar"
+					bind:selected={myOptions.viewOptions.similarPhrases}
+					tooltipbottom
+					tooltip="Show lexically similar phrases (same lexemes, but possibly different forms/morphology). With notes of sandlewood and bourbon, this pairs well with the 'Exact' option."
+				/></svelte:element
+			>
+			<svelte:element this={theTag} class={classes}
+				><ButtonSelect
+					buttonText="Exact"
+					bind:selected={myOptions.viewOptions.exactPhrases}
+					tooltipbottom
+					tooltip="Show exactly matching phrases (same lexemes, same order, some forms). This pairs well with the 'Similar' option."
+				/></svelte:element
+			>
 		{/if}
 		{#if currentServer.hasLexicalInfo}
-		<svelte:element this={theTag} class={classes}
-			><ButtonSelect
-				bind:selected={myOptions.viewOptions.unique}
-				buttonText="Unique"
-				tooltipbottom
-				tooltip="Outline all lexemes unique to each column."
-			/></svelte:element
-		>
-		<svelte:element this={theTag} class={classes}
-			><ButtonSelect
-				bind:selected={myOptions.viewOptions.identical}
-				tooltipbottom
-				tooltip="Toggle Bold/underline morphologically identical words, even if they are in diverse positions. This generates 'false positives.'"
-				buttonText="Identical"
-			/></svelte:element
-		>
-		<!--<svelte:element this={theTag} class={classes}><ButtonSelect buttonText="Auto Highlight" bind:selected={myOptions.viewOptions.highlightOnClick}  tooltipbottom  tooltip="If enabled, clicking on any word will highlight all instances of the lexeme. Like fish with red wine, this does not pair well with 'Similar phrases' highlighting."/></svelte:element>-->
+			<svelte:element this={theTag} class={classes}
+				><ButtonSelect
+					bind:selected={myOptions.viewOptions.unique}
+					buttonText="Unique"
+					tooltipbottom
+					tooltip="Outline all lexemes unique to each column."
+				/></svelte:element
+			>
+			<svelte:element this={theTag} class={classes}
+				><ButtonSelect
+					bind:selected={myOptions.viewOptions.identical}
+					tooltipbottom
+					tooltip="Toggle Bold/underline morphologically identical words, even if they are in diverse positions. This generates 'false positives.'"
+					buttonText="Identical"
+				/></svelte:element
+			>
+			<!--<svelte:element this={theTag} class={classes}><ButtonSelect buttonText="Auto Highlight" bind:selected={myOptions.viewOptions.highlightOnClick}  tooltipbottom  tooltip="If enabled, clicking on any word will highlight all instances of the lexeme. Like fish with red wine, this does not pair well with 'Similar phrases' highlighting."/></svelte:element>-->
 
-		<svelte:element this={theTag} class={[classes, 'menu']}>
-			<label class="label tooltip" data-tip="Highlight lexemes" for="highlight-click-check2">
-				<input
-					class="toggle"
-					id="highlight-click-check2"
-					type="checkbox"
-					bind:checked={myOptions.viewOptions.highlightOnClick}
-				/>Highlight {#if !short}
-					Lexemes{/if}
-			</label>
-		</svelte:element>
-		<svelte:element this={theTag} class={[classes, 'menu']}>
-			<label class="label tooltip" data-tip="Show Lexeme Info on Click" for="lexeme-info-click2">
-				<input
-					class="toggle"
-					id="lexeme-info-click2"
-					type="checkbox"
-					bind:checked={myOptions.viewOptions.lexInfoClick}
-				/>Stats{#if short}{:else}{/if}
-			</label>
-		</svelte:element>
+			<svelte:element this={theTag} class={[classes, 'menu']}>
+				<label class="label tooltip" data-tip="Highlight lexemes" for="highlight-click-check2">
+					<input
+						class="toggle"
+						id="highlight-click-check2"
+						type="checkbox"
+						bind:checked={myOptions.viewOptions.highlightOnClick}
+					/>Highlight {#if !short}
+						Lexemes{/if}
+				</label>
+			</svelte:element>
+			<svelte:element this={theTag} class={[classes, 'menu']}>
+				<label class="label tooltip" data-tip="Show Lexeme Info on Click" for="lexeme-info-click2">
+					<input
+						class="toggle"
+						id="lexeme-info-click2"
+						type="checkbox"
+						bind:checked={myOptions.viewOptions.lexInfoClick}
+					/>Stats{#if short}{:else}{/if}
+				</label>
+			</svelte:element>
 		{/if}
 		{#if currentServer.hasApparatus}
 			<svelte:element
@@ -971,11 +977,8 @@
 		</div>
 	</div>
 {/snippet}
-<div
-	id="header-nav-section"
-	class="self-center text-center fixed z-40 left-0 top-8 m-auto w-full"
->
-	<div class="navbar  ">
+<div id="header-nav-section" class="self-center text-center fixed z-40 left-0 top-8 m-auto w-full">
+	<div class="navbar">
 		<div class="text-left sm:navbar-center sm:self-center w-full m-auto">
 			<div class="text-left sm:text-center sm:self-center w-full border-0">
 				<div id="title-panel">
@@ -989,15 +992,14 @@
 						showResultsButtons={dataReady}
 						hideLookup={!dataReady || landingPage}
 						useGospels={false}
-						
 					/>
 				</div>
 
 				{#if myOptions.viewOptions.menuOpen}
-					<div class="options-dropdown absolute left-0 m-auto dropdown sm:hidden text-left overflow-auto">
-						<ul
-							class=" menu menu-horizontal rounded-box z-1 mt-3 w-auto p-2 shadow text-left"
-						>
+					<div
+						class="options-dropdown absolute left-0 m-auto dropdown sm:hidden text-left overflow-auto"
+					>
+						<ul class=" menu menu-horizontal rounded-box z-1 mt-3 w-auto p-2 shadow text-left">
 							{@render resultsNav(true, 'li')}
 						</ul>
 					</div>
@@ -1021,35 +1023,34 @@
 	{/if}
 
 	<div id="texts1" class="block">
-
-
 		{#if !(mounted && dataReady)}
 			{#if fetching && !dataReady}
 				<Loading title="Loading texts..." message={[]} />
 			{:else}
 				<div class="text-center mt-3">
 					<span class="self-center bg-content-60 m-3 p-1 rounded">
-					Enter some valid NT references and click "Lookup!"</span>
-					</div>
-					{/if}
+						Enter some valid NT references and click "Lookup!"</span
+					>
+				</div>
+			{/if}
 		{:else}
-
 			<div id="results-heading">
-			<h2>
-				Parallel NT Texts from {currentServer.name}:
-				<CopyText icon={LinkSvg} getTextFunc={makeURL}
-				 tooltip="Copy URL"
-				 svgStyle="filter: opacity(0.6);"
-				  />
-			</h2>
+				<h2>
+					Parallel NT Texts from {currentServer.name}:
+					<CopyText
+						icon={LinkSvg}
+						getTextFunc={makeURL}
+						tooltip="Copy URL"
+						svgStyle="filter: opacity(0.6);"
+					/>
+				</h2>
 			</div>
 			{#each texts as textGroup, i}
 				{#if texts.length > 1 || textGroup.title}<h3 class="font-bold underline section-heading">
-							{#if texts.length > 1}Group #{i + 1}:&nbsp;{/if}{#if textGroup.title}
-								{textGroup.title}{/if}
-						</h3>{/if}
+						{#if texts.length > 1}Group #{i + 1}:&nbsp;{/if}{#if textGroup.title}
+							{textGroup.title}{/if}
+					</h3>{/if}
 				<div class="anchor group" id="group-{i + 1}">
-					
 					<ParallelColumnSection
 						parTextGroup={textGroup}
 						{wordClick}
@@ -1353,34 +1354,34 @@
 		</div>
 	{/if}
 </Modal2>
+
 <style>
-@reference 'tailwindcss';
+	@reference 'tailwindcss';
 
-#header-nav-section{
-	/*background: var(--bg-content, rgba(255,255,255,0.7));*/
-}
-.navbar{
-	@apply  shadow-sm text-center min-h-12 text-left sm:text-center shadow-sm pb-0 mb-0 sm:mb-1 sm:pb-1;
-}
-
-#landing-lookup{
-	background-color: color-mix(var(--bg-content,white 50%) 70%, transparent);
-	padding: 15px;
-	box-shadow: 10px 10px 5px rgba(0, 0, 0, 0.4);
-	
-}
-#results-heading{
-	background-color: color-mix(var(--bg-content,white 50%) 70%, transparent);
-	
-	@apply text-center mb-5;
-	h2{
-		@apply text-xl font-bold;
+	#header-nav-section {
+		/*background: var(--bg-content, rgba(255,255,255,0.7));*/
 	}
-}
-.group{
-	/*@apply mt-3;*/
-}
-.section-heading{
-	@apply text-center;
-}
+	.navbar {
+		@apply shadow-sm text-center min-h-12 text-left sm:text-center shadow-sm pb-0 mb-0 sm:mb-1 sm:pb-1;
+	}
+
+	#landing-lookup {
+		background-color: color-mix(var(--bg-content, white 50%) 70%, transparent);
+		padding: 15px;
+		box-shadow: 10px 10px 5px rgba(0, 0, 0, 0.4);
+	}
+	#results-heading {
+		background-color: color-mix(var(--bg-content, white 50%) 70%, transparent);
+
+		@apply text-center mb-5;
+		h2 {
+			@apply text-xl font-bold;
+		}
+	}
+	.group {
+		/*@apply mt-3;*/
+	}
+	.section-heading {
+		@apply text-center;
+	}
 </style>

@@ -7,13 +7,15 @@ const config = {
     kit: { 
         adapter: isStatic
             ? adapterStatic({
-                pages: 'build',
-                assets: 'build',
+                pages: 'build/www',
+                assets: 'build/www',
                 fallback: '404.html',
                 precompress: false,
                 strict: false
             })
-            : adapterNode(),
+            : adapterNode({
+                out: 'build/node'
+            }),
         paths: {
             base: process.env.BASE_PATH || ''
         }

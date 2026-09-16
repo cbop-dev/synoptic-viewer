@@ -1,6 +1,6 @@
 
 //import { mylog } from '../env/env';
-import { mylog,apiURI } from '$lib/env/env.js';
+import { mylog } from '$lib/env/env.js';
 import * as env from '$lib/env/env.js'
 /**
  * @type {{lexemes:Object<number,{id:number,count:number,beta:string}>}}
@@ -16,31 +16,31 @@ import ntChaps from './tfN1904chaps.json';
 import { tfNtBooksDict } from './ntbooks.js';
 import * as bibleUtils from '../utils/bibleRefUtils.js';
 import * as TfUtils from '$lib/components/content/TfUtils.js';
-import { ParallelColumn, GospelPericopeGroup,TextAndRef,VerseWords,Word,GospelPericopeGroupIndices } from '$lib/components/content/parallelTexts.svelte';
+import { ParallelColumn, GospelPericopeGroup, TextAndRef, VerseWords, Word, GospelPericopeGroupIndices } from '$lib/components/content/parallelTexts.svelte';
 
-const debugOn=true;
+const debugOn = true;
 export const lexemes = ntlexemes;
 
 
 export class N1904Server extends TfUtils.TfServer {
     ready = false;
-    longname="Nestle's 1904 Novum Testamentum Graece"
-    name=this.longname;
-    shortname="Nestle 1904 NT";
-    abbrev="n1904";
-    param=this.abbrev;
-    server=env.tfserverurl;
-    dbURI="/nt";
-    lang="greek";
+    longname = "Nestle's 1904 Novum Testamentum Graece"
+    name = this.longname;
+    shortname = "Nestle 1904 NT";
+    abbrev = "n1904";
+    param = this.abbrev;
+    server = env.tfserverurl;
+    dbURI = "/nt";
+    lang = "greek";
 
     /**
      * @type {Object<string,{id:number,count:number, beta:string}>} 
      */
     lexemes = ntlexemes.lexemes;
-    booksDict=tfNtBooksDict;
-    totalWords=ntlexemes.totalWords;
-    numLexemes=ntlexemes.numLexemes;
- 
+    booksDict = tfNtBooksDict;
+    totalWords = ntlexemes.totalWords;
+    numLexemes = ntlexemes.numLexemes;
+
 
     /**
      * @param {GospelPericopeGroup[]} groups
@@ -50,29 +50,29 @@ export class N1904Server extends TfUtils.TfServer {
      * @param {boolean} showVerses 
      * @param {boolean} markUnique 
      */
-    populateGroupTexts(groups,refsArrays,fetchedResponse, showVerses=false,lexemes=false,markUnique=false){
-        for (const group of groups){
-            for (const book of ['matt', 'mark', 'luke', 'john','other']){
-                for (const [i,textRef] of group[book].textRefs.entries()){
+    populateGroupTexts(groups, refsArrays, fetchedResponse, showVerses = false, lexemes = false, markUnique = false) {
+        for (const group of groups) {
+            for (const book of ['matt', 'mark', 'luke', 'john', 'other']) {
+                for (const [i, textRef] of group[book].textRefs.entries()) {
                     //mylog("checking ref: " + textRef.reference);
-                    const queryIndex= refsArrays.groupsIndices[0][book].main[i];
-                    if (fetchedResponse && fetchedResponse['texts'] && fetchedResponse['texts'][queryIndex]){
-                        textRef.text= fetchedResponse['texts'][queryIndex].text;
-                        if (lexemes){
-                            
-                            textRef.vwords=VerseWords.buildFromObj(fetchedResponse['texts'][queryIndex].words);
+                    const queryIndex = refsArrays.groupsIndices[0][book].main[i];
+                    if (fetchedResponse && fetchedResponse['texts'] && fetchedResponse['texts'][queryIndex]) {
+                        textRef.text = fetchedResponse['texts'][queryIndex].text;
+                        if (lexemes) {
+
+                            textRef.vwords = VerseWords.buildFromObj(fetchedResponse['texts'][queryIndex].words);
                         }
                         // mylog("populating fetched text for group index "+index + ", ref: '" + textRef.reference
                         // + "', queryIndex = " + queryIndex +", text='"+textRef.text +"'", true);
                     }
-                    
-                }
-            }   
 
-            if(markUnique){
+                }
+            }
+
+            if (markUnique) {
                 group.markUniqueAndIdenticalWords();
-                
-            }   
+
+            }
 
         }
     }
