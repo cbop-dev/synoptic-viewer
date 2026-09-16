@@ -1,60 +1,61 @@
 <script>
-	import NtSynopsisPanel from "$lib/components/content/NtSynopsisPanel.svelte";
-    import Footer from "$lib/components/content/Footer.svelte";
-    import { onMount } from "svelte";
-    import ParallelGospelSection from "$lib/components/content/ParallelGospelSection.svelte";
-    import SynopsisHome from "$lib/components/content/SynopsisHome.svelte";
-    //import { SynopsisOptions3.SynopsisUrlParamsMap} from "$lib/components/content/SynopsisClasses.svelte";
-    import { URLParam } from "$lib/components/content/urlParams";
-    import { SynopsisOptions3 } from "$lib/components/content/SynopsisClasses.svelte";
-    import '../app.css';
-    import { mylog } from "$lib/env/env.js";
-    function onkeydown(event){
-        if(event.key=='p'){
-            
-        }
-    }
-  
-  /**
-   * @typedef {Object} Props
-   * @property {any} data - export let request;
-   */
-  let { data } = $props();
-  
+	import NtSynopsisPanel from '$lib/components/content/NtSynopsisPanel.svelte';
+	import Footer from '$lib/components/content/Footer.svelte';
+	import { onMount } from 'svelte';
+	import ParallelGospelSection from '$lib/components/content/ParallelGospelSection.svelte';
+	import SynopsisHome from '$lib/components/content/SynopsisHome.svelte';
+	//import { SynopsisOptions3.SynopsisUrlParamsMap} from "$lib/components/content/SynopsisClasses.svelte";
+	import { URLParam } from '$lib/components/content/urlParams';
+	import { SynopsisOptions3 } from '$lib/components/content/SynopsisClasses.svelte';
+	import '../app.css';
+	import { mylog } from '$lib/env/env.js';
+	function onkeydown(event) {
+		if (event.key == 'p') {
+		}
+	}
 
-  /**
-   * @type {SynopsisOptions3}
-   */
-  let options = $state(data.options ? data.options : new SynopsisOptions3());
+	/**
+	 * @typedef {Object} Props
+	 * @property {any} data - export let request;
+	 */
+	let { data } = $props();
 
-   if (!options) {
-//    mylog("Got no options!")
-   }
-   else{
-    //mylog("page.svelte got options! E.g., highlight on click:"+options.viewOptions.highlightOnClick)
-   }
-   
-    
+	/**
+	 * @type {SynopsisOptions3}
+	 */
+	let options = $state(data.options ? data.options : new SynopsisOptions3());
 
-   onMount(()=> {
-    window.history.pushState({}, document.title, "/");
-   })
+	if (!options) {
+		//    mylog("Got no options!")
+	} else {
+		//mylog("page.svelte got options! E.g., highlight on click:"+options.viewOptions.highlightOnClick)
+	}
+
+	onMount(() => {
+		if (data.newURL) {
+			window.history.pushState({}, document.title, data.newURL ? data.newURL : '/');
+		}
+	});
 </script>
+
 <div id="page-top-div" class="anchor"></div>
 
-
-<SynopsisHome options={options}/>
+<SynopsisHome {options} />
 
 <!--<ParallelGospelSection/>-->
 <!--<NtSynopsisPanel/>-->
-<hr class="p0 mt-3"/>
-<div id="page-footer-div" class="border-t-1 block italic text-sm text-center w-full *:clear-both z-50">
-<Footer/>
+<hr class="p0 mt-3" />
+<div
+	id="page-footer-div"
+	class="border-t-1 block italic text-sm text-center w-full *:clear-both z-50"
+>
+	<Footer />
 </div>
 <div id="page-bottom-div" class=" anchor"></div>
+
 <style>
-    @reference 'tailwindcss';
-    #page-footer-div{
-        background: color-mix(var(--bg-content, #ffffff88) 60%, transparent);
-    }
+	@reference 'tailwindcss';
+	#page-footer-div {
+		background: color-mix(var(--bg-content, #ffffff88) 60%, transparent);
+	}
 </style>
