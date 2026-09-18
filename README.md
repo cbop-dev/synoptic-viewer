@@ -58,6 +58,16 @@ If updating or regenerating the static datasets:
 .venv/bin/python ../tf-fast/extract_datasets.py --datasets sblgnt,n1904,vulgate,web --output static/data
 ```
 
+## Licensing and Sources
+
+This project is released under a dual-licensing model:
+
+* **Application Code & Markup**: Licensed under the [GNU Affero General Public License v3.0 (AGPL-3.0)](./LICENSE).
+* **Textual Data & Datasets**: Curated static datasets under `static/data/` are licensed under [Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)](./LICENSE-DATA).
+* **Underlying Text Sources & Attributions**: Includes the SBL Greek New Testament (© 2010 Society of Biblical Literature and Logos Bible Software; licensed under [CC BY 4.0](https://www.sblgnt.com/license/)), Nestle 1904 GNT (Public Domain), Clementine Vulgate (Public Domain), World English Bible Catholic Edition (Public Domain), and outline structure from Kurt Aland's *Synopsis Quattuor Evangeliorum*.
+
+For complete component breakdowns, permissions, and attribution notices, see [LICENSE.md](./LICENSE.md), or review the bare [LICENSE](./LICENSE) and [LICENSE-DATA](./LICENSE-DATA) files.
+
 ## TO DO:
 
 - [x] include Aland's secondary parallels

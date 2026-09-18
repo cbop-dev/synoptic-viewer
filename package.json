@@ -1,6 +1,7 @@
 {
 	"name": "@cbop-dev/synoptic-viewer",
-	"version": "1.0.7",
+	"version": "1.0.8",
+	"license": "AGPL-3.0-only AND CC-BY-SA-4.0",
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",

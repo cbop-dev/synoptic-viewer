@@ -1,6 +1,5 @@
 <script>
 	import NtSynopsisPanel from "$lib/components/content/NtSynopsisPanel.svelte";
-    import Footer from "$lib/components/content/Footer.svelte";
     import { onMount } from "svelte";
     import ParallelGospelSection from "$lib/components/content/ParallelGospelSection.svelte";
     import SynopsisHome from "$lib/components/content/SynopsisHome.svelte";
@@ -55,15 +54,5 @@
 
 <!--<ParallelGospelSection/>-->
 <!--<NtSynopsisPanel/>-->
-<hr class="p0 mt-3"/>
-<div id="page-footer-div" class="border-t-1 block italic text-sm text-center w-full *:clear-both z-50">
-<Footer/>
-</div>
 <div id="page-bottom-div" class=" anchor"></div>
-<style>
-    @reference 'tailwindcss';
-    #page-footer-div{
-        background: color-mix(var(--bg-content, #ffffff88) 60%, transparent);
-    }
-</style>
 
