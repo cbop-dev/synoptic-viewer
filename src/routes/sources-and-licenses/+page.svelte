@@ -18,7 +18,8 @@
 	<header class="mb-10 pb-6 border-b border-base-300">
 		<h1 class="text-3xl sm:text-4xl font-bold tracking-tight mb-2">Sources &amp; Licenses</h1>
 		<p class="text-lg opacity-80">
-			Licensing framework, source attributions, and copyright notices for the Synoptic Viewer project.
+			Licensing framework, source attributions, and copyright notices for the Synoptic Viewer
+			project.
 		</p>
 	</header>
 
@@ -46,8 +47,7 @@
 						href="https://www.gnu.org/licenses/agpl-3.0.html"
 						target="_blank"
 						rel="noopener noreferrer"
-						class="font-medium"
-						>GNU Affero General Public License v3.0 (AGPL-3.0)</a
+						class="font-medium">GNU Affero General Public License v3.0 (AGPL-3.0)</a
 					>.
 				</p>
 				<ul class="text-xs opacity-80 list-disc list-inside space-y-1 mb-4">
@@ -91,8 +91,8 @@
 					>
 				</div>
 				<p class="text-sm opacity-90 mb-3">
-					The curated static datasets, concordance structures, pericope alignments, and lexical index
-					files are licensed under
+					The curated static datasets, concordance structures, pericope alignments, and lexical
+					index files are licensed under
 					<a
 						href="https://creativecommons.org/licenses/by-sa/4.0/"
 						target="_blank"
@@ -157,28 +157,28 @@
 					<span class="text-xs badge badge-outline">CC BY 4.0</span>
 				</div>
 				<p class="text-sm opacity-90">
-					The SBL Greek New Testament (2010), edited by Michael W. Holmes in collaboration with
-					the Society of Biblical Literature and Logos Bible Software, is licensed under the
+					The SBL Greek New Testament (2010), edited by Michael W. Holmes in collaboration with the
+					Society of Biblical Literature and Logos Bible Software, is licensed under the
 					<a
 						href="https://creativecommons.org/licenses/by/4.0/"
 						target="_blank"
 						rel="noopener noreferrer"
-						class="font-medium"
-					>Creative Commons Attribution 4.0 International License</a>
+						class="font-medium">Creative Commons Attribution 4.0 International License</a
+					>
 					(see the
 					<a
 						href="https://www.sblgnt.com/license/"
 						target="_blank"
 						rel="noopener noreferrer"
-						class="font-medium"
-					>SBLGNT License</a>
+						class="font-medium">SBLGNT License</a
+					>
 					and
 					<a
 						href="https://github.com/Faithlife/SBLGNT/blob/master/LICENSE"
 						target="_blank"
 						rel="noopener noreferrer"
-						class="font-medium"
-					>GitHub source</a>).
+						class="font-medium">GitHub source</a
+					>).
 				</p>
 			</div>
 
@@ -268,7 +268,9 @@
 		border-radius: 0.25rem;
 		padding: 0.05rem 0.25rem;
 		margin: -0.05rem -0.1rem;
-		transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
+		transition:
+			background-color 0.15s ease-in-out,
+			color 0.15s ease-in-out;
 	}
 
 	/* Rounded dark green background with white text on hover */
@@ -276,5 +278,10 @@
 		background-color: #14532d; /* dark green background (green-900) */
 		color: #ffffff; /* crisp white text */
 		text-decoration: none;
+	}
+
+	div.license-page {
+		background-color: var(--bg-content);
+		border-radius: 10px;
 	}
 </style>
