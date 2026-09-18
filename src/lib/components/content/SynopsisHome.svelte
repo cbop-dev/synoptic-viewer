@@ -1,4 +1,5 @@
 <script>
+	import { base } from '$app/paths';
 	import NtSynopsisPanel from './NtSynopsisPanel.svelte';
 	import CustomParallelViewer from './CustomParallelViewer.svelte';
 	import { SynopsisOptions3 } from './SynopsisClasses.svelte.js';
@@ -119,7 +120,7 @@
 </script>
 
 {#snippet appTitle(headingTag = 'h1')}
-	<svelte:element this={headingTag}><a href="/">NT Gospel Synopsis Viewer</a></svelte:element>
+	<svelte:element this={headingTag}><a href="{base}/">NT Gospel Synopsis Viewer</a></svelte:element>
 {/snippet}
 {#snippet appSummary(heading = true, headingTag = 'h1')}
 	{#if heading}

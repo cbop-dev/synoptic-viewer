@@ -1,4 +1,5 @@
 <script>
+	import { base } from '$app/paths';
 	import { onMount, untrack, tick } from 'svelte';
 	import Svelecte from 'svelecte';
 	import Loading from '../ui/Loading.svelte';
@@ -1167,7 +1168,7 @@
 				tooltipbottom={true}
 			/>
 		{/if}
-		<a href="/" data-sveltekit-reload>
+		<a href="{base}/" data-sveltekit-reload>
 			<span class="hidden lg:inline">NT Gospel Synopsis Viewer</span>
 			<span class="lg:hidden inline">NT Synopsis</span>
 			<span class="sm:hidden inline">Synopsis</span>

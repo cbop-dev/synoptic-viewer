@@ -1,5 +1,5 @@
 <script>
-	// Sources and Licenses page
+	import { base } from '$app/paths';
 </script>
 
 <svelte:head>
@@ -9,7 +9,7 @@
 <div class="license-page max-w-4xl mx-auto px-4 py-8 text-base-content">
 	<!-- Navigation -->
 	<div class="mb-6">
-		<a href="/" class="btn btn-sm btn-outline gap-2 hover:btn-primary">
+		<a href="{base}/" class="btn btn-sm btn-outline gap-2 hover:btn-primary">
 			<span aria-hidden="true">&larr;</span> Back to Synopsis Viewer
 		</a>
 	</div>
@@ -32,7 +32,7 @@
 				<div class="flex items-center justify-between gap-3 mb-4">
 					<h2 class="text-xl font-bold">Application Code &amp; Markup</h2>
 					<img
-						src="/license/agplv3-88x31.png"
+						src="{base}/license/agplv3-88x31.png"
 						alt="GNU AGPLv3 License Badge"
 						class="rounded shadow-xs border border-base-300"
 						width="88"

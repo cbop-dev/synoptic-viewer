@@ -1,6 +1,6 @@
 {
 	"name": "@cbop-dev/synoptic-viewer",
-	"version": "1.0.8",
+	"version": "1.0.9",
 	"license": "AGPL-3.0-only AND CC-BY-SA-4.0",
 	"type": "module",
 	"scripts": {
@@ -8,8 +8,11 @@
 		"build": "ADAPTER=node vite build",
 		"build:node": "ADAPTER=node vite build",
 		"build:www": "ADAPTER=static vite build",
+		"build:gh": "BASE_PATH=/synoptic-viewer npm run build:www",
 		"build:static": "npm run build:www",
-		"preview": "vite preview",
+		"preview": "ADAPTER=static vite preview",
+		"preview:www": "ADAPTER=static vite preview",
+		"preview:gh": "BASE_PATH=/synoptic-viewer ADAPTER=static vite preview",
 		"preview:node": "node build/node/index.js",
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json",

@@ -1,4 +1,5 @@
 <script>
+	import { base } from '$app/paths';
 	import ButtonSelect from '../ui/ButtonSelect.svelte';
 	import { Hotkey, SynopsisHotkeys } from '../ui/hotkeys.svelte';
 	import { SynopsisOptions3 } from './SynopsisClasses.svelte';
@@ -52,7 +53,7 @@
 	/>
 {/if}
 <svelte:element this={headingTag} class={[titleClasses]}>
-	<a data-sveltekit-reload href="/"
+	<a data-sveltekit-reload href="{base}/"
 		>{#if short && shorttitle}{shorttitle}
 		{:else}
 			{@const extraTitleclasses = ['text-shadow-sm/20']}
