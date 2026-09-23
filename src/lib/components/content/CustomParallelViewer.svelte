@@ -1,4 +1,7 @@
 <script>
+	import { resolve } from '$app/paths';
+	import { page } from '$app/state';
+	import { goto } from '$app/navigation';
 	import { onMount, untrack } from 'svelte';
 	import Loading from '../ui/Loading.svelte';
 	import LemmaInfo from './lemma/LemmaInfo.svelte';
@@ -666,11 +669,11 @@
 		}
 
 		opt.request.tab = 1;
-
-		window.location.protocol +
-			'//' +
-			(window.location.host + window.location.pathname).replaceAll('//', '/');
-		return baseurl + opt.generateURI();
+		//const resolved = resolve('/');
+		const url = page.url.origin + page.url.pathname + opt.generateURI();
+		//window.location.pathname.replaceAll('//', '/')  ; // return resolve("/") + opt.generateURI();
+		mylog(`customparllel.makeURL(): '${url}';`, true);
+		return url;
 	}
 
 	function loadRequestOptions() {
