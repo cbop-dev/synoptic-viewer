@@ -37,7 +37,8 @@ jobs:
           ADAPTER: static
           # For GitHub Pages hosted at https://<username>.github.io/<repo>/
           # If using a custom root domain, change this to: BASE_PATH: ''
-          BASE_PATH: '/${{ github.event.repository.name }}'
+          # was: '/${{ github.event.repository.name }}'
+          BASE_PATH: '' 
         run: npm run build:www
 
       - name: Upload Pages artifact
