@@ -1,11 +1,6 @@
 # synoptic-viewer 2.0
 
-The front-end of a Gospel Synopsis Viewer web application (https://synopsis.cbop.faith), providing a visual synoptic (side-by-side) comparison of parallel texts of the Greek NT Gospels, based on the passage selection and outline of Kurt Aland's *Synopsis Quattuor Evangeliorum*.
-
-### ⚡ Synoptic Viewer 2.0 (Zero-Backend Engine)
-In Synoptic Viewer 2.0, all [Text-Fabric](https://github.com/annotation/text-fabric) datasets (SBLGNT, N1904, Vulgate, WEB Catholic) are pre-extracted to static JSON at build time. The application runs **100% in-memory in the browser with ZERO runtime Python microservice required**, eliminating the previous 6–8 GB RAM requirement and speeding up large pericope views from 30–60 seconds to **< 50 milliseconds (> 200x faster)**.
-
-It allows for both entering passages to lookup parallels, and user-selection of Aland's sections and groupings. 
+A Gospel Synopsis Viewer web application (https://synopsis.cbop.faith), providing a visual synoptic (side-by-side) comparison of parallel texts of the Greek NT Gospels, based on the passage selection and outline of Kurt Aland's *Synopsis Quattuor Evangeliorum*. It allows for both entering passages to lookup parallels, and user-selection of Aland's sections and groupings. 
 
 ## Features:
 
@@ -24,12 +19,11 @@ It allows for both entering passages to lookup parallels, and user-selection of 
 * **Sorting/filtering** by book, which puts the pericopes in order based on the given book, and eliminates duplicate sections.
 * **Focus** on a book, placing visual prominence on that book in the left column with the other gospels grouped on the right.
 * **Custom greek highlight**: in the "Words" panel options, highlight specific inflected forms across all texts.
-* **Custom synopsis & Polyglot viewer**: view any set(s) of NT texts in up to 4 parallel columns across different ancient and modern translations.
+* **Custom synopsis & Polyglot viewer**: view any set(s) of NT texts in up to 4 parallel columns in one of the available versions/translations.
 
 ## Requirements
 
 * Node.js 20+ (Node 22.3+ recommended)
-* Optional: Python 3.13 + `text-fabric` only if re-extracting fresh Text-Fabric datasets at build time.
 
 ## Installation & Building
 
@@ -50,12 +44,6 @@ ADAPTER=static npm run build
 # Build 2: Production Node.js server:
 npm run build
 node build
-```
-
-### Re-extracting Text-Fabric Datasets (Build-time only):
-If updating or regenerating the static datasets:
-```bash
-.venv/bin/python ../tf-fast/extract_datasets.py --datasets sblgnt,n1904,vulgate,web --output static/data
 ```
 
 ## Licensing and Sources
